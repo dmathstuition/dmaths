@@ -224,7 +224,12 @@ export default function Landing() {
             <Link href="/login" className="btn-gold">Enter portal →</Link>
           </div>
         </div>
-        <p className="mt-14 text-center text-xs text-white/25">
+        <div className="mt-14 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs">
+          <Link href="/privacy" className="text-white/40 hover:text-gold">Privacy Policy</Link>
+          <Link href="/terms" className="text-white/40 hover:text-gold">Terms of Service</Link>
+          <Link href="/refunds" className="text-white/40 hover:text-gold">Payment & Refund Policy</Link>
+        </div>
+        <p className="mt-4 text-center text-xs text-white/25">
           © {new Date().getFullYear()} D-Maths Tuition Centre. All rights reserved.
         </p>
       </footer>

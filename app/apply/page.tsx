@@ -15,6 +15,7 @@ export default function Apply() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
+  const [consent, setConsent] = useState(false);
 
   const set = (k: string, v: any) => setF(p => ({ ...p, [k]: v }));
   const toggleSubject = (s: string) =>
@@ -32,6 +33,7 @@ export default function Apply() {
   }
 
   async function submit() {
+    if (!consent) return setError("Please confirm you have read and agree to the policies before submitting.");
     setError("");
     if (!(f.payment_ref && f.payment_method && f.payment_amount))
       return setError("Please fill in all payment details.");
@@ -162,6 +164,21 @@ export default function Apply() {
               <Field label="Payment date" type="date" value={f.payment_date} onChange={v => set("payment_date", v)} />
             </Row>
           </div>
+        )}
+
+        {step === 3 && (
+          <label className="mt-6 flex items-start gap-3 rounded-xl border border-line bg-chalk/50 p-4 text-sm text-ink/70">
+            <input type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)}
+              className="mt-0.5 h-4 w-4 accent-gold" />
+            <span>
+              I am the student or their parent/guardian, the information provided is accurate, and I
+              have read and agree to the{" "}
+              <a href="/privacy" target="_blank" className="font-semibold text-gold-deep underline">Privacy Policy</a>,{" "}
+              <a href="/terms" target="_blank" className="font-semibold text-gold-deep underline">Terms of Service</a>, and{" "}
+              <a href="/refunds" target="_blank" className="font-semibold text-gold-deep underline">Payment &amp; Refund Policy</a>.
+              I consent to the processing of the student's information for the purpose of providing tuition.
+            </span>
+          </label>
         )}
 
         <div className="mt-7 flex items-center justify-between">
