@@ -1,12 +1,14 @@
 import { supabaseServer } from "@/lib/supabase/server";
+import { getProfile } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function StudentNotices() {
   const supa = supabaseServer();
-  const { data: { user } } = await supa.auth.getUser();
-  const { data: me } = await supa.from("profiles").select("subjects").eq("id", user!.id).single();
-  const { data: notices } = await supa.from("notices").select("*").order("created_at", { ascending: false });
+  const [me, { data: notices }] = await Promise.all([
+    getProfile(),
+    supa.from("notices").select("*").order("created_at", { ascending: false }),
+  ]);
   const mine = (notices ?? []).filter(n => n.target === "all" || (me?.subjects ?? []).includes(n.target));
 
   return (

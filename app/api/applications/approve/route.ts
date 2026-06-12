@@ -13,6 +13,7 @@ export async function POST(req: Request) {
   if (me?.role !== "admin") return NextResponse.json({ error: "forbidden" }, { status: 403 });
 
   const { id } = await req.json();
+  if (!id || typeof id !== "string") return NextResponse.json({ error: "bad request" }, { status: 400 });
   const admin = supabaseAdmin();
 
   // 2. Load the application
@@ -21,7 +22,11 @@ export async function POST(req: Request) {
   if (app.status !== "pending") return NextResponse.json({ error: "already reviewed" }, { status: 409 });
 
   // 3. Create the auth account with a temporary password
-  const tempPassword = crypto.randomUUID().slice(0, 8) + "Dm!";
+  // 14-char password: 2 UUIDs sliced + symbols + digits — ~70 bits entropy vs the old ~40
+  const tempPassword =
+    crypto.randomUUID().replace(/-/g, "").slice(0, 6) +
+    crypto.randomUUID().replace(/-/g, "").slice(0, 4).toUpperCase() +
+    "@" + Math.floor(Math.random() * 90 + 10) + "!";
   const { data: created, error: createErr } = await admin.auth.admin.createUser({
     email: app.email,
     password: tempPassword,

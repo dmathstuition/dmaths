@@ -1,13 +1,14 @@
 import { supabaseServer } from "@/lib/supabase/server";
+import { getUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import CBTClient from "@/components/portal/CBTClient";
 
 export const dynamic = "force-dynamic";
 
 export default async function CBTPage({ params }: { params: { id: string } }) {
-  const supa = supabaseServer();
-  const { data: { user } } = await supa.auth.getUser();
+  const user = await getUser();
   if (!user) redirect("/login");
+  const supa = supabaseServer();
 
   const { data: sub } = await supa
     .from("assignment_submissions")

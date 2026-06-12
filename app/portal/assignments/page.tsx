@@ -1,11 +1,12 @@
 import { supabaseServer } from "@/lib/supabase/server";
 import AssignmentsClient from "@/components/portal/AssignmentsClient";
+import { getUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function AssignmentsPage() {
+  const user = await getUser();
   const supa = supabaseServer();
-  const { data: { user } } = await supa.auth.getUser();
   const { data } = await supa
     .from("assignment_submissions")
     .select("*, assignment:assignments(*)")

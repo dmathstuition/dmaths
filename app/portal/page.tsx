@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { supabaseServer } from "@/lib/supabase/server";
+import { getUser, getProfile } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function StudentDashboard() {
+  const user = await getUser();
   const supa = supabaseServer();
-  const { data: { user } } = await supa.auth.getUser();
-  const [{ data: me }, { data: classes }, { data: subs }, { data: notices }] = await Promise.all([
-    supa.from("profiles").select("*").eq("id", user!.id).single(),
+  const [me, { data: classes }, { data: subs }, { data: notices }] = await Promise.all([
+    getProfile(),
     supa.from("classes").select("*").gte("starts_at", new Date().toISOString()).order("starts_at").limit(3),
     supa.from("assignment_submissions").select("status").eq("student_id", user!.id),
     supa.from("notices").select("id,title,created_at").order("created_at", { ascending: false }).limit(3),

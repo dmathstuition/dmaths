@@ -1,24 +1,25 @@
 import { supabaseServer } from "@/lib/supabase/server";
+import { getProfile } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
+function formatSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1048576) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / 1048576).toFixed(1)} MB`;
+}
+
 export default async function StudentMaterials() {
   const supa = supabaseServer();
-  const { data: { user } } = await supa.auth.getUser();
-  const { data: profile } = await supa.from("profiles").select("subjects").eq("id", user!.id).single();
-  const { data: materials } = await supa.from("lesson_materials").select("*").order("created_at", { ascending: false });
+  const [profile, { data: materials }] = await Promise.all([
+    getProfile(),
+    supa.from("lesson_materials").select("*").order("created_at", { ascending: false }),
+  ]);
 
-  // Filter to student's subjects or show all
   const mySubjects = profile?.subjects ?? [];
   const filtered = mySubjects.length
     ? (materials ?? []).filter(m => mySubjects.includes(m.subject))
     : (materials ?? []);
-
-  function formatSize(bytes: number) {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1048576) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / 1048576).toFixed(1)} MB`;
-  }
 
   return (
     <div className="space-y-5">
@@ -37,7 +38,7 @@ export default async function StudentMaterials() {
                 <span className="pill-blue">PDF</span>
               </div>
               <a href={m.file_url} target="_blank" rel="noopener noreferrer"
-                className="btn-gold mt-3 w-full text-center">📄 Open material</a>
+                className="btn-gold mt-3 block w-full text-center">📄 Open material</a>
             </div>
           </div>
         ))}

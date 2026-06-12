@@ -12,6 +12,11 @@ export async function POST(req: Request) {
   if (me?.role !== "admin") return NextResponse.json({ error: "forbidden" }, { status: 403 });
 
   const { submissionId, grade, feedback = "" } = await req.json();
+  const g = Number(grade);
+  if (!submissionId || !Number.isFinite(g) || g < 0 || g > 100) {
+    return NextResponse.json({ error: "grade must be 0-100" }, { status: 400 });
+  }
+  const cleanFeedback = String(feedback).slice(0, 2000);
   const admin = supabaseAdmin();
 
   const { data: sub } = await admin.from("assignment_submissions")
@@ -20,7 +25,7 @@ export async function POST(req: Request) {
   if (!sub) return NextResponse.json({ error: "not found" }, { status: 404 });
 
   await admin.from("assignment_submissions")
-    .update({ grade: Number(grade), feedback, status: "graded" })
+    .update({ grade: g, feedback: cleanFeedback, status: "graded" })
     .eq("id", submissionId);
   await admin.from("audit_log").insert({ actor_id: user.id, action: "grade_assignment", detail: { submissionId, grade } });
 
@@ -29,7 +34,7 @@ export async function POST(req: Request) {
     title: sub.assignment.title,
     subject: sub.assignment.subject,
     grade,
-    feedback,
+    feedback: cleanFeedback,
     loginUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/login`,
   });
 

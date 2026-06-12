@@ -21,19 +21,28 @@ export async function middleware(req: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
   const path = req.nextUrl.pathname;
-  const needsAuth = path.startsWith("/portal") || path.startsWith("/admin");
 
-  if (needsAuth && !user) {
+  if (!user) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  if (path.startsWith("/admin") && user) {
+  // Admin role check — only on real navigations, not router prefetches.
+  // Prefetches skipping this is safe: the actual navigation is always
+  // checked, and every admin API route re-verifies the role server-side.
+  const isPrefetch =
+    req.headers.get("next-router-prefetch") === "1" ||
+    req.headers.get("purpose") === "prefetch";
+
+  if (path.startsWith("/admin") && !isPrefetch) {
     const { data: profile } = await supabase
       .from("profiles").select("role").eq("id", user.id).single();
     if (profile?.role !== "admin") {
       return NextResponse.redirect(new URL("/portal", req.url));
     }
   }
+
+  // Never cache authenticated pages in shared caches
+  res.headers.set("Cache-Control", "private, no-store");
   return res;
 }
 

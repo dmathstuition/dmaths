@@ -34,3 +34,14 @@ body { @apply bg-chalk text-ink font-body antialiased; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* Page transitions */
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.page-enter { animation: pageEnter .22s ease-out; }
+@media (prefers-reduced-motion: reduce) {
+  .page-enter { animation: none; }
+}
+

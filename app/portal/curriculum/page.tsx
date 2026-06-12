@@ -1,14 +1,15 @@
 import { supabaseServer } from "@/lib/supabase/server";
+import { getProfile } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function StudentCurriculum() {
   const supa = supabaseServer();
-  const { data: { user } } = await supa.auth.getUser();
-  const { data: profile } = await supa.from("profiles").select("subjects,level").eq("id", user!.id).single();
-  const { data: curricula } = await supa.from("curricula").select("*").order("created_at", { ascending: false });
+  const [profile, { data: curricula }] = await Promise.all([
+    getProfile(),
+    supa.from("curricula").select("*").order("created_at", { ascending: false }),
+  ]);
 
-  // Filter by student's subjects and level
   const mySubjects = profile?.subjects ?? [];
   const myLevel = profile?.level ?? "";
   const filtered = (curricula ?? []).filter(c =>

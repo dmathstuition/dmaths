@@ -1,5 +1,5 @@
-import { supabaseServer } from "@/lib/supabase/server";
 import PortalShell from "@/components/PortalShell";
+import { getProfile } from "@/lib/auth";
 
 const NAV = [
   { href: "/admin", label: "Dashboard", icon: "▦" },
@@ -15,9 +15,7 @@ const NAV = [
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const supa = supabaseServer();
-  const { data: { user } } = await supa.auth.getUser();
-  const { data: p } = await supa.from("profiles").select("first_name,last_name").eq("id", user!.id).single();
+  const p = await getProfile();
   return (
     <PortalShell nav={NAV} name={`${p?.first_name ?? ""} ${p?.last_name ?? ""}`} subtitle="Administrator">
       {children}
