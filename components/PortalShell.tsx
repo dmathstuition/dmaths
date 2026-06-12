@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { Icon, type IconName } from "@/components/Icons";
+import Logo from "@/components/Logo";
 
 export type NavItem = { href: string; label: string; icon: IconName };
 
@@ -22,7 +23,7 @@ export default function PortalShell({
   const sidebar = (
     <div className="flex h-full flex-col bg-board/95 text-white backdrop-blur-xl">
       <div className="border-b border-white/10 px-5 py-5">
-        <Link href="/" className="font-display text-xl font-bold">D-Maths</Link>
+        <Link href="/"><Logo light /></Link>
         <p className="mt-1 font-mono text-[10px] uppercase tracking-[.18em] text-white/30">{subtitle}</p>
       </div>
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
@@ -61,7 +62,7 @@ export default function PortalShell({
           className="rounded-lg bg-white/10 p-2.5 text-white transition active:scale-95">
           <Icon name="menu" />
         </button>
-        <span className="font-display font-bold text-white">D-Maths</span>
+        <Logo light />
         <span className="w-10" />
       </header>
 
