@@ -107,7 +107,7 @@ export default function ReportsClient({
           <h1 className="font-display text-3xl font-semibold">Reports</h1>
           <p className="text-sm text-ink/45">Learner performance and analytics</p>
         </div>
-        <button className="btn-gold" onClick={exportCSV}>⬇ Export full report</button>
+        <button className="btn-gold" onClick={exportCSV}>Export full report</button>
       </div>
 
       {/* Tabs */}
@@ -189,7 +189,7 @@ export default function ReportsClient({
           {atRisk.length > 0 && (
             <div className="card overflow-hidden">
               <div className="border-b border-line bg-red-50 px-6 py-4">
-                <h2 className="font-display text-lg font-semibold text-red-900">⚠ At-risk learners</h2>
+                <h2 className="font-display text-lg font-semibold text-red-900">At-risk learners</h2>
                 <p className="text-xs text-red-900/60">Score below 40% or attendance below 50%</p>
               </div>
               <div className="divide-y divide-line/60">

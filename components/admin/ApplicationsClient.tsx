@@ -95,9 +95,9 @@ export default function ApplicationsClient({ initial }: { initial: App[] }) {
           {a.status === "pending" && (
             <div className="mt-4 flex gap-3 border-t border-line pt-4">
               <button className="btn-gold flex-1" disabled={busyId === a.id} onClick={() => approve(a.id)}>
-                {busyId === a.id ? "Working…" : "✓ Approve & create account"}
+                {busyId === a.id ? "Working…" : "Approve & create account"}
               </button>
-              <button className="btn-danger flex-1" disabled={busyId === a.id} onClick={() => reject(a.id)}>✕ Reject</button>
+              <button className="btn-danger flex-1" disabled={busyId === a.id} onClick={() => reject(a.id)}>Reject</button>
             </div>
           )}
         </article>

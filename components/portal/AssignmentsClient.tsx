@@ -42,7 +42,7 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
               <div>
                 <h2 className="font-extrabold">
                   {a.title}
-                  {a.type === "cbt" && <span className="pill-blue ml-1">🖥 CBT</span>}
+                  {a.type === "cbt" && <span className="pill-blue ml-1">CBT</span>}
                   {hasInlineCBT && <span className="pill ml-1 bg-purple-100 text-purple-800">{a.cbt_questions.length} Qs</span>}
                 </h2>
                 <p className="text-sm text-ink/45">
@@ -57,7 +57,7 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
             {a.file_url && (
               <a href={a.file_url} target="_blank" rel="noopener noreferrer"
                 className="mt-3 flex items-center gap-2 rounded-xl border border-line px-4 py-2.5 text-sm font-semibold text-gold-deep hover:bg-chalk">
-                📎 {a.file_name || "Assignment PDF"} — tap to view
+                {a.file_name || "Assignment PDF"} — tap to view
               </a>
             )}
 
@@ -74,9 +74,9 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
               <>
                 {cbtOpen ? (
                   hasInlineCBT ? (
-                    <a href={`/portal/cbt/${s.id}`} className="btn-ink mt-4 block w-full text-center">🖥 Start CBT test ({a.cbt_questions.length} questions)</a>
+                    <a href={`/portal/cbt/${s.id}`} className="btn-ink mt-4 block w-full text-center">Start CBT test ({a.cbt_questions.length} questions)</a>
                   ) : hasExternalCBT ? (
-                    <a href={a.cbt_link} target="_blank" rel="noopener noreferrer" className="btn-ink mt-4 block w-full text-center">🖥 Open CBT test</a>
+                    <a href={a.cbt_link} target="_blank" rel="noopener noreferrer" className="btn-ink mt-4 block w-full text-center">Open CBT test</a>
                   ) : null
                 ) : (
                   <p className="mt-4 rounded-xl bg-amber-50 px-4 py-3 text-center text-sm font-bold text-amber-900">

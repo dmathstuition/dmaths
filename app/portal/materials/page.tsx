@@ -38,7 +38,7 @@ export default async function StudentMaterials() {
                 <span className="pill-blue">PDF</span>
               </div>
               <a href={m.file_url} target="_blank" rel="noopener noreferrer"
-                className="btn-gold mt-3 block w-full text-center">📄 Open material</a>
+                className="btn-gold mt-3 block w-full text-center">Open material</a>
             </div>
           </div>
         ))}

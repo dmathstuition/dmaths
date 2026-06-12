@@ -123,7 +123,7 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
             </select>
             <input className="field" type="date" placeholder="Due date" value={f.due_date || ""} onChange={e => setF({ ...f, due_date: e.target.value })} />
             <select className="field" value={f.type} onChange={e => setF({ ...f, type: e.target.value })}>
-              <option value="written">✎ Written</option><option value="cbt">🖥 CBT test</option>
+              <option value="written">Written</option><option value="cbt">CBT test</option>
             </select>
             <input className="field" type="file" accept=".pdf,.doc,.docx,.jpg,.png" onChange={e => setFile(e.target.files?.[0] || null)} />
           </div>
@@ -224,7 +224,7 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
                 {g.assignment.title}
                 {g.assignment.type === "cbt" && <span className="pill-blue ml-1">CBT</span>}
                 {g.assignment.cbt_questions?.length > 0 && <span className="pill ml-1 bg-purple-100 text-purple-800">Inline</span>}
-                {g.assignment.file_url && <span className="pill ml-1 bg-cyan-100 text-cyan-800">📎 PDF</span>}
+                {g.assignment.file_url && <span className="pill ml-1 bg-cyan-100 text-cyan-800">PDF</span>}
               </h2>
               <p className="text-xs text-ink/45">{g.assignment.subject} · due {g.assignment.due_date ?? "TBD"}</p>
             </div>

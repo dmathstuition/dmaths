@@ -41,7 +41,7 @@ export default function StudentsClient({ initial }: { initial: any[] }) {
           <h1 className="font-display text-3xl font-semibold">Students</h1>
           <p className="text-sm text-ink/45">{students.length} registered</p>
         </div>
-        <button className="btn-ghost" onClick={exportCSV}>⬇ Export CSV</button>
+        <button className="btn-ghost" onClick={exportCSV}>Export CSV</button>
       </div>
       <input className="field max-w-sm" placeholder="Search name, ID, level or email…" value={q} onChange={e => setQ(e.target.value)} />
 
