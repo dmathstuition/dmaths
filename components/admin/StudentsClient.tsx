@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import { supabaseBrowser } from "@/lib/supabase/client";
 
 export default function StudentsClient({ initial }: { initial: any[] }) {
@@ -58,7 +59,7 @@ export default function StudentsClient({ initial }: { initial: any[] }) {
           <tbody>
             {visible.map(s => (
               <tr key={s.id} className="border-t border-line/60">
-                <td className="px-5 py-3 font-bold">{s.first_name} {s.last_name}</td>
+                <td className="px-5 py-3 font-bold"><Link href={`/admin/students/${s.id}`} className="hover:text-gold-deep hover:underline">{s.first_name} {s.last_name}</Link></td>
                 <td className="px-5 py-3 font-mono text-xs">{s.student_code}</td>
                 <td className="px-5 py-3 text-ink/60">{s.level}</td>
                 <td className="px-5 py-3">

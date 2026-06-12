@@ -21,6 +21,18 @@ export default function NoticesClient({ initial }: { initial: any[] }) {
     setF({ title: "", body: "", target: "all" });
     reload();
   }
+  async function emailNotice(id: string) {
+    if (!confirm('Email this announcement to all targeted students? This uses your daily Gmail quota.')) return;
+    const res = await fetch('/api/notices/email', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ noticeId: id }),
+    });
+    const json = await res.json();
+    if (!res.ok) return alert(json.error || 'Failed to send');
+    alert(`Sent to ${json.sent} student(s)${json.failed ? `, ${json.failed} failed` : ''}.`);
+    reload();
+  }
+
   async function remove(id: string) {
     if (!confirm("Delete this announcement permanently?")) return;
     await supabase.from("notices").delete().eq("id", id);
@@ -50,7 +62,12 @@ export default function NoticesClient({ initial }: { initial: any[] }) {
                 {new Date(n.created_at).toLocaleDateString("en-NG", { dateStyle: "medium" })} · {n.target === "all" ? "All students" : n.target}
               </p>
             </div>
-            <button className="text-sm font-bold text-red-600 hover:underline" onClick={() => remove(n.id)}>Delete</button>
+            <div className="flex items-center gap-3">
+              {n.emailed_at
+                ? <span className="pill-green">Emailed ({n.emailed_count})</span>
+                : <button className="text-sm font-bold text-gold-deep hover:underline" onClick={() => emailNotice(n.id)}>Email students</button>}
+              <button className="text-sm font-bold text-red-600 hover:underline" onClick={() => remove(n.id)}>Delete</button>
+            </div>
           </div>
           <p className="mt-3 text-sm leading-relaxed text-ink/65">{n.body}</p>
         </article>

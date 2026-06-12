@@ -5,6 +5,7 @@ import { useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { Icon, type IconName } from "@/components/Icons";
 import Logo from "@/components/Logo";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export type NavItem = { href: string; label: string; icon: IconName };
 
@@ -43,6 +44,7 @@ export default function PortalShell({
       </nav>
       <div className="border-t border-white/10 p-4">
         <p className="mb-2 truncate px-2 text-sm font-bold text-white/80">{name}</p>
+        <ThemeToggle />
         <button onClick={signOut}
           className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-left text-sm font-semibold text-white/40 transition hover:bg-white/10 hover:text-white">
           <Icon name="signout" className="opacity-70" /> Sign out
