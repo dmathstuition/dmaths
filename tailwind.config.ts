@@ -5,15 +5,15 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: "#0A1F3D",      // deep navy — primary surface for dark sections
-        board: "#06152B",    // darkest navy — hero / sidebar
-        chalk: "#F5F2EA",    // warm paper background
+        ink: "#0A1F3D",
+        board: "#06152B",
+        chalk: "#F5F2EA",
         gold: { DEFAULT: "#E8841C", soft: "#F7A84B", pale: "#FDF1E3", deep: "#B85F08" },
         line: "#E4E0D6"
       },
       fontFamily: {
         display: ["var(--font-fraunces)", "serif"],
-        body: ["var(--font-nunito)", "sans-serif"],
+        body: ["var(--font-roboto)", "sans-serif"],
         mono: ["var(--font-fira)", "monospace"]
       },
       boxShadow: {
