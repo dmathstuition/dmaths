@@ -11,6 +11,7 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
   const [editId, setEditId] = useState<string | null>(null);
   const [attendanceFor, setAttendanceFor] = useState<any>(null); // class being marked
   const [present, setPresent] = useState<Record<string, boolean>>({});
+  const [joined, setJoined] = useState<Record<string, boolean>>({});
   const [busy, setBusy] = useState(false);
 
   async function reload() {
@@ -53,12 +54,21 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  function openAttendance(cls: any) {
+  async function openAttendance(cls: any) {
     const roster = students.filter(s => cls.class_students?.some((r: any) => r.student_id === s.id));
     if (!roster.length) return alert("No students assigned to this class yet.");
-    // default everyone present
+    // pull any self-marked "joined" records for today to pre-fill
+    const { data: existing } = await supabase.from("attendance_records")
+      .select("student_id,present,self_marked,joined_at").eq("class_id", cls.id);
+    const joinedMap: Record<string, boolean> = {};
     const init: Record<string, boolean> = {};
-    roster.forEach(s => { init[s.id] = true; });
+    roster.forEach(s => {
+      const rec = (existing ?? []).find((e: any) => e.student_id === s.id);
+      joinedMap[s.id] = !!rec?.self_marked;
+      // default present = whoever actually joined the link; others default absent
+      init[s.id] = rec ? !!rec.present : false;
+    });
+    setJoined(joinedMap);
     setPresent(init);
     setAttendanceFor({ ...cls, roster });
   }
@@ -67,7 +77,7 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
     if (!confirm("Save attendance? Once saved it is LOCKED and cannot be changed.")) return;
     setBusy(true);
     const rows = attendanceFor.roster.map((s: any) => ({
-      class_id: attendanceFor.id, student_id: s.id, present: present[s.id] ?? false,
+      class_id: attendanceFor.id, student_id: s.id, present: present[s.id] ?? false, self_marked: false,
     }));
     const { error: e1 } = await supabase.from("attendance_records")
       .upsert(rows, { onConflict: "class_id,student_id,session_date" });
@@ -182,7 +192,10 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
                   <button key={s.id} onClick={() => setPresent(p => ({ ...p, [s.id]: !p[s.id] }))}
                     className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left transition
                       ${isPresent ? "border-emerald-300 bg-emerald-50" : "border-red-200 bg-red-50"}`}>
-                    <span className="font-semibold">{s.first_name} {s.last_name}</span>
+                    <span className="flex items-center gap-2 font-semibold">
+                      {s.first_name} {s.last_name}
+                      {joined[s.id] && <span className="pill-blue !py-0.5 !text-[10px]">Joined link</span>}
+                    </span>
                     <span className={`pill ${isPresent ? "pill-green" : "pill-red"}`}>{isPresent ? "Present" : "Absent"}</span>
                   </button>
                 );

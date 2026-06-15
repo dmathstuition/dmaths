@@ -13,6 +13,9 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
   const [reward, setReward] = useState({ stars: 5, message: "", notify: true });
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [confirmName, setConfirmName] = useState("");
+  const [deleting, setDeleting] = useState(false);
 
   const graded = subs.filter(s => s.status === "graded").length;
   const pending = subs.filter(s => s.status === "pending").length;
@@ -46,6 +49,20 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
     setRewards(data ?? []);
     setReward({ stars: 5, message: "", notify: true });
   }
+
+  async function deleteStudent() {
+    setDeleting(true); setMsg("");
+    const res = await fetch("/api/students/delete", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ studentId: student.id, confirmName }),
+    });
+    const json = await res.json();
+    setDeleting(false);
+    if (!res.ok) { setMsg(json.error || "Could not delete"); return; }
+    window.location.href = "/admin/students";
+  }
+
+  const fullName = `${student.first_name} ${student.last_name}`;
 
   return (
     <div className="space-y-6">
@@ -126,6 +143,32 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
             {!notes.length && <p className="text-sm text-ink/35">No notes yet.</p>}
           </div>
         </div>
+      </div>
+
+      {/* Danger zone — delete learner */}
+      <div className="card border-red-200 p-6">
+        <h2 className="font-display text-lg font-semibold text-red-700">Danger zone</h2>
+        <p className="mt-1 text-sm text-ink/55">
+          Permanently delete this learner and all their records (grades, attendance, rewards,
+          payment history). This cannot be undone. Use this only for learners who are no longer
+          interested — otherwise <strong>deactivate</strong> instead, which keeps the record.
+        </p>
+        {!confirmDelete ? (
+          <button className="btn-danger mt-4" onClick={() => setConfirmDelete(true)}>Delete this learner</button>
+        ) : (
+          <div className="mt-4 space-y-3 rounded-xl border border-red-200 bg-red-50 p-4">
+            <p className="text-sm font-semibold text-red-900">
+              Type the learner's full name <strong>{fullName}</strong> to confirm:
+            </p>
+            <input className="field" value={confirmName} onChange={e => setConfirmName(e.target.value)} placeholder={fullName} />
+            <div className="flex gap-2">
+              <button className="btn-ghost flex-1" onClick={() => { setConfirmDelete(false); setConfirmName(""); }}>Cancel</button>
+              <button className="btn-danger flex-1"
+                disabled={deleting || confirmName.trim().toLowerCase() !== fullName.trim().toLowerCase()}
+                onClick={deleteStudent}>{deleting ? "Deleting…" : "Permanently delete"}</button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

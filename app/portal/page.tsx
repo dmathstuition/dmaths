@@ -1,4 +1,5 @@
 import Link from "next/link";
+import JoinClassButton from "@/components/portal/JoinClassButton";
 import { supabaseServer } from "@/lib/supabase/server";
 import { getUser, getProfile } from "@/lib/auth";
 
@@ -42,7 +43,7 @@ export default async function StudentDashboard() {
                   {new Date(c.starts_at).toLocaleString("en-NG", { dateStyle: "medium", timeStyle: "short" })} · {c.tutor}
                 </p>
               </div>
-              {c.link && <a className="btn-gold !min-h-[34px] !px-3 !text-xs" href={c.link} target="_blank" rel="noopener noreferrer">Join</a>}
+              {c.link && <JoinClassButton classId={c.id} link={c.link} label="Join" className="btn-gold !min-h-[34px] !px-3 !text-xs" />}
             </div>
           ))}
           {!classes?.length && <p className="py-4 text-sm text-ink/40">No upcoming classes scheduled yet.</p>}

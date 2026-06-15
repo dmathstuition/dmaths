@@ -1,3 +1,4 @@
+import JoinClassButton from "@/components/portal/JoinClassButton";
 import { supabaseServer } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -26,7 +27,7 @@ export default async function MyClasses() {
                 {new Date(c.starts_at).toLocaleString("en-NG", { dateStyle: "full", timeStyle: "short" })} · {c.duration_minutes} min
               </p>
               {c.link
-                ? <a href={c.link} target="_blank" rel="noopener noreferrer" className="btn-gold mt-4 w-full">Join class</a>
+                ? <JoinClassButton classId={c.id} link={c.link} className="btn-gold mt-4 w-full inline-block text-center" />
                 : <p className="mt-4 rounded-xl bg-chalk px-4 py-2.5 text-center text-sm font-semibold text-ink/45">Class link coming soon</p>}
             </div>
           </div>
