@@ -18,7 +18,9 @@ export default async function PortalLayout({ children }: { children: React.React
   const p = await getProfile();
   const subjects = p?.subjects ?? [];
   return (
-    <PortalShell nav={NAV} name={`${p?.first_name ?? ""} ${p?.last_name ?? ""}`} subtitle={p?.student_code ?? "Student"} bellSubjects={subjects}>
+    <PortalShell nav={NAV} name={`${p?.first_name ?? ""} ${p?.last_name ?? ""}`}
+      subtitle={p?.student_code ?? "Student"}
+      bell={{ mode: "student", subjects, noticesHref: "/portal/notices" }}>
       <AuthGuard />
       {children}
     </PortalShell>

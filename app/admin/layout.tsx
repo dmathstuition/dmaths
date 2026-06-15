@@ -18,7 +18,8 @@ const NAV: NavItem[] = [
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const p = await getProfile();
   return (
-    <PortalShell nav={NAV} name={`${p?.first_name ?? ""} ${p?.last_name ?? ""}`} subtitle="Administrator">
+    <PortalShell nav={NAV} name={`${p?.first_name ?? ""} ${p?.last_name ?? ""}`} subtitle="Administrator"
+      bell={{ mode: "admin", noticesHref: "/admin/applications" }}>
       <AuthGuard />
       {children}
     </PortalShell>
