@@ -16,6 +16,7 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [jsonInput, setJsonInput] = useState("");
+  const [editId, setEditId] = useState<string | null>(null);
 
   async function reload() {
     const { data: s } = await supabase.from("assignment_submissions")
@@ -102,6 +103,24 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
     reload();
   }
 
+  async function saveEdit() {
+    if (!f.title) return alert("Add a title.");
+    await supabase.from("assignments").update({
+      title: f.title, subject: f.subject, due_date: f.due_date || null, instructions: f.instructions || "",
+    }).eq("id", editId!);
+    setEditId(null); setShowForm(false);
+    setF({ subject: "Algebra", type: "written", roster: [], cbt_mode: "link" });
+    reload();
+  }
+
+  function startEditAssignment(a: any) {
+    setEditId(a.id);
+    setF({ title: a.title, subject: a.subject, type: a.type, due_date: a.due_date || "",
+           instructions: a.instructions || "", roster: [], cbt_mode: "link" });
+    setShowForm(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   async function deleteAssignment(assignmentId: string, title: string, count: number) {
     if (!confirm(`Delete "${title}"? This permanently removes the assignment and all ${count} student submission(s) and grades for it. This cannot be undone.`)) return;
     await supabase.from("assignments").delete().eq("id", assignmentId);
@@ -117,11 +136,12 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
     <div className="space-y-5">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <h1 className="font-display text-3xl font-semibold">Assignments</h1>
-        <button className="btn-gold" onClick={() => setShowForm(v => !v)}>{showForm ? "Cancel" : "+ New assignment"}</button>
+        <button className="btn-gold" onClick={() => { if (showForm) { setEditId(null); setF({ subject: "Algebra", type: "written", roster: [], cbt_mode: "link" }); } setShowForm(v => !v); }}>{showForm ? "Cancel" : "+ New assignment"}</button>
       </div>
 
       {showForm && (
         <div className="card space-y-4 p-6">
+          {editId && <p className="rounded-xl bg-blue-50 px-4 py-2.5 text-sm font-semibold text-blue-900">Editing details only. Questions, files and roster can't be changed after creation — delete and recreate if those need to change.</p>}
           <div className="grid gap-4 sm:grid-cols-2">
             <input className="field sm:col-span-2" placeholder="Title" value={f.title || ""} onChange={e => setF({ ...f, title: e.target.value })} />
             <select className="field" value={f.subject} onChange={e => setF({ ...f, subject: e.target.value })}>
@@ -218,7 +238,7 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
               })}
             </div>
           </div>
-          <button className="btn-gold" onClick={create} disabled={busy}>{busy ? "Creating…" : "Create assignment"}</button>
+          <button className="btn-gold" onClick={editId ? saveEdit : create} disabled={busy}>{editId ? "Save changes" : (busy ? "Creating…" : "Create assignment")}</button>
         </div>
       )}
 
@@ -242,6 +262,8 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
               <p className="text-xs font-bold text-ink/45">
                 {g.rows.filter((r: any) => r.status !== "pending").length}/{g.rows.length} done
               </p>
+              <button className="text-xs font-bold text-ink/60 hover:underline"
+                onClick={() => startEditAssignment(g.assignment)}>Edit</button>
               <button className="text-xs font-bold text-red-600 hover:underline"
                 onClick={() => deleteAssignment(g.assignment.id, g.assignment.title, g.rows.length)}>Delete</button>
             </div>

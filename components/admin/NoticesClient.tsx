@@ -8,6 +8,7 @@ export default function NoticesClient({ initial }: { initial: any[] }) {
   const supabase = supabaseBrowser();
   const [notices, setNotices] = useState<any[]>(initial);
   const [f, setF] = useState({ title: "", body: "", target: "all" });
+  const [editId, setEditId] = useState<string | null>(null);
 
   async function reload() {
     const { data } = await supabase.from("notices").select("*").order("created_at", { ascending: false });
@@ -16,10 +17,21 @@ export default function NoticesClient({ initial }: { initial: any[] }) {
 
   async function post() {
     if (!(f.title && f.body)) return alert("Add a title and message.");
-    const { data: { user } } = await supabase.auth.getUser();
-    await supabase.from("notices").insert({ ...f, created_by: user?.id });
+    if (editId) {
+      await supabase.from("notices").update({ title: f.title, body: f.body, target: f.target }).eq("id", editId);
+      setEditId(null);
+    } else {
+      const { data: { user } } = await supabase.auth.getUser();
+      await supabase.from("notices").insert({ ...f, created_by: user?.id });
+    }
     setF({ title: "", body: "", target: "all" });
     reload();
+  }
+
+  function startEdit(n: any) {
+    setEditId(n.id);
+    setF({ title: n.title, body: n.body, target: n.target });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
   async function emailNotice(id: string) {
     if (!confirm('Email this announcement to all targeted students? This uses your daily Gmail quota.')) return;
@@ -49,7 +61,8 @@ export default function NoticesClient({ initial }: { initial: any[] }) {
           <select className="field max-w-xs" value={f.target} onChange={e => setF({ ...f, target: e.target.value })}>
             {TARGETS.map(t => <option key={t} value={t}>{t === "all" ? "All students" : `${t} students`}</option>)}
           </select>
-          <button className="btn-gold" onClick={post}>Post announcement</button>
+          <button className="btn-gold" onClick={post}>{editId ? "Save changes" : "Post announcement"}</button>
+          {editId && <button className="btn-ghost" onClick={() => { setEditId(null); setF({ title: "", body: "", target: "all" }); }}>Cancel edit</button>}
         </div>
       </div>
 
@@ -66,6 +79,7 @@ export default function NoticesClient({ initial }: { initial: any[] }) {
               {n.emailed_at
                 ? <span className="pill-green">Emailed ({n.emailed_count})</span>
                 : <button className="text-sm font-bold text-gold-deep hover:underline" onClick={() => emailNotice(n.id)}>Email students</button>}
+              <button className="text-sm font-bold text-ink/60 hover:underline" onClick={() => startEdit(n)}>Edit</button>
               <button className="text-sm font-bold text-red-600 hover:underline" onClick={() => remove(n.id)}>Delete</button>
             </div>
           </div>

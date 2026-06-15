@@ -2,7 +2,7 @@
 import { useMemo } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, CartesianGrid, PieChart, Pie, Cell, Legend } from "recharts";
 
-const COLORS = ["#E8841C", "#2563eb", "#059669", "#dc2626", "#8b5cf6", "#ec4899"];
+const COLORS = ["#1A60AB", "#EFAE56", "#059669", "#dc2626", "#8b5cf6", "#ec4899"];
 
 export default function ProgressClient({
   profile, submissions, attendanceRecords,
@@ -105,8 +105,8 @@ export default function ProgressClient({
                 <XAxis dataKey="label" tick={{ fontSize: 10 }} angle={-20} textAnchor="end" height={50} />
                 <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} />
                 <Tooltip />
-                <Line type="monotone" dataKey="score" stroke="#E8841C" strokeWidth={2} dot={{ r: 4 }} name="Score" />
-                <Line type="monotone" dataKey="avg" stroke="#0A1F3D" strokeWidth={2} strokeDasharray="5 5" dot={false} name="Running avg" />
+                <Line type="monotone" dataKey="score" stroke="#EFAE56" strokeWidth={2} dot={{ r: 4 }} name="Score" />
+                <Line type="monotone" dataKey="avg" stroke="#1A60AB" strokeWidth={2} strokeDasharray="5 5" dot={false} name="Running avg" />
               </LineChart>
             </ResponsiveContainer>
           ) : (
@@ -141,7 +141,7 @@ export default function ProgressClient({
                 <XAxis dataKey="subject" tick={{ fontSize: 10 }} angle={-20} textAnchor="end" height={50} />
                 <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} />
                 <Tooltip />
-                <Bar dataKey="avg" fill="#2563eb" radius={[6, 6, 0, 0]} name="Avg score" />
+                <Bar dataKey="avg" fill="#7BA3CA" radius={[6, 6, 0, 0]} name="Avg score" />
               </BarChart>
             </ResponsiveContainer>
           ) : (

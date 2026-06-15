@@ -8,6 +8,7 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
   const [students] = useState<any[]>(initialStudents);
   const [showForm, setShowForm] = useState(false);
   const [f, setF] = useState<any>({ platform: "Zoom", duration_minutes: 60, roster: [] as string[] });
+  const [editId, setEditId] = useState<string | null>(null);
   const [attendanceFor, setAttendanceFor] = useState<any>(null); // class being marked
   const [present, setPresent] = useState<Record<string, boolean>>({});
   const [busy, setBusy] = useState(false);
@@ -20,15 +21,36 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
   async function createClass() {
     if (!(f.subject && f.tutor && f.date && f.time)) return alert("Fill in subject, tutor, date and time.");
     const starts_at = new Date(`${f.date}T${f.time}:00`).toISOString();
-    const { data: cls, error } = await supabase.from("classes")
-      .insert({ subject: f.subject, tutor: f.tutor, platform: f.platform, starts_at,
-        duration_minutes: Number(f.duration_minutes) || 60, link: f.link || "" })
-      .select().single();
-    if (error || !cls) return alert("Could not create class.");
-    if (f.roster.length) {
-      await supabase.from("class_students").insert(f.roster.map((sid: string) => ({ class_id: cls.id, student_id: sid })));
+    const payload = { subject: f.subject, tutor: f.tutor, platform: f.platform, starts_at,
+      duration_minutes: Number(f.duration_minutes) || 60, link: f.link || "" };
+
+    if (editId) {
+      const { error } = await supabase.from("classes").update(payload).eq("id", editId);
+      if (error) return alert("Could not update class.");
+      setEditId(null);
+    } else {
+      const { data: cls, error } = await supabase.from("classes").insert(payload).select().single();
+      if (error || !cls) return alert("Could not create class.");
+      if (f.roster.length) {
+        await supabase.from("class_students").insert(f.roster.map((sid: string) => ({ class_id: cls.id, student_id: sid })));
+      }
     }
     setShowForm(false); setF({ platform: "Zoom", duration_minutes: 60, roster: [] }); reload();
+  }
+
+  function startEditClass(c: any) {
+    if (c.attendance_locked) { alert("Locked classes cannot be edited."); return; }
+    const d = new Date(c.starts_at);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    setEditId(c.id);
+    setF({
+      subject: c.subject, tutor: c.tutor, platform: c.platform,
+      date: `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`,
+      time: `${pad(d.getHours())}:${pad(d.getMinutes())}`,
+      duration_minutes: c.duration_minutes, link: c.link || "", roster: [],
+    });
+    setShowForm(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function openAttendance(cls: any) {
@@ -78,7 +100,7 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
           <h1 className="font-display text-3xl font-semibold">Classes</h1>
           <p className="text-sm text-ink/45">{upcoming.length} upcoming</p>
         </div>
-        <button className="btn-gold" onClick={() => setShowForm(v => !v)}>{showForm ? "Cancel" : "+ Create class"}</button>
+        <button className="btn-gold" onClick={() => { if (showForm) { setEditId(null); setF({ platform: "Zoom", duration_minutes: 60, roster: [] }); } setShowForm(v => !v); }}>{showForm ? "Cancel" : "+ Create class"}</button>
       </div>
 
       {showForm && (
@@ -94,7 +116,7 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
             <input className="field" type="number" min={15} step={15} placeholder="Duration (minutes)" value={f.duration_minutes} onChange={e => setF({ ...f, duration_minutes: e.target.value })} />
             <input className="field sm:col-span-2" placeholder="Class link (https://…)" value={f.link || ""} onChange={e => setF({ ...f, link: e.target.value })} />
           </div>
-          <div>
+          {!editId && <div>
             <p className="flabel">Assign students</p>
             <div className="flex max-h-44 flex-wrap gap-2 overflow-y-auto">
               {students.map(s => {
@@ -108,8 +130,8 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
                 );
               })}
             </div>
-          </div>
-          <button className="btn-gold" onClick={createClass}>Create class</button>
+          </div>}
+          <button className="btn-gold" onClick={createClass}>{editId ? "Save changes" : "Create class"}</button>
         </div>
       )}
 
@@ -134,7 +156,10 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
               )}
               {c.link && <a className="btn-ghost !min-h-[38px]" href={c.link} target="_blank" rel="noopener noreferrer">Open link</a>}
               {!c.attendance_locked && (
-                <button className="btn-danger !min-h-[38px]" onClick={() => deleteClass(c)} aria-label="Delete class">Delete</button>
+                <>
+                  <button className="btn-ghost !min-h-[38px]" onClick={() => startEditClass(c)}>Edit</button>
+                  <button className="btn-danger !min-h-[38px]" onClick={() => deleteClass(c)} aria-label="Delete class">Delete</button>
+                </>
               )}
             </div>
           </div>
