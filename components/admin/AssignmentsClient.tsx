@@ -102,6 +102,12 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
     reload();
   }
 
+  async function deleteAssignment(assignmentId: string, title: string, count: number) {
+    if (!confirm(`Delete "${title}"? This permanently removes the assignment and all ${count} student submission(s) and grades for it. This cannot be undone.`)) return;
+    await supabase.from("assignments").delete().eq("id", assignmentId);
+    reload();
+  }
+
   const grouped = subs.reduce((acc: any, s) => {
     (acc[s.assignment.id] ??= { assignment: s.assignment, rows: [] }).rows.push(s);
     return acc;
@@ -236,6 +242,8 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
               <p className="text-xs font-bold text-ink/45">
                 {g.rows.filter((r: any) => r.status !== "pending").length}/{g.rows.length} done
               </p>
+              <button className="text-xs font-bold text-red-600 hover:underline"
+                onClick={() => deleteAssignment(g.assignment.id, g.assignment.title, g.rows.length)}>Delete</button>
             </div>
           </div>
           <div className="divide-y divide-line/60">

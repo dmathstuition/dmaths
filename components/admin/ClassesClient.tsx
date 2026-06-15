@@ -59,6 +59,16 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
     reload();
   }
 
+  async function deleteClass(c: any) {
+    if (c.attendance_locked) {
+      alert("This class has locked attendance and cannot be deleted — its records are part of your history.");
+      return;
+    }
+    if (!confirm(`Delete "${c.subject}"? This also removes its roster. This cannot be undone.`)) return;
+    await supabase.from("classes").delete().eq("id", c.id);
+    reload();
+  }
+
   const upcoming = classes.filter(c => new Date(c.starts_at) >= new Date(Date.now() - 86400000));
 
   return (
@@ -123,6 +133,9 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
                 <button className="btn-gold !min-h-[38px] flex-1" onClick={() => openAttendance(c)}>Take attendance</button>
               )}
               {c.link && <a className="btn-ghost !min-h-[38px]" href={c.link} target="_blank" rel="noopener noreferrer">Open link</a>}
+              {!c.attendance_locked && (
+                <button className="btn-danger !min-h-[38px]" onClick={() => deleteClass(c)} aria-label="Delete class">Delete</button>
+              )}
             </div>
           </div>
         ))}

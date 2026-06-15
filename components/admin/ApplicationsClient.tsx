@@ -46,6 +46,12 @@ export default function ApplicationsClient({ initial }: { initial: App[] }) {
     reload();
   }
 
+  async function deleteApp(id: string) {
+    if (!confirm("Permanently delete this rejected application? This cannot be undone.")) return;
+    await supabase.from("applications").delete().eq("id", id);
+    reload();
+  }
+
   const counts = Object.fromEntries(FILTERS.map(f => [f, f === "all" ? apps.length : apps.filter(a => a.status === f).length]));
 
   return (
@@ -81,7 +87,12 @@ export default function ApplicationsClient({ initial }: { initial: App[] }) {
                 {(a.subjects ?? []).map((s: string) => <span key={s} className="pill-blue">{s}</span>)}
               </div>
             </div>
-            <span className={a.status === "approved" ? "pill-green" : a.status === "rejected" ? "pill-red" : "pill-amber"}>{a.status}</span>
+            <div className="flex items-center gap-3">
+              <span className={a.status === "approved" ? "pill-green" : a.status === "rejected" ? "pill-red" : "pill-amber"}>{a.status}</span>
+              {a.status === "rejected" && (
+                <button className="text-xs font-bold text-red-600 hover:underline" onClick={() => deleteApp(a.id)}>Delete</button>
+              )}
+            </div>
           </div>
 
           <dl className="mt-4 grid gap-2 border-t border-line pt-4 text-[13px] sm:grid-cols-4">
