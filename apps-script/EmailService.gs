@@ -90,6 +90,15 @@ const TEMPLATES = {
       '<p><a href="' + esc_(d.loginUrl) + '">View it in your portal →</a></p>',
   }),
 
+  reward: (d) => ({
+    subject: '⭐ You earned a reward from D-Maths!',
+    html:
+      '<h2 style="color:#0A1F3D">Well done, ' + esc_(d.firstName) + '!</h2>' +
+      '<p style="font-size:22px">' + '★'.repeat(Number(d.stars) || 0) + '</p>' +
+      '<p>' + esc_(d.message) + '</p>' +
+      '<p><a href="' + esc_(d.loginUrl) + '">View your progress →</a></p>',
+  }),
+
   notice: (d) => ({
     subject: '🔔 D-Maths announcement: ' + esc_(d.title),
     html:

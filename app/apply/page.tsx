@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { supabaseBrowser } from "@/lib/supabase/client";
+import PaystackButton from "@/components/PaystackButton";
 
 const SUBJECTS = ["Algebra","Calculus","Statistics","Geometry","Further Mathematics","Core Maths Revision","Physics","JavaScript","Python","External Examinations"];
 const LEVELS = ["JSS 1","JSS 2","JSS 3","SSS 1","SSS 2","SSS 3"];
@@ -46,6 +47,8 @@ export default function Apply() {
       subjects: f.subjects, notes: f.notes || "",
       payment_ref: f.payment_ref, payment_method: f.payment_method,
       payment_amount: Number(f.payment_amount), payment_date: f.payment_date || null,
+      payment_verified: f.payment_verified === true,
+      consented_at: new Date().toISOString(),
     });
     setBusy(false);
     if (err) return setError("Could not submit — please check your connection and try again.");
@@ -149,6 +152,31 @@ export default function Apply() {
               Send payment to <strong>Opay: 7025674894</strong> or <strong>Access Bank: 1534530227</strong>.
               Use your full name as the reference.
             </p>
+
+            {f.payment_verified && (
+              <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-900">
+                ✓ Payment verified online — reference {f.payment_ref}. You can submit now.
+              </p>
+            )}
+
+            {!f.payment_verified && (
+              <div className="rounded-xl border border-line bg-white p-4">
+                <p className="mb-3 text-sm font-semibold text-ink/70">
+                  Option 1 — Pay online now (instant, optional):
+                </p>
+                <PaystackButton
+                  email={f.email}
+                  amount={Number(f.payment_amount) || 0}
+                  onVerified={(ref, amt) => {
+                    set("payment_ref", ref);
+                    set("payment_amount", amt);
+                    set("payment_method", "Paystack (verified)");
+                    set("payment_verified", true);
+                  }}
+                />
+                <p className="mt-3 text-center text-xs text-ink/40">— or pay by transfer and fill the details below —</p>
+              </div>
+            )}
             <Row>
               <Field label="Payment reference" required placeholder="e.g. PAY-8821" value={f.payment_ref} onChange={v => set("payment_ref", v)} />
               <div>

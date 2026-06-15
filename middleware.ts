@@ -42,7 +42,8 @@ export async function middleware(req: NextRequest) {
   }
 
   // Never cache authenticated pages in shared caches
-  res.headers.set("Cache-Control", "private, no-store");
+  res.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+  res.headers.set("Pragma", "no-cache");
   return res;
 }
 

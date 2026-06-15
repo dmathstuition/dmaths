@@ -8,6 +8,9 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
   const [students] = useState<any[]>(initialStudents);
   const [showForm, setShowForm] = useState(false);
   const [f, setF] = useState<any>({ platform: "Zoom", duration_minutes: 60, roster: [] as string[] });
+  const [attendanceFor, setAttendanceFor] = useState<any>(null); // class being marked
+  const [present, setPresent] = useState<Record<string, boolean>>({});
+  const [busy, setBusy] = useState(false);
 
   async function reload() {
     const { data: c } = await supabase.from("classes").select("*, class_students(student_id)").order("starts_at", { ascending: true });
@@ -28,31 +31,42 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
     setShowForm(false); setF({ platform: "Zoom", duration_minutes: 60, roster: [] }); reload();
   }
 
-  async function markAttendance(cls: any) {
+  function openAttendance(cls: any) {
     const roster = students.filter(s => cls.class_students?.some((r: any) => r.student_id === s.id));
     if (!roster.length) return alert("No students assigned to this class yet.");
-    const absentNames = prompt(
-      `Marking attendance for ${cls.subject}.\nEveryone is marked PRESENT by default.\nType absent students' first names separated by commas (or leave blank):`
-    );
-    if (absentNames === null) return;
-    const absent = absentNames.toLowerCase().split(",").map(x => x.trim()).filter(Boolean);
-    const rows = roster.map(s => ({
-      class_id: cls.id, student_id: s.id,
-      present: !absent.includes(s.first_name.toLowerCase()),
+    // default everyone present
+    const init: Record<string, boolean> = {};
+    roster.forEach(s => { init[s.id] = true; });
+    setPresent(init);
+    setAttendanceFor({ ...cls, roster });
+  }
+
+  async function saveAttendance() {
+    if (!confirm("Save attendance? Once saved it is LOCKED and cannot be changed.")) return;
+    setBusy(true);
+    const rows = attendanceFor.roster.map((s: any) => ({
+      class_id: attendanceFor.id, student_id: s.id, present: present[s.id] ?? false,
     }));
-    await supabase.from("attendance_records").upsert(rows, { onConflict: "class_id,student_id,session_date" });
-    alert("Attendance saved — student attendance percentages updated automatically.");
+    const { error: e1 } = await supabase.from("attendance_records")
+      .upsert(rows, { onConflict: "class_id,student_id,session_date" });
+    if (e1) { setBusy(false); return alert("Could not save attendance."); }
+    // lock the class
+    await supabase.from("classes")
+      .update({ attendance_locked: true, attendance_taken_at: new Date().toISOString() })
+      .eq("id", attendanceFor.id);
+    setBusy(false);
+    setAttendanceFor(null);
+    reload();
   }
 
   const upcoming = classes.filter(c => new Date(c.starts_at) >= new Date(Date.now() - 86400000));
-  const past = classes.filter(c => new Date(c.starts_at) < new Date(Date.now() - 86400000));
 
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl font-semibold">Classes</h1>
-          <p className="text-sm text-ink/45">{upcoming.length} upcoming · {past.length} past</p>
+          <p className="text-sm text-ink/45">{upcoming.length} upcoming</p>
         </div>
         <button className="btn-gold" onClick={() => setShowForm(v => !v)}>{showForm ? "Cancel" : "+ Create class"}</button>
       </div>
@@ -60,7 +74,7 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
       {showForm && (
         <div className="card space-y-4 p-6">
           <div className="grid gap-4 sm:grid-cols-2">
-            <input className="field" placeholder="Subject (e.g. Algebra Fundamentals)" value={f.subject || ""} onChange={e => setF({ ...f, subject: e.target.value })} />
+            <input className="field" placeholder="Subject" value={f.subject || ""} onChange={e => setF({ ...f, subject: e.target.value })} />
             <input className="field" placeholder="Tutor name" value={f.tutor || ""} onChange={e => setF({ ...f, tutor: e.target.value })} />
             <input className="field" type="date" value={f.date || ""} onChange={e => setF({ ...f, date: e.target.value })} />
             <input className="field" type="time" value={f.time || ""} onChange={e => setF({ ...f, time: e.target.value })} />
@@ -100,17 +114,51 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
               <span className="pill-blue">{c.platform}</span>
             </div>
             <p className="mt-3 text-sm text-ink/65">
-              {new Date(c.starts_at).toLocaleString("en-NG", { dateStyle: "medium", timeStyle: "short" })} · {c.duration_minutes} min
-              · {c.class_students?.length ?? 0} student(s)
+              {new Date(c.starts_at).toLocaleString("en-NG", { dateStyle: "medium", timeStyle: "short" })} · {c.duration_minutes} min · {c.class_students?.length ?? 0} student(s)
             </p>
             <div className="mt-4 flex gap-2 border-t border-line pt-4">
-              <button className="btn-gold !min-h-[38px] flex-1" onClick={() => markAttendance(c)}>Mark attendance</button>
+              {c.attendance_locked ? (
+                <span className="pill-green flex-1 text-center !py-2.5">✓ Attendance locked</span>
+              ) : (
+                <button className="btn-gold !min-h-[38px] flex-1" onClick={() => openAttendance(c)}>Take attendance</button>
+              )}
               {c.link && <a className="btn-ghost !min-h-[38px]" href={c.link} target="_blank" rel="noopener noreferrer">Open link</a>}
             </div>
           </div>
         ))}
         {!upcoming.length && <div className="card p-12 text-center text-ink/40 md:col-span-2">No upcoming classes — create one above.</div>}
       </div>
+
+      {/* Attendance modal */}
+      {attendanceFor && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm p-0 sm:items-center sm:p-4">
+          <div className="w-full max-w-lg rounded-t-2xl bg-white sm:rounded-2xl">
+            <div className="border-b border-line px-6 py-4">
+              <h2 className="font-display text-lg font-semibold">Attendance — {attendanceFor.subject}</h2>
+              <p className="text-xs text-ink/45">Tap a student to toggle present / absent. This locks once saved.</p>
+            </div>
+            <div className="max-h-[50vh] space-y-1.5 overflow-y-auto p-4">
+              {attendanceFor.roster.map((s: any) => {
+                const isPresent = present[s.id] ?? false;
+                return (
+                  <button key={s.id} onClick={() => setPresent(p => ({ ...p, [s.id]: !p[s.id] }))}
+                    className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left transition
+                      ${isPresent ? "border-emerald-300 bg-emerald-50" : "border-red-200 bg-red-50"}`}>
+                    <span className="font-semibold">{s.first_name} {s.last_name}</span>
+                    <span className={`pill ${isPresent ? "pill-green" : "pill-red"}`}>{isPresent ? "Present" : "Absent"}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="flex gap-3 border-t border-line p-4">
+              <button className="btn-ghost flex-1" onClick={() => setAttendanceFor(null)}>Cancel</button>
+              <button className="btn-gold flex-1" onClick={saveAttendance} disabled={busy}>
+                {busy ? "Saving…" : "Save & lock"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

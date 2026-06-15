@@ -1,4 +1,5 @@
 import PortalShell, { type NavItem } from "@/components/PortalShell";
+import AuthGuard from "@/components/AuthGuard";
 import { getProfile } from "@/lib/auth";
 
 const NAV: NavItem[] = [
@@ -15,8 +16,10 @@ const NAV: NavItem[] = [
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
   const p = await getProfile();
+  const subjects = p?.subjects ?? [];
   return (
-    <PortalShell nav={NAV} name={`${p?.first_name ?? ""} ${p?.last_name ?? ""}`} subtitle={p?.student_code ?? "Student"}>
+    <PortalShell nav={NAV} name={`${p?.first_name ?? ""} ${p?.last_name ?? ""}`} subtitle={p?.student_code ?? "Student"} bellSubjects={subjects}>
+      <AuthGuard />
       {children}
     </PortalShell>
   );

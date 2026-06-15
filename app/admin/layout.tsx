@@ -1,4 +1,5 @@
 import PortalShell, { type NavItem } from "@/components/PortalShell";
+import AuthGuard from "@/components/AuthGuard";
 import { getProfile } from "@/lib/auth";
 
 const NAV: NavItem[] = [
@@ -18,6 +19,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const p = await getProfile();
   return (
     <PortalShell nav={NAV} name={`${p?.first_name ?? ""} ${p?.last_name ?? ""}`} subtitle="Administrator">
+      <AuthGuard />
       {children}
     </PortalShell>
   );

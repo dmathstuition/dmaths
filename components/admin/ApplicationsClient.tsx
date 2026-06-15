@@ -86,6 +86,7 @@ export default function ApplicationsClient({ initial }: { initial: App[] }) {
 
           <dl className="mt-4 grid gap-2 border-t border-line pt-4 text-[13px] sm:grid-cols-4">
             <Info k="Payment ref" v={a.payment_ref} />
+            {a.payment_verified && <div><dt className="text-[11px] font-bold uppercase tracking-wide text-ink/35">Status</dt><dd className="font-semibold"><span className="pill-green">✓ Verified</span></dd></div>}
             <Info k="Amount" v={`₦${a.payment_amount}`} />
             <Info k="Method" v={a.payment_method} />
             <Info k="Guardian" v={`${a.guardian_name} (${a.guardian_contact})`} />

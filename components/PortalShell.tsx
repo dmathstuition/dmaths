@@ -6,19 +6,22 @@ import { supabaseBrowser } from "@/lib/supabase/client";
 import { Icon, type IconName } from "@/components/Icons";
 import Logo from "@/components/Logo";
 import ThemeToggle from "@/components/ThemeToggle";
+import NotificationBell from "@/components/NotificationBell";
 
 export type NavItem = { href: string; label: string; icon: IconName };
 
 export default function PortalShell({
-  nav, name, subtitle, children,
-}: { nav: NavItem[]; name: string; subtitle: string; children: React.ReactNode }) {
+  nav, name, subtitle, children, bellSubjects,
+}: { nav: NavItem[]; name: string; subtitle: string; children: React.ReactNode; bellSubjects?: string[] }) {
   const path = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
 
   async function signOut() {
     await supabaseBrowser().auth.signOut();
-    router.replace("/");
+    // full document navigation (not router.replace) so the authenticated
+    // page cannot be restored from the browser back/forward cache
+    window.location.replace("/login");
   }
 
   const sidebar = (
@@ -65,7 +68,7 @@ export default function PortalShell({
           <Icon name="menu" />
         </button>
         <Logo light />
-        <span className="w-10" />
+        {bellSubjects ? <NotificationBell subjects={bellSubjects} /> : <span className="w-10" />}
       </header>
 
       {/* Mobile drawer */}
