@@ -4,7 +4,20 @@ import Link from "next/link";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import PaystackButton from "@/components/PaystackButton";
 
-const SUBJECTS = ["Algebra","Calculus","Statistics","Geometry","Further Mathematics","Core Maths Revision","Physics","JavaScript","Python","External Examinations"];
+const SUBJECTS = ["Algebra","Calculus","Statistics","Geometry","Further Mathematics","Core Maths Revision","Physics","JavaScript","Python","Python Practice Challenge","External Examinations"];
+
+// ── FREE ENROLMENT SWITCH ──────────────────────────────────────────
+// When true, applicants whose ONLY paid concern is the free subject below
+// skip the payment step entirely. Set to false (or remove the subject from
+// FREE_SUBJECTS) to turn the promotion off. No other code changes needed.
+const FREE_ENROLMENT_OPEN = true;
+const FREE_SUBJECTS = ["Python Practice Challenge"];
+
+function isFreeApplication(subjects: string[]) {
+  return FREE_ENROLMENT_OPEN
+    && subjects.length > 0
+    && subjects.every((s) => FREE_SUBJECTS.includes(s));
+}
 const LEVELS = ["JSS 1","JSS 2","JSS 3","SSS 1","SSS 2","SSS 3"];
 const METHODS = ["Access Bank Transfer","Opay Bank Transfer","Cash"];
 
@@ -29,8 +42,15 @@ export default function Apply() {
     if (step === 2) {
       if (!f.subjects.length) return setError("Select at least one subject.");
       if (!(f.guardian_name && f.guardian_contact)) return setError("Please provide guardian details.");
+      // Free enrolment: skip the payment step and submit straight away.
+      if (isFreeApplication(f.subjects)) { submitFree(); return; }
     }
     setStep(s => s + 1);
+  }
+
+  async function submitFree() {
+    // Free-enrolment path: no payment, consent auto-accepted at submit.
+    await doSubmit(true);
   }
 
   async function submit() {
@@ -38,6 +58,11 @@ export default function Apply() {
     setError("");
     if (!(f.payment_ref && f.payment_method && f.payment_amount))
       return setError("Please fill in all payment details.");
+    await doSubmit(false);
+  }
+
+  async function doSubmit(free: boolean) {
+    setError("");
     setBusy(true);
     const supabase = supabaseBrowser();
     const { error: err } = await supabase.from("applications").insert({
@@ -45,9 +70,11 @@ export default function Apply() {
       dob: f.dob || null, address: f.address || "", level: f.level || "JSS 1",
       guardian_name: f.guardian_name, guardian_contact: f.guardian_contact,
       subjects: f.subjects, notes: f.notes || "",
-      payment_ref: f.payment_ref, payment_method: f.payment_method,
-      payment_amount: Number(f.payment_amount), payment_date: f.payment_date || null,
-      payment_verified: f.payment_verified === true,
+      payment_ref: free ? "FREE-ENROLMENT" : f.payment_ref,
+      payment_method: free ? "Free promotion" : f.payment_method,
+      payment_amount: free ? 0 : Number(f.payment_amount),
+      payment_date: f.payment_date || null,
+      payment_verified: free ? true : (f.payment_verified === true),
       consented_at: new Date().toISOString(),
     });
     setBusy(false);
@@ -61,8 +88,9 @@ export default function Apply() {
         <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-3xl">⏳</div>
         <h1 className="font-display text-2xl font-semibold">Application submitted</h1>
         <p className="mt-3 text-sm leading-relaxed text-ink/55">
-          We verify payments within <strong>24 hours</strong>. Your Student ID and
-          password will arrive at <strong>{f.email}</strong>.
+          {isFreeApplication(f.subjects)
+            ? <>Your registration is confirmed. Your Student ID and password will arrive at <strong>{f.email}</strong> shortly after we review it.</>
+            : <>We verify payments within <strong>24 hours</strong>. Your Student ID and password will arrive at <strong>{f.email}</strong>.</>}
         </p>
         <Link href="/" className="btn-ink mt-7 w-full">Return to D-Maths</Link>
       </div>
@@ -212,7 +240,11 @@ export default function Apply() {
         <div className="mt-7 flex items-center justify-between">
           {step > 1 ? <button className="btn-ghost" onClick={() => setStep(s => s - 1)}>← Previous</button> : <span />}
           {step < 3
-            ? <button className="btn-gold" onClick={next}>Next step →</button>
+            ? <button className="btn-gold" onClick={next} disabled={busy}>
+                {step === 2 && isFreeApplication(f.subjects)
+                  ? (busy ? "Submitting…" : "Submit registration →")
+                  : "Next step →"}
+              </button>
             : <button className="btn-gold" onClick={submit} disabled={busy}>{busy ? "Submitting…" : "Submit application"}</button>}
         </div>
       </div>

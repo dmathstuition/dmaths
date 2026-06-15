@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
 
-const SUBJECTS = ["Algebra","Calculus","Statistics","Geometry","Further Mathematics","Core Maths Revision","Physics","JavaScript","Python","External Examinations"];
+const SUBJECTS = ["Algebra","Calculus","Statistics","Geometry","Further Mathematics","Core Maths Revision","Physics","JavaScript","Python","Python Practice Challenge","External Examinations"];
 
 export default function MaterialsClient({ initial }: { initial: any[] }) {
   const supabase = supabaseBrowser();

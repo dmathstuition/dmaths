@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
 
-const SUBJECTS = ["Algebra","Calculus","Statistics","Geometry","Further Mathematics","Core Maths Revision","Physics","JavaScript","Python","External Examinations"];
+const SUBJECTS = ["Algebra","Calculus","Statistics","Geometry","Further Mathematics","Core Maths Revision","Physics","JavaScript","Python","Python Practice Challenge","External Examinations"];
 
 type CBTQuestion = { id: number; question: string; options: string[]; answer: number };
 
@@ -241,8 +241,14 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
           <div className="divide-y divide-line/60">
             {g.rows.map((r: any) => (
               <div key={r.id} className="flex flex-wrap items-center justify-between gap-2 px-6 py-3 text-sm">
-                <p className="font-bold">{r.student.first_name} {r.student.last_name}
-                  <span className="ml-2 font-mono text-xs text-ink/40">{r.student.student_code}</span></p>
+                <div>
+                  <p className="font-bold">{r.student.first_name} {r.student.last_name}
+                    <span className="ml-2 font-mono text-xs text-ink/40">{r.student.student_code}</span></p>
+                  {r.submission_link && (
+                    <a href={r.submission_link} target="_blank" rel="noopener noreferrer"
+                      className="text-xs font-semibold text-gold-deep hover:underline">View submitted link →</a>
+                  )}
+                </div>
                 <div className="flex items-center gap-3">
                   <span className={r.status === "graded" ? "pill-green" : r.status === "submitted" ? "pill-blue" : "pill-amber"}>
                     {r.status}{r.status === "graded" && ` · ${r.grade}/100`}

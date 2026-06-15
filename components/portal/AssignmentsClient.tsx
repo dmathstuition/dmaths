@@ -5,6 +5,7 @@ import { supabaseBrowser } from "@/lib/supabase/client";
 export default function AssignmentsClient({ initial }: { initial: any[] }) {
   const supabase = supabaseBrowser();
   const [items, setItems] = useState<any[]>(initial);
+  const [links, setLinks] = useState<Record<string, string>>({});
 
   async function reload() {
     const { data: { user } } = await supabase.auth.getUser();
@@ -17,9 +18,14 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
   }
 
   async function markSubmitted(id: string) {
+    const link = (links[id] || "").trim();
+    if (link && !/^https?:\/\//i.test(link)) {
+      alert("Please enter a full link starting with http:// or https://");
+      return;
+    }
     if (!confirm("Mark this assignment as submitted? Your tutor will see it for grading.")) return;
     await supabase.from("assignment_submissions")
-      .update({ status: "submitted", submitted_at: new Date().toISOString() })
+      .update({ status: "submitted", submitted_at: new Date().toISOString(), submission_link: link })
       .eq("id", id);
     reload();
   }
@@ -61,6 +67,14 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
               </a>
             )}
 
+            {/* Submitted link (if any) */}
+            {s.submission_link && (
+              <a href={s.submission_link} target="_blank" rel="noopener noreferrer"
+                className="mt-3 block truncate rounded-xl border border-line px-4 py-2.5 text-sm font-semibold text-gold-deep hover:bg-chalk">
+                Your submitted link: {s.submission_link}
+              </a>
+            )}
+
             {/* Graded result */}
             {s.status === "graded" && (
               <div className="mt-4 rounded-xl border-l-4 border-l-emerald-500 bg-emerald-50 px-4 py-3">
@@ -88,9 +102,13 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
               </>
             )}
 
-            {/* Submit written assignment */}
+            {/* Submit written assignment — optional link */}
             {s.status === "pending" && a.type !== "cbt" && (
-              <button className="btn-gold mt-4" onClick={() => markSubmitted(s.id)}>Mark as submitted</button>
+              <div className="mt-4 space-y-2">
+                <input className="field" placeholder="Optional: paste a link (GitHub, Replit, Colab, Google Doc…)"
+                  value={links[s.id] || ""} onChange={e => setLinks(l => ({ ...l, [s.id]: e.target.value }))} />
+                <button className="btn-gold w-full" onClick={() => markSubmitted(s.id)}>Mark as submitted</button>
+              </div>
             )}
 
             {/* Submit for external CBT after taking it */}

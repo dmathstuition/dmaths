@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
 
-const TARGETS = ["all","Algebra","Calculus","Statistics","Geometry","Further Mathematics","Physics","JavaScript","Python","External Examinations"];
+const TARGETS = ["all","Algebra","Calculus","Statistics","Geometry","Further Mathematics","Physics","JavaScript","Python","Python Practice Challenge","External Examinations"];
 
 export default function NoticesClient({ initial }: { initial: any[] }) {
   const supabase = supabaseBrowser();
