@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Fraunces, Roboto, Fira_Code } from "next/font/google";
 import "./globals.css";
 import CookieBanner from "@/components/CookieBanner";
+import { ToastProvider } from "@/components/Toast";
 
 const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-fraunces", axes: ["opsz"] });
 const roboto = Roboto({ subsets: ["latin"], variable: "--font-roboto", weight: ["400","500","700","900"] });
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${fraunces.variable} ${roboto.variable} ${fira.variable}`}>
-      <body>{children}<CookieBanner /></body>
+      <body><ToastProvider>{children}<CookieBanner /></ToastProvider></body>
     </html>
   );
 }

@@ -128,3 +128,41 @@ html { scroll-behavior: smooth; }
 .dark .bg-chalk { background: #142138 !important; }
 .dark .border-line { border-color: rgba(255,255,255,0.1) !important; }
 .dark .glass-dark { background: rgba(10, 42, 79, 0.9); }
+
+/* ── Landing page polish ────────────────────────────────── */
+@keyframes revealUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+.reveal { opacity: 0; animation: revealUp .7s cubic-bezier(.16,.84,.44,1) forwards; }
+.reveal-1 { animation-delay: .05s; }
+.reveal-2 { animation-delay: .15s; }
+.reveal-3 { animation-delay: .25s; }
+.reveal-4 { animation-delay: .35s; }
+.float { animation: floatY 5s ease-in-out infinite; }
+
+/* gold diagonal accent stroke (brand logo motif) */
+.accent-stroke { position: relative; }
+.accent-stroke::after {
+  content: ""; position: absolute; left: 0; bottom: -6px;
+  height: 4px; width: 56px; border-radius: 4px;
+  background: linear-gradient(90deg, #EFAE56, #F4C078);
+}
+
+/* dotted grid texture for light sections */
+.dotgrid {
+  background-image: radial-gradient(rgba(26,96,171,.10) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* hover lift for feature cards */
+.hovlift { transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
+.hovlift:hover { transform: translateY(-4px); box-shadow: 0 18px 44px rgba(26,96,171,.14); }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .float { animation: none; opacity: 1; }
+}
