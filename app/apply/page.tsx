@@ -18,7 +18,7 @@ function isFreeApplication(subjects: string[]) {
     && subjects.length > 0
     && subjects.every((s) => FREE_SUBJECTS.includes(s));
 }
-const LEVELS = ["JSS 1","JSS 2","JSS 3","SSS 1","SSS 2","SSS 3"];
+const LEVELS = ["JSS 1","JSS 2","JSS 3","SSS 1","SSS 2","SSS 3","Post Secondary"];
 const METHODS = ["Access Bank Transfer","Opay Bank Transfer","Cash"];
 
 type Form = Record<string, any>;

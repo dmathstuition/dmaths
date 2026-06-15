@@ -3,7 +3,7 @@ import { useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
 
 const SUBJECTS = ["Algebra","Calculus","Statistics","Geometry","Further Mathematics","Core Maths Revision","Physics","JavaScript","Python","Python Practice Challenge","External Examinations"];
-const LEVELS = ["JSS 1","JSS 2","JSS 3","SS 1","SS 2","SS 3"];
+const LEVELS = ["JSS 1","JSS 2","JSS 3","SS 1","SS 2","SS 3","Post Secondary"];
 
 export default function CurriculumClient({ initial }: { initial: any[] }) {
   const supabase = supabaseBrowser();
