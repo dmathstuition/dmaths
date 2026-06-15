@@ -16,8 +16,8 @@ body { @apply bg-chalk text-ink font-body antialiased; }
 
 @layer components {
   .btn        { @apply inline-flex items-center justify-center gap-2 rounded-xl font-bold text-sm min-h-[44px] px-5 transition active:scale-95 disabled:opacity-50 disabled:pointer-events-none; }
-  .btn-gold   { @apply btn bg-gold text-board hover:bg-gold-soft shadow-[0_3px_14px_rgba(232,132,28,.35)]; }
-  .btn-ink    { @apply btn bg-ink text-white hover:bg-[#123158]; }
+  .btn-gold   { @apply btn bg-gold text-board hover:bg-gold-soft shadow-[0_3px_14px_rgba(239,174,86,.35)]; }
+  .btn-ink    { @apply btn bg-ink text-white hover:bg-[#0F3A6B]; }
   .btn-ghost  { @apply btn bg-white border border-line text-ink hover:bg-chalk; }
   .btn-danger { @apply btn bg-red-600 text-white hover:bg-red-700; }
   .card       { @apply bg-white rounded-2xl shadow-card border border-line/60; }
@@ -54,7 +54,7 @@ body { @apply bg-chalk text-ink font-body antialiased; }
   box-shadow: 0 4px 24px rgba(10, 31, 61, 0.06);
 }
 .glass-dark {
-  background: rgba(6, 21, 43, 0.85);
+  background: rgba(15, 58, 107, 0.85);
   backdrop-filter: blur(16px) saturate(1.2);
   -webkit-backdrop-filter: blur(16px) saturate(1.2);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -80,9 +80,9 @@ body { @apply bg-chalk text-ink font-body antialiased; }
 /* ── Soft gradient backdrop for portal pages ────────────── */
 .portal-bg {
   background:
-    radial-gradient(1200px 500px at 85% -10%, rgba(232,132,28,.07), transparent 60%),
-    radial-gradient(900px 400px at -10% 110%, rgba(10,31,61,.05), transparent 55%),
-    #F5F2EA;
+    radial-gradient(1200px 500px at 85% -10%, rgba(239,174,86,.10), transparent 60%),
+    radial-gradient(900px 400px at -10% 110%, rgba(26,96,171,.06), transparent 55%),
+    #F6F6F3;
 }
 
 /* ── Better focus rings everywhere ──────────────────────── */
@@ -100,21 +100,21 @@ html { scroll-behavior: smooth; }
 }
 
 /* ── Dark mode ──────────────────────────────────────────── */
-.dark body { background: #0A1424; color: #E8EDF5; }
+.dark body { background: #0A2A4F; color: #E8EDF5; }
 .dark .portal-bg {
   background:
     radial-gradient(1200px 500px at 85% -10%, rgba(232,132,28,.10), transparent 60%),
     radial-gradient(900px 400px at -10% 110%, rgba(255,255,255,.03), transparent 55%),
-    #0A1424;
+    #0A2A4F;
 }
 .dark .card,
 .dark .glass-card {
-  background: rgba(20, 33, 56, 0.85);
+  background: rgba(15, 58, 107, 0.55);
   border-color: rgba(255,255,255,0.08);
   color: #E8EDF5;
 }
 .dark .field {
-  background: #142138;
+  background: #0F3A6B;
   border-color: rgba(255,255,255,0.12);
   color: #E8EDF5;
 }
@@ -127,4 +127,4 @@ html { scroll-behavior: smooth; }
 .dark .text-ink\/70 { color: #E8EDF5 !important; }
 .dark .bg-chalk { background: #142138 !important; }
 .dark .border-line { border-color: rgba(255,255,255,0.1) !important; }
-.dark .glass-dark { background: rgba(6, 14, 28, 0.9); }
+.dark .glass-dark { background: rgba(10, 42, 79, 0.9); }
