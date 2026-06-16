@@ -274,10 +274,16 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
                 <div>
                   <p className="font-bold">{r.student.first_name} {r.student.last_name}
                     <span className="ml-2 font-mono text-xs text-ink/40">{r.student.student_code}</span></p>
-                  {r.submission_link && (
-                    <a href={r.submission_link} target="_blank" rel="noopener noreferrer"
-                      className="text-xs font-semibold text-gold-deep hover:underline">View submitted link →</a>
-                  )}
+                  <div className="flex flex-wrap gap-3">
+                    {r.submission_link && (
+                      <a href={r.submission_link} target="_blank" rel="noopener noreferrer"
+                        className="text-xs font-semibold text-gold-deep hover:underline">View submitted link →</a>
+                    )}
+                    {r.file_url && (
+                      <a href={r.file_url} target="_blank" rel="noopener noreferrer"
+                        className="text-xs font-semibold text-gold-deep hover:underline">View submitted photo / file →</a>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className={r.status === "graded" ? "pill-green" : r.status === "submitted" ? "pill-blue" : "pill-amber"}>

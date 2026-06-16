@@ -6,6 +6,7 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
   const supabase = supabaseBrowser();
   const [items, setItems] = useState<any[]>(initial);
   const [links, setLinks] = useState<Record<string, string>>({});
+  const [uploading, setUploading] = useState<string | null>(null);
 
   async function reload() {
     const { data: { user } } = await supabase.auth.getUser();
@@ -15,6 +16,28 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
       .eq("student_id", user!.id)
       .order("id", { ascending: false });
     setItems(data ?? []);
+  }
+
+  async function uploadAndSubmit(submissionId: string, file: File) {
+    if (file.size > 10 * 1024 * 1024) { alert("Photo too large — 10 MB maximum."); return; }
+    setUploading(submissionId);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("bucket", "submissions");
+      fd.append("folder", submissionId);
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      const json = await res.json();
+      if (!res.ok) { alert(json.error || "Upload failed"); setUploading(null); return; }
+      await supabase.from("assignment_submissions")
+        .update({ status: "submitted", submitted_at: new Date().toISOString(), file_url: json.url })
+        .eq("id", submissionId);
+      setUploading(null);
+      reload();
+    } catch {
+      alert("Upload failed — check your connection.");
+      setUploading(null);
+    }
   }
 
   async function markSubmitted(id: string) {
@@ -74,6 +97,12 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
                 Your submitted link: {s.submission_link}
               </a>
             )}
+            {s.file_url && (
+              <a href={s.file_url} target="_blank" rel="noopener noreferrer"
+                className="mt-3 block truncate rounded-xl border border-line px-4 py-2.5 text-sm font-semibold text-gold-deep hover:bg-chalk">
+                Your submitted photo / file →
+              </a>
+            )}
 
             {/* Graded result */}
             {s.status === "graded" && (
@@ -102,12 +131,27 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
               </>
             )}
 
-            {/* Submit written assignment — optional link */}
+            {/* Submit written assignment — snap a photo, paste a link, or mark done */}
             {s.status === "pending" && a.type !== "cbt" && (
-              <div className="mt-4 space-y-2">
-                <input className="field" placeholder="Optional: paste a link (GitHub, Replit, Colab, Google Doc…)"
+              <div className="mt-4 space-y-3">
+                {/* Snap / upload a photo of handwritten work */}
+                <label className={`flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-line py-3 text-sm font-semibold text-ink/60 transition hover:border-gold hover:text-ink ${uploading === s.id ? "opacity-50" : ""}`}>
+                  {uploading === s.id ? "Uploading…" : "Snap or upload a photo of your work"}
+                  <input type="file" accept="image/*" capture="environment" className="hidden"
+                    disabled={uploading === s.id}
+                    onChange={e => { const f = e.target.files?.[0]; if (f) uploadAndSubmit(s.id, f); }} />
+                </label>
+
+                <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-ink/30">
+                  <span className="h-px flex-1 bg-line" /> or <span className="h-px flex-1 bg-line" />
+                </div>
+
+                {/* Paste a link */}
+                <input className="field" placeholder="Paste a link (GitHub, Replit, Colab, Google Doc…)"
                   value={links[s.id] || ""} onChange={e => setLinks(l => ({ ...l, [s.id]: e.target.value }))} />
-                <button className="btn-gold w-full" onClick={() => markSubmitted(s.id)}>Mark as submitted</button>
+                <button className="btn-gold w-full" onClick={() => markSubmitted(s.id)} disabled={uploading === s.id}>
+                  Submit link / mark as done
+                </button>
               </div>
             )}
 
