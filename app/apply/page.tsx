@@ -1,4 +1,5 @@
 "use client";
+import Logo from "@/components/Logo";
 import { useState } from "react";
 import Link from "next/link";
 import { supabaseBrowser } from "@/lib/supabase/client";
@@ -257,7 +258,7 @@ function Shell({ children }: { children: React.ReactNode }) {
     <main className="min-h-screen bg-chalk pb-20">
       <header className="bg-board px-5 py-4">
         <div className="mx-auto flex max-w-4xl items-center justify-between">
-          <Link href="/" className="font-display text-lg font-bold text-white">D-Maths</Link>
+          <Link href="/"><Logo light /></Link>
           <Link href="/login" className="text-sm font-semibold text-white/55 hover:text-white">Already enrolled? Sign in</Link>
         </div>
       </header>

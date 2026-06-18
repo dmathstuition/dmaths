@@ -173,7 +173,7 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
               </select>
             </div>
             <div>
-              <label className="flabel">Due date</label>
+              <label className="flabel">Due date <span className="font-normal text-ink/40">(when students must submit by)</span></label>
               <input className="field" type="date" value={f.due_date || ""} onChange={e => setF({ ...f, due_date: e.target.value })} />
             </div>
             <div>
@@ -203,17 +203,32 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
 
               {f.cbt_mode === "link" && (
                 <div className="grid gap-4 sm:grid-cols-3">
-                  <input className="field" placeholder="CBT test link (https://…)" value={f.cbt_link || ""} onChange={e => setF({ ...f, cbt_link: e.target.value })} />
-                  <input className="field" type="datetime-local" title="Opens" value={f.cbt_open || ""} onChange={e => setF({ ...f, cbt_open: e.target.value })} />
-                  <input className="field" type="datetime-local" title="Closes" value={f.cbt_close || ""} onChange={e => setF({ ...f, cbt_close: e.target.value })} />
+                  <div className="sm:col-span-3">
+                    <label className="flabel">CBT test link</label>
+                    <input className="field" placeholder="https://… (where the test is hosted)" value={f.cbt_link || ""} onChange={e => setF({ ...f, cbt_link: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="flabel">Test opens <span className="font-normal text-ink/40">(date & time)</span></label>
+                    <input className="field" type="datetime-local" value={f.cbt_open || ""} onChange={e => setF({ ...f, cbt_open: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="flabel">Test closes <span className="font-normal text-ink/40">(date & time)</span></label>
+                    <input className="field" type="datetime-local" value={f.cbt_close || ""} onChange={e => setF({ ...f, cbt_close: e.target.value })} />
+                  </div>
                 </div>
               )}
 
               {f.cbt_mode === "inline" && (
                 <div className="space-y-3">
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <input className="field" type="datetime-local" title="Opens" value={f.cbt_open || ""} onChange={e => setF({ ...f, cbt_open: e.target.value })} />
-                    <input className="field" type="datetime-local" title="Closes" value={f.cbt_close || ""} onChange={e => setF({ ...f, cbt_close: e.target.value })} />
+                    <div>
+                      <label className="flabel">Test opens <span className="font-normal text-ink/40">(date & time)</span></label>
+                      <input className="field" type="datetime-local" value={f.cbt_open || ""} onChange={e => setF({ ...f, cbt_open: e.target.value })} />
+                    </div>
+                    <div>
+                      <label className="flabel">Test closes <span className="font-normal text-ink/40">(date & time)</span></label>
+                      <input className="field" type="datetime-local" value={f.cbt_close || ""} onChange={e => setF({ ...f, cbt_close: e.target.value })} />
+                    </div>
                   </div>
 
                   {/* Question builder */}

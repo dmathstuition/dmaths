@@ -67,7 +67,7 @@ export default function PortalShell({
           className="rounded-lg bg-white/10 p-2.5 text-white lg:hidden">
           <Icon name="menu" />
         </button>
-        <span className="font-display font-bold text-white lg:hidden">D-Maths</span>
+        <span className="lg:hidden"><Logo light /></span>
 
         <div className="ml-auto flex items-center gap-2">
           {bell && <NotificationBell mode={bell.mode} subjects={bell.subjects} noticesHref={bell.noticesHref} />}
