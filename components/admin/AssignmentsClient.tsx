@@ -4,7 +4,17 @@ import { supabaseBrowser } from "@/lib/supabase/client";
 
 const SUBJECTS = ["Algebra","Calculus","Statistics","Geometry","Further Mathematics","Core Maths Revision","Physics","JavaScript","Python","Python Practice Challenge","External Examinations"];
 
-type CBTQuestion = { id: number; question: string; options: string[]; answer: number };
+type CBTQuestion = { id: number; question: string; code?: string; options: string[]; answer: number };
+
+const JSON_PLACEHOLDER = `[
+  {
+    "id": 1,
+    "question": "Given the code, how many times will the loop execute?",
+    "code": "data = {'students': ['John', 'Mary', 'Peter']}\nfor student in data['students']:\n    print(student)",
+    "options": ["1", "2", "3", "4"],
+    "correctAnswer": 2
+  }
+]`;
 
 export default function AssignmentsClient({ initialSubs, initialStudents }: { initialSubs: any[]; initialStudents: any[] }) {
   const supabase = supabaseBrowser();
@@ -26,7 +36,7 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
   }
 
   function addQuestion() {
-    setQuestions(prev => [...prev, { id: prev.length + 1, question: "", options: ["", "", "", ""], answer: 0 }]);
+    setQuestions(prev => [...prev, { id: prev.length + 1, question: "", code: "", options: ["", "", "", ""], answer: 0 }]);
   }
 
   function updateQuestion(idx: number, field: string, value: any) {
@@ -45,8 +55,17 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
     try {
       const parsed = JSON.parse(jsonInput);
       if (!Array.isArray(parsed)) return alert("JSON must be an array of questions.");
-      const valid = parsed.every((q: any) => q.question && Array.isArray(q.options) && typeof q.answer === "number");
-      if (!valid) return alert("Each question needs: question (string), options (array), answer (number/index).");
+      // Accept either "answer" or "correctAnswer" as the correct-option index.
+      const norm = parsed.map((q: any, i: number) => ({
+        id: typeof q.id === "number" ? q.id : i + 1,
+        question: q.question,
+        code: typeof q.code === "string" ? q.code : "",
+        options: q.options,
+        answer: typeof q.answer === "number" ? q.answer
+              : typeof q.correctAnswer === "number" ? q.correctAnswer : -1,
+      }));
+      const valid = norm.every((q: any) => q.question && Array.isArray(q.options) && q.answer >= 0 && q.answer < q.options.length);
+      if (!valid) return alert("Each question needs: question (string), options (array), and answer OR correctAnswer (0-based index of the correct option).");
       setQuestions(parsed.map((q: any, i: number) => ({ ...q, id: i + 1 })));
       setJsonInput("");
     } catch { alert("Invalid JSON."); }
@@ -143,15 +162,30 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
         <div className="card space-y-4 p-6">
           {editId && <p className="rounded-xl bg-blue-50 px-4 py-2.5 text-sm font-semibold text-blue-900">Editing details only. Questions, files and roster can't be changed after creation — delete and recreate if those need to change.</p>}
           <div className="grid gap-4 sm:grid-cols-2">
-            <input className="field sm:col-span-2" placeholder="Title" value={f.title || ""} onChange={e => setF({ ...f, title: e.target.value })} />
-            <select className="field" value={f.subject} onChange={e => setF({ ...f, subject: e.target.value })}>
-              {SUBJECTS.map(s => <option key={s}>{s}</option>)}
-            </select>
-            <input className="field" type="date" placeholder="Due date" value={f.due_date || ""} onChange={e => setF({ ...f, due_date: e.target.value })} />
-            <select className="field" value={f.type} onChange={e => setF({ ...f, type: e.target.value })}>
-              <option value="written">Written</option><option value="cbt">CBT test</option>
-            </select>
-            <input className="field" type="file" accept=".pdf,.doc,.docx,.jpg,.png" onChange={e => setFile(e.target.files?.[0] || null)} />
+            <div className="sm:col-span-2">
+              <label className="flabel">Assignment title</label>
+              <input className="field" placeholder="e.g. Week 3 — Loops & Lists practice" value={f.title || ""} onChange={e => setF({ ...f, title: e.target.value })} />
+            </div>
+            <div>
+              <label className="flabel">Subject</label>
+              <select className="field" value={f.subject} onChange={e => setF({ ...f, subject: e.target.value })}>
+                {SUBJECTS.map(s => <option key={s}>{s}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="flabel">Due date</label>
+              <input className="field" type="date" value={f.due_date || ""} onChange={e => setF({ ...f, due_date: e.target.value })} />
+            </div>
+            <div>
+              <label className="flabel">Type</label>
+              <select className="field" value={f.type} onChange={e => setF({ ...f, type: e.target.value })}>
+                <option value="written">Written (photo / link submission)</option><option value="cbt">CBT test (multiple choice)</option>
+              </select>
+            </div>
+            <div>
+              <label className="flabel">Attach question sheet <span className="font-normal text-ink/40">(optional)</span></label>
+              <input className="field" type="file" accept=".pdf,.doc,.docx,.jpg,.png" onChange={e => setFile(e.target.files?.[0] || null)} />
+            </div>
           </div>
 
           {f.type === "cbt" && (
@@ -189,8 +223,10 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
                         <p className="text-xs font-bold text-ink/45">Question {qi + 1}</p>
                         <button className="text-xs font-bold text-red-600 hover:underline" onClick={() => removeQuestion(qi)}>Remove</button>
                       </div>
-                      <input className="field" placeholder="Question text" value={q.question}
+                      <input className="field" placeholder="Question text — e.g. How many times will the loop run?" value={q.question}
                         onChange={e => updateQuestion(qi, "question", e.target.value)} />
+                      <textarea className="field min-h-16 font-mono text-xs" placeholder="Optional code block (shown to students in a monospace box)"
+                        value={q.code || ""} onChange={e => updateQuestion(qi, "code", e.target.value)} />
                       <div className="grid gap-2 sm:grid-cols-2">
                         {q.options.map((opt, oi) => (
                           <div key={oi} className="flex items-center gap-2">
@@ -210,8 +246,9 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
                     <details className="flex-1">
                       <summary className="cursor-pointer text-sm font-bold text-gold-deep hover:underline">Import JSON</summary>
                       <div className="mt-2 space-y-2">
-                        <textarea className="field min-h-24 font-mono text-xs" placeholder='[{"question":"...","options":["A","B","C","D"],"answer":0}]'
+                        <textarea className="field min-h-32 font-mono text-xs" placeholder={JSON_PLACEHOLDER}
                           value={jsonInput} onChange={e => setJsonInput(e.target.value)} />
+                        <p className="text-[11px] text-ink/45">Supports <code>answer</code> or <code>correctAnswer</code> (0-based index), and an optional <code>code</code> block.</p>
                         <button className="btn-ghost" onClick={importJSON}>Parse & import</button>
                       </div>
                     </details>
