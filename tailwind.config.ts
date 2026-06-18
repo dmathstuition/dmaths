@@ -22,8 +22,8 @@ const config: Config = {
         line: "#D6E3E9",       // borders use the pale blue-gray
       },
       fontFamily: {
-        display: ["var(--font-fraunces)", "serif"],
-        body: ["var(--font-roboto)", "sans-serif"],
+        display: ["var(--font-poppins)", "sans-serif"],
+        body: ["var(--font-poppins)", "sans-serif"],
         mono: ["var(--font-fira)", "monospace"]
       },
       boxShadow: {
