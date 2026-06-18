@@ -28,7 +28,7 @@ export default function Landing() {
       {/* NAV */}
       <nav className="fixed inset-x-0 top-0 z-50 border-b border-line/60 bg-white/85 backdrop-blur-lg">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
-          <Logo />
+          <Logo size="lg" />
           <div className="hidden gap-1 md:flex">
             {[["#services","Services"],["#how","How it works"],["#agency","About"],["#results","Results"],["#contact","Contact"]].map(([h,l]) => (
               <a key={h} href={h} className="rounded-full px-4 py-2 text-sm font-medium text-ink/60 transition hover:bg-chalk hover:text-ink">{l}</a>

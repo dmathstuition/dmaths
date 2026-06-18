@@ -1,9 +1,9 @@
 import Image from "next/image";
 
-// size: "sm" (nav bars) | "md" (default) | "lg" (sidebar / hero)
+// size: "sm" (compact) | "md" (default) | "lg" (sidebar / nav / hero)
 export default function Logo({ light, size = "md" }: { light?: boolean; size?: "sm" | "md" | "lg" }) {
-  const h = size === "lg" ? "h-14" : size === "sm" ? "h-9" : "h-11";
-  const dims = size === "lg" ? { width: 260, height: 74 } : { width: 200, height: 56 };
+  const h = size === "lg" ? "h-16" : size === "sm" ? "h-10" : "h-12";
+  const dims = size === "lg" ? { width: 300, height: 86 } : { width: 220, height: 62 };
   return (
     <Image
       src="/dmathslogo.png"
