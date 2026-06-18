@@ -1,6 +1,7 @@
 import PortalShell, { type NavItem } from "@/components/PortalShell";
 import AuthGuard from "@/components/AuthGuard";
 import { getProfile } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 const NAV: NavItem[] = [
   { href: "/portal", label: "Dashboard", icon: "dashboard" },
@@ -16,10 +17,18 @@ const NAV: NavItem[] = [
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
   const p = await getProfile();
+
+  // No profile = deleted/orphaned account, or not provisioned. Deny access.
+  // Inactive students are also bounced. /login?gone=1 lets the login page
+  // clear the stale session client-side.
+  if (!p || p.role !== "student" || p.is_active === false) {
+    redirect("/login?gone=1");
+  }
+
   const subjects = p?.subjects ?? [];
   return (
-    <PortalShell nav={NAV} name={`${p?.first_name ?? ""} ${p?.last_name ?? ""}`}
-      subtitle={p?.student_code ?? "Student"}
+    <PortalShell nav={NAV} name={`${p.first_name ?? ""} ${p.last_name ?? ""}`}
+      subtitle={p.student_code ?? "Student"}
       bell={{ mode: "student", subjects, noticesHref: "/portal/notices" }}>
       <AuthGuard />
       {children}

@@ -1,10 +1,20 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabaseBrowser } from "@/lib/supabase/client";
 
 export default function Login() {
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.search.includes("gone=1")) {
+      // an orphaned / deleted / inactive account was bounced here — clear it
+      import("@/lib/supabase/client").then(({ supabaseBrowser }) => {
+        supabaseBrowser().auth.signOut();
+      });
+    }
+  }, []);
+
   const router = useRouter();
   const supabase = supabaseBrowser();
   const [identifier, setIdentifier] = useState("");

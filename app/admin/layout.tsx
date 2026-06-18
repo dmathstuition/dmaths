@@ -1,6 +1,7 @@
 import PortalShell, { type NavItem } from "@/components/PortalShell";
 import AuthGuard from "@/components/AuthGuard";
 import { getProfile } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 const NAV: NavItem[] = [
   { href: "/admin", label: "Dashboard", icon: "dashboard" },
@@ -18,6 +19,9 @@ const NAV: NavItem[] = [
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const p = await getProfile();
+  if (!p || p.role !== "admin") {
+    redirect("/login?gone=1");
+  }
   return (
     <PortalShell nav={NAV} name={`${p?.first_name ?? ""} ${p?.last_name ?? ""}`} subtitle="Administrator"
       bell={{ mode: "admin", noticesHref: "/admin/applications" }}>
