@@ -5,35 +5,41 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, 
 const COLORS = ["#1A60AB", "#EFAE56", "#059669", "#dc2626", "#8b5cf6", "#ec4899"];
 
 export default function ProgressClient({
-  profile, submissions, attendanceRecords,
+  profile, submissions, history = [], attendanceRecords,
 }: {
   profile: any;
   submissions: any[];
+  history?: any[];
   attendanceRecords: any[];
 }) {
   // ── Score trend over time ──
   const scoreTrend = useMemo(() => {
-    const graded = submissions
-      .filter(s => s.status === "graded" && s.grade !== null)
-      .sort((a, b) => new Date(a.submitted_at || a.id).getTime() - new Date(b.submitted_at || b.id).getTime());
+    const graded = (history.length ? history : submissions
+        .filter(s => s.status === "graded" && s.grade !== null)
+        .map(s => ({ grade: s.grade, title: s.assignment?.title, subject: s.assignment?.subject, graded_at: s.submitted_at })))
+      .slice()
+      .sort((a, b) => new Date(a.graded_at || 0).getTime() - new Date(b.graded_at || 0).getTime());
 
     let running = 0;
-    return graded.map((s, i) => {
+    return graded.map((s: any, i: number) => {
       running += s.grade;
       return {
-        label: s.assignment?.title?.slice(0, 15) || `#${i + 1}`,
+        label: (s.title || `#${i + 1}`).slice(0, 15),
         score: s.grade,
         avg: Math.round(running / (i + 1)),
-        subject: s.assignment?.subject || "",
+        subject: s.subject || "",
       };
     });
-  }, [submissions]);
+  }, [history, submissions]);
 
   // ── Subject breakdown ──
   const subjectBreakdown = useMemo(() => {
+    const src = history.length ? history : submissions
+      .filter(s => s.status === "graded" && s.grade !== null)
+      .map(s => ({ grade: s.grade, subject: s.assignment?.subject }));
     const map: Record<string, { sum: number; count: number; scores: number[] }> = {};
-    submissions.filter(s => s.status === "graded" && s.grade !== null).forEach(s => {
-      const subj = s.assignment?.subject || "Unknown";
+    src.forEach((s: any) => {
+      const subj = s.subject || "Unknown";
       if (!map[subj]) map[subj] = { sum: 0, count: 0, scores: [] };
       map[subj].sum += s.grade;
       map[subj].count++;
@@ -46,7 +52,7 @@ export default function ProgressClient({
       best: Math.max(...d.scores),
       worst: Math.min(...d.scores),
     }));
-  }, [submissions]);
+  }, [history, submissions]);
 
   // ── Assignment completion rate ──
   const total = submissions.length;

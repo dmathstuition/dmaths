@@ -141,7 +141,7 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
   }
 
   async function deleteAssignment(assignmentId: string, title: string, count: number) {
-    if (!confirm(`Delete "${title}"? This permanently removes the assignment and all ${count} student submission(s) and grades for it. This cannot be undone.`)) return;
+    if (!confirm(`Delete "${title}"? This removes the assignment and its ${count} submission(s). Students keep their recorded average (grade history is preserved). This cannot be undone.`)) return;
     await supabase.from("assignments").delete().eq("id", assignmentId);
     reload();
   }
