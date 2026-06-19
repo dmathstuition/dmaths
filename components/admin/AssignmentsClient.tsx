@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
+import CBTPreview from "@/components/admin/CBTPreview";
 
 const SUBJECTS = ["Algebra","Calculus","Statistics","Geometry","Further Mathematics","Core Maths Revision","Physics","JavaScript","Python","Python Practice Challenge","External Examinations"];
 
@@ -27,6 +28,7 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
   const [busy, setBusy] = useState(false);
   const [jsonInput, setJsonInput] = useState("");
   const [editId, setEditId] = useState<string | null>(null);
+  const [previewCBT, setPreviewCBT] = useState<any | null>(null);
 
   async function reload() {
     const { data: s } = await supabase.from("assignment_submissions")
@@ -314,6 +316,10 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
               <p className="text-xs font-bold text-ink/45">
                 {g.rows.filter((r: any) => r.status !== "pending").length}/{g.rows.length} done
               </p>
+              {g.assignment.type === "cbt" && g.assignment.cbt_questions?.length > 0 && (
+                <button className="text-xs font-bold text-gold-deep hover:underline"
+                  onClick={() => setPreviewCBT(g.assignment)}>Preview / test</button>
+              )}
               <button className="text-xs font-bold text-ink/60 hover:underline"
                 onClick={() => startEditAssignment(g.assignment)}>Edit</button>
               <button className="text-xs font-bold text-red-600 hover:underline"
@@ -353,6 +359,14 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
         </div>
       ))}
       {!subs.length && <div className="card p-12 text-center text-ink/40">No assignments yet.</div>}
+
+      {previewCBT && (
+        <CBTPreview
+          title={previewCBT.title}
+          questions={previewCBT.cbt_questions || []}
+          onClose={() => setPreviewCBT(null)}
+        />
+      )}
     </div>
   );
 }
