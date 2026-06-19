@@ -43,9 +43,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Answer count mismatch" }, { status: 400 });
   }
 
+  // Accept either "answer" or "correctAnswer" as the correct-option index,
+  // so assignments imported with either key grade correctly.
+  const correctIndex = (q: any) =>
+    typeof q.answer === "number" ? q.answer
+    : typeof q.correctAnswer === "number" ? q.correctAnswer : -1;
+
   let correct = 0;
   questions.forEach((q: any, i: number) => {
-    if (answers[i] === q.answer) correct++;
+    if (answers[i] === correctIndex(q)) correct++;
   });
   const grade = Math.round((correct / questions.length) * 100);
 

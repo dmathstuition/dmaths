@@ -6,7 +6,8 @@ type Question = {
   question: string;
   code?: string;
   options: string[];
-  answer: number;
+  answer?: number;
+  correctAnswer?: number;
 };
 
 export default function CBTClient({
@@ -66,15 +67,15 @@ export default function CBTClient({
           <h2 className="font-display text-lg font-semibold">Review answers</h2>
           {questions.map((q, i) => {
             const picked = answers[i] ?? null;
-            const isCorrect = picked === q.answer;
+            const ci = (typeof q.answer === "number" ? q.answer : q.correctAnswer); const isCorrect = picked === ci;
             return (
               <div key={q.id} className={`rounded-xl border p-4 ${isCorrect ? "border-emerald-200 bg-emerald-50" : "border-red-200 bg-red-50"}`}>
                 <p className="text-sm font-bold">{i + 1}. {q.question}</p>
                 {q.code && <pre className="mt-2 overflow-x-auto rounded-lg bg-chalk p-3 font-mono text-[11px] whitespace-pre-wrap text-ink/70">{q.code}</pre>}
                 <div className="mt-2 space-y-1">
                   {q.options.map((opt, j) => (
-                    <p key={j} className={`text-sm pl-4 ${j === q.answer ? "font-bold text-emerald-700" : j === picked && !isCorrect ? "font-bold text-red-600 line-through" : "text-ink/60"}`}>
-                      {j === q.answer ? "✓ " : j === picked ? "✕ " : "  "}{opt}
+                    <p key={j} className={`text-sm pl-4 ${j === ci ? "font-bold text-emerald-700" : j === picked && !isCorrect ? "font-bold text-red-600 line-through" : "text-ink/60"}`}>
+                      {j === ci ? "✓ " : j === picked ? "✕ " : "  "}{opt}
                     </p>
                   ))}
                 </div>
