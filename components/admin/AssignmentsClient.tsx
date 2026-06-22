@@ -41,6 +41,16 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
   const [jsonError, setJsonError] = useState("");
   const [confirmState, setConfirmState] = useState<ConfirmState | null>(null);
   const [gradeTarget, setGradeTarget] = useState<any | null>(null);
+  const [sendingReminders, setSendingReminders] = useState(false);
+
+  async function sendReminders() {
+    setSendingReminders(true);
+    const res = await fetch("/api/reminders/assignments", { method: "POST" });
+    const json = await res.json();
+    setSendingReminders(false);
+    if (!res.ok) { push(json.error || "Failed to send reminders.", "error"); return; }
+    push(json.sent > 0 ? `${json.sent} of ${json.total} reminder email(s) sent.` : (json.message ?? "No reminders needed."), "success");
+  }
 
   async function reload() {
     const { data: s } = await supabase.from("assignment_submissions")
@@ -177,7 +187,12 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
     <div className="space-y-5">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <h1 className="font-display text-3xl font-semibold">Assignments</h1>
-        <button className="btn-gold" onClick={() => { if (showForm) { setEditId(null); setF({ subject: "Algebra", type: "written", roster: [], cbt_mode: "link" }); } setShowForm(v => !v); }}>{showForm ? "Cancel" : "+ New assignment"}</button>
+        <div className="flex gap-2">
+          <button className="btn-ghost" onClick={sendReminders} disabled={sendingReminders}>
+            {sendingReminders ? <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-ink/20 border-t-ink" /> : "Send due-tomorrow reminders"}
+          </button>
+          <button className="btn-gold" onClick={() => { if (showForm) { setEditId(null); setF({ subject: "Algebra", type: "written", roster: [], cbt_mode: "link" }); } setShowForm(v => !v); }}>{showForm ? "Cancel" : "+ New assignment"}</button>
+        </div>
       </div>
 
       {showForm && (

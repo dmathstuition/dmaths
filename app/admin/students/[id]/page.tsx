@@ -10,7 +10,10 @@ export default async function StudentDetail({ params }: { params: { id: string }
     supa.from("profiles").select("*").eq("id", params.id).single(),
     supa.from("admin_notes").select("*").eq("student_id", params.id).order("created_at", { ascending: false }),
     supa.from("rewards").select("*").eq("student_id", params.id).order("created_at", { ascending: false }),
-    supa.from("assignment_submissions").select("status,grade").eq("student_id", params.id),
+    supa.from("assignment_submissions")
+      .select("status, grade, submitted_at, assignment:assignments(title, subject)")
+      .eq("student_id", params.id)
+      .order("submitted_at", { ascending: true }),
   ]);
   if (!student) redirect("/admin/students");
   return <StudentDetailClient student={student} initialNotes={notes ?? []} initialRewards={rewards ?? []} subs={subs ?? []} />;

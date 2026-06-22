@@ -12,6 +12,8 @@ export default function MaterialsClient({ initial }: { initial: any[] }) {
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
+  const [q, setQ] = useState("");
+  const [subjectFilter, setSubjectFilter] = useState("all");
 
   async function reload() {
     const { data } = await supabase.from("lesson_materials").select("*").order("created_at", { ascending: false });
@@ -50,6 +52,11 @@ export default function MaterialsClient({ initial }: { initial: any[] }) {
     reload();
   }
 
+  const visible = materials.filter(m =>
+    (!q || m.title.toLowerCase().includes(q.toLowerCase()) || (m.description ?? "").toLowerCase().includes(q.toLowerCase())) &&
+    (subjectFilter === "all" || m.subject === subjectFilter)
+  );
+
   async function remove(id: string) {
     if (!confirm("Delete this material permanently?")) return;
     await supabase.from("lesson_materials").delete().eq("id", id);
@@ -67,9 +74,17 @@ export default function MaterialsClient({ initial }: { initial: any[] }) {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl font-semibold">Lesson materials</h1>
-          <p className="text-sm text-ink/45">{materials.length} files uploaded</p>
+              <p className="text-sm text-ink/45">{materials.length} files uploaded</p>
         </div>
         <button className="btn-gold" onClick={() => setShowForm(v => !v)}>{showForm ? "Cancel" : "+ Upload material"}</button>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        <input className="field max-w-xs" placeholder="Search title or description…" value={q} onChange={e => setQ(e.target.value)} />
+        <select className="field max-w-[200px]" value={subjectFilter} onChange={e => setSubjectFilter(e.target.value)}>
+          <option value="all">All subjects</option>
+          {SUBJECTS.map(s => <option key={s} value={s}>{s}</option>)}
+        </select>
       </div>
 
       {msg && <p className="rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-900">{msg}</p>}
@@ -89,7 +104,7 @@ export default function MaterialsClient({ initial }: { initial: any[] }) {
       )}
 
       <div className="grid gap-4 md:grid-cols-2">
-        {materials.map(m => (
+        {visible.map(m => (
           <div key={m.id} className="card p-5">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
@@ -105,6 +120,7 @@ export default function MaterialsClient({ initial }: { initial: any[] }) {
             </div>
           </div>
         ))}
+        {materials.length > 0 && !visible.length && <div className="card p-12 text-center text-ink/40 md:col-span-2">No materials match your search.</div>}
         {!materials.length && <div className="card p-12 text-center text-ink/40 md:col-span-2">No materials uploaded yet.</div>}
       </div>
     </div>
