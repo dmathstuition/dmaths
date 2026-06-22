@@ -78,12 +78,21 @@ describe("POST /api/paystack/verify", () => {
   });
 
   it("updates the application record when applicationId is provided", async () => {
+    // Email from Paystack default handler is "student@test.com" — mock the DB lookup to match
+    mockAdmin._qb.single.mockResolvedValueOnce({ data: { email: "student@test.com" }, error: null });
     const res = await POST(makeRequest({ reference: "ref-abc", applicationId: "app-1" }));
     expect(res.status).toBe(200);
     expect(mockAdmin.from).toHaveBeenCalledWith("applications");
     expect(mockAdmin._qb.update).toHaveBeenCalledWith(
       expect.objectContaining({ payment_amount: 15000, payment_verified: true })
     );
+  });
+
+  it("returns 400 when Paystack email does not match the application email", async () => {
+    mockAdmin._qb.single.mockResolvedValueOnce({ data: { email: "other@example.com" }, error: null });
+    const res = await POST(makeRequest({ reference: "ref-abc", applicationId: "app-1" }));
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toMatch(/email/i);
   });
 
   it("returns verified: true without a DB call when applicationId is absent", async () => {

@@ -2,11 +2,20 @@
 import { useState } from "react";
 import Link from "next/link";
 import { supabaseBrowser } from "@/lib/supabase/client";
+import ConfirmModal from "@/components/ConfirmModal";
+import { useToast } from "@/components/Toast";
+
+type ConfirmState = {
+  title: string; message: string; confirmLabel?: string; danger?: boolean; onConfirm: () => void;
+};
 
 export default function StudentsClient({ initial }: { initial: any[] }) {
   const supabase = supabaseBrowser();
+  const push = useToast();
   const [students, setStudents] = useState<any[]>(initial);
   const [q, setQ] = useState("");
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [confirmState, setConfirmState] = useState<ConfirmState | null>(null);
 
   async function reload() {
     const { data } = await supabase.from("profiles").select("*")
@@ -17,9 +26,24 @@ export default function StudentsClient({ initial }: { initial: any[] }) {
   const visible = students.filter(s =>
     !q || `${s.first_name} ${s.last_name} ${s.student_code} ${s.email} ${s.level}`.toLowerCase().includes(q.toLowerCase()));
 
-  async function toggleActive(s: any) {
-    await supabase.from("profiles").update({ is_active: !s.is_active }).eq("id", s.id);
-    reload();
+  function confirmToggleActive(s: any) {
+    const deactivating = s.is_active;
+    setConfirmState({
+      title: deactivating ? `Deactivate ${s.first_name}?` : `Activate ${s.first_name}?`,
+      message: deactivating
+        ? "The student will lose access to the portal immediately."
+        : "The student will regain access to the portal.",
+      confirmLabel: deactivating ? "Deactivate" : "Activate",
+      danger: deactivating,
+      onConfirm: async () => {
+        setConfirmState(null);
+        setBusyId(s.id);
+        await supabase.from("profiles").update({ is_active: !s.is_active }).eq("id", s.id);
+        setBusyId(null);
+        push(deactivating ? `${s.first_name} deactivated.` : `${s.first_name} activated.`, "success");
+        reload();
+      },
+    });
   }
 
   function exportCSV() {
@@ -30,7 +54,7 @@ export default function StudentsClient({ initial }: { initial: any[] }) {
     const esc = (v: any) => `"${String(v ?? "").replace(/"/g, '""')}"`;
     const csv = [headers, ...rows].map(r => r.map(esc).join(",")).join("\n");
     const a = document.createElement("a");
-    a.href = "data:text/csv;charset=utf-8,\uFEFF" + encodeURIComponent(csv);
+    a.href = "data:text/csv;charset=utf-8,﻿" + encodeURIComponent(csv);
     a.download = `dmaths-students-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
   }
@@ -70,8 +94,12 @@ export default function StudentsClient({ initial }: { initial: any[] }) {
                 <td className="px-5 py-3 text-ink/60">{s.attendance}%</td>
                 <td className="px-5 py-3"><span className={s.is_active ? "pill-green" : "pill-red"}>{s.is_active ? "Active" : "Inactive"}</span></td>
                 <td className="px-5 py-3">
-                  <button className="text-[13px] font-bold text-gold-deep hover:underline" onClick={() => toggleActive(s)}>
-                    {s.is_active ? "Deactivate" : "Activate"}
+                  <button className="text-[13px] font-bold text-gold-deep hover:underline disabled:opacity-40"
+                    disabled={busyId === s.id}
+                    onClick={() => confirmToggleActive(s)}>
+                    {busyId === s.id
+                      ? <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-ink/20 border-t-ink/60" />
+                      : s.is_active ? "Deactivate" : "Activate"}
                   </button>
                 </td>
               </tr>
@@ -80,6 +108,10 @@ export default function StudentsClient({ initial }: { initial: any[] }) {
           </tbody>
         </table>
       </div>
+
+      {confirmState && (
+        <ConfirmModal {...confirmState} onCancel={() => setConfirmState(null)} />
+      )}
     </div>
   );
 }

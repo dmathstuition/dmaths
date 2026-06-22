@@ -2,10 +2,17 @@
 import { useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import CBTPreview from "@/components/admin/CBTPreview";
+import ConfirmModal from "@/components/ConfirmModal";
+import GradeModal from "@/components/GradeModal";
+import { useToast } from "@/components/Toast";
 
 const SUBJECTS = ["Algebra","Calculus","Statistics","Geometry","Further Mathematics","Core Maths Revision","Physics","JavaScript","Python","Python Practice Challenge","External Examinations"];
 
 type CBTQuestion = { id: number; question: string; code?: string; options: string[]; answer: number };
+
+type ConfirmState = {
+  title: string; message: string; confirmLabel?: string; danger?: boolean; onConfirm: () => void;
+};
 
 const JSON_PLACEHOLDER = `[
   {
@@ -19,6 +26,7 @@ const JSON_PLACEHOLDER = `[
 
 export default function AssignmentsClient({ initialSubs, initialStudents }: { initialSubs: any[]; initialStudents: any[] }) {
   const supabase = supabaseBrowser();
+  const push = useToast();
   const [subs, setSubs] = useState<any[]>(initialSubs);
   const [students] = useState<any[]>(initialStudents);
   const [showForm, setShowForm] = useState(false);
@@ -29,6 +37,10 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
   const [jsonInput, setJsonInput] = useState("");
   const [editId, setEditId] = useState<string | null>(null);
   const [previewCBT, setPreviewCBT] = useState<any | null>(null);
+  const [formError, setFormError] = useState("");
+  const [jsonError, setJsonError] = useState("");
+  const [confirmState, setConfirmState] = useState<ConfirmState | null>(null);
+  const [gradeTarget, setGradeTarget] = useState<any | null>(null);
 
   async function reload() {
     const { data: s } = await supabase.from("assignment_submissions")
@@ -54,10 +66,10 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
   }
 
   function importJSON() {
+    setJsonError("");
     try {
       const parsed = JSON.parse(jsonInput);
-      if (!Array.isArray(parsed)) return alert("JSON must be an array of questions.");
-      // Accept either "answer" or "correctAnswer" as the correct-option index.
+      if (!Array.isArray(parsed)) { setJsonError("JSON must be an array of questions."); return; }
       const norm = parsed.map((q: any, i: number) => ({
         id: typeof q.id === "number" ? q.id : i + 1,
         question: q.question,
@@ -67,19 +79,19 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
               : typeof q.correctAnswer === "number" ? q.correctAnswer : -1,
       }));
       const valid = norm.every((q: any) => q.question && Array.isArray(q.options) && q.answer >= 0 && q.answer < q.options.length);
-      if (!valid) return alert("Each question needs: question (string), options (array), and answer OR correctAnswer (0-based index of the correct option).");
+      if (!valid) { setJsonError("Each question needs: question (string), options (array), and answer OR correctAnswer (0-based index of the correct option)."); return; }
       setQuestions(parsed.map((q: any, i: number) => ({ ...q, id: i + 1 })));
       setJsonInput("");
-    } catch { alert("Invalid JSON."); }
+    } catch { setJsonError("Invalid JSON."); }
   }
 
   async function create() {
-    if (!f.title) return alert("Add a title.");
-    if (f.type === "cbt" && f.cbt_mode === "link" && !f.cbt_link) return alert("Add the CBT test link.");
-    if (f.type === "cbt" && f.cbt_mode === "inline" && questions.length === 0) return alert("Add at least one question.");
+    setFormError("");
+    if (!f.title) { setFormError("Add a title."); return; }
+    if (f.type === "cbt" && f.cbt_mode === "link" && !f.cbt_link) { setFormError("Add the CBT test link."); return; }
+    if (f.type === "cbt" && f.cbt_mode === "inline" && questions.length === 0) { setFormError("Add at least one question."); return; }
     setBusy(true);
 
-    // Upload file if present
     let fileUrl = "", fileName = "";
     if (file) {
       const form = new FormData();
@@ -88,7 +100,7 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
       form.append("folder", f.subject.toLowerCase().replace(/\s+/g, "-"));
       const res = await fetch("/api/upload", { method: "POST", body: form });
       const json = await res.json();
-      if (!res.ok) { setBusy(false); return alert(`Upload failed: ${json.error}`); }
+      if (!res.ok) { setBusy(false); setFormError(`Upload failed: ${json.error}`); return; }
       fileUrl = json.url; fileName = json.name;
     }
 
@@ -102,7 +114,7 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
       file_url: fileUrl, file_name: fileName,
     }).select().single();
 
-    if (error || !a) { setBusy(false); return alert("Could not create assignment."); }
+    if (error || !a) { setBusy(false); setFormError("Could not create assignment."); return; }
     await supabase.from("assignment_submissions")
       .insert(roster.map((sid: string) => ({ assignment_id: a.id, student_id: sid })));
 
@@ -112,20 +124,20 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
     reload();
   }
 
-  async function grade(sub: any) {
-    const g = prompt(`Grade for ${sub.student.first_name} — "${sub.assignment.title}" (0–100):`, sub.grade ?? "");
-    if (g === null) return;
-    const feedback = prompt("Feedback for the student (optional):", sub.feedback ?? "") ?? "";
+  async function doGrade(sub: any, grade: number, feedback: string) {
+    setGradeTarget(null);
     const res = await fetch("/api/assignments/grade", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ submissionId: sub.id, grade: Number(g), feedback }),
+      body: JSON.stringify({ submissionId: sub.id, grade, feedback }),
     });
-    if (!res.ok) alert("Grading failed.");
+    if (!res.ok) { push("Grading failed.", "error"); return; }
+    push("Grade saved.", "success");
     reload();
   }
 
   async function saveEdit() {
-    if (!f.title) return alert("Add a title.");
+    setFormError("");
+    if (!f.title) { setFormError("Add a title."); return; }
     await supabase.from("assignments").update({
       title: f.title, subject: f.subject, due_date: f.due_date || null, instructions: f.instructions || "",
     }).eq("id", editId!);
@@ -142,10 +154,18 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  async function deleteAssignment(assignmentId: string, title: string, count: number) {
-    if (!confirm(`Delete "${title}"? This removes the assignment and its ${count} submission(s). Students keep their recorded average (grade history is preserved). This cannot be undone.`)) return;
-    await supabase.from("assignments").delete().eq("id", assignmentId);
-    reload();
+  function deleteAssignment(assignmentId: string, title: string, count: number) {
+    setConfirmState({
+      title: `Delete "${title}"?`,
+      message: `This removes the assignment and its ${count} submission(s). Students keep their recorded average. This cannot be undone.`,
+      confirmLabel: "Delete",
+      danger: true,
+      onConfirm: async () => {
+        setConfirmState(null);
+        await supabase.from("assignments").delete().eq("id", assignmentId);
+        reload();
+      },
+    });
   }
 
   const grouped = subs.reduce((acc: any, s) => {
@@ -233,7 +253,6 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
                     </div>
                   </div>
 
-                  {/* Question builder */}
                   {questions.map((q, qi) => (
                     <div key={qi} className="rounded-xl border border-line bg-chalk/50 p-4 space-y-2">
                       <div className="flex items-center justify-between">
@@ -266,6 +285,7 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
                         <textarea className="field min-h-32 font-mono text-xs" placeholder={JSON_PLACEHOLDER}
                           value={jsonInput} onChange={e => setJsonInput(e.target.value)} />
                         <p className="text-[11px] text-ink/45">Supports <code>answer</code> or <code>correctAnswer</code> (0-based index), and an optional <code>code</code> block.</p>
+                        {jsonError && <p role="alert" className="rounded-xl bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-800">{jsonError}</p>}
                         <button className="btn-ghost" onClick={importJSON}>Parse & import</button>
                       </div>
                     </details>
@@ -292,7 +312,12 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
               })}
             </div>
           </div>
-          <button className="btn-gold" onClick={editId ? saveEdit : create} disabled={busy}>{editId ? "Save changes" : (busy ? "Creating…" : "Create assignment")}</button>
+          {formError && <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-800">{formError}</p>}
+          <button className="btn-gold" onClick={editId ? saveEdit : create} disabled={busy}>
+            {busy
+              ? <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+              : editId ? "Save changes" : "Create assignment"}
+          </button>
         </div>
       )}
 
@@ -348,7 +373,7 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
                     {r.status}{r.status === "graded" && ` · ${r.grade}/100`}
                   </span>
                   {r.status !== "pending" && (
-                    <button className="text-[13px] font-bold text-gold-deep hover:underline" onClick={() => grade(r)}>
+                    <button className="text-[13px] font-bold text-gold-deep hover:underline" onClick={() => setGradeTarget(r)}>
                       {r.status === "graded" ? "Update grade" : "Grade"}
                     </button>
                   )}
@@ -366,6 +391,21 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
           questions={previewCBT.cbt_questions || []}
           onClose={() => setPreviewCBT(null)}
         />
+      )}
+
+      {gradeTarget && (
+        <GradeModal
+          studentName={`${gradeTarget.student.first_name} ${gradeTarget.student.last_name}`}
+          assignmentTitle={gradeTarget.assignment.title}
+          initialGrade={gradeTarget.grade ?? null}
+          initialFeedback={gradeTarget.feedback ?? ""}
+          onConfirm={(grade, feedback) => doGrade(gradeTarget, grade, feedback)}
+          onCancel={() => setGradeTarget(null)}
+        />
+      )}
+
+      {confirmState && (
+        <ConfirmModal {...confirmState} onCancel={() => setConfirmState(null)} />
       )}
     </div>
   );
