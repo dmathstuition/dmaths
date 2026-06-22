@@ -1,5 +1,6 @@
 import PortalShell, { type NavItem } from "@/components/PortalShell";
 import AuthGuard from "@/components/AuthGuard";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import { getProfile } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
@@ -26,7 +27,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <PortalShell nav={NAV} name={`${p?.first_name ?? ""} ${p?.last_name ?? ""}`} subtitle="Administrator"
       bell={{ mode: "admin", noticesHref: "/admin/applications" }}>
       <AuthGuard />
-      {children}
+      <ErrorBoundary>{children}</ErrorBoundary>
     </PortalShell>
   );
 }

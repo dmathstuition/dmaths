@@ -2,17 +2,19 @@
 import { useState } from "react";
 import Link from "next/link";
 import { supabaseBrowser } from "@/lib/supabase/client";
+import { useToast } from "@/components/Toast";
 
 export default function StudentDetailClient({ student, initialNotes, initialRewards, subs }: {
   student: any; initialNotes: any[]; initialRewards: any[]; subs: any[];
 }) {
   const supabase = supabaseBrowser();
+  const push = useToast();
   const [notes, setNotes] = useState(initialNotes);
   const [rewards, setRewards] = useState(initialRewards);
   const [note, setNote] = useState("");
   const [reward, setReward] = useState({ stars: 5, message: "", notify: true });
   const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState("");
+  const [rewardError, setRewardError] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmName, setConfirmName] = useState("");
   const [deleting, setDeleting] = useState(false);
@@ -34,31 +36,31 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
   }
 
   async function giveReward() {
-    if (!reward.message.trim()) return setMsg("Add a reward message.");
-    setBusy(true); setMsg("");
+    if (!reward.message.trim()) { setRewardError("Add a reward message."); return; }
+    setRewardError("");
+    setBusy(true);
     const res = await fetch("/api/rewards", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ studentId: student.id, ...reward }),
     });
     const json = await res.json();
     setBusy(false);
-    if (!res.ok) return setMsg(json.error || "Failed");
-    setMsg(reward.notify ? (json.emailed ? "Reward given and emailed." : "Reward saved (email failed).") : "Reward given.");
-    // refresh rewards list
+    if (!res.ok) { push(json.error || "Failed to give reward.", "error"); return; }
+    push(reward.notify ? (json.emailed ? "Reward given and emailed." : "Reward saved (email failed).") : "Reward given.", "success");
     const { data } = await supabase.from("rewards").select("*").eq("student_id", student.id).order("created_at", { ascending: false });
     setRewards(data ?? []);
     setReward({ stars: 5, message: "", notify: true });
   }
 
   async function deleteStudent() {
-    setDeleting(true); setMsg("");
+    setDeleting(true);
     const res = await fetch("/api/students/delete", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ studentId: student.id, confirmName }),
     });
     const json = await res.json();
     setDeleting(false);
-    if (!res.ok) { setMsg(json.error || "Could not delete"); return; }
+    if (!res.ok) { push(json.error || "Could not delete student.", "error"); return; }
     window.location.href = "/admin/students";
   }
 
@@ -88,8 +90,6 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
         </p>
       </div>
 
-      {msg && <p className="rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-900">{msg}</p>}
-
       <div className="grid gap-5 lg:grid-cols-2">
         {/* Rewards */}
         <div className="card p-6">
@@ -103,11 +103,14 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
             </div>
             <textarea className="field min-h-16" placeholder="e.g. Excellent work on calculus this week!"
               value={reward.message} onChange={e => setReward({ ...reward, message: e.target.value })} />
+            {rewardError && <p role="alert" className="rounded-xl bg-red-50 px-3 py-2 text-sm font-semibold text-red-800">{rewardError}</p>}
             <label className="flex items-center gap-2 text-sm text-ink/60">
               <input type="checkbox" checked={reward.notify} onChange={e => setReward({ ...reward, notify: e.target.checked })} className="accent-gold" />
               Email the student
             </label>
-            <button className="btn-gold" onClick={giveReward} disabled={busy}>{busy ? "Saving…" : "Give reward"}</button>
+            <button className="btn-gold" onClick={giveReward} disabled={busy}>
+              {busy ? <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" /> : "Give reward"}
+            </button>
           </div>
           <div className="mt-5 space-y-2 border-t border-line pt-4">
             {rewards.map(r => (

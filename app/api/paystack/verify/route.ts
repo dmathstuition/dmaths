@@ -26,8 +26,15 @@ export async function POST(req: Request) {
   const amountPaid = (json.data.amount ?? 0) / 100; // Paystack returns kobo
   const email = json.data.customer?.email;
 
-  // Record on the application if we have one
+  // Record on the application if we have one.
+  // Cross-check the Paystack customer email against the application email so
+  // that one applicant cannot use another person's payment reference.
   if (applicationId) {
+    const { data: app } = await supabaseAdmin()
+      .from("applications").select("email").eq("id", applicationId).single();
+    if (!app || app.email.toLowerCase() !== (email ?? "").toLowerCase()) {
+      return NextResponse.json({ error: "Payment email does not match application" }, { status: 400 });
+    }
     await supabaseAdmin().from("applications").update({
       payment_ref: reference,
       payment_amount: amountPaid,
