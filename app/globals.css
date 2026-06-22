@@ -166,3 +166,22 @@ html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) {
   .reveal, .float { animation: none; opacity: 1; }
 }
+
+/* ── Scroll-triggered reveal (IntersectionObserver) ─────── */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity .6s cubic-bezier(.16,.84,.44,1), transform .6s cubic-bezier(.16,.84,.44,1);
+}
+.reveal-on-scroll.in-view {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal-on-scroll { opacity: 1; transform: none; transition: none; }
+}
+
+/* ── Hero image glow ────────────────────────────────────── */
+.hero-glow {
+  background: radial-gradient(ellipse 70% 60% at 60% 50%, rgba(239,174,86,.18), transparent 70%);
+}

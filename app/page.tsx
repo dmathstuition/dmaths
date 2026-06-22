@@ -1,6 +1,9 @@
 import Link from "next/link";
-import Logo from "@/components/Logo";
-import { HeroStudy, AgencyAnalytics, DotsScatter } from "@/components/illustrations";
+import Image from "next/image";
+import { DotsScatter } from "@/components/illustrations";
+import Reveal from "@/components/landing/Reveal";
+import CountUp from "@/components/landing/CountUp";
+import LandingNav from "@/components/landing/LandingNav";
 
 const SERVICES = [
   { t: "Algebra & Calculus", d: "From linear equations to derivatives and integrals, built step by step.", c: "#EFAE56", sym: "ƒ(x)" },
@@ -22,29 +25,28 @@ const TESTIMONIALS = [
   { n: "Alli Abdulsamod", r: "Undergraduate", t: "D-Maths prepared me exceptionally well for my entrance exams. I credit them for my distinction." },
 ];
 
+const STATS = [
+  { v: 200, suffix: "+", l: "Students" },
+  { v: 98,  suffix: "%", l: "Pass rate" },
+  { v: 6,   suffix: "",  l: "Expert tutors" },
+];
+
 export default function Landing() {
   return (
     <main className="overflow-hidden bg-white font-body text-ink">
-      {/* NAV */}
-      <nav className="fixed inset-x-0 top-0 z-50 border-b border-line/60 bg-white/85 backdrop-blur-lg">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
-          <Logo size="lg" />
-          <div className="hidden gap-1 md:flex">
-            {[["#services","Services"],["#how","How it works"],["#agency","About"],["#results","Results"],["#contact","Contact"]].map(([h,l]) => (
-              <a key={h} href={h} className="rounded-full px-4 py-2 text-sm font-medium text-ink/60 transition hover:bg-chalk hover:text-ink">{l}</a>
-            ))}
-          </div>
-          <Link href="/apply" className="btn-gold !min-h-[40px] !rounded-full !px-5">Sign up</Link>
-        </div>
-      </nav>
+      <LandingNav />
 
       {/* HERO */}
       <header className="relative pt-28 pb-16">
         <DotsScatter className="pointer-events-none absolute left-6 top-28 h-24 w-24 opacity-70" />
         <DotsScatter className="pointer-events-none absolute right-10 bottom-10 h-20 w-20 opacity-50" />
         <div className="mx-auto grid max-w-6xl items-center gap-8 px-5 md:grid-cols-2">
-          <div className="reveal reveal-1">
-            <h1 className="font-display text-5xl font-extrabold leading-[1.08] tracking-tight md:text-6xl">
+          <Reveal className="space-y-0">
+            <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold-pale px-4 py-1.5 text-xs font-bold text-gold-deep">
+              <span className="h-1.5 w-1.5 rounded-full bg-gold-deep" />
+              Trusted by 200+ students across Nigeria
+            </span>
+            <h1 className="mt-5 font-display text-5xl font-extrabold leading-[1.08] tracking-tight md:text-6xl">
               We create <span className="text-gold-deep">solutions</span> for your success
             </h1>
             <p className="mt-5 max-w-md text-[15px] leading-relaxed text-ink/55">
@@ -60,39 +62,68 @@ export default function Landing() {
                 Explore more
               </a>
             </div>
-          </div>
-          <div className="reveal reveal-2 relative">
-            <HeroStudy className="w-full" />
-          </div>
+          </Reveal>
+
+          <Reveal delay={120} className="relative">
+            <div className="hero-glow absolute inset-0 rounded-3xl" />
+            <div className="relative overflow-hidden rounded-3xl shadow-2xl">
+              <Image
+                src="https://images.unsplash.com/photo-1596495578065-6e0763fa1178?w=800&q=80"
+                alt="Student studying mathematics online"
+                width={800}
+                height={560}
+                className="h-auto w-full object-cover"
+                priority
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0F3A6B]/30 to-transparent" />
+            </div>
+            {/* floating stat badges */}
+            <div className="float absolute -left-4 top-8 rounded-2xl bg-white px-4 py-3 shadow-xl">
+              <p className="font-display text-xl font-extrabold text-ink">98%</p>
+              <p className="text-[11px] font-semibold text-ink/45">Pass rate</p>
+            </div>
+            <div className="float absolute -right-4 bottom-10 rounded-2xl bg-gold px-4 py-3 shadow-xl" style={{ animationDelay: "1.2s" }}>
+              <p className="font-display text-xl font-extrabold text-white">★ 4.9</p>
+              <p className="text-[11px] font-semibold text-white/70">Student rating</p>
+            </div>
+          </Reveal>
         </div>
       </header>
 
       {/* SERVICES */}
       <section id="services" className="mx-auto max-w-6xl px-5 py-16">
-        <div className="mb-12 text-center">
+        <Reveal className="mb-12 text-center">
           <h2 className="font-display text-3xl font-bold md:text-4xl">We Provide The Best <span className="text-gold-deep">Services</span></h2>
           <p className="mx-auto mt-3 max-w-md text-sm text-ink/50">Unleash the full potential of every student with our subject expertise.</p>
-        </div>
+        </Reveal>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {SERVICES.map(s => (
-            <div key={s.t} className="hovlift group rounded-3xl border border-line bg-white p-6 text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl font-mono text-xl font-bold text-white shadow-lg" style={{ background: s.c }}>{s.sym}</div>
-              <h3 className="font-display text-lg font-bold">{s.t}</h3>
-              <p className="mt-2 text-[13px] leading-relaxed text-ink/55">{s.d}</p>
-            </div>
+          {SERVICES.map((s, i) => (
+            <Reveal key={s.t} delay={i * 80}>
+              <div className="hovlift group h-full rounded-3xl border border-line bg-white p-6 text-center">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl font-mono text-xl font-bold text-white shadow-lg" style={{ background: s.c }}>{s.sym}</div>
+                <h3 className="font-display text-lg font-bold">{s.t}</h3>
+                <p className="mt-2 text-[13px] leading-relaxed text-ink/55">{s.d}</p>
+              </div>
+            </Reveal>
           ))}
         </div>
       </section>
 
-      {/* PEACH "SIMPLE SOLUTIONS" BAND — process */}
+      {/* HOW IT WORKS */}
       <section id="how" className="relative my-8">
         <div className="mx-auto max-w-6xl px-5">
           <div className="rounded-[2.5rem] bg-gold-pale px-6 py-14 sm:px-12">
             <div className="grid items-center gap-10 md:grid-cols-2">
-              <div className="reveal reveal-1">
-                <AgencyAnalytics className="w-full max-w-sm" />
-              </div>
-              <div>
+              <Reveal className="relative overflow-hidden rounded-2xl shadow-lg">
+                <Image
+                  src="https://images.unsplash.com/photo-1509062522246-3755977927d7?w=700&q=80"
+                  alt="Students in an online classroom"
+                  width={700}
+                  height={480}
+                  className="h-auto w-full object-cover"
+                />
+              </Reveal>
+              <Reveal delay={100}>
                 <h2 className="font-display text-3xl font-bold md:text-4xl">Simple <span className="text-gold-deep">Solutions!</span></h2>
                 <p className="mt-3 text-sm leading-relaxed text-ink/60">
                   We understand that no two students learn alike. That's why we take the time to
@@ -113,16 +144,16 @@ export default function Landing() {
                   <Link href="/apply" className="btn-gold !rounded-full !px-6">Get started</Link>
                   <Link href="/login" className="btn !rounded-full border border-gold/50 bg-white !px-6 text-gold-deep hover:bg-white/60">Read more</Link>
                 </div>
-              </div>
+              </Reveal>
             </div>
           </div>
         </div>
       </section>
 
-      {/* AGENCY / ABOUT */}
+      {/* ABOUT */}
       <section id="agency" className="mx-auto max-w-6xl px-5 py-20">
         <div className="grid items-center gap-12 md:grid-cols-2">
-          <div className="reveal reveal-1 order-2 md:order-1">
+          <Reveal className="order-2 md:order-1">
             <h2 className="font-display text-3xl font-bold md:text-4xl">Our <span className="text-gold-deep">Centre</span></h2>
             <p className="mt-4 text-[15px] leading-relaxed text-ink/55">
               We believe in the power of personalised teaching. Our approach lets us make informed
@@ -130,43 +161,53 @@ export default function Landing() {
               into achievement — tailored mathematics tuition for every learner.
             </p>
             <div className="mt-6 grid grid-cols-3 gap-4">
-              {[["200+","Students"],["98%","Pass rate"],["6","Expert tutors"]].map(([v,l]) => (
+              {STATS.map(({ v, suffix, l }) => (
                 <div key={l} className="rounded-2xl bg-chalk p-4 text-center">
-                  <div className="font-display text-2xl font-extrabold text-ink">{v}</div>
+                  <div className="font-display text-2xl font-extrabold text-ink">
+                    <CountUp to={v} suffix={suffix} />
+                  </div>
                   <div className="mt-1 text-[11px] font-semibold text-ink/45">{l}</div>
                 </div>
               ))}
             </div>
             <Link href="/apply" className="btn-gold mt-7 inline-flex !rounded-full !px-6">Read more</Link>
-          </div>
-          <div className="reveal reveal-2 order-1 md:order-2">
-            <AgencyAnalytics className="w-full" />
-          </div>
+          </Reveal>
+          <Reveal delay={120} className="order-1 md:order-2 overflow-hidden rounded-3xl shadow-2xl">
+            <Image
+              src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&q=80"
+              alt="Tutor helping students with mathematics"
+              width={800}
+              height={560}
+              className="h-auto w-full object-cover"
+            />
+          </Reveal>
         </div>
       </section>
 
       {/* TESTIMONIALS */}
       <section id="results" className="bg-chalk py-20">
         <div className="mx-auto max-w-6xl px-5">
-          <div className="mb-12 text-center">
+          <Reveal className="mb-12 text-center">
             <h2 className="font-display text-3xl font-bold md:text-4xl">What <span className="text-gold-deep">Clients</span> Say!</h2>
             <p className="mx-auto mt-3 max-w-md text-sm text-ink/50">See how D-Maths has helped students achieve their goals.</p>
-          </div>
+          </Reveal>
           <div className="grid gap-5 md:grid-cols-3">
-            {TESTIMONIALS.map(t => (
-              <figure key={t.n} className="hovlift rounded-3xl border border-line bg-white p-6">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gold font-display font-bold text-white">
-                    {t.n.split(" ").map(w=>w[0]).slice(0,2).join("")}
+            {TESTIMONIALS.map((t, i) => (
+              <Reveal key={t.n} delay={i * 80}>
+                <figure className="hovlift h-full rounded-3xl border border-line bg-white p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gold font-display font-bold text-white">
+                      {t.n.split(" ").map(w=>w[0]).slice(0,2).join("")}
+                    </div>
+                    <div>
+                      <p className="font-display text-sm font-bold">{t.n}</p>
+                      <p className="text-xs text-ink/45">{t.r}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-display text-sm font-bold">{t.n}</p>
-                    <p className="text-xs text-ink/45">{t.r}</p>
-                  </div>
-                </div>
-                <blockquote className="mt-4 text-[13px] leading-relaxed text-ink/60">{t.t}</blockquote>
-                <div className="mt-4 text-gold">{"★".repeat(5)}</div>
-              </figure>
+                  <blockquote className="mt-4 text-[13px] leading-relaxed text-ink/60">{t.t}</blockquote>
+                  <div className="mt-4 text-gold">{"★".repeat(5)}</div>
+                </figure>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -174,17 +215,19 @@ export default function Landing() {
 
       {/* CTA BAND */}
       <section className="mx-auto max-w-6xl px-5 py-16">
-        <div className="flex flex-col items-center justify-between gap-5 rounded-[2rem] bg-gold-pale px-8 py-8 sm:flex-row">
-          <p className="font-display text-2xl font-bold text-ink">Ready to get started?</p>
-          <Link href="/apply" className="btn-gold !rounded-full !px-8 !text-base">Apply now</Link>
-        </div>
+        <Reveal>
+          <div className="flex flex-col items-center justify-between gap-5 rounded-[2rem] bg-gold-pale px-8 py-8 sm:flex-row">
+            <p className="font-display text-2xl font-bold text-ink">Ready to get started?</p>
+            <Link href="/apply" className="btn-gold !rounded-full !px-8 !text-base">Apply now</Link>
+          </div>
+        </Reveal>
       </section>
 
       {/* FOOTER */}
       <footer id="contact" className="relative bg-white pt-12">
         <div className="mx-auto grid max-w-6xl gap-10 px-5 pb-10 md:grid-cols-4">
           <div>
-            <Logo />
+            <p className="font-display text-lg font-bold text-ink">D-Maths</p>
             <p className="mt-4 max-w-xs text-[13px] leading-relaxed text-ink/50">
               World-class online mathematics education for JSS and SSS students across Nigeria.
             </p>

@@ -43,6 +43,11 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ["@supabase/ssr"],
   },
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "images.unsplash.com" },
+    ],
+  },
   async headers() {
     return [
       { source: "/(.*)", headers: securityHeaders },
