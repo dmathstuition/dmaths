@@ -118,9 +118,33 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
         </div>
       </div>
 
-      {trendData.length >= 2 && (
+      {trendData.length >= 1 && (
         <div className="card p-6">
-          <h2 className="mb-4 font-display text-lg font-semibold">Grade trend</h2>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-display text-lg font-semibold">Grade trend</h2>
+            <button
+              onClick={() => {
+                const header = "Assignment,Subject,Submitted,Grade/100,Feedback";
+                const rows = subs
+                  .filter(s => s.status === "graded")
+                  .map(s => [
+                    `"${(s.assignment?.title ?? "").replace(/"/g, '""')}"`,
+                    `"${(s.assignment?.subject ?? "").replace(/"/g, '""')}"`,
+                    s.submitted_at ? new Date(s.submitted_at).toLocaleDateString("en-NG") : "",
+                    s.grade ?? "",
+                    `"${(s.feedback ?? "").replace(/"/g, '""')}"`,
+                  ].join(","));
+                const csv = [header, ...rows].join("\n");
+                const a = document.createElement("a");
+                a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+                a.download = `${student.student_code}-grades.csv`;
+                a.click();
+              }}
+              className="btn-ghost !min-h-[34px] !px-3 text-xs"
+            >
+              Export CSV
+            </button>
+          </div>
           <ResponsiveContainer width="100%" height={200}>
             <LineChart data={trendData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />

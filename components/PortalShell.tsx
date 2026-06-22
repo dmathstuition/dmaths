@@ -7,14 +7,16 @@ import { Icon, type IconName } from "@/components/Icons";
 import Logo from "@/components/Logo";
 import ThemeToggle from "@/components/ThemeToggle";
 import NotificationBell from "@/components/NotificationBell";
+import AdminSearch from "@/components/admin/AdminSearch";
 
 export type NavItem = { href: string; label: string; icon: IconName };
 
 export default function PortalShell({
-  nav, name, subtitle, children, bell,
+  nav, name, subtitle, children, bell, search,
 }: {
   nav: NavItem[]; name: string; subtitle: string; children: React.ReactNode;
   bell?: { mode: "student" | "admin"; subjects?: string[]; noticesHref: string };
+  search?: boolean;
 }) {
   const path = usePathname();
   const router = useRouter();
@@ -69,7 +71,8 @@ export default function PortalShell({
         </button>
         <span className="lg:hidden"><Logo light /></span>
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-3">
+          {search && <AdminSearch />}
           {bell && <NotificationBell mode={bell.mode} subjects={bell.subjects} noticesHref={bell.noticesHref} />}
         </div>
       </header>
