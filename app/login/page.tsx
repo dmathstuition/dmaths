@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabaseBrowser } from "@/lib/supabase/client";
+import { useToast } from "@/components/Toast";
+import { Icon } from "@/components/Icons";
 
 export default function Login() {
 
@@ -17,8 +19,10 @@ export default function Login() {
 
   const router = useRouter();
   const supabase = supabaseBrowser();
+  const push = useToast();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
+  const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -71,7 +75,7 @@ export default function Login() {
       redirectTo: `${window.location.origin}/portal/profile`,
     });
     setError("");
-    alert("If an account exists, a reset link has been sent to its email address.");
+    push("If an account exists, a reset link has been sent to its email address.", "success");
   }
 
   return (
@@ -92,8 +96,15 @@ export default function Login() {
             </div>
             <div>
               <label className="flabel" htmlFor="pw">Password</label>
-              <input id="pw" type="password" className="field" placeholder="••••••••" autoComplete="current-password"
-                value={password} onChange={e => setPassword(e.target.value)} required />
+              <div className="relative">
+                <input id="pw" type={showPw ? "text" : "password"} className="field pr-10" placeholder="••••••••" autoComplete="current-password"
+                  value={password} onChange={e => setPassword(e.target.value)} required />
+                <button type="button" onClick={() => setShowPw(s => !s)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ink/40 hover:text-ink"
+                  aria-label={showPw ? "Hide password" : "Show password"}>
+                  <Icon name={showPw ? "eyeOff" : "eye"} />
+                </button>
+              </div>
             </div>
             <div className="flex justify-end">
               <button type="button" onClick={forgotPassword} className="text-[13px] font-bold text-gold-deep hover:underline">Forgot password?</button>

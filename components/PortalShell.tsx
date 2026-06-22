@@ -33,7 +33,7 @@ export default function PortalShell({
       </div>
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
         {nav.map(n => {
-          const active = path === n.href;
+          const active = path === n.href || (n.href.includes("/", 1) && path.startsWith(n.href + "/"));
           return (
             <Link key={n.href} href={n.href} onClick={() => setOpen(false)}
               className={`group flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-200
