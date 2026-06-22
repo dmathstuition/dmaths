@@ -3,10 +3,12 @@ import { useState } from "react";
 import Link from "next/link";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { useToast } from "@/components/Toast";
+import { Icon, type IconName } from "@/components/Icons";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 
-export default function StudentDetailClient({ student, initialNotes, initialRewards, subs }: {
+export default function StudentDetailClient({ student, initialNotes, initialRewards, subs, behaviorTypes, initialBehaviorLogs }: {
   student: any; initialNotes: any[]; initialRewards: any[]; subs: any[];
+  behaviorTypes: any[]; initialBehaviorLogs: any[];
 }) {
   const supabase = supabaseBrowser();
   const push = useToast();
@@ -22,8 +24,38 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
   const [guardianEmail, setGuardianEmail] = useState(student.guardian_email ?? "");
   const [savingGuardian, setSavingGuardian] = useState(false);
 
+  // Behaviour state
+  const [behaviorLogs, setBehaviorLogs] = useState(initialBehaviorLogs);
+  const [behaviorCategory, setBehaviorCategory] = useState<"positive" | "negative">("positive");
+  const [selectedType, setSelectedType] = useState<string | null>(null);
+  const [behaviorNote, setBehaviorNote] = useState("");
+  const [loggingBehavior, setLoggingBehavior] = useState(false);
+  const [rewardPoints, setRewardPoints] = useState(student.reward_points ?? 0);
+  const [sanctionPoints, setSanctionPoints] = useState(student.sanction_points ?? 0);
+
   const graded = subs.filter(s => s.status === "graded").length;
   const pending = subs.filter(s => s.status === "pending").length;
+
+  async function logBehavior() {
+    if (!selectedType) return;
+    setLoggingBehavior(true);
+    const res = await fetch("/api/behaviors/log", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ studentId: student.id, behaviorTypeId: selectedType, notes: behaviorNote }),
+    });
+    const json = await res.json();
+    setLoggingBehavior(false);
+    if (!res.ok) { push(json.error || "Failed to log behaviour.", "error"); return; }
+    push("Behaviour logged.", "success");
+    setRewardPoints(json.rewardPoints);
+    setSanctionPoints(json.sanctionPoints);
+    setSelectedType(null);
+    setBehaviorNote("");
+    const { data } = await supabase.from("behavior_logs")
+      .select("*, behavior_type:behavior_types(name,category,points,icon,color)")
+      .eq("student_id", student.id).order("created_at", { ascending: false }).limit(30);
+    setBehaviorLogs(data ?? []);
+  }
 
   const trendData = subs
     .filter(s => s.status === "graded" && s.grade !== null && s.submitted_at)
@@ -98,10 +130,12 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
               {(student.subjects ?? []).map((s: string) => <span key={s} className="pill-blue">{s}</span>)}
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-4 text-center">
+          <div className="grid grid-cols-5 gap-3 text-center">
             <Stat label="Avg" value={`${student.avg_score}%`} />
             <Stat label="Attend" value={`${student.attendance}%`} />
             <Stat label="Stars" value={`${student.stars}/5`} />
+            <Stat label="Reward" value={`+${rewardPoints}`} color="text-emerald-600" />
+            <Stat label="Sanction" value={sanctionPoints} color="text-red-500" />
           </div>
         </div>
         <p className="mt-4 border-t border-line pt-3 text-sm text-ink/55">
@@ -115,6 +149,68 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
             {savingGuardian ? "Saving…" : "Save"}
           </button>
           <span className="text-xs text-ink/35">Used for weekly digest emails to guardian</span>
+        </div>
+      </div>
+
+      {/* Behaviour logging */}
+      <div className="card p-6">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="font-display text-lg font-semibold">Log behaviour</h2>
+          <div className="flex rounded-xl border border-line bg-chalk p-1">
+            {(["positive", "negative"] as const).map(cat => (
+              <button key={cat} onClick={() => { setBehaviorCategory(cat); setSelectedType(null); }}
+                className={`rounded-lg px-4 py-1.5 text-sm font-semibold capitalize transition ${behaviorCategory === cat
+                  ? cat === "positive" ? "bg-emerald-500 text-white shadow" : "bg-red-500 text-white shadow"
+                  : "text-ink/45 hover:text-ink"}`}>
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+          {behaviorTypes.filter(bt => bt.category === behaviorCategory).map(bt => (
+            <button key={bt.id} onClick={() => setSelectedType(bt.id === selectedType ? null : bt.id)}
+              className={`flex flex-col items-center gap-1.5 rounded-2xl border p-3 text-center transition hover:shadow-md ${selectedType === bt.id ? "ring-2 shadow-md" : "border-line"}`}
+              style={selectedType === bt.id ? { borderColor: bt.color, "--tw-ring-color": bt.color, background: `${bt.color}12` } as React.CSSProperties : undefined}>
+              <div className="flex h-10 w-10 items-center justify-center rounded-full text-white transition"
+                style={{ background: selectedType === bt.id ? bt.color : "#94a3b8" }}>
+                <Icon name={bt.icon as IconName} />
+              </div>
+              <span className="text-[11px] font-bold text-ink leading-tight">{bt.name}</span>
+              <span className="text-[10px] font-semibold" style={{ color: bt.color }}>
+                {bt.points > 0 ? `+${bt.points}` : bt.points} pts
+              </span>
+            </button>
+          ))}
+        </div>
+        {selectedType && (
+          <div className="mt-4 space-y-2">
+            <textarea className="field min-h-[60px]" placeholder="Optional note…"
+              value={behaviorNote} onChange={e => setBehaviorNote(e.target.value)} />
+            <button className="btn-gold" onClick={logBehavior} disabled={loggingBehavior}>
+              {loggingBehavior ? <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" /> : "Log behaviour"}
+            </button>
+          </div>
+        )}
+        {/* Recent log */}
+        <div className="mt-5 space-y-1.5 border-t border-line pt-4">
+          {behaviorLogs.slice(0, 10).map((l: any) => {
+            const bt = l.behavior_type;
+            const isPos = bt?.category === "positive";
+            return (
+              <div key={l.id} className="flex items-center gap-3 rounded-xl px-3 py-2 bg-chalk text-sm">
+                <span className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-[10px] font-extrabold text-white ${isPos ? "bg-emerald-500" : "bg-red-500"}`}>
+                  {bt?.points > 0 ? `+${bt.points}` : bt?.points}
+                </span>
+                <span className="flex-1 font-semibold text-ink">{bt?.name}</span>
+                {l.notes && <span className="text-xs text-ink/40 italic truncate max-w-[140px]">{l.notes}</span>}
+                <span className="flex-shrink-0 text-xs text-ink/35">
+                  {new Date(l.created_at).toLocaleDateString("en-NG", { dateStyle: "medium" })}
+                </span>
+              </div>
+            );
+          })}
+          {behaviorLogs.length === 0 && <p className="text-sm text-ink/35">No behaviour entries yet.</p>}
         </div>
       </div>
 
@@ -249,10 +345,10 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({ label, value, color }: { label: string; value: string | number; color?: string }) {
   return (
     <div>
-      <p className="font-display text-xl font-semibold">{value}</p>
+      <p className={`font-display text-xl font-semibold ${color ?? ""}`}>{value}</p>
       <p className="text-[10px] font-bold uppercase tracking-wide text-ink/40">{label}</p>
     </div>
   );
