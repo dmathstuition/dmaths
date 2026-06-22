@@ -1,19 +1,29 @@
 "use client";
 import { useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
+import { useToast } from "@/components/Toast";
+import { Icon } from "@/components/Icons";
 
 export default function ProfileClient({ me }: { me: any }) {
   const supabase = supabaseBrowser();
+  const push = useToast();
   const [pw, setPw] = useState({ next: "", confirm: "" });
-  const [msg, setMsg] = useState("");
+  const [showNewPw, setShowNewPw] = useState(false);
+  const [showConfirmPw, setShowConfirmPw] = useState(false);
+  const [busy, setBusy] = useState(false);
 
   async function changePassword() {
-    setMsg("");
-    if (pw.next.length < 8) return setMsg("Password must be at least 8 characters.");
-    if (pw.next !== pw.confirm) return setMsg("Passwords do not match.");
+    if (pw.next.length < 8) { push("Password must be at least 8 characters.", "error"); return; }
+    if (pw.next !== pw.confirm) { push("Passwords do not match.", "error"); return; }
+    setBusy(true);
     const { error } = await supabase.auth.updateUser({ password: pw.next });
-    setMsg(error ? "Could not update password — try signing in again." : "Password updated successfully.");
-    if (!error) setPw({ next: "", confirm: "" });
+    setBusy(false);
+    if (error) {
+      push("Could not update password — try signing in again.", "error");
+    } else {
+      push("Password updated successfully.", "success");
+      setPw({ next: "", confirm: "" });
+    }
   }
 
   return (
@@ -50,14 +60,31 @@ export default function ProfileClient({ me }: { me: any }) {
 
         <div className="card p-6">
           <h2 className="mb-4 font-display text-lg font-semibold">Change password</h2>
-          {msg && <p className="mb-3 rounded-xl bg-chalk px-4 py-2.5 text-sm font-semibold">{msg}</p>}
           <div className="grid gap-3 sm:grid-cols-2">
-            <input className="field" type="password" placeholder="New password (min 8 chars)" autoComplete="new-password"
-              value={pw.next} onChange={e => setPw({ ...pw, next: e.target.value })} />
-            <input className="field" type="password" placeholder="Confirm new password" autoComplete="new-password"
-              value={pw.confirm} onChange={e => setPw({ ...pw, confirm: e.target.value })} />
+            <div className="relative">
+              <input className="field pr-10" type={showNewPw ? "text" : "password"} placeholder="New password (min 8 chars)" autoComplete="new-password"
+                value={pw.next} onChange={e => setPw({ ...pw, next: e.target.value })} />
+              <button type="button" onClick={() => setShowNewPw(s => !s)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-ink/40 hover:text-ink"
+                aria-label={showNewPw ? "Hide password" : "Show password"}>
+                <Icon name={showNewPw ? "eyeOff" : "eye"} />
+              </button>
+            </div>
+            <div className="relative">
+              <input className="field pr-10" type={showConfirmPw ? "text" : "password"} placeholder="Confirm new password" autoComplete="new-password"
+                value={pw.confirm} onChange={e => setPw({ ...pw, confirm: e.target.value })} />
+              <button type="button" onClick={() => setShowConfirmPw(s => !s)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-ink/40 hover:text-ink"
+                aria-label={showConfirmPw ? "Hide password" : "Show password"}>
+                <Icon name={showConfirmPw ? "eyeOff" : "eye"} />
+              </button>
+            </div>
           </div>
-          <button className="btn-gold mt-4" onClick={changePassword}>Update password</button>
+          <button className="btn-gold mt-4" onClick={changePassword} disabled={busy}>
+            {busy
+              ? <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+              : "Update password"}
+          </button>
         </div>
       </div>
     </div>

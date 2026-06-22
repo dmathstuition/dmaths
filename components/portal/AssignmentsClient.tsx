@@ -1,12 +1,21 @@
 "use client";
 import { useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
+import ConfirmModal from "@/components/ConfirmModal";
+import { useToast } from "@/components/Toast";
+
+type ConfirmState = {
+  title: string; message: string; confirmLabel?: string; danger?: boolean; onConfirm: () => void;
+};
 
 export default function AssignmentsClient({ initial }: { initial: any[] }) {
   const supabase = supabaseBrowser();
+  const push = useToast();
   const [items, setItems] = useState<any[]>(initial);
   const [links, setLinks] = useState<Record<string, string>>({});
   const [uploading, setUploading] = useState<string | null>(null);
+  const [uploadPct, setUploadPct] = useState(0);
+  const [confirmState, setConfirmState] = useState<ConfirmState | null>(null);
 
   async function reload() {
     const { data: { user } } = await supabase.auth.getUser();
@@ -19,38 +28,66 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
   }
 
   async function uploadAndSubmit(submissionId: string, file: File) {
-    if (file.size > 10 * 1024 * 1024) { alert("Photo too large — 10 MB maximum."); return; }
+    if (file.size > 10 * 1024 * 1024) { push("Photo too large — 10 MB maximum.", "error"); return; }
     setUploading(submissionId);
-    try {
-      const fd = new FormData();
-      fd.append("file", file);
-      fd.append("bucket", "submissions");
-      fd.append("folder", submissionId);
-      const res = await fetch("/api/upload", { method: "POST", body: fd });
-      const json = await res.json();
-      if (!res.ok) { alert(json.error || "Upload failed"); setUploading(null); return; }
-      await supabase.from("assignment_submissions")
-        .update({ status: "submitted", submitted_at: new Date().toISOString(), file_url: json.url })
-        .eq("id", submissionId);
-      setUploading(null);
-      reload();
-    } catch {
-      alert("Upload failed — check your connection.");
-      setUploading(null);
-    }
-  }
+    setUploadPct(0);
+    const fd = new FormData();
+    fd.append("file", file);
+    fd.append("bucket", "submissions");
+    fd.append("folder", submissionId);
 
-  async function markSubmitted(id: string) {
-    const link = (links[id] || "").trim();
-    if (link && !/^https?:\/\//i.test(link)) {
-      alert("Please enter a full link starting with http:// or https://");
+    const result = await new Promise<{ url?: string; error?: string }>((resolve) => {
+      const xhr = new XMLHttpRequest();
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) setUploadPct(Math.round((e.loaded / e.total) * 100));
+      };
+      xhr.onload = () => {
+        try {
+          const json = JSON.parse(xhr.responseText);
+          if (xhr.status >= 200 && xhr.status < 300) resolve({ url: json.url });
+          else resolve({ error: json.error || "Upload failed" });
+        } catch {
+          resolve({ error: "Upload failed" });
+        }
+      };
+      xhr.onerror = () => resolve({ error: "Upload failed — check your connection." });
+      xhr.open("POST", "/api/upload");
+      xhr.send(fd);
+    });
+
+    if (result.error) {
+      push(result.error, "error");
+      setUploadPct(0);
+      setUploading(null);
       return;
     }
-    if (!confirm("Mark this assignment as submitted? Your tutor will see it for grading.")) return;
+
     await supabase.from("assignment_submissions")
-      .update({ status: "submitted", submitted_at: new Date().toISOString(), submission_link: link })
-      .eq("id", id);
+      .update({ status: "submitted", submitted_at: new Date().toISOString(), file_url: result.url })
+      .eq("id", submissionId);
+    setUploadPct(0);
+    setUploading(null);
     reload();
+  }
+
+  function markSubmitted(id: string) {
+    const link = (links[id] || "").trim();
+    if (link && !/^https?:\/\//i.test(link)) {
+      push("Please enter a full link starting with http:// or https://", "error");
+      return;
+    }
+    setConfirmState({
+      title: "Submit assignment?",
+      message: "Your tutor will see it for grading.",
+      confirmLabel: "Submit",
+      onConfirm: async () => {
+        setConfirmState(null);
+        await supabase.from("assignment_submissions")
+          .update({ status: "submitted", submitted_at: new Date().toISOString(), submission_link: link })
+          .eq("id", id);
+        reload();
+      },
+    });
   }
 
   return (
@@ -82,7 +119,6 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
             </div>
             {a.instructions && <p className="mt-3 text-sm leading-relaxed text-ink/60">{a.instructions}</p>}
 
-            {/* Attached PDF */}
             {a.file_url && (
               <a href={a.file_url} target="_blank" rel="noopener noreferrer"
                 className="mt-3 flex items-center gap-2 rounded-xl border border-line px-4 py-2.5 text-sm font-semibold text-gold-deep hover:bg-chalk">
@@ -90,7 +126,6 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
               </a>
             )}
 
-            {/* Submitted link (if any) */}
             {s.submission_link && (
               <a href={s.submission_link} target="_blank" rel="noopener noreferrer"
                 className="mt-3 block truncate rounded-xl border border-line px-4 py-2.5 text-sm font-semibold text-gold-deep hover:bg-chalk">
@@ -104,7 +139,6 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
               </a>
             )}
 
-            {/* Graded result */}
             {s.status === "graded" && (
               <div className="mt-4 rounded-xl border-l-4 border-l-emerald-500 bg-emerald-50 px-4 py-3">
                 <p className="text-sm font-extrabold text-emerald-900">Grade: {s.grade}/100</p>
@@ -112,7 +146,6 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
               </div>
             )}
 
-            {/* CBT actions */}
             {a.type === "cbt" && s.status === "pending" && (
               <>
                 {cbtOpen ? (
@@ -131,10 +164,8 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
               </>
             )}
 
-            {/* Submit written assignment — snap a photo, paste a link, or mark done */}
             {s.status === "pending" && a.type !== "cbt" && (
               <div className="mt-4 space-y-3">
-                {/* Snap / upload a photo of handwritten work */}
                 <label className={`flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-line py-3 text-sm font-semibold text-ink/60 transition hover:border-gold hover:text-ink ${uploading === s.id ? "opacity-50" : ""}`}>
                   {uploading === s.id ? "Uploading…" : "Snap or upload a photo of your work"}
                   <input type="file" accept="image/*" capture="environment" className="hidden"
@@ -142,11 +173,16 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
                     onChange={e => { const f = e.target.files?.[0]; if (f) uploadAndSubmit(s.id, f); }} />
                 </label>
 
+                {uploading === s.id && uploadPct > 0 && uploadPct < 100 && (
+                  <div className="h-1.5 w-full rounded-full bg-line">
+                    <div className="h-full rounded-full bg-gold transition-all" style={{ width: `${uploadPct}%` }} />
+                  </div>
+                )}
+
                 <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-ink/30">
                   <span className="h-px flex-1 bg-line" /> or <span className="h-px flex-1 bg-line" />
                 </div>
 
-                {/* Paste a link */}
                 <input className="field" placeholder="Paste a link (GitHub, Replit, Colab, Google Doc…)"
                   value={links[s.id] || ""} onChange={e => setLinks(l => ({ ...l, [s.id]: e.target.value }))} />
                 <button className="btn-gold w-full" onClick={() => markSubmitted(s.id)} disabled={uploading === s.id}>
@@ -155,7 +191,6 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
               </div>
             )}
 
-            {/* Submit for external CBT after taking it */}
             {s.status === "pending" && a.type === "cbt" && hasExternalCBT && !hasInlineCBT && (
               <button className="btn-gold mt-2 w-full" onClick={() => markSubmitted(s.id)}>I've completed the external test</button>
             )}
@@ -163,6 +198,10 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
         );
       })}
       {!items.length && <div className="card p-12 text-center text-ink/40">No assignments yet — they'll appear here once your tutor posts them.</div>}
+
+      {confirmState && (
+        <ConfirmModal {...confirmState} onCancel={() => setConfirmState(null)} />
+      )}
     </div>
   );
 }

@@ -1,18 +1,27 @@
 "use client";
 import { useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
+import ConfirmModal from "@/components/ConfirmModal";
+import { useToast } from "@/components/Toast";
+
+type ConfirmState = {
+  title: string; message: string; confirmLabel?: string; danger?: boolean; onConfirm: () => void;
+};
 
 export default function ClassesClient({ initialClasses, initialStudents }: { initialClasses: any[]; initialStudents: any[] }) {
   const supabase = supabaseBrowser();
+  const push = useToast();
   const [classes, setClasses] = useState<any[]>(initialClasses);
   const [students] = useState<any[]>(initialStudents);
   const [showForm, setShowForm] = useState(false);
   const [f, setF] = useState<any>({ platform: "Zoom", duration_minutes: 60, roster: [] as string[] });
   const [editId, setEditId] = useState<string | null>(null);
-  const [attendanceFor, setAttendanceFor] = useState<any>(null); // class being marked
+  const [attendanceFor, setAttendanceFor] = useState<any>(null);
   const [present, setPresent] = useState<Record<string, boolean>>({});
   const [joined, setJoined] = useState<Record<string, boolean>>({});
   const [busy, setBusy] = useState(false);
+  const [formError, setFormError] = useState("");
+  const [confirmState, setConfirmState] = useState<ConfirmState | null>(null);
 
   async function reload() {
     const { data: c } = await supabase.from("classes").select("*, class_students(student_id)").order("starts_at", { ascending: true });
@@ -20,27 +29,33 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
   }
 
   async function createClass() {
-    if (!(f.subject && f.tutor && f.date && f.time)) return alert("Fill in subject, tutor, date and time.");
-    const starts_at = new Date(`${f.date}T${f.time}:00`).toISOString();
-    const payload = { subject: f.subject, tutor: f.tutor, platform: f.platform, starts_at,
-      duration_minutes: Number(f.duration_minutes) || 60, link: f.link || "" };
+    if (!(f.subject && f.tutor && f.date && f.time)) return setFormError("Fill in subject, tutor, date and time.");
+    setFormError("");
+    setBusy(true);
+    try {
+      const starts_at = new Date(`${f.date}T${f.time}:00`).toISOString();
+      const payload = { subject: f.subject, tutor: f.tutor, platform: f.platform, starts_at,
+        duration_minutes: Number(f.duration_minutes) || 60, link: f.link || "" };
 
-    if (editId) {
-      const { error } = await supabase.from("classes").update(payload).eq("id", editId);
-      if (error) return alert("Could not update class.");
-      setEditId(null);
-    } else {
-      const { data: cls, error } = await supabase.from("classes").insert(payload).select().single();
-      if (error || !cls) return alert("Could not create class.");
-      if (f.roster.length) {
-        await supabase.from("class_students").insert(f.roster.map((sid: string) => ({ class_id: cls.id, student_id: sid })));
+      if (editId) {
+        const { error } = await supabase.from("classes").update(payload).eq("id", editId);
+        if (error) { setFormError("Could not update class."); return; }
+        setEditId(null);
+      } else {
+        const { data: cls, error } = await supabase.from("classes").insert(payload).select().single();
+        if (error || !cls) { setFormError("Could not create class."); return; }
+        if (f.roster.length) {
+          await supabase.from("class_students").insert(f.roster.map((sid: string) => ({ class_id: cls.id, student_id: sid })));
+        }
       }
+      setShowForm(false); setF({ platform: "Zoom", duration_minutes: 60, roster: [] }); reload();
+    } finally {
+      setBusy(false);
     }
-    setShowForm(false); setF({ platform: "Zoom", duration_minutes: 60, roster: [] }); reload();
   }
 
   function startEditClass(c: any) {
-    if (c.attendance_locked) { alert("Locked classes cannot be edited."); return; }
+    if (c.attendance_locked) { push("Locked classes cannot be edited.", "error"); return; }
     const d = new Date(c.starts_at);
     const pad = (n: number) => String(n).padStart(2, "0");
     setEditId(c.id);
@@ -56,8 +71,7 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
 
   async function openAttendance(cls: any) {
     const roster = students.filter(s => cls.class_students?.some((r: any) => r.student_id === s.id));
-    if (!roster.length) return alert("No students assigned to this class yet.");
-    // pull any self-marked "joined" records for today to pre-fill
+    if (!roster.length) { push("No students assigned to this class yet.", "error"); return; }
     const { data: existing } = await supabase.from("attendance_records")
       .select("student_id,present,self_marked,joined_at").eq("class_id", cls.id);
     const joinedMap: Record<string, boolean> = {};
@@ -65,7 +79,6 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
     roster.forEach(s => {
       const rec = (existing ?? []).find((e: any) => e.student_id === s.id);
       joinedMap[s.id] = !!rec?.self_marked;
-      // default present = whoever actually joined the link; others default absent
       init[s.id] = rec ? !!rec.present : false;
     });
     setJoined(joinedMap);
@@ -73,16 +86,24 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
     setAttendanceFor({ ...cls, roster });
   }
 
-  async function saveAttendance() {
-    if (!confirm("Save attendance? Once saved it is LOCKED and cannot be changed.")) return;
+  function triggerSaveAttendance() {
+    setConfirmState({
+      title: "Lock attendance?",
+      message: "Once saved it is locked and cannot be changed.",
+      confirmLabel: "Save & lock",
+      onConfirm: doSaveAttendance,
+    });
+  }
+
+  async function doSaveAttendance() {
+    setConfirmState(null);
     setBusy(true);
     const rows = attendanceFor.roster.map((s: any) => ({
       class_id: attendanceFor.id, student_id: s.id, present: present[s.id] ?? false, self_marked: false,
     }));
     const { error: e1 } = await supabase.from("attendance_records")
       .upsert(rows, { onConflict: "class_id,student_id,session_date" });
-    if (e1) { setBusy(false); return alert("Could not save attendance."); }
-    // lock the class
+    if (e1) { setBusy(false); push("Could not save attendance.", "error"); return; }
     await supabase.from("classes")
       .update({ attendance_locked: true, attendance_taken_at: new Date().toISOString() })
       .eq("id", attendanceFor.id);
@@ -91,14 +112,22 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
     reload();
   }
 
-  async function deleteClass(c: any) {
+  function deleteClass(c: any) {
     if (c.attendance_locked) {
-      alert("This class has locked attendance and cannot be deleted — its records are part of your history.");
+      push("This class has locked attendance and cannot be deleted.", "error");
       return;
     }
-    if (!confirm(`Delete "${c.subject}"? This also removes its roster. This cannot be undone.`)) return;
-    await supabase.from("classes").delete().eq("id", c.id);
-    reload();
+    setConfirmState({
+      title: `Delete "${c.subject}"?`,
+      message: "This also removes its roster and cannot be undone.",
+      confirmLabel: "Delete",
+      danger: true,
+      onConfirm: async () => {
+        setConfirmState(null);
+        await supabase.from("classes").delete().eq("id", c.id);
+        reload();
+      },
+    });
   }
 
   const upcoming = classes.filter(c => new Date(c.starts_at) >= new Date(Date.now() - 86400000));
@@ -141,7 +170,12 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
               })}
             </div>
           </div>}
-          <button className="btn-gold" onClick={createClass}>{editId ? "Save changes" : "Create class"}</button>
+          {formError && <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-800">{formError}</p>}
+          <button className="btn-gold" onClick={createClass} disabled={busy}>
+            {busy
+              ? <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+              : editId ? "Save changes" : "Create class"}
+          </button>
         </div>
       )}
 
@@ -177,7 +211,6 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
         {!upcoming.length && <div className="card p-12 text-center text-ink/40 md:col-span-2">No upcoming classes — create one above.</div>}
       </div>
 
-      {/* Attendance modal */}
       {attendanceFor && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm p-0 sm:items-center sm:p-4">
           <div className="w-full max-w-lg rounded-t-2xl bg-white sm:rounded-2xl">
@@ -203,12 +236,18 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
             </div>
             <div className="flex gap-3 border-t border-line p-4">
               <button className="btn-ghost flex-1" onClick={() => setAttendanceFor(null)}>Cancel</button>
-              <button className="btn-gold flex-1" onClick={saveAttendance} disabled={busy}>
-                {busy ? "Saving…" : "Save & lock"}
+              <button className="btn-gold flex-1" onClick={triggerSaveAttendance} disabled={busy}>
+                {busy
+                  ? <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                  : "Save & lock"}
               </button>
             </div>
           </div>
         </div>
+      )}
+
+      {confirmState && (
+        <ConfirmModal {...confirmState} onCancel={() => setConfirmState(null)} />
       )}
     </div>
   );

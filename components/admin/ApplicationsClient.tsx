@@ -1,17 +1,26 @@
 "use client";
 import { useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
+import ConfirmModal from "@/components/ConfirmModal";
+import PromptModal from "@/components/PromptModal";
+import { useToast } from "@/components/Toast";
 
 type App = Record<string, any>;
 const FILTERS = ["all", "pending", "approved", "rejected"] as const;
 
+type ConfirmState = {
+  title: string; message: string; confirmLabel?: string; danger?: boolean; onConfirm: () => void;
+};
+
 export default function ApplicationsClient({ initial }: { initial: App[] }) {
   const supabase = supabaseBrowser();
+  const push = useToast();
   const [apps, setApps] = useState<App[]>(initial);
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>("pending");
   const [q, setQ] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
-  const [msg, setMsg] = useState("");
+  const [confirmState, setConfirmState] = useState<ConfirmState | null>(null);
+  const [promptId, setPromptId] = useState<string | null>(null);
 
   async function reload() {
     const { data } = await supabase.from("applications").select("*").order("created_at", { ascending: false });
@@ -22,32 +31,32 @@ export default function ApplicationsClient({ initial }: { initial: App[] }) {
     .filter(a => filter === "all" || a.status === filter)
     .filter(a => !q || `${a.first_name} ${a.last_name} ${a.email} ${a.payment_ref}`.toLowerCase().includes(q.toLowerCase()));
 
-  async function approve(id: string) {
-    if (!confirm("Approve this application and email login credentials to the student?")) return;
+  async function doApprove(id: string) {
+    setConfirmState(null);
     setBusyId(id);
     const res = await fetch("/api/applications/approve", {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }),
     });
     const json = await res.json();
     setBusyId(null);
-    if (!res.ok) return setMsg(`Approval failed: ${json.error}`);
-    setMsg(`Approved — Student ID ${json.studentCode} emailed to the applicant.`);
+    if (!res.ok) { push(`Approval failed: ${json.error}`, "error"); return; }
+    push(`Approved — Student ID ${json.studentCode} emailed to the applicant.`, "success");
     reload();
   }
 
-  async function reject(id: string) {
-    const reason = prompt("Optional rejection reason (included in the email):") ?? "";
+  async function doReject(id: string, reason: string) {
+    setPromptId(null);
     setBusyId(id);
     await fetch("/api/applications/reject", {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, reason }),
     });
     setBusyId(null);
-    setMsg("Application rejected — applicant notified.");
+    push("Application rejected — applicant notified.", "info");
     reload();
   }
 
-  async function deleteApp(id: string) {
-    if (!confirm("Permanently delete this rejected application? This cannot be undone.")) return;
+  async function doDeleteApp(id: string) {
+    setConfirmState(null);
     await supabase.from("applications").delete().eq("id", id);
     reload();
   }
@@ -60,8 +69,6 @@ export default function ApplicationsClient({ initial }: { initial: App[] }) {
         <h1 className="font-display text-3xl font-semibold">Enrolment applications</h1>
         <p className="text-sm text-ink/45">{counts.pending} pending · {counts.approved} approved · {counts.rejected} rejected</p>
       </div>
-
-      {msg && <p className="rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-900">{msg}</p>}
 
       <div className="flex flex-wrap items-center gap-2">
         {FILTERS.map(f => (
@@ -90,7 +97,14 @@ export default function ApplicationsClient({ initial }: { initial: App[] }) {
             <div className="flex items-center gap-3">
               <span className={a.status === "approved" ? "pill-green" : a.status === "rejected" ? "pill-red" : "pill-amber"}>{a.status}</span>
               {a.status === "rejected" && (
-                <button className="text-xs font-bold text-red-600 hover:underline" onClick={() => deleteApp(a.id)}>Delete</button>
+                <button className="text-xs font-bold text-red-600 hover:underline"
+                  onClick={() => setConfirmState({
+                    title: "Delete application?",
+                    message: "This permanently removes the rejected application and cannot be undone.",
+                    confirmLabel: "Delete",
+                    danger: true,
+                    onConfirm: () => doDeleteApp(a.id),
+                  })}>Delete</button>
               )}
             </div>
           </div>
@@ -106,14 +120,40 @@ export default function ApplicationsClient({ initial }: { initial: App[] }) {
 
           {a.status === "pending" && (
             <div className="mt-4 flex gap-3 border-t border-line pt-4">
-              <button className="btn-gold flex-1" disabled={busyId === a.id} onClick={() => approve(a.id)}>
-                {busyId === a.id ? "Working…" : "Approve & create account"}
+              <button className="btn-gold flex-1" disabled={busyId === a.id}
+                onClick={() => setConfirmState({
+                  title: "Approve application?",
+                  message: "This will create a student account and email login credentials to the applicant.",
+                  confirmLabel: "Approve & create account",
+                  onConfirm: () => doApprove(a.id),
+                })}>
+                {busyId === a.id
+                  ? <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                  : "Approve & create account"}
               </button>
-              <button className="btn-danger flex-1" disabled={busyId === a.id} onClick={() => reject(a.id)}>Reject</button>
+              <button className="btn-danger flex-1" disabled={busyId === a.id}
+                onClick={() => setPromptId(a.id)}>
+                {busyId === a.id
+                  ? <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                  : "Reject"}
+              </button>
             </div>
           )}
         </article>
       ))}
+
+      {confirmState && (
+        <ConfirmModal {...confirmState} onCancel={() => setConfirmState(null)} />
+      )}
+      {promptId && (
+        <PromptModal
+          title="Reject application"
+          message="Optional: add a reason to include in the notification email."
+          placeholder="e.g. Application incomplete, payment not received…"
+          onConfirm={(reason) => doReject(promptId, reason)}
+          onCancel={() => setPromptId(null)}
+        />
+      )}
     </div>
   );
 }
