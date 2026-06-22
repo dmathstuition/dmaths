@@ -38,6 +38,7 @@ export default async function CBTPage({ params }: { params: { id: string } }) {
       questions={a.cbt_questions}
       assignmentTitle={a.title}
       subject={a.subject}
+      cbtClose={a.cbt_close ?? null}
     />
   );
 }

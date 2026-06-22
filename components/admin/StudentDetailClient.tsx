@@ -3,6 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { useToast } from "@/components/Toast";
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 
 export default function StudentDetailClient({ student, initialNotes, initialRewards, subs }: {
   student: any; initialNotes: any[]; initialRewards: any[]; subs: any[];
@@ -18,9 +19,20 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmName, setConfirmName] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [guardianEmail, setGuardianEmail] = useState(student.guardian_email ?? "");
+  const [savingGuardian, setSavingGuardian] = useState(false);
 
   const graded = subs.filter(s => s.status === "graded").length;
   const pending = subs.filter(s => s.status === "pending").length;
+
+  const trendData = subs
+    .filter(s => s.status === "graded" && s.grade !== null && s.submitted_at)
+    .map((s, i) => ({
+      n: i + 1,
+      grade: s.grade,
+      label: (s.assignment?.title ?? `#${i + 1}`).slice(0, 24),
+      subject: s.assignment?.subject ?? "",
+    }));
 
   async function addNote() {
     if (!note.trim()) return;
@@ -50,6 +62,13 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
     const { data } = await supabase.from("rewards").select("*").eq("student_id", student.id).order("created_at", { ascending: false });
     setRewards(data ?? []);
     setReward({ stars: 5, message: "", notify: true });
+  }
+
+  async function saveGuardianEmail() {
+    setSavingGuardian(true);
+    await supabase.from("profiles").update({ guardian_email: guardianEmail.trim() }).eq("id", student.id);
+    setSavingGuardian(false);
+    push("Guardian email saved.", "success");
   }
 
   async function deleteStudent() {
@@ -88,7 +107,36 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
         <p className="mt-4 border-t border-line pt-3 text-sm text-ink/55">
           {student.email} · {student.phone} · Guardian: {student.guardian_name} ({student.guardian_contact}) · {graded} graded, {pending} pending
         </p>
+        <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-line pt-3">
+          <label className="text-xs font-bold uppercase tracking-wide text-ink/35 shrink-0">Guardian email</label>
+          <input className="field max-w-xs" type="email" placeholder="parent@example.com"
+            value={guardianEmail} onChange={e => setGuardianEmail(e.target.value)} />
+          <button className="btn-ghost !min-h-[36px]" onClick={saveGuardianEmail} disabled={savingGuardian}>
+            {savingGuardian ? "Saving…" : "Save"}
+          </button>
+          <span className="text-xs text-ink/35">Used for weekly digest emails to guardian</span>
+        </div>
       </div>
+
+      {trendData.length >= 2 && (
+        <div className="card p-6">
+          <h2 className="mb-4 font-display text-lg font-semibold">Grade trend</h2>
+          <ResponsiveContainer width="100%" height={200}>
+            <LineChart data={trendData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <XAxis dataKey="n" tick={{ fontSize: 11 }} label={{ value: "Assignment", position: "insideBottom", offset: -2, fontSize: 11 }} height={36} />
+              <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} />
+              <Tooltip
+                formatter={(val: any, _: any, props: any) => [`${val}/100`, props.payload?.subject || "Grade"]}
+                labelFormatter={(_: any, payload: any[]) => payload?.[0]?.payload?.label ?? ""}
+              />
+              <Line type="monotone" dataKey="grade" stroke="#EFAE56" strokeWidth={2.5}
+                dot={{ fill: "#EFAE56", r: 4, strokeWidth: 0 }}
+                activeDot={{ r: 6 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
 
       <div className="grid gap-5 lg:grid-cols-2">
         {/* Rewards */}

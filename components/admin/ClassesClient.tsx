@@ -156,7 +156,24 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
             <input className="field sm:col-span-2" placeholder="Class link (https://…)" value={f.link || ""} onChange={e => setF({ ...f, link: e.target.value })} />
           </div>
           {!editId && <div>
-            <p className="flabel">Assign students</p>
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+              <p className="flabel mb-0">Assign students</p>
+              <div className="flex items-center gap-3">
+                <button type="button" onClick={() => setF({ ...f, roster: students.map(s => s.id) })}
+                  className="text-xs font-bold text-gold-deep hover:underline">Select all</button>
+                <button type="button" onClick={() => setF({ ...f, roster: [] })}
+                  className="text-xs font-bold text-ink/40 hover:underline">Clear</button>
+              </div>
+            </div>
+            <div className="mb-2 flex flex-wrap gap-1.5">
+              {[...new Set(students.map(s => s.level))].filter(Boolean).sort().map(level => (
+                <button key={level} type="button"
+                  onClick={() => setF({ ...f, roster: [...new Set([...f.roster, ...students.filter(s => s.level === level).map(s => s.id)])] })}
+                  className="rounded-full border border-line px-2.5 py-0.5 text-[11px] font-bold text-ink/50 hover:bg-chalk">
+                  + {level}
+                </button>
+              ))}
+            </div>
             <div className="flex max-h-44 flex-wrap gap-2 overflow-y-auto">
               {students.map(s => {
                 const on = f.roster.includes(s.id);
