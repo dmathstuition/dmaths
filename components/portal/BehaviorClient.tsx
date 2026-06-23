@@ -10,17 +10,32 @@ interface Log {
   id: string; created_at: string; notes?: string;
   behavior_type_id: string;
 }
+interface WeekSub {
+  grade: number | null;
+  assignment: { title: string; subject: string }[] | { title: string; subject: string } | null;
+}
 
 export default function BehaviorClient({
-  rewardPoints, sanctionPoints, logs, behaviorTypes,
+  rewardPoints, sanctionPoints, logs, behaviorTypes, weekSubs,
 }: {
   rewardPoints: number; sanctionPoints: number; logs: Log[]; behaviorTypes: BehaviorType[];
+  weekSubs: WeekSub[];
 }) {
   const [tab, setTab] = useState<"positive" | "negative">("positive");
 
   const receivedIds = new Set(logs.map(l => l.behavior_type_id));
   const tabTypes = behaviorTypes.filter(t => t.category === tab);
   const tabLogs = logs.filter(l => behaviorTypes.find(t => t.id === l.behavior_type_id)?.category === tab);
+
+  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const weekLogs = logs.filter(l => new Date(l.created_at) >= weekAgo);
+  let weekRewardPts = 0, weekSanctionPts = 0, weekPos = 0, weekNeg = 0;
+  for (const l of weekLogs) {
+    const bt = behaviorTypes.find(t => t.id === l.behavior_type_id);
+    if (!bt) continue;
+    if (bt.points > 0) { weekRewardPts += bt.points; weekPos++; }
+    else { weekSanctionPts += bt.points; weekNeg++; }
+  }
 
   return (
     <div className="space-y-6">
@@ -38,6 +53,34 @@ export default function BehaviorClient({
           </div>
           <p className="mt-2 text-sm font-bold text-red-500">Sanction pts</p>
         </div>
+      </div>
+
+      {/* This week summary */}
+      <div className="card p-5">
+        <p className="mb-3 text-[11px] font-extrabold uppercase tracking-wider text-ink/40">This week</p>
+        <div className="flex flex-wrap gap-6">
+          <WeekStat label="reward pts" value={weekRewardPts > 0 ? `+${weekRewardPts}` : "0"} color="text-emerald-600" />
+          <WeekStat label="sanction pts" value={weekSanctionPts !== 0 ? String(weekSanctionPts) : "0"} color="text-red-500" />
+          <WeekStat label="positive" value={weekPos} color="text-emerald-500" />
+          <WeekStat label="negative" value={weekNeg} color="text-red-400" />
+          {weekSubs.length > 0 && <WeekStat label="graded" value={weekSubs.length} color="text-gold-deep" />}
+        </div>
+        {weekSubs.length > 0 && (
+          <ul className="mt-3 space-y-1 border-t border-line pt-3">
+            {weekSubs.slice(0, 4).map((s, i) => {
+              const asgn = Array.isArray(s.assignment) ? s.assignment[0] : s.assignment;
+              return (
+                <li key={i} className="flex items-center justify-between text-xs text-ink/60">
+                  <span className="truncate">
+                    {asgn?.title ?? "Assignment"}
+                    {asgn?.subject && <span className="ml-1 text-ink/35">· {asgn.subject}</span>}
+                  </span>
+                  {s.grade !== null && <span className="ml-2 font-semibold text-gold-deep">{s.grade}/100</span>}
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </div>
 
       {/* Tabs */}
@@ -100,6 +143,15 @@ export default function BehaviorClient({
           })}
         </div>
       </div>
+    </div>
+  );
+}
+
+function WeekStat({ label, value, color }: { label: string; value: string | number; color: string }) {
+  return (
+    <div className="text-center min-w-[48px]">
+      <p className={`font-display text-xl font-semibold ${color}`}>{value}</p>
+      <p className="text-[10px] text-ink/40">{label}</p>
     </div>
   );
 }
