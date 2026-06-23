@@ -16,6 +16,7 @@ const NAV: NavItem[] = [
   { href: "/admin/calendar", label: "Calendar", icon: "calendar" },
   { href: "/admin/notices", label: "Announcements", icon: "notices" },
   { href: "/admin/activity", label: "Activity", icon: "reports" },
+  { href: "/admin/behavior", label: "Behaviour", icon: "checkCircle" },
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -25,7 +26,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
   return (
     <PortalShell nav={NAV} name={`${p?.first_name ?? ""} ${p?.last_name ?? ""}`} subtitle="Administrator"
-      bell={{ mode: "admin", noticesHref: "/admin/applications" }}>
+      bell={{ mode: "admin", noticesHref: "/admin/applications" }} search>
       <AuthGuard />
       <ErrorBoundary>{children}</ErrorBoundary>
     </PortalShell>

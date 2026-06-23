@@ -25,11 +25,13 @@ export default async function StudentDashboard() {
         <p className="mt-2 text-sm text-white/50">ID: <span className="font-mono text-white/80">{me?.student_code}</span></p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <Stat label="Upcoming classes" value={classes?.length ?? 0} />
         <Stat label="Pending tasks" value={pending} highlight={pending > 0} />
         <Stat label="Average score" value={`${me?.avg_score ?? 0}%`} />
         <Stat label="Attendance" value={`${me?.attendance ?? 0}%`} />
+        <Stat label="Reward pts" value={`+${me?.reward_points ?? 0}`} green={(me?.reward_points ?? 0) > 0} />
+        <Stat label="Sanctions" value={me?.sanction_points ?? 0} red={(me?.sanction_points ?? 0) < 0} />
       </div>
 
       <div className="grid gap-5 lg:grid-cols-2">
@@ -66,11 +68,11 @@ export default async function StudentDashboard() {
   );
 }
 
-function Stat({ label, value, highlight }: { label: string; value: string | number; highlight?: boolean }) {
+function Stat({ label, value, highlight, green, red }: { label: string; value: string | number; highlight?: boolean; green?: boolean; red?: boolean }) {
   return (
     <div className={`card p-5 ${highlight ? "ring-2 ring-gold/40" : ""}`}>
       <p className="text-[11px] font-extrabold uppercase tracking-wider text-ink/40">{label}</p>
-      <p className="mt-2 font-display text-3xl font-semibold">{value}</p>
+      <p className={`mt-2 font-display text-3xl font-semibold ${green ? "text-emerald-600" : red ? "text-red-500" : ""}`}>{value}</p>
     </div>
   );
 }

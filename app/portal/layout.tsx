@@ -13,6 +13,7 @@ const NAV: NavItem[] = [
   { href: "/portal/progress", label: "My progress", icon: "progress" },
   { href: "/portal/calendar", label: "Calendar", icon: "calendar" },
   { href: "/portal/notices", label: "Notices", icon: "notices" },
+  { href: "/portal/behavior", label: "My behaviour", icon: "checkCircle" },
   { href: "/portal/profile", label: "Profile", icon: "profile" },
 ];
 

@@ -24,6 +24,12 @@ export async function POST(req: Request) {
   // Reflect latest star rating on the profile
   await admin.from("profiles").update({ stars: s }).eq("id", studentId);
   await admin.from("audit_log").insert({ actor_id: user.id, action: "reward_given", detail: { studentId, stars: s } });
+  await admin.from("notifications").insert({
+    user_id: studentId,
+    title: `You earned ${s} star${s > 1 ? "s" : ""}!`,
+    body: message,
+    link: "/portal/progress",
+  });
 
   let emailed = false;
   if (notify) {

@@ -28,6 +28,12 @@ export async function POST(req: Request) {
     .update({ grade: g, feedback: cleanFeedback, status: "graded" })
     .eq("id", submissionId);
   await admin.from("audit_log").insert({ actor_id: user.id, action: "grade_assignment", detail: { submissionId, grade } });
+  await admin.from("notifications").insert({
+    user_id: sub.student_id,
+    title: "Assignment graded",
+    body: `${g}/100 — ${sub.assignment.title}`,
+    link: "/portal/assignments",
+  });
 
   await sendEmail("graded", sub.student.email, {
     firstName: sub.student.first_name,
