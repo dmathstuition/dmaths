@@ -51,10 +51,10 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
     setSanctionPoints(json.sanctionPoints);
     setSelectedType(null);
     setBehaviorNote("");
-    const { data } = await supabase.from("behavior_logs")
+    const { data: freshLogs, error: refetchErr } = await supabase.from("behavior_logs")
       .select("*, behavior_type:behavior_types(name,category,points,icon,color)")
       .eq("student_id", student.id).order("created_at", { ascending: false }).limit(30);
-    setBehaviorLogs(data ?? []);
+    if (!refetchErr) setBehaviorLogs(freshLogs ?? []);
   }
 
   const trendData = subs
