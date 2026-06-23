@@ -10,7 +10,7 @@ export default async function BehaviorPage() {
 
   const [{ data: logs }, { data: types }] = await Promise.all([
     supa.from("behavior_logs")
-      .select("*, behavior_type:behavior_types(name,category,points,icon,color)")
+      .select("*")
       .eq("student_id", me!.id)
       .order("created_at", { ascending: false })
       .limit(50),
