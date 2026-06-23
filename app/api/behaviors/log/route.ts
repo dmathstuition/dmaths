@@ -29,18 +29,30 @@ export async function POST(req: Request) {
   });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // Recompute denormalised totals from DB
-  const { data: totals } = await admin
+  // Recompute denormalised totals — two plain queries avoids FK-join cache issues
+  const { data: logRows } = await admin
     .from("behavior_logs")
-    .select("behavior_type:behavior_types(points)")
+    .select("behavior_type_id")
     .eq("student_id", studentId);
 
   let rewardPoints = 0;
   let sanctionPoints = 0;
-  for (const row of totals ?? []) {
-    const pts = (row.behavior_type as any)?.points ?? 0;
-    if (pts > 0) rewardPoints += pts;
-    else sanctionPoints += pts;
+
+  if (logRows && logRows.length > 0) {
+    const uniqueTypeIds = [...new Set(logRows.map(l => l.behavior_type_id))];
+    const { data: typeRows } = await admin
+      .from("behavior_types")
+      .select("id, points")
+      .in("id", uniqueTypeIds);
+
+    const pointsMap: Record<string, number> = {};
+    for (const t of typeRows ?? []) pointsMap[t.id] = t.points;
+
+    for (const l of logRows) {
+      const pts = pointsMap[l.behavior_type_id] ?? 0;
+      if (pts > 0) rewardPoints += pts;
+      else sanctionPoints += pts;
+    }
   }
 
   await admin.from("profiles").update({ reward_points: rewardPoints, sanction_points: sanctionPoints }).eq("id", studentId);
