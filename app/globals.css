@@ -185,3 +185,47 @@ html { scroll-behavior: smooth; }
 .hero-glow {
   background: radial-gradient(ellipse 70% 60% at 60% 50%, rgba(239,174,86,.18), transparent 70%);
 }
+
+/* ── Animated progress bar (grows from left on mount) ──── */
+@keyframes bar-expand {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+.bar-animate {
+  transform-origin: left;
+  transform: scaleX(0);
+  animation: bar-expand 1s cubic-bezier(.4,0,.2,1) .45s forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .bar-animate { animation: none; transform: scaleX(1); }
+}
+
+/* ── Frosted glass for dark hero stat chips ─────────────── */
+.glass-hero-chip {
+  background: rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 0.875rem;
+}
+
+/* ── Stat card shimmer on hover ─────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+.stat-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.35) 50%, transparent 60%);
+  background-size: 200% 100%;
+  opacity: 0;
+  transition: opacity .2s;
+  pointer-events: none;
+}
+.stat-shimmer:hover::after {
+  opacity: 1;
+  animation: shimmer .6s ease forwards;
+}
