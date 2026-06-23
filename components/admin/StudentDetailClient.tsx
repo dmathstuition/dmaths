@@ -59,6 +59,20 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
     if (!refetchErr) setBehaviorLogs(freshLogs ?? []);
   }
 
+  async function deleteBehaviorLog(logId: string) {
+    if (!window.confirm("Delete this behaviour log entry?")) return;
+    const res = await fetch("/api/behaviors/log", {
+      method: "DELETE", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ logId }),
+    });
+    const json = await res.json();
+    if (!res.ok) { push(json.error || "Failed to delete entry.", "error"); return; }
+    setBehaviorLogs(prev => prev.filter((l: any) => l.id !== logId));
+    setRewardPoints(json.rewardPoints);
+    setSanctionPoints(json.sanctionPoints);
+    push("Entry deleted.", "success");
+  }
+
   const trendData = subs
     .filter(s => s.status === "graded" && s.grade !== null && s.submitted_at)
     .map((s, i) => ({
@@ -200,7 +214,7 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
             const bt = typeMap.get(l.behavior_type_id);
             const isPos = bt?.category === "positive";
             return (
-              <div key={l.id} className="flex items-center gap-3 rounded-xl px-3 py-2 bg-chalk text-sm">
+              <div key={l.id} className="group flex items-center gap-3 rounded-xl px-3 py-2 bg-chalk text-sm">
                 <span className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-[10px] font-extrabold text-white ${isPos ? "bg-emerald-500" : "bg-red-500"}`}>
                   {bt?.points > 0 ? `+${bt.points}` : bt?.points}
                 </span>
@@ -209,6 +223,10 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
                 <span className="flex-shrink-0 text-xs text-ink/35">
                   {new Date(l.created_at).toLocaleDateString("en-NG", { dateStyle: "medium" })}
                 </span>
+                <button onClick={() => deleteBehaviorLog(l.id)}
+                  className="flex-shrink-0 text-xs font-bold text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                  Delete
+                </button>
               </div>
             );
           })}

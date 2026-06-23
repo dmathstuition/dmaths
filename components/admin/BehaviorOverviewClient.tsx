@@ -1,10 +1,14 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import { useToast } from "@/components/Toast";
 
-export default function BehaviorOverviewClient({ logs }: { logs: any[] }) {
+export default function BehaviorOverviewClient({ logs: initialLogs }: { logs: any[] }) {
+  const push = useToast();
+  const [logs, setLogs] = useState(initialLogs);
   const [tab, setTab] = useState<"all" | "positive" | "negative">("all");
   const [q, setQ] = useState("");
+  const [sendingReport, setSendingReport] = useState(false);
 
   const now = new Date();
   const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -22,10 +26,37 @@ export default function BehaviorOverviewClient({ logs }: { logs: any[] }) {
     return true;
   });
 
+  async function deleteLog(logId: string) {
+    if (!window.confirm("Delete this behaviour log entry?")) return;
+    const res = await fetch("/api/behaviors/log", {
+      method: "DELETE", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ logId }),
+    });
+    const json = await res.json();
+    if (!res.ok) { push(json.error || "Failed to delete entry.", "error"); return; }
+    setLogs(prev => prev.filter(l => l.id !== logId));
+    push("Entry deleted.", "success");
+  }
+
+  async function sendWeeklyReports() {
+    setSendingReport(true);
+    const res = await fetch("/api/reports/weekly", { method: "POST" });
+    const json = await res.json();
+    setSendingReport(false);
+    if (!res.ok) { push(json.error || "Failed to send reports.", "error"); return; }
+    push(`Weekly reports sent to ${json.sent} student${json.sent !== 1 ? "s" : ""}.`, "success");
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="font-display text-2xl font-semibold">Behaviour log</h1>
+        <button onClick={sendWeeklyReports} disabled={sendingReport}
+          className="btn-gold !min-h-[38px] text-sm">
+          {sendingReport
+            ? <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+            : "Send weekly reports"}
+        </button>
       </div>
 
       {/* Summary */}
@@ -74,7 +105,7 @@ export default function BehaviorOverviewClient({ logs }: { logs: any[] }) {
           const isPos = l.behavior_type?.category === "positive";
           const pts = l.behavior_type?.points ?? 0;
           return (
-            <div key={l.id} className="flex items-center gap-4 px-5 py-3">
+            <div key={l.id} className="group flex items-center gap-4 px-5 py-3">
               <span className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-extrabold text-white ${isPos ? "bg-emerald-500" : "bg-red-500"}`}>
                 {pts > 0 ? `+${pts}` : pts}
               </span>
@@ -90,6 +121,10 @@ export default function BehaviorOverviewClient({ logs }: { logs: any[] }) {
               <span className="flex-shrink-0 text-xs text-ink/35">
                 {new Date(l.created_at).toLocaleDateString("en-NG", { dateStyle: "medium" })}
               </span>
+              <button onClick={() => deleteLog(l.id)}
+                className="flex-shrink-0 text-xs font-bold text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                Delete
+              </button>
             </div>
           );
         })}
