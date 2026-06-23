@@ -8,7 +8,7 @@ interface BehaviorType {
 }
 interface Log {
   id: string; created_at: string; notes?: string;
-  behavior_type: BehaviorType;
+  behavior_type_id: string;
 }
 
 export default function BehaviorClient({
@@ -18,9 +18,9 @@ export default function BehaviorClient({
 }) {
   const [tab, setTab] = useState<"positive" | "negative">("positive");
 
-  const receivedIds = new Set(logs.map(l => l.behavior_type?.id).filter(Boolean));
+  const receivedIds = new Set(logs.map(l => l.behavior_type_id));
   const tabTypes = behaviorTypes.filter(t => t.category === tab);
-  const tabLogs = logs.filter(l => l.behavior_type?.category === tab);
+  const tabLogs = logs.filter(l => behaviorTypes.find(t => t.id === l.behavior_type_id)?.category === tab);
 
   return (
     <div className="space-y-6">
@@ -81,7 +81,7 @@ export default function BehaviorClient({
         {tabLogs.length === 0 && <p className="text-sm text-ink/40">No {tab} entries yet.</p>}
         <div className="space-y-2">
           {tabLogs.map(l => {
-            const bt = l.behavior_type;
+            const bt = behaviorTypes.find(t => t.id === l.behavior_type_id);
             const isPos = bt?.category === "positive";
             return (
               <div key={l.id} className="flex items-start gap-3 rounded-xl px-4 py-2.5 bg-chalk">

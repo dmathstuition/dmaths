@@ -33,6 +33,8 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
   const [rewardPoints, setRewardPoints] = useState(student.reward_points ?? 0);
   const [sanctionPoints, setSanctionPoints] = useState(student.sanction_points ?? 0);
 
+  const typeMap = new Map(behaviorTypes.map((t: any) => [t.id, t]));
+
   const graded = subs.filter(s => s.status === "graded").length;
   const pending = subs.filter(s => s.status === "pending").length;
 
@@ -52,7 +54,7 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
     setSelectedType(null);
     setBehaviorNote("");
     const { data: freshLogs, error: refetchErr } = await supabase.from("behavior_logs")
-      .select("*, behavior_type:behavior_types(name,category,points,icon,color)")
+      .select("*")
       .eq("student_id", student.id).order("created_at", { ascending: false }).limit(30);
     if (!refetchErr) setBehaviorLogs(freshLogs ?? []);
   }
@@ -195,7 +197,7 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
         {/* Recent log */}
         <div className="mt-5 space-y-1.5 border-t border-line pt-4">
           {behaviorLogs.slice(0, 10).map((l: any) => {
-            const bt = l.behavior_type;
+            const bt = typeMap.get(l.behavior_type_id);
             const isPos = bt?.category === "positive";
             return (
               <div key={l.id} className="flex items-center gap-3 rounded-xl px-3 py-2 bg-chalk text-sm">

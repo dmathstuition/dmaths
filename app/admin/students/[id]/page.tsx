@@ -16,7 +16,7 @@ export default async function StudentDetail({ params }: { params: { id: string }
       .order("submitted_at", { ascending: true }),
     supa.from("behavior_types").select("*").eq("is_active", true).order("sort_order"),
     supa.from("behavior_logs")
-      .select("*, behavior_type:behavior_types(name,category,points,icon,color)")
+      .select("*")
       .eq("student_id", params.id)
       .order("created_at", { ascending: false })
       .limit(30),
