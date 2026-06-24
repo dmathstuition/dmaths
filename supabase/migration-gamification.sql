@@ -48,5 +48,11 @@ alter table guardian_tokens enable row level security;
 create policy "guardian tokens service only" on guardian_tokens using (false);
 
 -- Ensure admin can read/write attendance records (browser client RLS)
-create policy if not exists "admin read attendance"  on attendance_records for select using (is_admin());
-create policy if not exists "admin write attendance" on attendance_records for all    using (is_admin());
+do $$ begin
+  if not exists (select 1 from pg_policies where policyname = 'admin read attendance' and tablename = 'attendance_records') then
+    execute 'create policy "admin read attendance" on attendance_records for select using (is_admin())';
+  end if;
+  if not exists (select 1 from pg_policies where policyname = 'admin write attendance' and tablename = 'attendance_records') then
+    execute 'create policy "admin write attendance" on attendance_records for all using (is_admin())';
+  end if;
+end $$;
