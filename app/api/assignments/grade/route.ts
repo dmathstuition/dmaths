@@ -27,6 +27,23 @@ export async function POST(req: Request) {
   await admin.from("assignment_submissions")
     .update({ grade: g, feedback: cleanFeedback, status: "graded" })
     .eq("id", submissionId);
+
+  if (g === 100) {
+    const { data: perfectBadge } = await admin.from("badges").select("id, name, description").eq("slug", "perfect_score").single();
+    if (perfectBadge) {
+      const { error: badgeErr } = await admin.from("student_badges")
+        .insert({ student_id: sub.student_id, badge_id: (perfectBadge as any).id });
+      if (!badgeErr) {
+        await admin.from("notifications").insert({
+          user_id: sub.student_id,
+          title: `Badge unlocked: ${(perfectBadge as any).name}!`,
+          body: (perfectBadge as any).description,
+          link: "/portal/badges",
+        });
+      }
+    }
+  }
+
   await admin.from("audit_log").insert({ actor_id: user.id, action: "grade_assignment", detail: { submissionId, grade } });
   await admin.from("notifications").insert({
     user_id: sub.student_id,

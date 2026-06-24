@@ -28,6 +28,7 @@ export default async function ProgressPage() {
       submissions={submissions ?? []}
       history={history ?? []}
       attendanceRecords={attendance ?? []}
+      gradeTarget={profile?.grade_target ?? null}
     />
   );
 }

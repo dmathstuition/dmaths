@@ -1,16 +1,17 @@
 "use client";
 import { useMemo } from "react";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, CartesianGrid, PieChart, Pie, Cell, Legend } from "recharts";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, CartesianGrid, PieChart, Pie, Cell, Legend, ReferenceLine } from "recharts";
 
 const COLORS = ["#1A60AB", "#EFAE56", "#059669", "#dc2626", "#8b5cf6", "#ec4899"];
 
 export default function ProgressClient({
-  profile, submissions, history = [], attendanceRecords,
+  profile, submissions, history = [], attendanceRecords, gradeTarget = null,
 }: {
   profile: any;
   submissions: any[];
   history?: any[];
   attendanceRecords: any[];
+  gradeTarget?: number | null;
 }) {
   // ── Score trend over time ──
   const scoreTrend = useMemo(() => {
@@ -91,13 +92,19 @@ export default function ProgressClient({
       </div>
 
       {/* KPIs */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <KPI label="Average score" value={`${profile.avg_score}%`}
           color={profile.avg_score >= 70 ? "text-emerald-600" : profile.avg_score >= 50 ? "text-amber-600" : "text-red-600"} />
         <KPI label="Attendance" value={`${profile.attendance}%`}
           color={profile.attendance >= 70 ? "text-emerald-600" : "text-amber-600"} />
         <KPI label="Completed" value={`${completed}/${total}`} sub={`${pending} pending`} />
         <KPI label="Stars" value={`${profile.stars}/5`} sub="tutor rating" />
+        {gradeTarget !== null && (
+          <KPI label="Target"
+            value={`${gradeTarget}%`}
+            sub={profile.avg_score >= gradeTarget ? "On target!" : `${gradeTarget - profile.avg_score}% to go`}
+            color={profile.avg_score >= gradeTarget ? "text-emerald-600" : "text-gold-deep"} />
+        )}
       </div>
 
       <div className="grid gap-5 lg:grid-cols-2">
@@ -113,6 +120,9 @@ export default function ProgressClient({
                 <Tooltip />
                 <Line type="monotone" dataKey="score" stroke="#EFAE56" strokeWidth={2} dot={{ r: 4 }} name="Score" />
                 <Line type="monotone" dataKey="avg" stroke="#1A60AB" strokeWidth={2} strokeDasharray="5 5" dot={false} name="Running avg" />
+                {gradeTarget !== null && (
+                  <ReferenceLine y={gradeTarget} stroke="#EFAE56" strokeDasharray="6 3" strokeWidth={1.5} label={{ value: `Target ${gradeTarget}%`, position: "insideTopRight", fontSize: 10, fill: "#EFAE56" }} />
+                )}
               </LineChart>
             </ResponsiveContainer>
           ) : (
