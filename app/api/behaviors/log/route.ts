@@ -2,6 +2,26 @@ import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
+async function awardPointsBadges(admin: ReturnType<typeof supabaseAdmin>, studentId: string, rewardPoints: number) {
+  const [{ data: badges }, { data: earned }] = await Promise.all([
+    admin.from("badges").select("id, name, description, points_threshold").not("points_threshold", "is", null),
+    admin.from("student_badges").select("badge_id").eq("student_id", studentId),
+  ]);
+  const earnedIds = new Set((earned ?? []).map((e: any) => e.badge_id));
+  const toAward = (badges ?? []).filter((b: any) => rewardPoints >= b.points_threshold && !earnedIds.has(b.id));
+  for (const badge of toAward) {
+    const { error } = await admin.from("student_badges").insert({ student_id: studentId, badge_id: badge.id });
+    if (!error) {
+      await admin.from("notifications").insert({
+        user_id: studentId,
+        title: `Badge unlocked: ${(badge as any).name}!`,
+        body: (badge as any).description,
+        link: "/portal/badges",
+      });
+    }
+  }
+}
+
 async function recomputeTotals(admin: ReturnType<typeof supabaseAdmin>, studentId: string) {
   const { data: logRows } = await admin
     .from("behavior_logs")
@@ -111,6 +131,7 @@ export async function POST(req: Request) {
   }
 
   await admin.from("profiles").update({ reward_points: rewardPoints, sanction_points: sanctionPoints }).eq("id", studentId);
+  await awardPointsBadges(admin, studentId, rewardPoints);
   await admin.from("audit_log").insert({ actor_id: user.id, action: "log_behaviour", detail: { studentId, behaviorTypeId, points: btype.points } });
   await admin.from("notifications").insert({
     user_id: studentId,

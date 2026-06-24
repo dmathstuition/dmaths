@@ -23,6 +23,10 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
   const [deleting, setDeleting] = useState(false);
   const [guardianEmail, setGuardianEmail] = useState(student.guardian_email ?? "");
   const [savingGuardian, setSavingGuardian] = useState(false);
+  const [gradeTarget, setGradeTarget] = useState<string>(student.grade_target != null ? String(student.grade_target) : "");
+  const [savingTarget, setSavingTarget] = useState(false);
+  const [sendingInvite, setSendingInvite] = useState(false);
+  const [guardianPortalUrl, setGuardianPortalUrl] = useState("");
 
   // Behaviour state
   const [behaviorLogs, setBehaviorLogs] = useState(initialBehaviorLogs);
@@ -119,6 +123,31 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
     push("Guardian email saved.", "success");
   }
 
+  async function saveGradeTarget() {
+    setSavingTarget(true);
+    const val = gradeTarget === "" ? null : Number(gradeTarget);
+    const res = await fetch("/api/students/target", {
+      method: "PATCH", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ studentId: student.id, gradeTarget: val }),
+    });
+    setSavingTarget(false);
+    if (!res.ok) { push("Failed to save target.", "error"); return; }
+    push("Grade target saved.", "success");
+  }
+
+  async function sendGuardianInvite() {
+    setSendingInvite(true);
+    const res = await fetch("/api/guardian/invite", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ studentId: student.id }),
+    });
+    const json = await res.json();
+    setSendingInvite(false);
+    if (!res.ok) { push(json.error || "Failed to send invite.", "error"); return; }
+    setGuardianPortalUrl(json.url);
+    push("Guardian portal link sent.", "success");
+  }
+
   async function deleteStudent() {
     setDeleting(true);
     const res = await fetch("/api/students/delete", {
@@ -157,14 +186,33 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
         <p className="mt-4 border-t border-line pt-3 text-sm text-ink/55">
           {student.email} · {student.phone} · Guardian: {student.guardian_name} ({student.guardian_contact}) · {graded} graded, {pending} pending
         </p>
-        <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-line pt-3">
-          <label className="text-xs font-bold uppercase tracking-wide text-ink/35 shrink-0">Guardian email</label>
-          <input className="field max-w-xs" type="email" placeholder="parent@example.com"
-            value={guardianEmail} onChange={e => setGuardianEmail(e.target.value)} />
-          <button className="btn-ghost !min-h-[36px]" onClick={saveGuardianEmail} disabled={savingGuardian}>
-            {savingGuardian ? "Saving…" : "Save"}
-          </button>
-          <span className="text-xs text-ink/35">Used for weekly digest emails to guardian</span>
+        <div className="mt-3 space-y-2 border-t border-line pt-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <label className="text-xs font-bold uppercase tracking-wide text-ink/35 shrink-0">Guardian email</label>
+            <input className="field max-w-xs" type="email" placeholder="parent@example.com"
+              value={guardianEmail} onChange={e => setGuardianEmail(e.target.value)} />
+            <button className="btn-ghost !min-h-[36px]" onClick={saveGuardianEmail} disabled={savingGuardian}>
+              {savingGuardian ? "Saving…" : "Save"}
+            </button>
+            <button className="btn-gold !min-h-[36px] text-sm" onClick={sendGuardianInvite} disabled={sendingInvite}>
+              {sendingInvite ? <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" /> : "Send guardian portal link"}
+            </button>
+          </div>
+          {guardianPortalUrl && (
+            <div className="flex items-center gap-2">
+              <input readOnly value={guardianPortalUrl} className="field max-w-sm text-xs font-mono" onClick={e => (e.target as HTMLInputElement).select()} />
+              <button className="btn-ghost !min-h-[34px] text-xs" onClick={() => { navigator.clipboard.writeText(guardianPortalUrl); push("Link copied!", "success"); }}>Copy</button>
+            </div>
+          )}
+          <div className="flex flex-wrap items-center gap-2">
+            <label className="text-xs font-bold uppercase tracking-wide text-ink/35 shrink-0">Grade target</label>
+            <input className="field w-24" type="number" min="0" max="100" placeholder="e.g. 80"
+              value={gradeTarget} onChange={e => setGradeTarget(e.target.value)} />
+            <button className="btn-ghost !min-h-[36px]" onClick={saveGradeTarget} disabled={savingTarget}>
+              {savingTarget ? "Saving…" : "Save"}
+            </button>
+            <span className="text-xs text-ink/35">Shown as a target line on the student's progress chart</span>
+          </div>
         </div>
       </div>
 
