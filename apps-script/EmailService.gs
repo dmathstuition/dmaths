@@ -114,6 +114,45 @@ const TEMPLATES = {
       '<p><strong>Subject:</strong> ' + esc_(d.subject) + '</p>' +
       '<p>' + esc_(d.message) + '</p>',
   }),
+
+  guardian_invite: (d) => ({
+    subject: '👪 Parent access to ' + esc_(d.studentName) + '’s D-Maths progress',
+    html:
+      '<h2 style="color:#0A1F3D">Hello,</h2>' +
+      '<p>You have been given a private parent view of <strong>' + esc_(d.studentName) + '</strong>’s progress at D-Maths Tuition Centre.</p>' +
+      '<p>It shows grades, attendance, behaviour points and recent assignments — all read-only. No account or password is needed; just open the link below.</p>' +
+      '<p style="margin:22px 0"><a href="' + esc_(d.portalUrl) + '" style="background:#E8841C;color:#06152B;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:bold">View ' + esc_(d.studentName) + '’s progress →</a></p>' +
+      '<p style="color:#64748B;font-size:13px">Keep this link private — anyone with it can see your child’s dashboard. The link expires after 90 days; reply to this email if you need a new one.</p>',
+  }),
+
+  weekly_report: (d) => {
+    const greeting = d.isGuardian
+      ? '<h2 style="color:#0A1F3D">Weekly update for ' + esc_(d.studentName) + '</h2>'
+      : '<h2 style="color:#0A1F3D">Hi ' + esc_(d.firstName) + ', here’s your week</h2>';
+    const intro = d.isGuardian
+      ? '<p>Here is this week’s summary for ' + esc_(d.studentName) + ' at D-Maths Tuition Centre.</p>'
+      : '<p>Here is a quick summary of your week at D-Maths Tuition Centre.</p>';
+    return {
+      subject: '📊 D-Maths weekly report' + (d.isGuardian ? ' — ' + esc_(d.studentName) : ''),
+      html:
+        greeting +
+        intro +
+        '<h3 style="color:#0A1F3D;margin:18px 0 4px">This week</h3>' +
+        '<table style="border-collapse:collapse;margin:8px 0">' +
+        row_('Reward points earned', '<span style="color:#16A34A;font-weight:bold">+' + esc_(d.weeklyRewardPts) + '</span>') +
+        row_('Sanction points', '<span style="color:#DC2626;font-weight:bold">' + esc_(d.weeklySanctionPts) + '</span>') +
+        row_('Positive notes', esc_(d.positiveCount)) +
+        row_('Concerns logged', esc_(d.negativeCount)) +
+        row_('Assignments graded', esc_(d.gradedCount)) +
+        '</table>' +
+        '<h3 style="color:#0A1F3D;margin:18px 0 4px">All-time totals</h3>' +
+        '<table style="border-collapse:collapse;margin:8px 0">' +
+        row_('Reward points', '<span style="color:#16A34A;font-weight:bold">+' + esc_(d.rewardPoints) + '</span>') +
+        row_('Sanction points', '<span style="color:#DC2626;font-weight:bold">' + esc_(d.sanctionPoints) + '</span>') +
+        '</table>' +
+        '<p style="margin:22px 0"><a href="' + esc_(d.loginUrl) + '" style="background:#E8841C;color:#06152B;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:bold">Open the portal →</a></p>',
+    };
+  },
 };
 
 // ── Helpers ──────────────────────────────────────────────────────
