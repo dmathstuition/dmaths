@@ -16,7 +16,7 @@ const STEPS = [
   { t: "Register", d: "Submit the enrolment form to get started in minutes." },
   { t: "We verify", d: "Your details and payment are confirmed, usually within 24 hours." },
   { t: "Get access", d: "Your Student ID and password arrive by email." },
-  { t: "Start learning", d: "Join live classes and watch your progress climb." },
+  { t: "Start learning", d: "Join live video sessions from home and watch your progress climb." },
 ];
 
 const TESTIMONIALS = [
@@ -42,16 +42,21 @@ export default function Landing() {
         <DotsScatter className="pointer-events-none absolute right-10 bottom-10 h-20 w-20 opacity-50" />
         <div className="mx-auto grid max-w-6xl items-center gap-8 px-5 md:grid-cols-2">
           <Reveal className="space-y-0">
-            <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold-pale px-4 py-1.5 text-xs font-bold text-gold-deep">
-              <span className="h-1.5 w-1.5 rounded-full bg-gold-deep" />
-              Trusted by 200+ students across Nigeria
-            </span>
+            <div className="flex flex-wrap gap-2">
+              <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold-pale px-4 py-1.5 text-xs font-bold text-gold-deep">
+                <span className="h-1.5 w-1.5 rounded-full bg-gold-deep" />
+                Trusted by 200+ students across Nigeria
+              </span>
+              <span className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-xs font-bold text-blue-700">
+                🖥️ 100% Online · join from anywhere in Nigeria
+              </span>
+            </div>
             <h1 className="mt-5 font-display text-5xl font-extrabold leading-[1.08] tracking-tight md:text-6xl">
               We create <span className="text-gold-deep">solutions</span> for your success
             </h1>
             <p className="mt-5 max-w-md text-[15px] leading-relaxed text-ink/55">
               Our tutors keep a keen eye on every student's progress to ensure mathematics
-              becomes a strength — through live classes, personalised feedback and a portal built for results.
+              becomes a strength — through live video sessions, personalised feedback and a portal built for results.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-4">
               <Link href="/apply" className="btn-gold !min-h-[50px] !rounded-full !px-7 !text-base">Get started</Link>
@@ -89,6 +94,15 @@ export default function Landing() {
           </Reveal>
         </div>
       </header>
+
+      {/* TRUST STRIP */}
+      <section className="mx-auto max-w-6xl px-5 pb-6 pt-2">
+        <div className="flex flex-wrap justify-center gap-3 text-sm">
+          {["📹 Live via Zoom & Google Meet", "📱 WhatsApp support", "📊 Progress dashboard", "🎓 Personalised feedback"].map(f => (
+            <span key={f} className="rounded-full border border-line bg-chalk px-5 py-2 font-medium text-ink/70">{f}</span>
+          ))}
+        </div>
+      </section>
 
       {/* SERVICES */}
       <section id="services" className="mx-auto max-w-6xl px-5 py-16">
@@ -217,7 +231,10 @@ export default function Landing() {
       <section className="mx-auto max-w-6xl px-5 py-16">
         <Reveal>
           <div className="flex flex-col items-center justify-between gap-5 rounded-[2rem] bg-gold-pale px-8 py-8 sm:flex-row">
-            <p className="font-display text-2xl font-bold text-ink">Ready to get started?</p>
+            <div>
+              <p className="font-display text-2xl font-bold text-ink">Ready to get started?</p>
+              <p className="mt-1 text-sm text-ink/55">100% online — study from home, anywhere in Nigeria.</p>
+            </div>
             <Link href="/apply" className="btn-gold !rounded-full !px-8 !text-base">Apply now</Link>
           </div>
         </Reveal>
@@ -225,7 +242,7 @@ export default function Landing() {
 
       {/* FOOTER */}
       <footer id="contact" className="relative bg-white pt-12">
-        <div className="mx-auto grid max-w-6xl gap-10 px-5 pb-10 md:grid-cols-4">
+        <div className="mx-auto grid max-w-6xl gap-10 px-5 pb-10 sm:grid-cols-2 md:grid-cols-5">
           <div>
             <p className="font-display text-lg font-bold text-ink">D-Maths</p>
             <p className="mt-4 max-w-xs text-[13px] leading-relaxed text-ink/50">
@@ -235,11 +252,42 @@ export default function Landing() {
           <FooterCol title="Centre" links={[["About","#agency"],["Services","#services"],["Results","#results"],["Apply","/apply"]]} />
           <FooterCol title="Learn" links={[["Login","/login"],["How it works","#how"],["Python Challenge","/apply"]]} />
           <FooterCol title="Legal" links={[["Privacy Policy","/privacy"],["Terms of Service","/terms"],["Refund Policy","/refunds"]]} />
+          <div>
+            <h4 className="font-display text-sm font-bold text-ink">Contact</h4>
+            <ul className="mt-3 space-y-2 text-[13px] text-ink/55">
+              <li>
+                <a href="mailto:dmathstuition@gmail.com" className="hover:text-gold-deep">
+                  dmathstuition@gmail.com
+                </a>
+              </li>
+              <li>
+                <a href="https://wa.me/2347025674894" target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 hover:text-gold-deep">
+                  <span className="h-2 w-2 flex-shrink-0 rounded-full" style={{ background: "#25D366" }} />
+                  WhatsApp: +234 70 2567 4894
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
         <div className="bg-gold py-4 text-center text-xs font-semibold text-white">
           © {new Date().getFullYear()} D-Maths Tuition Centre · dmathstuition@gmail.com · Asaba, Delta State
         </div>
       </footer>
+      {/* FLOATING WHATSAPP BUTTON */}
+      <a
+        href="https://wa.me/2347025674894"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Chat on WhatsApp"
+        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-xl transition hover:scale-110 hover:shadow-2xl"
+        style={{ background: "#25D366" }}
+      >
+        <svg viewBox="0 0 24 24" className="h-7 w-7 fill-white" aria-hidden="true">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+          <path d="M12 0C5.373 0 0 5.373 0 12c0 2.12.554 4.112 1.524 5.843L.057 23.572a.5.5 0 0 0 .609.61l5.802-1.519A11.947 11.947 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.9a9.9 9.9 0 0 1-5.045-1.378l-.361-.214-3.742.981.999-3.65-.235-.374A9.9 9.9 0 0 1 2.1 12C2.1 6.534 6.534 2.1 12 2.1S21.9 6.534 21.9 12 17.466 21.9 12 21.9z" />
+        </svg>
+      </a>
     </main>
   );
 }
