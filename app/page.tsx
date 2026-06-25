@@ -12,6 +12,25 @@ const SERVICES = [
   { t: "Statistics & More", d: "Data, probability, geometry and physics across every level.", c: "#EFAE56", sym: "σ" },
 ];
 
+const FEATURES = [
+  {
+    label: "Live video sessions",
+    icon: <><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></>,
+  },
+  {
+    label: "WhatsApp support",
+    icon: <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>,
+  },
+  {
+    label: "Progress dashboard",
+    icon: <><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></>,
+  },
+  {
+    label: "Personalised feedback",
+    icon: <><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></>,
+  },
+];
+
 const STEPS = [
   { t: "Register", d: "Submit the enrolment form to get started in minutes." },
   { t: "We verify", d: "Your details and payment are confirmed, usually within 24 hours." },
@@ -42,15 +61,10 @@ export default function Landing() {
         <DotsScatter className="pointer-events-none absolute right-10 bottom-10 h-20 w-20 opacity-50" />
         <div className="mx-auto grid max-w-6xl items-center gap-8 px-5 md:grid-cols-2">
           <Reveal className="space-y-0">
-            <div className="flex flex-wrap gap-2">
-              <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold-pale px-4 py-1.5 text-xs font-bold text-gold-deep">
-                <span className="h-1.5 w-1.5 rounded-full bg-gold-deep" />
-                Trusted by 200+ students across Nigeria
-              </span>
-              <span className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-xs font-bold text-blue-700">
-                🖥️ 100% Online · join from anywhere in Nigeria
-              </span>
-            </div>
+            <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold-pale px-4 py-1.5 text-xs font-bold text-gold-deep">
+              <span className="h-1.5 w-1.5 rounded-full bg-gold-deep" />
+              Trusted by 200+ students across Nigeria
+            </span>
             <h1 className="mt-5 font-display text-5xl font-extrabold leading-[1.08] tracking-tight md:text-6xl">
               We create <span className="text-gold-deep">solutions</span> for your success
             </h1>
@@ -95,11 +109,20 @@ export default function Landing() {
         </div>
       </header>
 
-      {/* TRUST STRIP */}
-      <section className="mx-auto max-w-6xl px-5 pb-6 pt-2">
-        <div className="flex flex-wrap justify-center gap-3 text-sm">
-          {["📹 Live via Zoom & Google Meet", "📱 WhatsApp support", "📊 Progress dashboard", "🎓 Personalised feedback"].map(f => (
-            <span key={f} className="rounded-full border border-line bg-chalk px-5 py-2 font-medium text-ink/70">{f}</span>
+      {/* FEATURES STRIP */}
+      <section className="border-y border-line/40 bg-chalk/40 py-5">
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-x-10 gap-y-4 px-5">
+          {FEATURES.map(({ label, icon }) => (
+            <div key={label} className="flex items-center gap-2.5">
+              <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-gold/10">
+                <svg className="h-[15px] w-[15px] text-gold-deep" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" strokeWidth="2"
+                  strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  {icon}
+                </svg>
+              </span>
+              <span className="text-sm font-semibold text-ink/65">{label}</span>
+            </div>
           ))}
         </div>
       </section>
