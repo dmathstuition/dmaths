@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const safeFolder = folder.replace(/[^a-z0-9\-\/]/gi, "").slice(0, 60);
+  const safeFolder = folder.replace(/[^a-z0-9\-]/gi, "").slice(0, 60);
   const safeName = `${safeFolder ? safeFolder + "/" : ""}${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
   const arrayBuffer = await file.arrayBuffer();
