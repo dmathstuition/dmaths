@@ -18,7 +18,9 @@ create table if not exists student_badges (
   unique(student_id, badge_id)
 );
 alter table student_badges enable row level security;
+drop policy if exists "student own badges" on student_badges;
 create policy "student own badges"    on student_badges for select using (student_id = auth.uid());
+drop policy if exists "admin all badges" on student_badges;
 create policy "admin all badges"      on student_badges using (is_admin());
 
 -- Seed 6 badges
@@ -45,6 +47,7 @@ create table if not exists guardian_tokens (
 );
 alter table guardian_tokens enable row level security;
 -- No public access — service role only (token IS the credential)
+drop policy if exists "guardian tokens service only" on guardian_tokens;
 create policy "guardian tokens service only" on guardian_tokens using (false);
 
 -- Ensure admin can read/write attendance records (browser client RLS)

@@ -59,7 +59,7 @@ export default function Landing() {
       <header className="relative pt-28 pb-16">
         <DotsScatter className="pointer-events-none absolute left-6 top-28 h-24 w-24 opacity-70" />
         <DotsScatter className="pointer-events-none absolute right-10 bottom-10 h-20 w-20 opacity-50" />
-        <div className="mx-auto grid max-w-6xl items-center gap-8 px-5 md:grid-cols-2">
+        <div className="mx-auto grid max-w-7xl items-center gap-8 px-5 md:grid-cols-2">
           <Reveal className="space-y-0">
             <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold-pale px-4 py-1.5 text-xs font-bold text-gold-deep">
               <span className="h-1.5 w-1.5 rounded-full bg-gold-deep" />
@@ -111,7 +111,7 @@ export default function Landing() {
 
       {/* FEATURES STRIP */}
       <section className="border-y border-line/40 bg-chalk/40 py-5">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-x-10 gap-y-4 px-5">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-10 gap-y-4 px-5">
           {FEATURES.map(({ label, icon }) => (
             <div key={label} className="flex items-center gap-2.5">
               <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-gold/10">
@@ -128,7 +128,7 @@ export default function Landing() {
       </section>
 
       {/* SERVICES */}
-      <section id="services" className="mx-auto max-w-6xl px-5 py-16">
+      <section id="services" className="mx-auto max-w-7xl px-5 py-16">
         <Reveal className="mb-12 text-center">
           <h2 className="font-display text-3xl font-bold md:text-4xl">We Provide The Best <span className="text-gold-deep">Services</span></h2>
           <p className="mx-auto mt-3 max-w-md text-sm text-ink/50">Unleash the full potential of every student with our subject expertise.</p>
@@ -148,7 +148,7 @@ export default function Landing() {
 
       {/* HOW IT WORKS */}
       <section id="how" className="relative my-8">
-        <div className="mx-auto max-w-6xl px-5">
+        <div className="mx-auto max-w-7xl px-5">
           <div className="rounded-[2.5rem] bg-gold-pale px-6 py-14 sm:px-12">
             <div className="grid items-center gap-10 md:grid-cols-2">
               <Reveal className="relative overflow-hidden rounded-2xl shadow-lg">
@@ -188,7 +188,7 @@ export default function Landing() {
       </section>
 
       {/* ABOUT */}
-      <section id="agency" className="mx-auto max-w-6xl px-5 py-20">
+      <section id="agency" className="mx-auto max-w-7xl px-5 py-20">
         <div className="grid items-center gap-12 md:grid-cols-2">
           <Reveal className="order-2 md:order-1">
             <h2 className="font-display text-3xl font-bold md:text-4xl">Our <span className="text-gold-deep">Centre</span></h2>
@@ -223,7 +223,7 @@ export default function Landing() {
 
       {/* TESTIMONIALS */}
       <section id="results" className="bg-chalk py-20">
-        <div className="mx-auto max-w-6xl px-5">
+        <div className="mx-auto max-w-7xl px-5">
           <Reveal className="mb-12 text-center">
             <h2 className="font-display text-3xl font-bold md:text-4xl">What <span className="text-gold-deep">Clients</span> Say!</h2>
             <p className="mx-auto mt-3 max-w-md text-sm text-ink/50">See how D-Maths has helped students achieve their goals.</p>
@@ -251,7 +251,7 @@ export default function Landing() {
       </section>
 
       {/* CTA BAND */}
-      <section className="mx-auto max-w-6xl px-5 py-16">
+      <section className="mx-auto max-w-7xl px-5 py-16">
         <Reveal>
           <div className="flex flex-col items-center justify-between gap-5 rounded-[2rem] bg-gold-pale px-8 py-8 sm:flex-row">
             <div>
@@ -265,7 +265,7 @@ export default function Landing() {
 
       {/* FOOTER */}
       <footer id="contact" className="relative bg-white pt-12">
-        <div className="mx-auto grid max-w-6xl gap-10 px-5 pb-10 sm:grid-cols-2 md:grid-cols-5">
+        <div className="mx-auto grid max-w-7xl gap-10 px-5 pb-10 sm:grid-cols-2 md:grid-cols-5">
           <div>
             <p className="font-display text-lg font-bold text-ink">D-Maths</p>
             <p className="mt-4 max-w-xs text-[13px] leading-relaxed text-ink/50">

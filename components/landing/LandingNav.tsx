@@ -47,7 +47,7 @@ export default function LandingNav() {
       }`}
     >
       <div
-        className={`mx-auto flex max-w-6xl items-center justify-between px-5 transition-all duration-300 ${
+        className={`mx-auto flex max-w-7xl items-center justify-between px-5 transition-all duration-300 ${
           scrolled ? "h-14" : "h-16"
         }`}
       >
