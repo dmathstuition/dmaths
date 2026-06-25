@@ -9,6 +9,11 @@ create table if not exists badges (
   points_threshold int
 );
 
+-- Badges catalogue is public read for all signed-in users; writes via service role only
+alter table badges enable row level security;
+drop policy if exists "signed-in read badges" on badges;
+create policy "signed-in read badges" on badges for select using (auth.uid() is not null);
+
 -- Per-student earned badges (unique constraint prevents double-award)
 create table if not exists student_badges (
   id         uuid primary key default gen_random_uuid(),
