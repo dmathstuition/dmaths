@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { useToast } from "@/components/Toast";
@@ -36,6 +36,12 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
   const [loggingBehavior, setLoggingBehavior] = useState(false);
   const [rewardPoints, setRewardPoints] = useState(student.reward_points ?? 0);
   const [sanctionPoints, setSanctionPoints] = useState(student.sanction_points ?? 0);
+
+  // Parent linking
+  const [linkedParents, setLinkedParents] = useState<any[]>([]);
+  const [parentEmail, setParentEmail] = useState("");
+  const [parentName, setParentName] = useState("");
+  const [linkingParent, setLinkingParent] = useState(false);
 
   const typeMap = new Map(behaviorTypes.map((t: any) => [t.id, t]));
 
@@ -75,6 +81,40 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
     setRewardPoints(json.rewardPoints);
     setSanctionPoints(json.sanctionPoints);
     push("Entry deleted.", "success");
+  }
+
+  useEffect(() => {
+    supabase.from("parent_student_links")
+      .select("parent:profiles(id,email,first_name,last_name)")
+      .eq("student_id", student.id)
+      .then(({ data }) => setLinkedParents((data ?? []).map((r: any) => r.parent)));
+  }, [student.id]);
+
+  async function linkParent() {
+    if (!parentEmail.trim()) return;
+    setLinkingParent(true);
+    const res = await fetch("/api/parents/link", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ studentId: student.id, parentEmail: parentEmail.trim(), parentName: parentName.trim() }),
+    });
+    const json = await res.json();
+    setLinkingParent(false);
+    if (!res.ok) { push(json.error || "Failed to link parent.", "error"); return; }
+    push(json.created ? "Parent account created and login email sent." : "Existing parent account linked.", "success");
+    setParentEmail(""); setParentName("");
+    const { data } = await supabase.from("parent_student_links")
+      .select("parent:profiles(id,email,first_name,last_name)").eq("student_id", student.id);
+    setLinkedParents((data ?? []).map((r: any) => r.parent));
+  }
+
+  async function unlinkParent(parentId: string) {
+    const res = await fetch("/api/parents/unlink", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ studentId: student.id, parentId }),
+    });
+    if (!res.ok) { push("Failed to unlink parent.", "error"); return; }
+    setLinkedParents(prev => prev.filter((p: any) => p.id !== parentId));
+    push("Parent unlinked.", "success");
   }
 
   const trendData = subs
@@ -381,6 +421,35 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
             ))}
             {!notes.length && <p className="text-sm text-ink/35">No notes yet.</p>}
           </div>
+        </div>
+      </div>
+
+      {/* Parent Portal Access */}
+      <div className="card p-6">
+        <h2 className="font-display text-lg font-semibold">Parent portal access</h2>
+        <p className="mt-1 text-sm text-ink/55">Linked parents can log in at <span className="font-mono">/parent</span> to view this student's progress, grades, and behaviour.</p>
+
+        {linkedParents.length > 0 && (
+          <div className="mt-4 space-y-2">
+            {linkedParents.map((p: any) => (
+              <div key={p.id} className="flex items-center justify-between rounded-xl bg-chalk px-4 py-2.5 text-sm">
+                <div>
+                  <span className="font-semibold text-ink">{p.first_name} {p.last_name}</span>
+                  <span className="ml-2 text-ink/45">{p.email}</span>
+                </div>
+                <button onClick={() => unlinkParent(p.id)} className="text-xs font-bold text-red-600 hover:underline">Unlink</button>
+              </div>
+            ))}
+          </div>
+        )}
+        {linkedParents.length === 0 && <p className="mt-3 text-sm text-ink/35">No parents linked yet.</p>}
+
+        <div className="mt-4 flex flex-wrap gap-2 border-t border-line pt-4">
+          <input className="field max-w-xs" type="email" placeholder="Parent email" value={parentEmail} onChange={e => setParentEmail(e.target.value)} />
+          <input className="field max-w-[180px]" type="text" placeholder="Parent name (optional)" value={parentName} onChange={e => setParentName(e.target.value)} />
+          <button className="btn-gold !min-h-[40px]" onClick={linkParent} disabled={linkingParent || !parentEmail.trim()}>
+            {linkingParent ? <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" /> : "Link parent →"}
+          </button>
         </div>
       </div>
 
