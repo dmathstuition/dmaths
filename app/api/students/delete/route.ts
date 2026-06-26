@@ -29,9 +29,32 @@ export async function POST(req: Request) {
     detail: { studentId, name: expected },
   });
 
-  // 1) Delete the AUTH user first. This is what stops them logging in.
-  //    profiles.id references auth.users ON DELETE CASCADE, so this also
-  //    removes the profile and every child row in one shot.
+  // 1) Explicitly remove the student's child rows BEFORE deleting the auth user.
+  //    In theory profiles.id → auth.users is ON DELETE CASCADE and every child
+  //    table cascades off profiles, so deleting the auth user would be enough.
+  //    In practice, if any of these FKs in the live database is NOT cascade
+  //    (schema drift), the auth deletion fails with "Database error deleting
+  //    user". Clearing the children first makes deletion robust regardless of
+  //    how the constraints are configured. The service role bypasses RLS.
+  //    Tables that may not exist yet (un-applied migrations) error harmlessly.
+  const childTables: { table: string; col: string }[] = [
+    { table: "assignment_submissions", col: "student_id" },
+    { table: "attendance_records",     col: "student_id" },
+    { table: "class_students",         col: "student_id" },
+    { table: "admin_notes",            col: "student_id" },
+    { table: "rewards",                col: "student_id" },
+    { table: "behavior_logs",          col: "student_id" },
+    { table: "student_badges",         col: "student_id" },
+    { table: "guardian_tokens",        col: "student_id" },
+    { table: "parent_student_links",   col: "student_id" },
+    { table: "notifications",          col: "user_id" },
+  ];
+  for (const { table, col } of childTables) {
+    await admin.from(table).delete().eq(col, studentId); // per-table errors ignored
+  }
+
+  // 2) Delete the AUTH user. profiles.id → auth.users ON DELETE CASCADE removes
+  //    the profile row too. This is what stops them logging in.
   const { error: authErr } = await admin.auth.admin.deleteUser(studentId);
 
   if (authErr) {
