@@ -4,6 +4,7 @@ import { DotsScatter } from "@/components/illustrations";
 import Reveal from "@/components/landing/Reveal";
 import CountUp from "@/components/landing/CountUp";
 import LandingNav from "@/components/landing/LandingNav";
+import SummerCampBanner from "@/components/landing/SummerCampBanner";
 
 const SERVICES = [
   { t: "Algebra & Calculus", d: "From linear equations to derivatives and integrals, built step by step.", c: "#EFAE56", sym: "ƒ(x)" },
@@ -53,6 +54,7 @@ const STATS = [
 export default function Landing() {
   return (
     <main className="overflow-hidden bg-white font-body text-ink">
+      <SummerCampBanner />
       <LandingNav />
 
       {/* HERO */}

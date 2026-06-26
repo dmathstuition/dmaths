@@ -1,9 +1,10 @@
 "use client";
 import Logo from "@/components/Logo";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import PaystackButton from "@/components/PaystackButton";
+import { SUMMER_CAMP_TIERS, findTier, fmtUsd, fmtNgn, type CampTier } from "@/lib/summerCamp";
 
 const SUBJECTS = ["Algebra","Calculus","Statistics","Geometry","Further Mathematics","Core Maths Revision","Physics","JavaScript","Python","Python Practice Challenge","External Examinations"];
 
@@ -31,16 +32,37 @@ export default function Apply() {
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
   const [consent, setConsent] = useState(false);
+  // Summer-camp tag from the URL (?camp=summer-2026&plan=<id>)
+  const [camp, setCamp] = useState("");
 
   const set = (k: string, v: any) => setF(p => ({ ...p, [k]: v }));
   const toggleSubject = (s: string) =>
     set("subjects", f.subjects.includes(s) ? f.subjects.filter((x: string) => x !== s) : [...f.subjects, s]);
+
+  // When a tier is chosen, lock in its naira price and use its name as the
+  // "subject" so the existing ≥1-subject validation passes.
+  const selectTier = (t: CampTier) =>
+    setF(p => ({ ...p, plan: t.id, payment_amount: t.ngn, subjects: [t.name] }));
+
+  // Read campaign params on mount. We read window.location.search directly
+  // (instead of useSearchParams) to avoid the Next 14 CSR-bailout/Suspense rule.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const c = params.get("camp") || "";
+    if (!c) return;
+    setCamp(c);
+    const tier = findTier(params.get("plan"));
+    if (tier) selectTier(tier);
+  }, []);
+
+  const selectedTier = camp ? findTier(f.plan) : undefined;
 
   function next() {
     setError("");
     if (step === 1 && !(f.first_name && f.last_name && f.email && f.phone))
       return setError("Please fill in all required fields.");
     if (step === 2) {
+      if (camp && !f.plan) return setError("Please choose a camp package.");
       if (!f.subjects.length) return setError("Select at least one subject.");
       if (!(f.guardian_name && f.guardian_contact)) return setError("Please provide guardian details.");
       // Free enrolment: skip the payment step and submit straight away.
@@ -72,6 +94,7 @@ export default function Apply() {
       guardian_name: f.guardian_name, guardian_contact: f.guardian_contact,
       guardian_email: f.guardian_email || "",
       subjects: f.subjects, notes: f.notes || "",
+      camp: camp || "", plan: f.plan || "",
       payment_ref: free ? "FREE-ENROLMENT" : f.payment_ref,
       payment_method: free ? "Free promotion" : f.payment_method,
       payment_amount: free ? 0 : Number(f.payment_amount),
@@ -155,21 +178,44 @@ export default function Apply() {
               <Field label="Guardian contact" type="tel" required value={f.guardian_contact} onChange={v => set("guardian_contact", v)} />
               <Field label="Guardian email" type="email" placeholder="parent@example.com" value={f.guardian_email} onChange={v => set("guardian_email", v)} />
             </Row>
-            <div>
-              <label className="flabel">Subjects needed <Req /></label>
-              <div className="flex flex-wrap gap-2">
-                {SUBJECTS.map(s => {
-                  const on = f.subjects.includes(s);
-                  return (
-                    <button type="button" key={s} onClick={() => toggleSubject(s)}
-                      className={`rounded-full border px-3.5 py-1.5 text-[13px] font-semibold transition
-                        ${on ? "border-gold bg-gold-pale text-gold-deep" : "border-line bg-white text-ink/70 hover:border-gold/40"}`}>
-                      {s}
-                    </button>
-                  );
-                })}
+            {camp ? (
+              <div>
+                <label className="flabel">Summer camp package <Req /></label>
+                <div className="grid gap-2.5 sm:grid-cols-2">
+                  {SUMMER_CAMP_TIERS.map(t => {
+                    const on = f.plan === t.id;
+                    return (
+                      <button type="button" key={t.id} onClick={() => selectTier(t)}
+                        className={`rounded-2xl border p-3.5 text-left transition
+                          ${on ? "border-gold bg-gold-pale ring-1 ring-gold/40" : "border-line bg-white hover:border-gold/40"}`}>
+                        <div className="flex items-baseline justify-between gap-2">
+                          <span className="text-[13px] font-bold text-ink">{t.name}</span>
+                          <span className="font-display text-sm font-extrabold text-gold-deep">{fmtUsd(t.usd)}</span>
+                        </div>
+                        <p className="mt-1 text-[12px] leading-snug text-ink/55">{t.blurb}</p>
+                        <p className="mt-1.5 text-[11px] font-semibold text-ink/40">{fmtNgn(t.ngn)} · whole summer</p>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            ) : (
+              <div>
+                <label className="flabel">Subjects needed <Req /></label>
+                <div className="flex flex-wrap gap-2">
+                  {SUBJECTS.map(s => {
+                    const on = f.subjects.includes(s);
+                    return (
+                      <button type="button" key={s} onClick={() => toggleSubject(s)}
+                        className={`rounded-full border px-3.5 py-1.5 text-[13px] font-semibold transition
+                          ${on ? "border-gold bg-gold-pale text-gold-deep" : "border-line bg-white text-ink/70 hover:border-gold/40"}`}>
+                        {s}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
             <div>
               <label className="flabel">Notes / goals</label>
               <textarea className="field min-h-24" placeholder="e.g. Preparing for BECE, weak in integration…"
@@ -181,6 +227,20 @@ export default function Apply() {
         {step === 3 && (
           <div className="space-y-4">
             <h2 className="font-display text-xl font-semibold">Payment information</h2>
+
+            {selectedTier && (
+              <div className="flex items-center justify-between gap-3 rounded-xl border border-gold bg-gold-pale px-4 py-3">
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-wide text-gold-deep">Summer camp package</p>
+                  <p className="text-sm font-bold text-ink">{selectedTier.name}</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-display text-xl font-extrabold text-ink">{fmtNgn(selectedTier.ngn)}</p>
+                  <p className="text-[11px] font-semibold text-ink/45">{fmtUsd(selectedTier.usd)} · whole summer</p>
+                </div>
+              </div>
+            )}
+
             <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900">
               Send payment to <strong>Opay: 7025674894</strong> or <strong>Access Bank: 1534530227</strong>.
               Use your full name as the reference.
@@ -221,7 +281,14 @@ export default function Apply() {
               </div>
             </Row>
             <Row>
-              <Field label="Amount paid (₦)" type="number" required value={f.payment_amount} onChange={v => set("payment_amount", v)} />
+              {selectedTier ? (
+                <div>
+                  <label className="flabel">Amount due (₦)</label>
+                  <input className="field bg-chalk/60 font-bold" value={fmtNgn(selectedTier.ngn)} readOnly />
+                </div>
+              ) : (
+                <Field label="Amount paid (₦)" type="number" required value={f.payment_amount} onChange={v => set("payment_amount", v)} />
+              )}
               <Field label="Payment date" type="date" value={f.payment_date} onChange={v => set("payment_date", v)} />
             </Row>
           </div>
