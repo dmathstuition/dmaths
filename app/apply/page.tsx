@@ -70,6 +70,7 @@ export default function Apply() {
       first_name: f.first_name, last_name: f.last_name, email: f.email, phone: f.phone,
       dob: f.dob || null, address: f.address || "", level: f.level || "JSS 1",
       guardian_name: f.guardian_name, guardian_contact: f.guardian_contact,
+      guardian_email: f.guardian_email || "",
       subjects: f.subjects, notes: f.notes || "",
       payment_ref: free ? "FREE-ENROLMENT" : f.payment_ref,
       payment_method: free ? "Free promotion" : f.payment_method,
@@ -150,7 +151,10 @@ export default function Apply() {
               </div>
               <Field label="Guardian name" required value={f.guardian_name} onChange={v => set("guardian_name", v)} />
             </Row>
-            <Field label="Guardian contact" type="tel" required value={f.guardian_contact} onChange={v => set("guardian_contact", v)} />
+            <Row>
+              <Field label="Guardian contact" type="tel" required value={f.guardian_contact} onChange={v => set("guardian_contact", v)} />
+              <Field label="Guardian email" type="email" placeholder="parent@example.com" value={f.guardian_email} onChange={v => set("guardian_email", v)} />
+            </Row>
             <div>
               <label className="flabel">Subjects needed <Req /></label>
               <div className="flex flex-wrap gap-2">

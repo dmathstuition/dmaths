@@ -115,6 +115,20 @@ const TEMPLATES = {
       '<p>' + esc_(d.message) + '</p>',
   }),
 
+  parent_credentials: (d) => ({
+    subject: '👪 Your D-Maths Parent Portal Login',
+    html:
+      '<h2 style="color:#0A1F3D">Hello ' + esc_(d.parentName) + ',</h2>' +
+      '<p>Your child <strong>' + esc_(d.studentName) + '</strong> (' + esc_(d.studentCode) + ') has been enrolled at D-Maths Tuition Centre.</p>' +
+      '<p>A parent portal account has been created so you can track their progress at any time — grades, attendance, behaviour, and assignments.</p>' +
+      '<table style="border-collapse:collapse;margin:16px 0">' +
+      row_('Email', esc_(d.email)) +
+      row_('Temporary password', '<code>' + esc_(d.tempPassword) + '</code>') +
+      '</table>' +
+      '<p><a href="' + esc_(d.loginUrl) + '" style="background:#E8841C;color:#06152B;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:bold">Sign in to parent portal →</a></p>' +
+      '<p style="color:#64748B;font-size:13px">Please change your password after first sign-in. If you have more than one child with D-Maths, the same login will show all of them.</p>',
+  }),
+
   guardian_invite: (d) => ({
     subject: '👪 Parent access to ' + esc_(d.studentName) + '’s D-Maths progress',
     html:

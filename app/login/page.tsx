@@ -60,7 +60,8 @@ export default function Login() {
       setBusy(false);
       return;
     }
-    router.replace(profile?.role === "admin" ? "/admin" : "/portal");
+    const dest = profile?.role === "admin" ? "/admin" : profile?.role === "parent" ? "/parent" : "/portal";
+    router.replace(dest);
   }
 
   async function forgotPassword() {
@@ -85,7 +86,7 @@ export default function Login() {
         <div className="overflow-hidden rounded-2xl bg-white shadow-lift">
           <div className="bg-ink p-7">
             <h1 className="font-display text-2xl font-semibold text-white">Sign in to your portal</h1>
-            <p className="mt-1.5 text-sm text-white/45">Students use their Student ID. Staff use their email.</p>
+            <p className="mt-1.5 text-sm text-white/45">Students use their Student ID. Parents and staff use their email.</p>
           </div>
           <form onSubmit={signIn} className="space-y-4 p-7">
             {error && <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-800">{error}</p>}
