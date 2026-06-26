@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import Logo from "@/components/Logo";
 import Reveal from "@/components/landing/Reveal";
 import { DotsScatter } from "@/components/illustrations";
@@ -54,8 +55,8 @@ export default function SummerCamp() {
       <section className="boardgrid relative bg-board pb-20 pt-16 text-white">
         <DotsScatter className="pointer-events-none absolute left-6 top-20 h-24 w-24 opacity-30" />
         <DotsScatter className="pointer-events-none absolute right-10 bottom-10 h-20 w-20 opacity-20" />
-        <div className="mx-auto max-w-3xl px-5 text-center">
-          <Reveal>
+        <div className="mx-auto grid max-w-6xl items-center gap-10 px-5 md:grid-cols-2">
+          <Reveal className="text-center md:text-left">
             <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-4 py-1.5 text-xs font-bold text-gold">
               <span className="h-1.5 w-1.5 rounded-full bg-gold" />
               Registration is open
@@ -69,7 +70,7 @@ export default function SummerCamp() {
               sessions, real projects, and a personalized portal so you can track every learner's
               growth — all summer long.
             </p>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-4 md:justify-start">
               <a href="#packages" className="btn-gold !min-h-[50px] !rounded-full !px-7 !text-base">
                 See packages
               </a>
@@ -79,6 +80,25 @@ export default function SummerCamp() {
               >
                 Register now →
               </Link>
+            </div>
+          </Reveal>
+
+          <Reveal delay={120} className="relative">
+            <div className="relative overflow-hidden rounded-3xl shadow-2xl ring-1 ring-white/10">
+              <Image
+                src="https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&q=80"
+                alt="Children learning coding and mathematics online"
+                width={800}
+                height={600}
+                className="h-auto w-full object-cover"
+                priority
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-board/50 to-transparent" />
+            </div>
+            {/* floating badge */}
+            <div className="float absolute -left-3 bottom-6 rounded-2xl bg-gold px-4 py-3 shadow-xl">
+              <p className="font-display text-lg font-extrabold text-white">2 months</p>
+              <p className="text-[11px] font-semibold text-white/80">All summer break</p>
             </div>
           </Reveal>
         </div>
