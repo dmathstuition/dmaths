@@ -4,6 +4,7 @@ import { supabaseBrowser } from "@/lib/supabase/client";
 import ConfirmModal from "@/components/ConfirmModal";
 import PromptModal from "@/components/PromptModal";
 import { useToast } from "@/components/Toast";
+import { findTier } from "@/lib/summerCamp";
 
 type App = Record<string, any>;
 const FILTERS = ["all", "pending", "approved", "rejected"] as const;
@@ -29,7 +30,7 @@ export default function ApplicationsClient({ initial }: { initial: App[] }) {
 
   const visible = apps
     .filter(a => filter === "all" || a.status === filter)
-    .filter(a => !q || `${a.first_name} ${a.last_name} ${a.email} ${a.payment_ref}`.toLowerCase().includes(q.toLowerCase()));
+    .filter(a => !q || `${a.first_name} ${a.last_name} ${a.email} ${a.payment_ref} ${a.camp || ""} ${findTier(a.plan)?.name ?? ""}`.toLowerCase().includes(q.toLowerCase()));
 
   async function doApprove(id: string) {
     setConfirmState(null);
@@ -95,6 +96,7 @@ export default function ApplicationsClient({ initial }: { initial: App[] }) {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              {a.camp && <span className="pill-amber">☀️ Summer Camp</span>}
               <span className={a.status === "approved" ? "pill-green" : a.status === "rejected" ? "pill-red" : "pill-amber"}>{a.status}</span>
               {a.status === "rejected" && (
                 <button className="text-xs font-bold text-red-600 hover:underline"
@@ -110,9 +112,10 @@ export default function ApplicationsClient({ initial }: { initial: App[] }) {
           </div>
 
           <dl className="mt-4 grid gap-2 border-t border-line pt-4 text-[13px] sm:grid-cols-4">
+            {a.camp && <Info k="Camp package" v={findTier(a.plan)?.name ?? a.plan} />}
             <Info k="Payment ref" v={a.payment_ref} />
             {a.payment_verified && <div><dt className="text-[11px] font-bold uppercase tracking-wide text-ink/35">Status</dt><dd className="font-semibold"><span className="pill-green">✓ Verified</span></dd></div>}
-            <Info k="Amount" v={`₦${a.payment_amount}`} />
+            <Info k="Amount" v={`₦${Number(a.payment_amount).toLocaleString("en-NG")}`} />
             <Info k="Method" v={a.payment_method} />
             <Info k="Guardian" v={`${a.guardian_name} (${a.guardian_contact})`} />
           </dl>
