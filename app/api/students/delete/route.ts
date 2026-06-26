@@ -48,6 +48,7 @@ export async function POST(req: Request) {
     { table: "guardian_tokens",        col: "student_id" },
     { table: "parent_student_links",   col: "student_id" },
     { table: "notifications",          col: "user_id" },
+    { table: "audit_log",              col: "actor_id" },
   ];
   for (const { table, col } of childTables) {
     await admin.from(table).delete().eq(col, studentId); // per-table errors ignored
