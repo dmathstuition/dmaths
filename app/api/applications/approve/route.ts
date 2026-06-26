@@ -63,5 +63,63 @@ export async function POST(req: Request) {
     loginUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/login`,
   });
 
+  // 7. If a guardian email was provided, create a parent portal account
+  const guardianEmail = ((app.guardian_email as string) || "").trim();
+  if (guardianEmail) {
+    // Check for an existing parent account with this email
+    const { data: existingParent } = await admin
+      .from("profiles")
+      .select("id")
+      .eq("email", guardianEmail)
+      .eq("role", "parent")
+      .maybeSingle();
+
+    if (existingParent) {
+      // Parent already has an account (e.g. another sibling) — just link them
+      await admin
+        .from("parent_student_links")
+        .upsert(
+          { parent_id: existingParent.id, student_id: created.user.id },
+          { onConflict: "parent_id,student_id" },
+        );
+    } else {
+      // New parent — create auth account, profile, link, and send credentials
+      const tempParentPwd =
+        crypto.randomUUID().replace(/-/g, "").slice(0, 6) +
+        crypto.randomUUID().replace(/-/g, "").slice(0, 4).toUpperCase() +
+        "@" + Math.floor(Math.random() * 90 + 10) + "!";
+
+      const { data: parentAuth, error: parentErr } = await admin.auth.admin.createUser({
+        email: guardianEmail,
+        password: tempParentPwd,
+        email_confirm: true,
+      });
+
+      if (!parentErr && parentAuth.user) {
+        await admin.from("profiles").insert({
+          id: parentAuth.user.id,
+          role: "parent",
+          first_name: app.guardian_name || "Parent/Guardian",
+          last_name: "",
+          email: guardianEmail,
+          is_active: true,
+        });
+        await admin.from("parent_student_links").insert({
+          parent_id: parentAuth.user.id,
+          student_id: created.user.id,
+        });
+        await sendEmail("parent_credentials", guardianEmail, {
+          parentName: app.guardian_name || "Parent/Guardian",
+          studentName: `${app.first_name} ${app.last_name}`,
+          studentCode: code,
+          email: guardianEmail,
+          tempPassword: tempParentPwd,
+          loginUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/login`,
+        });
+      }
+      // Parent account failure is non-fatal: student approval already succeeded
+    }
+  }
+
   return NextResponse.json({ ok: true, studentCode: code });
 }
