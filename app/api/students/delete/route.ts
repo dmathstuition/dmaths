@@ -35,14 +35,33 @@ export async function POST(req: Request) {
   const { error: authErr } = await admin.auth.admin.deleteUser(studentId);
 
   if (authErr) {
-    // The auth user could NOT be removed (e.g. service-role key missing).
-    // Do NOT delete the profile on its own — that would create an account
-    // that can still log in but has no profile (the "empty portal" bug).
-    // Instead, deactivate so they're locked out, and report the failure.
-    await admin.from("profiles").update({ is_active: false }).eq("id", studentId);
-    return NextResponse.json({
-      error: "Could not fully delete the account (auth removal failed). The learner has been deactivated and locked out instead. Check that SUPABASE_SERVICE_ROLE_KEY is set in your environment.",
-    }, { status: 500 });
+    // If the auth user simply doesn't exist, the profile is an orphan — safe to delete directly.
+    const notFound =
+      authErr.message?.toLowerCase().includes("not found") ||
+      (authErr as any).status === 404;
+
+    if (notFound) {
+      await admin.from("profiles").delete().eq("id", studentId);
+      return NextResponse.json({ ok: true });
+    }
+
+    // Real failure (key missing, network, etc.) — deactivate as fallback.
+    const { error: deactivateErr } = await admin
+      .from("profiles")
+      .update({ is_active: false })
+      .eq("id", studentId);
+
+    const deactivated = !deactivateErr;
+    return NextResponse.json(
+      {
+        error:
+          `Auth removal failed (${authErr.message}). ` +
+          (deactivated
+            ? "The learner has been deactivated and locked out instead."
+            : "Deactivation also failed — check SUPABASE_SERVICE_ROLE_KEY in Vercel."),
+      },
+      { status: 500 },
+    );
   }
 
   // Safety net: ensure the profile row is gone even if the cascade didn't fire.
