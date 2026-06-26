@@ -299,6 +299,16 @@ export default function Landing() {
           © {new Date().getFullYear()} D-Maths Tuition Centre · dmathstuition@gmail.com · Asaba, Delta State
         </div>
       </footer>
+      {/* FLOATING SUMMER CAMP CTA */}
+      <Link
+        href="/summer-camp"
+        aria-label="Register for the D-Maths Summer Camp"
+        className="btn-gold fixed bottom-6 left-6 z-50 flex items-center gap-2 !rounded-full !px-5 shadow-xl transition hover:scale-105 hover:shadow-2xl"
+      >
+        <span aria-hidden="true">☀️</span>
+        <span className="text-sm font-bold">Summer Camp</span>
+      </Link>
+
       {/* FLOATING WHATSAPP BUTTON */}
       <a
         href="https://wa.me/2347025674894"
