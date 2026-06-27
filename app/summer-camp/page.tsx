@@ -214,6 +214,42 @@ export default function SummerCamp() {
         </div>
       </section>
 
+      {/* HOW TO REGISTER */}
+      <section className="mx-auto max-w-5xl px-5 py-16">
+        <Reveal className="mb-10 text-center">
+          <h2 className="font-display text-3xl font-bold md:text-4xl">
+            How to <span className="text-gold-deep">register</span>
+          </h2>
+          <p className="mx-auto mt-3 max-w-lg text-sm text-ink/50">
+            It only takes a few minutes. Here's exactly what happens.
+          </p>
+        </Reveal>
+        <ol className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { t: "Choose your package", d: "Pick the track and plan that fits your child best." },
+            { t: "Fill the short form", d: "A few details about the learner and their guardian." },
+            { t: "Make payment", d: "Securely by card or bank transfer — 20% off applied." },
+            { t: "We contact you", d: "Our team reaches out to confirm your place and send your portal login." },
+          ].map((s, i) => (
+            <Reveal key={s.t} delay={i * 80}>
+              <li className="card h-full p-5">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gold font-display text-sm font-bold text-white">
+                  {i + 1}
+                </span>
+                <p className="mt-3 font-display font-bold text-ink">{s.t}</p>
+                <p className="mt-1 text-[13px] leading-relaxed text-ink/55">{s.d}</p>
+              </li>
+            </Reveal>
+          ))}
+        </ol>
+        <Reveal>
+          <p className="mx-auto mt-8 max-w-2xl rounded-2xl border border-gold/30 bg-gold-pale px-5 py-4 text-center text-sm font-semibold text-ink/70">
+            That's it — once you finish registering, <strong className="text-ink">our team will contact you</strong> to
+            confirm everything and get your child started.
+          </p>
+        </Reveal>
+      </section>
+
       {/* FINAL CTA */}
       <section className="mx-auto max-w-6xl px-5 py-16">
         <Reveal>

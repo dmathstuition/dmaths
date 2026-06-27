@@ -119,6 +119,9 @@ export default function Apply() {
             ? <>Your registration is confirmed. Your Student ID and password will arrive at <strong>{f.email}</strong> shortly after we review it.</>
             : <>We verify payments within <strong>24 hours</strong>. Your Student ID and password will arrive at <strong>{f.email}</strong>.</>}
         </p>
+        <p className="mt-3 rounded-xl bg-gold-pale px-4 py-3 text-sm font-semibold text-ink/70">
+          📞 Our team will also contact you shortly to confirm your place.
+        </p>
         <Link href="/" className="btn-ink mt-7 w-full">Return to D-Maths</Link>
       </div>
     </Shell>
