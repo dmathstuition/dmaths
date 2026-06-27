@@ -7,10 +7,12 @@ import { useState, useEffect } from "react";
 declare global { interface Window { PaystackPop?: any } }
 
 export default function PaystackButton({
-  email, amount, onVerified,
+  email, amount, plan, camp, onVerified,
 }: {
   email: string;
   amount: number;
+  plan?: string;
+  camp?: string;
   onVerified: (ref: string, amount: number) => void;
 }) {
   const publicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY;
@@ -38,11 +40,12 @@ export default function PaystackButton({
       email,
       amount: Math.round(amount * 100), // kobo
       currency: "NGN",
+      metadata: { plan: plan || "", camp: camp || "" },
       callback: (response: any) => {
-        // verify server-side before trusting it
+        // verify server-side before trusting it (server also re-checks amount)
         fetch("/api/paystack/verify", {
           method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ reference: response.reference }),
+          body: JSON.stringify({ reference: response.reference, plan: plan || "" }),
         })
           .then(r => r.json())
           .then(j => {

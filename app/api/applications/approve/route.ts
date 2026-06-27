@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { sendEmail } from "@/lib/email";
+import { expectedNgnForPlan } from "@/lib/paystack";
 
 // POST { id } — approve an application: create login, profile, email credentials.
 export async function POST(req: Request) {
@@ -20,6 +21,53 @@ export async function POST(req: Request) {
   const { data: app } = await admin.from("applications").select("*").eq("id", id).single();
   if (!app) return NextResponse.json({ error: "not found" }, { status: 404 });
   if (app.status !== "pending") return NextResponse.json({ error: "already reviewed" }, { status: 409 });
+
+  // 2b. PAYMENT GATE — for applications that claim a Paystack payment, the money
+  //     must exist in the server-trusted `payments` ledger (written only by the
+  //     verified webhook / verify route). This is what stops a forged client-side
+  //     "paid" claim from ever becoming a real student account. Manual bank
+  //     transfers / cash / free promo are unaffected — the admin vouches for those.
+  const ref = (app.payment_ref || "").trim();
+  const isPaystack = /paystack/i.test(app.payment_method || "");
+  if (isPaystack && ref) {
+    const { data: pay } = await admin
+      .from("payments").select("*").eq("reference", ref).maybeSingle();
+
+    if (!pay || pay.status !== "success" || (pay.currency || "NGN") !== "NGN") {
+      return NextResponse.json(
+        { error: "No verified Paystack payment is on record for this reference. Do not approve." },
+        { status: 402 },
+      );
+    }
+    if ((pay.email || "").toLowerCase() !== (app.email || "").toLowerCase()) {
+      return NextResponse.json(
+        { error: "The Paystack payment email does not match the applicant's email." },
+        { status: 402 },
+      );
+    }
+    const expected = expectedNgnForPlan(app.plan);
+    if (expected > 0 && Number(pay.amount) < expected) {
+      return NextResponse.json(
+        { error: `Underpayment: ₦${Number(pay.amount).toLocaleString("en-NG")} received, package costs ₦${expected.toLocaleString("en-NG")}.` },
+        { status: 402 },
+      );
+    }
+    // Reject re-use of one payment reference across multiple approved enrolments.
+    const { data: dupe } = await admin
+      .from("applications").select("id")
+      .eq("payment_ref", ref).eq("status", "approved").neq("id", app.id).maybeSingle();
+    if (dupe) {
+      return NextResponse.json(
+        { error: "This payment reference was already used for another approved enrolment." },
+        { status: 409 },
+      );
+    }
+    // Payment is genuine — mark it verified before we create the account.
+    await admin.from("applications").update({
+      payment_verified: true,
+      payment_verified_at: new Date().toISOString(),
+    }).eq("id", app.id);
+  }
 
   // 3. Create the auth account with a temporary password
   // 14-char password: 2 UUIDs sliced + symbols + digits — ~70 bits entropy vs the old ~40
