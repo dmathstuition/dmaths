@@ -4,11 +4,13 @@ import { useEffect, useRef, useState } from "react";
 interface Props {
   to: number;
   suffix?: string;
+  prefix?: string;
   duration?: number;
   className?: string;
+  thousands?: boolean; // format with thousands separators (e.g. 83,999)
 }
 
-export default function CountUp({ to, suffix = "", duration = 1600, className }: Props) {
+export default function CountUp({ to, suffix = "", prefix = "", duration = 1600, className, thousands = false }: Props) {
   const [value, setValue] = useState(0);
   const ref = useRef<HTMLSpanElement>(null);
   const started = useRef(false);
@@ -45,7 +47,7 @@ export default function CountUp({ to, suffix = "", duration = 1600, className }:
 
   return (
     <span ref={ref} className={className}>
-      {value}{suffix}
+      {prefix}{thousands ? value.toLocaleString("en-NG") : value}{suffix}
     </span>
   );
 }
