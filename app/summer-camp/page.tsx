@@ -98,10 +98,10 @@ export default function SummerCamp() {
             <div className="hero-glow absolute -inset-6 rounded-[2rem]" />
             <div className="relative overflow-hidden rounded-3xl shadow-2xl ring-1 ring-white/10">
               <Image
-                src="https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&q=80"
-                alt="Children learning coding and mathematics online"
-                width={800}
-                height={600}
+                src="/summer-camp-banner.png"
+                alt="D-Maths students coding and building projects with the D-Maths robot"
+                width={1000}
+                height={812}
                 className="h-auto w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 priority
               />
