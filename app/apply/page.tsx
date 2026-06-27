@@ -99,7 +99,9 @@ export default function Apply() {
       payment_method: free ? "Free promotion" : f.payment_method,
       payment_amount: free ? 0 : Number(f.payment_amount),
       payment_date: f.payment_date || null,
-      payment_verified: free ? true : (f.payment_verified === true),
+      // payment_verified is intentionally NOT sent from the browser. The DB
+      // trigger forces it false on insert; only the server (Paystack verify /
+      // webhook / approval gate) can ever set it true.
       consented_at: new Date().toISOString(),
     });
     setBusy(false);
@@ -260,6 +262,8 @@ export default function Apply() {
                 <PaystackButton
                   email={f.email}
                   amount={Number(f.payment_amount) || 0}
+                  plan={f.plan || ""}
+                  camp={camp || ""}
                   onVerified={(ref, amt) => {
                     set("payment_ref", ref);
                     set("payment_amount", amt);
