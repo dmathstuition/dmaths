@@ -86,24 +86,22 @@ export default function Landing() {
           </Reveal>
 
           <Reveal delay={120} className="relative">
-            <div className="hero-glow absolute inset-0 rounded-3xl" />
-            <div className="relative overflow-hidden rounded-3xl shadow-2xl">
-              <Image
-                src="https://images.unsplash.com/photo-1596495578065-6e0763fa1178?w=800&q=80"
-                alt="Student studying mathematics online"
-                width={800}
-                height={560}
-                className="h-auto w-full object-cover"
-                priority
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0F3A6B]/30 to-transparent" />
-            </div>
+            {/* soft glow behind the cut-out figure for depth */}
+            <div className="hero-glow absolute inset-0 scale-110" />
+            <Image
+              src="/camp-hero.png"
+              alt="D-Maths student with the D-Maths robot"
+              width={900}
+              height={760}
+              className="relative z-10 mx-auto h-auto w-full object-contain drop-shadow-2xl"
+              priority
+            />
             {/* floating stat badges */}
-            <div className="float absolute -left-4 top-8 rounded-2xl bg-white px-4 py-3 shadow-xl">
+            <div className="float absolute -left-3 top-8 z-20 rounded-2xl bg-white px-4 py-3 shadow-xl">
               <p className="font-display text-xl font-extrabold text-ink">98%</p>
               <p className="text-[11px] font-semibold text-ink/45">Pass rate</p>
             </div>
-            <div className="float absolute -right-4 bottom-10 rounded-2xl bg-gold px-4 py-3 shadow-xl" style={{ animationDelay: "1.2s" }}>
+            <div className="float absolute -right-3 bottom-10 z-20 rounded-2xl bg-gold px-4 py-3 shadow-xl" style={{ animationDelay: "1.2s" }}>
               <p className="font-display text-xl font-extrabold text-white">★ 4.9</p>
               <p className="text-[11px] font-semibold text-white/70">Student rating</p>
             </div>
@@ -211,13 +209,15 @@ export default function Landing() {
             </div>
             <Link href="/apply" className="btn-gold mt-7 inline-flex !rounded-full !px-6">Read more</Link>
           </Reveal>
-          <Reveal delay={120} className="order-1 md:order-2 overflow-hidden rounded-3xl shadow-2xl">
+          <Reveal delay={120} className="relative order-1 md:order-2">
+            {/* decorative soft blob behind the cut-out figure */}
+            <div className="absolute inset-0 scale-95 rounded-full bg-gold-pale/70 blur-2xl" />
             <Image
-              src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&q=80"
-              alt="Tutor helping students with mathematics"
-              width={800}
-              height={560}
-              className="h-auto w-full object-cover"
+              src="/camp-about.png"
+              alt="D-Maths learner with the D-Maths robot"
+              width={900}
+              height={760}
+              className="relative z-10 mx-auto h-auto w-full object-contain drop-shadow-2xl"
             />
           </Reveal>
         </div>
