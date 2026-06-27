@@ -13,6 +13,21 @@ export const SUMMER_CAMP = {
   ngnPerUsd: 1500,
 } as const;
 
+// ── Promotional discount ─────────────────────────────────────────────
+// Percentage off every package. The `usd`/`ngn` on each tier are the LIST
+// prices; the discounted figures below are what we display AND what Paystack
+// actually charges / the server enforces. Set to 0 to end the promotion —
+// the struck-through "was" prices then disappear automatically.
+export const DISCOUNT_PCT = 20;
+
+const DISCOUNT_FACTOR = (100 - DISCOUNT_PCT) / 100;
+
+// 20% off the charm list prices lands cleanly (e.g. ₦104,999 → ₦83,999).
+export const discountedUsd = (tier: { usd: number }) =>
+  Math.round(tier.usd * DISCOUNT_FACTOR * 100) / 100;
+export const discountedNgn = (tier: { ngn: number }) =>
+  Math.round(tier.ngn * DISCOUNT_FACTOR);
+
 export type CampTrack = "maths" | "coding" | "both";
 
 export interface CampTier {

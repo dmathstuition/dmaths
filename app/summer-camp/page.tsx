@@ -7,6 +7,9 @@ import { DotsScatter } from "@/components/illustrations";
 import {
   SUMMER_CAMP,
   SUMMER_CAMP_TIERS,
+  DISCOUNT_PCT,
+  discountedUsd,
+  discountedNgn,
   fmtUsd,
   fmtNgn,
 } from "@/lib/summerCamp";
@@ -57,10 +60,17 @@ export default function SummerCamp() {
         <DotsScatter className="pointer-events-none absolute right-10 bottom-10 h-20 w-20 opacity-20" />
         <div className="mx-auto grid max-w-6xl items-center gap-10 px-5 md:grid-cols-2">
           <Reveal className="text-center md:text-left">
-            <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-4 py-1.5 text-xs font-bold text-gold">
-              <span className="h-1.5 w-1.5 rounded-full bg-gold" />
-              Registration is open
-            </span>
+            <div className="flex flex-wrap items-center justify-center gap-2 md:justify-start">
+              <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-4 py-1.5 text-xs font-bold text-gold">
+                <span className="h-1.5 w-1.5 rounded-full bg-gold" />
+                Registration is open
+              </span>
+              {DISCOUNT_PCT > 0 && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-gold px-4 py-1.5 text-xs font-extrabold uppercase tracking-wide text-board">
+                  🎉 {DISCOUNT_PCT}% off — limited time
+                </span>
+              )}
+            </div>
             <h1 className="mt-5 font-display text-4xl font-extrabold leading-[1.08] tracking-tight md:text-6xl">
               D-Maths Online <span className="text-gold">Summer Camp</span>
             </h1>
@@ -158,16 +168,30 @@ export default function SummerCamp() {
                       Best value
                     </span>
                   )}
-                  <span className="self-start rounded-full bg-gold-pale px-2.5 py-1 text-[11px] font-bold text-gold-deep">
-                    {TRACK_LABEL[t.track]}
-                  </span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="rounded-full bg-gold-pale px-2.5 py-1 text-[11px] font-bold text-gold-deep">
+                      {TRACK_LABEL[t.track]}
+                    </span>
+                    {DISCOUNT_PCT > 0 && (
+                      <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-extrabold text-emerald-700">
+                        Save {DISCOUNT_PCT}%
+                      </span>
+                    )}
+                  </div>
                   <h3 className="mt-3 font-display text-lg font-bold leading-snug">{t.name}</h3>
                   <p className="mt-2 flex-1 text-[13px] leading-relaxed text-ink/55">{t.blurb}</p>
 
                   <div className="mt-5 border-t border-line pt-4">
-                    <p className="font-display text-3xl font-extrabold text-ink">{fmtUsd(t.usd)}</p>
+                    <div className="flex items-baseline gap-2">
+                      <p className="font-display text-3xl font-extrabold text-ink">{fmtUsd(discountedUsd(t))}</p>
+                      {DISCOUNT_PCT > 0 && (
+                        <p className="font-display text-lg font-semibold text-ink/35 line-through">{fmtUsd(t.usd)}</p>
+                      )}
+                    </div>
                     <p className="mt-0.5 text-sm font-semibold text-ink/45">
-                      {fmtNgn(t.ngn)} · whole summer
+                      {fmtNgn(discountedNgn(t))}
+                      {DISCOUNT_PCT > 0 && <span className="ml-1.5 text-ink/30 line-through">{fmtNgn(t.ngn)}</span>}
+                      {" "}· whole summer
                     </p>
                   </div>
 

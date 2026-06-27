@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import PaystackButton from "@/components/PaystackButton";
-import { SUMMER_CAMP_TIERS, findTier, fmtUsd, fmtNgn, type CampTier } from "@/lib/summerCamp";
+import { SUMMER_CAMP_TIERS, findTier, fmtUsd, fmtNgn, DISCOUNT_PCT, discountedUsd, discountedNgn, type CampTier } from "@/lib/summerCamp";
 
 const SUBJECTS = ["Algebra","Calculus","Statistics","Geometry","Further Mathematics","Core Maths Revision","Physics","JavaScript","Python","Python Practice Challenge","External Examinations"];
 
@@ -39,10 +39,10 @@ export default function Apply() {
   const toggleSubject = (s: string) =>
     set("subjects", f.subjects.includes(s) ? f.subjects.filter((x: string) => x !== s) : [...f.subjects, s]);
 
-  // When a tier is chosen, lock in its naira price and use its name as the
-  // "subject" so the existing ≥1-subject validation passes.
+  // When a tier is chosen, lock in its DISCOUNTED naira price (what we charge)
+  // and use its name as the "subject" so the existing ≥1-subject validation passes.
   const selectTier = (t: CampTier) =>
-    setF(p => ({ ...p, plan: t.id, payment_amount: t.ngn, subjects: [t.name] }));
+    setF(p => ({ ...p, plan: t.id, payment_amount: discountedNgn(t), subjects: [t.name] }));
 
   // Read campaign params on mount. We read window.location.search directly
   // (instead of useSearchParams) to avoid the Next 14 CSR-bailout/Suspense rule.
@@ -182,7 +182,10 @@ export default function Apply() {
             </Row>
             {camp ? (
               <div>
-                <label className="flabel">Summer camp package <Req /></label>
+                <label className="flabel">
+                  Summer camp package <Req />
+                  {DISCOUNT_PCT > 0 && <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-extrabold text-emerald-700">{DISCOUNT_PCT}% off applied</span>}
+                </label>
                 <div className="grid gap-2.5 sm:grid-cols-2">
                   {SUMMER_CAMP_TIERS.map(t => {
                     const on = f.plan === t.id;
@@ -192,10 +195,17 @@ export default function Apply() {
                           ${on ? "border-gold bg-gold-pale ring-1 ring-gold/40" : "border-line bg-white hover:border-gold/40"}`}>
                         <div className="flex items-baseline justify-between gap-2">
                           <span className="text-[13px] font-bold text-ink">{t.name}</span>
-                          <span className="font-display text-sm font-extrabold text-gold-deep">{fmtUsd(t.usd)}</span>
+                          <span className="flex items-baseline gap-1.5">
+                            <span className="font-display text-sm font-extrabold text-gold-deep">{fmtUsd(discountedUsd(t))}</span>
+                            {DISCOUNT_PCT > 0 && <span className="text-[11px] font-semibold text-ink/30 line-through">{fmtUsd(t.usd)}</span>}
+                          </span>
                         </div>
                         <p className="mt-1 text-[12px] leading-snug text-ink/55">{t.blurb}</p>
-                        <p className="mt-1.5 text-[11px] font-semibold text-ink/40">{fmtNgn(t.ngn)} · whole summer</p>
+                        <p className="mt-1.5 text-[11px] font-semibold text-ink/40">
+                          {fmtNgn(discountedNgn(t))}
+                          {DISCOUNT_PCT > 0 && <span className="ml-1 text-ink/25 line-through">{fmtNgn(t.ngn)}</span>}
+                          {" "}· whole summer
+                        </p>
                       </button>
                     );
                   })}
@@ -233,12 +243,17 @@ export default function Apply() {
             {selectedTier && (
               <div className="flex items-center justify-between gap-3 rounded-xl border border-gold bg-gold-pale px-4 py-3">
                 <div>
-                  <p className="text-[11px] font-bold uppercase tracking-wide text-gold-deep">Summer camp package</p>
+                  <p className="text-[11px] font-bold uppercase tracking-wide text-gold-deep">
+                    Summer camp package{DISCOUNT_PCT > 0 && ` · ${DISCOUNT_PCT}% off`}
+                  </p>
                   <p className="text-sm font-bold text-ink">{selectedTier.name}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-display text-xl font-extrabold text-ink">{fmtNgn(selectedTier.ngn)}</p>
-                  <p className="text-[11px] font-semibold text-ink/45">{fmtUsd(selectedTier.usd)} · whole summer</p>
+                  <p className="font-display text-xl font-extrabold text-ink">
+                    {fmtNgn(discountedNgn(selectedTier))}
+                    {DISCOUNT_PCT > 0 && <span className="ml-1.5 text-sm font-semibold text-ink/35 line-through">{fmtNgn(selectedTier.ngn)}</span>}
+                  </p>
+                  <p className="text-[11px] font-semibold text-ink/45">{fmtUsd(discountedUsd(selectedTier))} · whole summer</p>
                 </div>
               </div>
             )}
@@ -287,8 +302,8 @@ export default function Apply() {
             <Row>
               {selectedTier ? (
                 <div>
-                  <label className="flabel">Amount due (₦)</label>
-                  <input className="field bg-chalk/60 font-bold" value={fmtNgn(selectedTier.ngn)} readOnly />
+                  <label className="flabel">Amount due (₦){DISCOUNT_PCT > 0 && ` · ${DISCOUNT_PCT}% off`}</label>
+                  <input className="field bg-chalk/60 font-bold" value={fmtNgn(discountedNgn(selectedTier))} readOnly />
                 </div>
               ) : (
                 <Field label="Amount paid (₦)" type="number" required value={f.payment_amount} onChange={v => set("payment_amount", v)} />

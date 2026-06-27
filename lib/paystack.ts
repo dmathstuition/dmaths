@@ -1,6 +1,6 @@
 // SERVER ONLY — Paystack helpers. Never import in a client component
 // (this reads PAYSTACK_SECRET_KEY).
-import { SUMMER_CAMP_TIERS } from "@/lib/summerCamp";
+import { SUMMER_CAMP_TIERS, discountedNgn } from "@/lib/summerCamp";
 
 export interface PaystackTxn {
   status: string;
@@ -17,12 +17,13 @@ export function paystackSecret(): string {
   return process.env.PAYSTACK_SECRET_KEY || "";
 }
 
-// Expected naira price for a camp package. Returns 0 for non-camp payments
-// (regular enrolments have no fixed server-side price).
+// Expected naira price for a camp package — the DISCOUNTED amount, since that
+// is what the customer is charged. Returns 0 for non-camp payments (regular
+// enrolments have no fixed server-side price).
 export function expectedNgnForPlan(plan?: string | null): number {
   if (!plan) return 0;
   const tier = SUMMER_CAMP_TIERS.find((t) => t.id === plan);
-  return tier ? tier.ngn : 0;
+  return tier ? discountedNgn(tier) : 0;
 }
 
 // Ask Paystack's API whether a reference genuinely succeeded. The secret key
