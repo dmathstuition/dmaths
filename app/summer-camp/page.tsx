@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Logo from "@/components/Logo";
 import Reveal from "@/components/landing/Reveal";
+import CountUp from "@/components/landing/CountUp";
 import { DotsScatter } from "@/components/illustrations";
 import {
   SUMMER_CAMP,
@@ -56,8 +57,8 @@ export default function SummerCamp() {
 
       {/* HERO */}
       <section className="boardgrid relative bg-board pb-20 pt-16 text-white">
-        <DotsScatter className="pointer-events-none absolute left-6 top-20 h-24 w-24 opacity-30" />
-        <DotsScatter className="pointer-events-none absolute right-10 bottom-10 h-20 w-20 opacity-20" />
+        <DotsScatter className="float pointer-events-none absolute left-6 top-20 h-24 w-24 opacity-30" />
+        <DotsScatter className="float pointer-events-none absolute right-10 bottom-10 h-20 w-20 opacity-20 [animation-delay:1.5s]" />
         <div className="mx-auto grid max-w-6xl items-center gap-10 px-5 md:grid-cols-2">
           <Reveal className="text-center md:text-left">
             <div className="flex flex-wrap items-center justify-center gap-2 md:justify-start">
@@ -66,13 +67,13 @@ export default function SummerCamp() {
                 Registration is open
               </span>
               {DISCOUNT_PCT > 0 && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-gold px-4 py-1.5 text-xs font-extrabold uppercase tracking-wide text-board">
+                <span className="badge-pulse inline-flex items-center gap-1 rounded-full bg-gold px-4 py-1.5 text-xs font-extrabold uppercase tracking-wide text-board">
                   🎉 {DISCOUNT_PCT}% off — limited time
                 </span>
               )}
             </div>
             <h1 className="mt-5 font-display text-4xl font-extrabold leading-[1.08] tracking-tight md:text-6xl">
-              D-Maths Online <span className="text-gold">Summer Camp</span>
+              D-Maths Online <span className="text-shimmer">Summer Camp</span>
             </h1>
             <p className="mt-5 text-[15px] leading-relaxed text-white/70 md:text-base">
               Hands-on <strong className="text-white">Maths &amp; Coding</strong> for the{" "}
@@ -93,14 +94,15 @@ export default function SummerCamp() {
             </div>
           </Reveal>
 
-          <Reveal delay={120} className="relative">
+          <Reveal delay={120} className="group relative">
+            <div className="hero-glow absolute -inset-6 rounded-[2rem]" />
             <div className="relative overflow-hidden rounded-3xl shadow-2xl ring-1 ring-white/10">
               <Image
                 src="https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&q=80"
                 alt="Children learning coding and mathematics online"
                 width={800}
                 height={600}
-                className="h-auto w-full object-cover"
+                className="h-auto w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 priority
               />
               <div className="absolute inset-0 bg-gradient-to-t from-board/50 to-transparent" />
@@ -128,8 +130,8 @@ export default function SummerCamp() {
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {INCLUDED.map((item, i) => (
             <Reveal key={item} delay={i * 60}>
-              <div className="hovlift flex h-full items-center gap-3 rounded-2xl border border-line bg-white p-4">
-                <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-gold/10 text-gold-deep">
+              <div className="hovlift group flex h-full items-center gap-3 rounded-2xl border border-line bg-white p-4">
+                <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-gold/10 text-gold-deep transition-transform duration-300 group-hover:scale-110 group-hover:bg-gold group-hover:text-white">
                   <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <polyline points="20 6 9 17 4 12" />
@@ -159,12 +161,12 @@ export default function SummerCamp() {
             {SUMMER_CAMP_TIERS.map((t, i) => (
               <Reveal key={t.id} delay={i * 70}>
                 <div
-                  className={`hovlift relative flex h-full flex-col rounded-3xl border bg-white p-6 ${
+                  className={`hovlift group relative flex h-full flex-col rounded-3xl border bg-white p-6 transition-transform duration-300 hover:scale-[1.02] ${
                     t.highlight ? "border-gold shadow-lg ring-1 ring-gold/30" : "border-line"
                   }`}
                 >
                   {t.highlight && (
-                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gold px-3 py-1 text-[11px] font-extrabold uppercase tracking-wide text-white shadow">
+                    <span className="badge-pulse absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gold px-3 py-1 text-[11px] font-extrabold uppercase tracking-wide text-white shadow">
                       Best value
                     </span>
                   )}
@@ -189,7 +191,7 @@ export default function SummerCamp() {
                       )}
                     </div>
                     <p className="mt-0.5 text-sm font-semibold text-ink/45">
-                      {fmtNgn(discountedNgn(t))}
+                      <CountUp to={discountedNgn(t)} prefix="₦" thousands duration={1100} />
                       {DISCOUNT_PCT > 0 && <span className="ml-1.5 text-ink/30 line-through">{fmtNgn(t.ngn)}</span>}
                       {" "}· whole summer
                     </p>
@@ -197,9 +199,9 @@ export default function SummerCamp() {
 
                   <Link
                     href={`/apply?camp=${SUMMER_CAMP.season}&plan=${t.id}`}
-                    className="btn-gold mt-5 w-full !rounded-full"
+                    className="btn-gold mt-5 inline-flex w-full items-center justify-center gap-1.5 !rounded-full"
                   >
-                    Register →
+                    Register <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
                   </Link>
                 </div>
               </Reveal>
@@ -232,8 +234,8 @@ export default function SummerCamp() {
             { t: "We contact you", d: "Our team reaches out to confirm your place and send your portal login." },
           ].map((s, i) => (
             <Reveal key={s.t} delay={i * 80}>
-              <li className="card h-full p-5">
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gold font-display text-sm font-bold text-white">
+              <li className="hovlift group card h-full p-5">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gold font-display text-sm font-bold text-white transition-transform duration-300 group-hover:scale-110">
                   {i + 1}
                 </span>
                 <p className="mt-3 font-display font-bold text-ink">{s.t}</p>
@@ -253,7 +255,7 @@ export default function SummerCamp() {
       {/* FINAL CTA */}
       <section className="mx-auto max-w-6xl px-5 py-16">
         <Reveal>
-          <div className="flex flex-col items-center justify-between gap-5 rounded-[2rem] bg-gold-pale px-8 py-8 sm:flex-row">
+          <div className="stat-shimmer group relative flex flex-col items-center justify-between gap-5 overflow-hidden rounded-[2rem] bg-gold-pale px-8 py-8 sm:flex-row">
             <div>
               <p className="font-display text-2xl font-bold text-ink">Ready for a summer of growth?</p>
               <p className="mt-1 text-sm text-ink/55">
@@ -262,9 +264,9 @@ export default function SummerCamp() {
             </div>
             <Link
               href={`/apply?camp=${SUMMER_CAMP.season}`}
-              className="btn-gold !rounded-full !px-8 !text-base"
+              className="btn-gold inline-flex items-center gap-1.5 !rounded-full !px-8 !text-base"
             >
-              Register now
+              Register now <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
             </Link>
           </div>
         </Reveal>
