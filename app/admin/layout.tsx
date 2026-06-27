@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 const NAV: NavItem[] = [
   { href: "/admin", label: "Dashboard", icon: "dashboard" },
   { href: "/admin/applications", label: "Applications", icon: "applications" },
+  { href: "/admin/payments", label: "Payments", icon: "payments" },
   { href: "/admin/students", label: "Students", icon: "students" },
   { href: "/admin/classes", label: "Classes", icon: "classes" },
   { href: "/admin/attendance", label: "Attendance", icon: "calendar" },

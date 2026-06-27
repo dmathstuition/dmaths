@@ -12,6 +12,7 @@ export default async function AdminDashboard() {
   const [
     { count: students }, { count: pending }, { count: classes },
     { count: activeStudents }, { data: recent }, { data: allStudents }, { count: assignments },
+    { data: payments },
   ] = await Promise.all([
     supa.from("profiles").select("*", { count: "exact", head: true }).eq("role", "student"),
     supa.from("applications").select("*", { count: "exact", head: true }).eq("status", "pending"),
@@ -21,10 +22,20 @@ export default async function AdminDashboard() {
       .eq("role", "student").order("created_at", { ascending: false }).limit(6),
     supa.from("profiles").select("avg_score,attendance").eq("role", "student"),
     supa.from("assignments").select("*", { count: "exact", head: true }),
+    supa.from("payments").select("amount,status,paid_at,created_at").eq("status", "success"),
   ]);
 
   const avgScore = allStudents?.length ? Math.round(allStudents.reduce((a, s) => a + (s.avg_score || 0), 0) / allStudents.length) : 0;
   const avgAttend = allStudents?.length ? Math.round(allStudents.reduce((a, s) => a + (s.attendance || 0), 0) / allStudents.length) : 0;
+
+  // Revenue received this month (from the verified payments ledger; empty until
+  // Paystack is live / the migration is run).
+  const monthRevenue = (payments ?? [])
+    .filter((p: any) => {
+      const d = new Date(p.paid_at || p.created_at);
+      return d.getMonth() === new Date().getMonth() && d.getFullYear() === new Date().getFullYear();
+    })
+    .reduce((a: number, p: any) => a + Number(p.amount || 0), 0);
   const today = new Date().toLocaleDateString("en-NG", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
   return (
@@ -46,6 +57,7 @@ export default async function AdminDashboard() {
               <HeroStat label="Active students" value={activeStudents ?? 0} />
               <HeroStat label="Avg score" value={avgScore} suffix="%" />
               <HeroStat label="Avg attendance" value={avgAttend} suffix="%" />
+              <HeroStat label="Received this month" value={monthRevenue} prefix="₦" />
             </div>
           </div>
         </div>
@@ -154,11 +166,11 @@ export default async function AdminDashboard() {
   );
 }
 
-function HeroStat({ label, value, suffix = "" }: { label: string; value: number; suffix?: string }) {
+function HeroStat({ label, value, suffix = "", prefix = "" }: { label: string; value: number; suffix?: string; prefix?: string }) {
   return (
     <div className="glass-hero-chip px-5 py-3">
       <p className="font-display text-3xl font-semibold">
-        <CountUp to={value} suffix={suffix} duration={1400} />
+        {prefix}<CountUp to={value} suffix={suffix} duration={1400} />
       </p>
       <p className="text-[11px] font-bold uppercase tracking-wider text-white/50">{label}</p>
     </div>

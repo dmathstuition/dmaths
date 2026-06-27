@@ -93,6 +93,9 @@ export const Icons = {
   checkCircle: (p: IconProps) => (
     <Svg {...p}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></Svg>
   ),
+  payments: (p: IconProps) => (
+    <Svg {...p}><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></Svg>
+  ),
 };
 
 export type IconName = keyof typeof Icons;
