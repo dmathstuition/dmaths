@@ -40,6 +40,20 @@ export const balanceNgn = (tier: { ngn: number }) =>
 
 export type CampTrack = "maths" | "coding" | "both";
 
+// ── Camp curriculum (the subjects/modules inside each plan) ──────────
+// Shown on the camp page and auto-filled as the "subjects" of a camp
+// enrolment, matched to the chosen package's track.
+const MATHS_MODULES = ["Mathematics Foundation Challenge", "Foundation Mathematics"];
+const CODING_MODULES = ["Coding", "Game Development", "Artificial Intelligence", "Web Development", "Python"];
+
+export const CAMP_CURRICULUM: Record<CampTrack, string[]> = {
+  maths: MATHS_MODULES,
+  coding: CODING_MODULES,
+  both: [...MATHS_MODULES, ...CODING_MODULES],
+};
+
+export const tierModules = (tier: { track: CampTrack }) => CAMP_CURRICULUM[tier.track];
+
 export interface CampTier {
   id: string;
   name: string;
