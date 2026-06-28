@@ -21,18 +21,31 @@ export default function TermsPage() {
 
       <H2>Fees and payment</H2>
       <p>
-        Tuition fees are communicated at the point of enrolment and must be paid to the bank or
-        Opay accounts we specify. Access to classes and portal features is conditional on payment.
-        We are not responsible for payments made to any account other than those we officially
-        provide. Always confirm account details directly with us before paying.
+        Tuition and programme fees are communicated at the point of enrolment. You may pay by
+        bank transfer or Opay to the accounts we specify, or online by card or bank through our
+        payment processor, Paystack. Some programmes allow you to pay a part deposit (for example
+        50%) to secure a place, with the balance due as arranged with us. Access to classes and
+        portal features is conditional on payment. Promotional prices and discounts are
+        time-limited and may be changed or withdrawn at any time. We are not responsible for
+        payments made to any account other than those we officially provide — always confirm
+        account details directly with us before paying.
+      </p>
+
+      <H2>Programmes and camps</H2>
+      <p>
+        From time to time we run fixed programmes such as the D-Maths Online Summer Camp. Each
+        programme is offered for a stated period and package, places may be limited, and the
+        specific fee, dates and inclusions are shown at sign-up. Refunds for fixed programmes are
+        governed by our Payment &amp; Refund Policy.
       </p>
 
       <H2>Use of the portal</H2>
       <p>
-        Login credentials are personal to each student and must not be shared. You are responsible
-        for activity under your account. You agree not to misuse the portal, attempt to access
-        other users' data, upload harmful files, or use the service for any unlawful purpose. We
-        may suspend accounts that breach these terms.
+        Login credentials are personal to each account holder and must not be shared. Parents or
+        guardians may be given their own account, through which they can view only the records of
+        their own linked child. You are responsible for activity under your account. You agree not
+        to misuse the portal, attempt to access other users' data, upload harmful files, or use
+        the service for any unlawful purpose. We may suspend accounts that breach these terms.
       </p>
 
       <H2>Academic content</H2>
