@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { sendEmail } from "@/lib/email";
-import { expectedNgnForPlan } from "@/lib/paystack";
+import { expectedNgnForPlan, depositNgnForPlan } from "@/lib/paystack";
 
 // POST { id } — approve an application: create login, profile, email credentials.
 export async function POST(req: Request) {
@@ -45,10 +45,13 @@ export async function POST(req: Request) {
         { status: 402 },
       );
     }
-    const expected = expectedNgnForPlan(app.plan);
-    if (expected > 0 && Number(pay.amount) < expected) {
+    // Part payment is allowed: the minimum is the 50% deposit. Anything below
+    // that is blocked; deposit-to-full is approved and flagged as part payment.
+    const full = expectedNgnForPlan(app.plan);
+    const minDue = depositNgnForPlan(app.plan);
+    if (minDue > 0 && Number(pay.amount) < minDue) {
       return NextResponse.json(
-        { error: `Underpayment: ₦${Number(pay.amount).toLocaleString("en-NG")} received, package costs ₦${expected.toLocaleString("en-NG")}.` },
+        { error: `Underpayment: ₦${Number(pay.amount).toLocaleString("en-NG")} received, minimum deposit is ₦${minDue.toLocaleString("en-NG")}.` },
         { status: 402 },
       );
     }
@@ -62,10 +65,13 @@ export async function POST(req: Request) {
         { status: 409 },
       );
     }
-    // Payment is genuine — mark it verified before we create the account.
+    // Payment is genuine — mark it verified before we create the account, and
+    // record whether the balance is fully settled or still part-paid.
+    const payPlan = full > 0 && Number(pay.amount) < full ? "part" : "full";
     await admin.from("applications").update({
       payment_verified: true,
       payment_verified_at: new Date().toISOString(),
+      pay_plan: payPlan,
     }).eq("id", app.id);
   }
 

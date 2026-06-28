@@ -28,6 +28,16 @@ export const discountedUsd = (tier: { usd: number }) =>
 export const discountedNgn = (tier: { ngn: number }) =>
   Math.round(tier.ngn * DISCOUNT_FACTOR);
 
+// ── Part payment ─────────────────────────────────────────────────────
+// Families may pay a deposit now and the balance later. The deposit is half
+// the discounted price; both the displayed amount and the server's minimum
+// accepted amount derive from here, so they can never diverge.
+export const DEPOSIT_FRACTION = 0.5;
+export const depositNgn = (tier: { ngn: number }) =>
+  Math.round(discountedNgn(tier) * DEPOSIT_FRACTION);
+export const balanceNgn = (tier: { ngn: number }) =>
+  discountedNgn(tier) - depositNgn(tier);
+
 export type CampTrack = "maths" | "coding" | "both";
 
 export interface CampTier {
