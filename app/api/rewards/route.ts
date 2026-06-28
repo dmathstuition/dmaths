@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { sendEmail } from "@/lib/email";
+import { loginUrl } from "@/lib/siteUrl";
 
 export async function POST(req: Request) {
   const supa = supabaseServer();
@@ -37,7 +38,7 @@ export async function POST(req: Request) {
     if (student?.email) {
       emailed = await sendEmail("reward", student.email, {
         firstName: student.first_name, stars: s, message,
-        loginUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/login`,
+        loginUrl: loginUrl(),
       });
     }
   }

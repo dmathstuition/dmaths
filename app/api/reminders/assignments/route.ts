@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { getProfile } from "@/lib/auth";
 import { sendEmail } from "@/lib/email";
+import { loginUrl } from "@/lib/siteUrl";
 
 export async function POST() {
   const profile = await getProfile();
@@ -47,7 +48,7 @@ export async function POST() {
       assignmentTitle: assignment.title,
       subject: assignment.subject,
       dueDate: new Date(assignment.due_date).toLocaleDateString("en-NG", { dateStyle: "medium" }),
-      loginUrl: process.env.NEXT_PUBLIC_APP_URL ?? "",
+      loginUrl: loginUrl(),
     });
     if (ok) sent++;
   }

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { sendEmail } from "@/lib/email";
+import { siteBaseUrl } from "@/lib/siteUrl";
 
 export async function POST(req: Request) {
   const supa = supabaseServer();
@@ -32,7 +33,7 @@ export async function POST(req: Request) {
     guardian_email: student.guardian_email,
   }).select("token").single();
 
-  const portalUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/guardian/${row!.token}`;
+  const portalUrl = `${siteBaseUrl()}/guardian/${row!.token}`;
   const studentName = `${student.first_name} ${student.last_name}`;
 
   await sendEmail("guardian_invite", student.guardian_email, { studentName, portalUrl });
