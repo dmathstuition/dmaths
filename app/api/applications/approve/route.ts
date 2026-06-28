@@ -4,6 +4,7 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { sendEmail } from "@/lib/email";
 import { expectedNgnForPlan, depositNgnForPlan } from "@/lib/paystack";
 import { loginUrl } from "@/lib/siteUrl";
+import { findTier, fmtNgn } from "@/lib/summerCamp";
 
 // POST { id } — approve an application: create login, profile, email credentials.
 export async function POST(req: Request) {
@@ -109,14 +110,31 @@ export async function POST(req: Request) {
   await admin.from("applications").update({ status: "approved", reviewed_at: new Date().toISOString() }).eq("id", id);
   await admin.from("audit_log").insert({ actor_id: user.id, action: "approve_application", detail: { application_id: id, student_code: code } });
 
-  // 6. Email credentials via the Apps Script relay
-  await sendEmail("credentials", app.email, {
-    firstName: app.first_name,
-    studentCode: code,
-    email: app.email,
-    tempPassword,
-    loginUrl: loginUrl(),
-  });
+  // 6. Email login details via the Apps Script relay. Camp registrations get a
+  //    dedicated welcome email (with package + any outstanding balance); regular
+  //    enrolments get the standard credentials email.
+  if (app.camp) {
+    const full = expectedNgnForPlan(app.plan);
+    const balance = Math.max(0, full - Number(app.payment_amount || 0));
+    const balanceDue = app.pay_plan === "part" && balance > 0 ? fmtNgn(balance) : "";
+    await sendEmail("camp_welcome", app.email, {
+      firstName: app.first_name,
+      studentCode: code,
+      email: app.email,
+      tempPassword,
+      loginUrl: loginUrl(),
+      packageName: findTier(app.plan)?.name ?? app.plan,
+      balanceDue,
+    });
+  } else {
+    await sendEmail("credentials", app.email, {
+      firstName: app.first_name,
+      studentCode: code,
+      email: app.email,
+      tempPassword,
+      loginUrl: loginUrl(),
+    });
+  }
 
   // 7. If a guardian email was provided, create a parent portal account
   const guardianEmail = ((app.guardian_email as string) || "").trim();

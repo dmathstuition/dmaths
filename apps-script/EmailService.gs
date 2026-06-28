@@ -115,6 +115,40 @@ const TEMPLATES = {
       '<p>' + esc_(d.message) + '</p>',
   }),
 
+  camp_welcome: (d) => ({
+    subject: '☀️ Welcome to the D-Maths Online Summer Camp!',
+    html:
+      '<h2 style="color:#0A1F3D">Welcome, ' + esc_(d.firstName) + '!</h2>' +
+      '<p>Your place in the <strong>D-Maths Online Summer Camp</strong> is confirmed' +
+      (d.packageName ? ' on the <strong>' + esc_(d.packageName) + '</strong> package' : '') +
+      '. Here are your portal credentials:</p>' +
+      '<table style="border-collapse:collapse;margin:16px 0">' +
+      row_('Student ID', '<code>' + esc_(d.studentCode) + '</code>') +
+      row_('Email', esc_(d.email)) +
+      row_('Temporary password', '<code>' + esc_(d.tempPassword) + '</code>') +
+      '</table>' +
+      (d.balanceDue
+        ? '<p style="background:#FEF3C7;border:1px solid #FCD34D;border-radius:8px;padding:10px 14px;color:#92400E"><strong>Balance to pay:</strong> ' + esc_(d.balanceDue) + ' — our team will arrange this with you.</p>'
+        : '') +
+      '<p><a href="' + esc_(d.loginUrl) + '" style="background:#E8841C;color:#06152B;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:bold">Sign in to your portal →</a></p>' +
+      '<p style="color:#64748B;font-size:13px">Our team will contact you shortly with your class schedule and how to join. Please change your password after first sign-in (Profile → Change password).</p>',
+  }),
+
+  balance_reminder: (d) => ({
+    subject: '⏳ D-Maths Summer Camp — balance reminder',
+    html:
+      '<h2 style="color:#0A1F3D">Hi ' + esc_(d.firstName) + ',</h2>' +
+      '<p>Thank you for registering for the <strong>D-Maths Online Summer Camp</strong>' +
+      (d.packageName ? ' (' + esc_(d.packageName) + ')' : '') +
+      '. This is a friendly reminder about the balance on your registration:</p>' +
+      '<table style="border-collapse:collapse;margin:16px 0">' +
+      row_('Paid so far', esc_(d.paid)) +
+      row_('Balance due', '<span style="color:#DC2626;font-weight:bold">' + esc_(d.balanceDue) + '</span>') +
+      '</table>' +
+      '<p>To settle the balance, pay by bank transfer or Opay to the accounts we provided, or simply reply to this email and we will arrange it with you.</p>' +
+      '<p><a href="' + esc_(d.loginUrl) + '" style="background:#E8841C;color:#06152B;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:bold">Open your portal →</a></p>',
+  }),
+
   parent_credentials: (d) => ({
     subject: '👪 Your D-Maths Parent Portal Login',
     html:
