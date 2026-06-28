@@ -16,24 +16,29 @@ export default function PrivacyPage() {
       <p>
         Our students are mostly under 18. We collect a parent or guardian's name and contact
         details with every application, and by submitting an application the guardian consents to
-        the processing of the student's information as described here. A guardian may withdraw
-        consent at any time by contacting us, after which the student's account will be closed and
-        data deleted as described below.
+        the processing of the student's information as described here. A parent or guardian may
+        also be given their own portal account (with an email and password) to view their own
+        child's progress. A guardian may withdraw consent at any time by contacting us, after
+        which the student's account will be closed and data deleted as described below.
       </p>
 
       <H2>What we collect</H2>
       <p>
         Through the enrolment application and portal we collect: the student's name, date of
         birth, email address, phone number, home address, academic level and subjects; the
-        guardian's name and contact; payment reference details (we do not store card numbers or
-        bank credentials — payments are made directly to our bank/Opay accounts); and academic
-        records generated through use of the portal (assignment grades, attendance, progress).
+        guardian's name, contact and (where provided) email; academic and conduct records
+        generated through use of the portal (assignment grades, attendance, progress, behaviour
+        notes, reward stars and badges); and payment records (the payment reference, amount,
+        method and status). We do not store card numbers or bank credentials — online card and
+        bank payments are processed securely by Paystack, and bank-transfer/Opay payments are
+        made directly to the accounts we provide.
       </p>
 
       <H2>Why we collect it</H2>
       <p>
         We use this information solely to deliver tuition services: creating and managing student
-        accounts, scheduling classes, grading assignments, tracking academic progress, contacting
+        accounts, scheduling classes, grading assignments, tracking academic progress and
+        behaviour, giving parents/guardians portal access to their own child's records, contacting
         students and guardians about classes and results, and verifying enrolment payments. We do
         not sell, rent, or trade personal information to anyone, and we do not use it for
         third-party advertising.
@@ -51,9 +56,10 @@ export default function PrivacyPage() {
       <H2>Who we share it with</H2>
       <p>
         We share data only with the service providers required to run the portal: Supabase
-        (database and authentication), Vercel (website hosting), and Google (email delivery).
-        Each processes data on our instructions. We may disclose information if required by
-        Nigerian law or a valid legal process.
+        (database and authentication), Vercel (website hosting), Google (email delivery), and
+        Paystack (processing online card and bank payments). Each processes data on our
+        instructions. We may disclose information if required by Nigerian law or a valid legal
+        process.
       </p>
 
       <H2>How long we keep it</H2>
