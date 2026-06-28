@@ -8,6 +8,7 @@ import { DotsScatter } from "@/components/illustrations";
 import {
   SUMMER_CAMP,
   SUMMER_CAMP_TIERS,
+  CAMP_CURRICULUM,
   DISCOUNT_PCT,
   discountedUsd,
   discountedNgn,
@@ -26,15 +27,8 @@ export const metadata: Metadata = {
   },
 };
 
-const INCLUDED = [
-  "Mathematics Foundation Challenge",
-  "Foundation Mathematics",
-  "Coding",
-  "Game Development",
-  "Artificial Intelligence",
-  "Web Development",
-  "Python",
-];
+// Single source of truth — the same modules the apply form fills in per plan.
+const INCLUDED = CAMP_CURRICULUM.both;
 
 const TRACK_LABEL: Record<string, string> = {
   maths: "Maths",

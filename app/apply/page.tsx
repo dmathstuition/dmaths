@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import PaystackButton from "@/components/PaystackButton";
-import { SUMMER_CAMP_TIERS, findTier, fmtUsd, fmtNgn, DISCOUNT_PCT, discountedUsd, discountedNgn, depositNgn, balanceNgn, type CampTier } from "@/lib/summerCamp";
+import { SUMMER_CAMP_TIERS, findTier, fmtUsd, fmtNgn, DISCOUNT_PCT, discountedUsd, discountedNgn, depositNgn, balanceNgn, tierModules, type CampTier } from "@/lib/summerCamp";
 
 const SUBJECTS = ["Algebra","Calculus","Statistics","Geometry","Further Mathematics","Core Maths Revision","Physics","JavaScript","Python","Python Practice Challenge","External Examinations"];
 
@@ -44,7 +44,7 @@ export default function Apply() {
   // When a tier is chosen, lock in its naira price (full or 50% deposit) and use
   // its name as the "subject" so the existing ≥1-subject validation passes.
   const selectTier = (t: CampTier) =>
-    setF(p => ({ ...p, plan: t.id, payment_amount: payHalf ? depositNgn(t) : discountedNgn(t), subjects: [t.name] }));
+    setF(p => ({ ...p, plan: t.id, payment_amount: payHalf ? depositNgn(t) : discountedNgn(t), subjects: tierModules(t) }));
 
   // Switch between paying in full and paying the 50% deposit.
   function setPayOption(half: boolean, t?: CampTier) {
@@ -222,6 +222,19 @@ export default function Apply() {
                     );
                   })}
                 </div>
+                {selectedTier && (
+                  <div className="mt-4 rounded-2xl border border-line bg-chalk/40 p-4">
+                    <p className="text-[11px] font-bold uppercase tracking-wide text-ink/40">Included in your plan</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {tierModules(selectedTier).map(m => (
+                        <span key={m} className="inline-flex items-center gap-1.5 rounded-full bg-gold-pale px-3 py-1 text-[12px] font-semibold text-gold-deep">
+                          <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12" /></svg>
+                          {m}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div>
