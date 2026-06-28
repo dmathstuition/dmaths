@@ -96,6 +96,8 @@ export default function SummerCamp() {
                 alt="D-Maths students coding and building projects with the D-Maths robot"
                 width={1000}
                 height={812}
+                quality={90}
+                sizes="(max-width: 768px) 100vw, 50vw"
                 className="h-auto w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 priority
               />
