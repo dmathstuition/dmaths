@@ -93,6 +93,8 @@ export default function Landing() {
               alt="D-Maths student with the D-Maths robot"
               width={900}
               height={760}
+              quality={90}
+              sizes="(max-width: 768px) 100vw, 50vw"
               className="relative z-10 mx-auto h-auto w-full object-contain drop-shadow-2xl"
               priority
             />
@@ -153,10 +155,12 @@ export default function Landing() {
             <div className="grid items-center gap-10 md:grid-cols-2">
               <Reveal className="relative overflow-hidden rounded-2xl shadow-lg">
                 <Image
-                  src="https://images.unsplash.com/photo-1509062522246-3755977927d7?w=700&q=80"
+                  src="https://images.unsplash.com/photo-1509062522246-3755977927d7?w=1200&q=85"
                   alt="Students in an online classroom"
-                  width={700}
-                  height={480}
+                  width={1200}
+                  height={820}
+                  quality={90}
+                  sizes="(max-width: 768px) 100vw, 50vw"
                   className="h-auto w-full object-cover"
                 />
               </Reveal>
@@ -217,6 +221,8 @@ export default function Landing() {
               alt="D-Maths learner with the D-Maths robot"
               width={900}
               height={760}
+              quality={90}
+              sizes="(max-width: 768px) 100vw, 50vw"
               className="relative z-10 mx-auto h-auto w-full object-contain drop-shadow-2xl"
             />
           </Reveal>
