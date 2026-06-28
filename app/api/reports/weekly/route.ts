@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { sendEmail } from "@/lib/email";
+import { siteBaseUrl } from "@/lib/siteUrl";
 
 export async function POST() {
   const supa = supabaseServer();
@@ -44,7 +45,7 @@ export async function POST() {
     subsByStudent.set(sub.student_id, arr);
   }
 
-  const loginUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/login`;
+  const loginUrl = `${siteBaseUrl()}/login`;
   let sent = 0;
 
   for (const student of students ?? []) {

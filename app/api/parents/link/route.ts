@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { sendEmail } from "@/lib/email";
+import { loginUrl } from "@/lib/siteUrl";
 
 export async function POST(req: Request) {
   const supa = supabaseServer();
@@ -80,7 +81,7 @@ export async function POST(req: Request) {
     studentCode: student.student_code,
     email,
     tempPassword,
-    loginUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/login`,
+    loginUrl: loginUrl(),
   });
 
   return NextResponse.json({ ok: true, created: true });

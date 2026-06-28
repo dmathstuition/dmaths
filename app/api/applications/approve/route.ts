@@ -3,6 +3,7 @@ import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { sendEmail } from "@/lib/email";
 import { expectedNgnForPlan, depositNgnForPlan } from "@/lib/paystack";
+import { loginUrl } from "@/lib/siteUrl";
 
 // POST { id } — approve an application: create login, profile, email credentials.
 export async function POST(req: Request) {
@@ -114,7 +115,7 @@ export async function POST(req: Request) {
     studentCode: code,
     email: app.email,
     tempPassword,
-    loginUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/login`,
+    loginUrl: loginUrl(),
   });
 
   // 7. If a guardian email was provided, create a parent portal account
@@ -168,7 +169,7 @@ export async function POST(req: Request) {
           studentCode: code,
           email: guardianEmail,
           tempPassword: tempParentPwd,
-          loginUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/login`,
+          loginUrl: loginUrl(),
         });
       }
       // Parent account failure is non-fatal: student approval already succeeded

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { sendEmail } from "@/lib/email";
+import { loginUrl } from "@/lib/siteUrl";
 
 // Gmail consumer quota is ~100/day. Cap a single blast well under that so one
 // announcement can't exhaust the whole day's allowance in one click.
@@ -47,7 +48,7 @@ export async function POST(req: Request) {
   for (const r of recipients) {
     const sent = await sendEmail("notice", r.email, {
       firstName: r.first_name, title: notice.title, body: notice.body,
-      loginUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/login`,
+      loginUrl: loginUrl(),
     });
     sent ? ok++ : failed++;
   }

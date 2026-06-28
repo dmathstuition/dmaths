@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { sendEmail } from "@/lib/email";
+import { loginUrl } from "@/lib/siteUrl";
 
 // POST { submissionId, grade, feedback } — grade + email the student
 export async function POST(req: Request) {
@@ -58,7 +59,7 @@ export async function POST(req: Request) {
     subject: sub.assignment.subject,
     grade,
     feedback: cleanFeedback,
-    loginUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/login`,
+    loginUrl: loginUrl(),
   });
 
   return NextResponse.json({ ok: true });
