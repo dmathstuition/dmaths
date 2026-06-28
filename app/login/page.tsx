@@ -7,13 +7,21 @@ import { useToast } from "@/components/Toast";
 import { Icon } from "@/components/Icons";
 
 export default function Login() {
+  const [notice, setNotice] = useState<{ kind: "success" | "error"; text: string } | null>(null);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && window.location.search.includes("gone=1")) {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.has("gone")) {
       // an orphaned / deleted / inactive account was bounced here — clear it
       import("@/lib/supabase/client").then(({ supabaseBrowser }) => {
         supabaseBrowser().auth.signOut();
       });
+    }
+    if (params.get("reset") === "done") {
+      setNotice({ kind: "success", text: "Password updated — sign in with your new password." });
+    } else if (params.get("error") === "reset") {
+      setNotice({ kind: "error", text: "That reset link is invalid or has expired — please request a new one." });
     }
   }, []);
 
@@ -73,7 +81,7 @@ export default function Login() {
       email = data;
     }
     await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/portal/profile`,
+      redirectTo: `${window.location.origin}/auth/confirm?next=/reset-password`,
     });
     setError("");
     push("If an account exists, a reset link has been sent to its email address.", "success");
@@ -89,6 +97,11 @@ export default function Login() {
             <p className="mt-1.5 text-sm text-white/45">Students use their Student ID. Parents and staff use their email.</p>
           </div>
           <form onSubmit={signIn} className="space-y-4 p-7">
+            {notice && (
+              <p role="status" className={`rounded-xl px-4 py-3 text-sm font-semibold ${notice.kind === "success" ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-800"}`}>
+                {notice.text}
+              </p>
+            )}
             {error && <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-800">{error}</p>}
             <div>
               <label className="flabel" htmlFor="id">Student ID or email</label>
