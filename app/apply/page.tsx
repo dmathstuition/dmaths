@@ -22,6 +22,8 @@ function isFreeApplication(subjects: string[]) {
 }
 const LEVELS = ["JSS 1","JSS 2","JSS 3","SSS 1","SSS 2","SSS 3","Post Secondary"];
 const METHODS = ["Access Bank Transfer","Opay Bank Transfer","Cash"];
+// Tab-scoped draft so leaving to read a policy page and pressing Back restores progress.
+const DRAFT_KEY = "dmaths-apply-draft";
 
 type Form = Record<string, any>;
 
@@ -52,9 +54,24 @@ export default function Apply() {
     if (t) set("payment_amount", half ? depositNgn(t) : discountedNgn(t));
   }
 
-  // Read campaign params on mount. We read window.location.search directly
-  // (instead of useSearchParams) to avoid the Next 14 CSR-bailout/Suspense rule.
+  // On mount: restore an in-progress draft (so leaving to read a policy page and
+  // pressing Back returns to the same step with data intact). If there's no
+  // draft, read campaign params from the URL. We read window.location.search
+  // directly (instead of useSearchParams) to avoid the Next 14 CSR-bailout rule.
   useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(DRAFT_KEY);
+      if (raw) {
+        const d = JSON.parse(raw);
+        if (d.f) setF(d.f);
+        if (typeof d.step === "number") setStep(d.step);
+        if (typeof d.camp === "string") setCamp(d.camp);
+        setPayHalf(!!d.payHalf);
+        setConsent(!!d.consent);
+        return; // restored — don't let URL params overwrite the chosen tier/amount
+      }
+    } catch { /* ignore malformed draft */ }
+
     const params = new URLSearchParams(window.location.search);
     const c = params.get("camp") || "";
     if (!c) return;
@@ -62,6 +79,15 @@ export default function Apply() {
     const tier = findTier(params.get("plan"));
     if (tier) selectTier(tier);
   }, []);
+
+  // Persist progress so a same-tab navigation (e.g. to a policy page) can be
+  // restored on Back. Stops once the application is submitted.
+  useEffect(() => {
+    if (done) return;
+    try {
+      sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ f, step, camp, payHalf, consent }));
+    } catch { /* storage unavailable — non-fatal */ }
+  }, [f, step, camp, payHalf, consent, done]);
 
   const selectedTier = camp ? findTier(f.plan) : undefined;
 
@@ -115,6 +141,7 @@ export default function Apply() {
     });
     setBusy(false);
     if (err) return setError("Could not submit — please check your connection and try again.");
+    try { sessionStorage.removeItem(DRAFT_KEY); } catch {}
     setDone(true);
   }
 
@@ -371,9 +398,9 @@ export default function Apply() {
             <span>
               I am the student or their parent/guardian, the information provided is accurate, and I
               have read and agree to the{" "}
-              <a href="/privacy" target="_blank" className="font-semibold text-gold-deep underline">Privacy Policy</a>,{" "}
-              <a href="/terms" target="_blank" className="font-semibold text-gold-deep underline">Terms of Service</a>, and{" "}
-              <a href="/refunds" target="_blank" className="font-semibold text-gold-deep underline">Payment &amp; Refund Policy</a>.
+              <a href="/privacy" className="font-semibold text-gold-deep underline">Privacy Policy</a>,{" "}
+              <a href="/terms" className="font-semibold text-gold-deep underline">Terms of Service</a>, and{" "}
+              <a href="/refunds" className="font-semibold text-gold-deep underline">Payment &amp; Refund Policy</a>.
               I consent to the processing of the student's information for the purpose of providing tuition.
             </span>
           </label>
