@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { supabaseAdmin } from "@/lib/supabase/admin";
-import { recordPayment, expectedNgnForPlan, type PaystackTxn } from "@/lib/paystack";
+import { recordPayment, depositNgnForPlan, type PaystackTxn } from "@/lib/paystack";
 
 // Node runtime required: we need `crypto` and the raw request body to verify
 // Paystack's signature. (Edge runtime would not give us a stable raw body.)
@@ -57,8 +57,8 @@ export async function POST(req: Request) {
         app.email.toLowerCase() === payerEmail &&
         (data.currency || "NGN") === "NGN"
       ) {
-        const expectedAmt = expectedNgnForPlan(app.plan);
-        if (!(expectedAmt > 0 && amountPaid < expectedAmt)) {
+        const minDue = depositNgnForPlan(app.plan);
+        if (!(minDue > 0 && amountPaid < minDue)) {
           await admin.from("applications").update({
             payment_ref: data.reference,
             payment_amount: amountPaid,

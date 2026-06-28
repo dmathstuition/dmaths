@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import PaystackButton from "@/components/PaystackButton";
-import { SUMMER_CAMP_TIERS, findTier, fmtUsd, fmtNgn, DISCOUNT_PCT, discountedUsd, discountedNgn, type CampTier } from "@/lib/summerCamp";
+import { SUMMER_CAMP_TIERS, findTier, fmtUsd, fmtNgn, DISCOUNT_PCT, discountedUsd, discountedNgn, depositNgn, balanceNgn, type CampTier } from "@/lib/summerCamp";
 
 const SUBJECTS = ["Algebra","Calculus","Statistics","Geometry","Further Mathematics","Core Maths Revision","Physics","JavaScript","Python","Python Practice Challenge","External Examinations"];
 
@@ -34,15 +34,23 @@ export default function Apply() {
   const [consent, setConsent] = useState(false);
   // Summer-camp tag from the URL (?camp=summer-2026&plan=<id>)
   const [camp, setCamp] = useState("");
+  // Part payment: pay the full discounted price, or a 50% deposit now.
+  const [payHalf, setPayHalf] = useState(false);
 
   const set = (k: string, v: any) => setF(p => ({ ...p, [k]: v }));
   const toggleSubject = (s: string) =>
     set("subjects", f.subjects.includes(s) ? f.subjects.filter((x: string) => x !== s) : [...f.subjects, s]);
 
-  // When a tier is chosen, lock in its DISCOUNTED naira price (what we charge)
-  // and use its name as the "subject" so the existing ≥1-subject validation passes.
+  // When a tier is chosen, lock in its naira price (full or 50% deposit) and use
+  // its name as the "subject" so the existing ≥1-subject validation passes.
   const selectTier = (t: CampTier) =>
-    setF(p => ({ ...p, plan: t.id, payment_amount: discountedNgn(t), subjects: [t.name] }));
+    setF(p => ({ ...p, plan: t.id, payment_amount: payHalf ? depositNgn(t) : discountedNgn(t), subjects: [t.name] }));
+
+  // Switch between paying in full and paying the 50% deposit.
+  function setPayOption(half: boolean, t?: CampTier) {
+    setPayHalf(half);
+    if (t) set("payment_amount", half ? depositNgn(t) : discountedNgn(t));
+  }
 
   // Read campaign params on mount. We read window.location.search directly
   // (instead of useSearchParams) to avoid the Next 14 CSR-bailout/Suspense rule.
@@ -95,6 +103,7 @@ export default function Apply() {
       guardian_email: f.guardian_email || "",
       subjects: f.subjects, notes: f.notes || "",
       camp: camp || "", plan: f.plan || "",
+      pay_plan: selectedTier && payHalf ? "part" : "full",
       payment_ref: free ? "FREE-ENROLMENT" : f.payment_ref,
       payment_method: free ? "Free promotion" : f.payment_method,
       payment_amount: free ? 0 : Number(f.payment_amount),
@@ -261,6 +270,32 @@ export default function Apply() {
               </div>
             )}
 
+            {/* Part payment option (camp only) */}
+            {selectedTier && (
+              <div>
+                <label className="flabel">Payment option</label>
+                <div className="grid gap-2.5 sm:grid-cols-2">
+                  <button type="button" onClick={() => setPayOption(false, selectedTier)}
+                    className={`rounded-2xl border p-3.5 text-left transition ${!payHalf ? "border-gold bg-gold-pale ring-1 ring-gold/40" : "border-line bg-white hover:border-gold/40"}`}>
+                    <p className="text-[13px] font-bold text-ink">Pay in full</p>
+                    <p className="mt-0.5 font-display text-lg font-extrabold text-gold-deep">{fmtNgn(discountedNgn(selectedTier))}</p>
+                    <p className="text-[11px] text-ink/45">One payment · done</p>
+                  </button>
+                  <button type="button" onClick={() => setPayOption(true, selectedTier)}
+                    className={`rounded-2xl border p-3.5 text-left transition ${payHalf ? "border-gold bg-gold-pale ring-1 ring-gold/40" : "border-line bg-white hover:border-gold/40"}`}>
+                    <p className="text-[13px] font-bold text-ink">Pay half now</p>
+                    <p className="mt-0.5 font-display text-lg font-extrabold text-gold-deep">{fmtNgn(depositNgn(selectedTier))}</p>
+                    <p className="text-[11px] text-ink/45">Balance {fmtNgn(balanceNgn(selectedTier))} later</p>
+                  </button>
+                </div>
+                {payHalf && (
+                  <p className="mt-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] font-semibold text-amber-900">
+                    You'll pay <strong>{fmtNgn(depositNgn(selectedTier))}</strong> now to secure your place. The remaining <strong>{fmtNgn(balanceNgn(selectedTier))}</strong> can be paid later — our team will arrange it with you.
+                  </p>
+                )}
+              </div>
+            )}
+
             <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900">
               Send payment to <strong>Opay: 7025674894</strong> or <strong>Access Bank: 1534530227</strong>.
               Use your full name as the reference.
@@ -305,8 +340,8 @@ export default function Apply() {
             <Row>
               {selectedTier ? (
                 <div>
-                  <label className="flabel">Amount due (₦){DISCOUNT_PCT > 0 && ` · ${DISCOUNT_PCT}% off`}</label>
-                  <input className="field bg-chalk/60 font-bold" value={fmtNgn(discountedNgn(selectedTier))} readOnly />
+                  <label className="flabel">Amount due now (₦){payHalf ? " · half" : DISCOUNT_PCT > 0 ? ` · ${DISCOUNT_PCT}% off` : ""}</label>
+                  <input className="field bg-chalk/60 font-bold" value={fmtNgn(payHalf ? depositNgn(selectedTier) : discountedNgn(selectedTier))} readOnly />
                 </div>
               ) : (
                 <Field label="Amount paid (₦)" type="number" required value={f.payment_amount} onChange={v => set("payment_amount", v)} />

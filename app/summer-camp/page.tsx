@@ -208,7 +208,10 @@ export default function SummerCamp() {
             ))}
           </div>
 
-          <p className="mx-auto mt-8 max-w-lg text-center text-xs text-ink/40">
+          <p className="mx-auto mt-8 max-w-lg text-center text-sm font-semibold text-ink/60">
+            💳 Prefer to spread it out? <span className="text-gold-deep">Pay half now and the balance later.</span>
+          </p>
+          <p className="mx-auto mt-2 max-w-lg text-center text-xs text-ink/40">
             Payment is processed in naira (₦) at ₦{SUMMER_CAMP.ngnPerUsd.toLocaleString("en-NG")} to
             $1. After you register and your payment is verified, your Student ID and portal login
             arrive by email.

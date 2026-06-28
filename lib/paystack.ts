@@ -1,6 +1,6 @@
 // SERVER ONLY — Paystack helpers. Never import in a client component
 // (this reads PAYSTACK_SECRET_KEY).
-import { SUMMER_CAMP_TIERS, discountedNgn } from "@/lib/summerCamp";
+import { SUMMER_CAMP_TIERS, discountedNgn, depositNgn } from "@/lib/summerCamp";
 
 export interface PaystackTxn {
   status: string;
@@ -24,6 +24,15 @@ export function expectedNgnForPlan(plan?: string | null): number {
   if (!plan) return 0;
   const tier = SUMMER_CAMP_TIERS.find((t) => t.id === plan);
   return tier ? discountedNgn(tier) : 0;
+}
+
+// Minimum acceptable payment for a camp package — the 50% deposit, since part
+// payment is allowed. Used as the enforcement floor (verify / webhook / approval
+// gate). Returns 0 for non-camp payments.
+export function depositNgnForPlan(plan?: string | null): number {
+  if (!plan) return 0;
+  const tier = SUMMER_CAMP_TIERS.find((t) => t.id === plan);
+  return tier ? depositNgn(tier) : 0;
 }
 
 // Ask Paystack's API whether a reference genuinely succeeded. The secret key

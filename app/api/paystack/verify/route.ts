@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
-import { paystackSecret, verifyTransaction, recordPayment, expectedNgnForPlan } from "@/lib/paystack";
+import { paystackSecret, verifyTransaction, recordPayment, depositNgnForPlan } from "@/lib/paystack";
 
 export const runtime = "nodejs";
 
@@ -39,13 +39,14 @@ export async function POST(req: Request) {
   // 3. Record into the authoritative ledger (idempotent on reference).
   await recordPayment(admin, data);
 
-  // 4. For camp packages we know the exact price — reject underpayment.
-  const expected = expectedNgnForPlan(plan ?? data.metadata?.plan);
-  if (expected > 0 && amountPaid < expected) {
+  // 4. For camp packages, the minimum is the 50% deposit (part payment is
+  //    allowed) — reject anything below that.
+  const minDue = depositNgnForPlan(plan ?? data.metadata?.plan);
+  if (minDue > 0 && amountPaid < minDue) {
     return NextResponse.json(
       {
         verified: false,
-        error: `Amount paid (₦${amountPaid.toLocaleString("en-NG")}) is less than the package price (₦${expected.toLocaleString("en-NG")}).`,
+        error: `Amount paid (₦${amountPaid.toLocaleString("en-NG")}) is less than the minimum deposit (₦${minDue.toLocaleString("en-NG")}).`,
       },
       { status: 400 },
     );

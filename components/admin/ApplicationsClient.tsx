@@ -4,7 +4,7 @@ import { supabaseBrowser } from "@/lib/supabase/client";
 import ConfirmModal from "@/components/ConfirmModal";
 import PromptModal from "@/components/PromptModal";
 import { useToast } from "@/components/Toast";
-import { findTier } from "@/lib/summerCamp";
+import { findTier, discountedNgn, fmtNgn } from "@/lib/summerCamp";
 
 type App = Record<string, any>;
 const FILTERS = ["all", "pending", "approved", "rejected"] as const;
@@ -26,6 +26,19 @@ export default function ApplicationsClient({ initial }: { initial: App[] }) {
   async function reload() {
     const { data } = await supabase.from("applications").select("*").order("created_at", { ascending: false });
     setApps(data ?? []);
+  }
+
+  // Outstanding balance for a part-paid camp application (full price − paid).
+  function balanceFor(a: App): number {
+    const tier = findTier(a.plan);
+    if (!tier || a.pay_plan !== "part") return 0;
+    return Math.max(0, discountedNgn(tier) - Number(a.payment_amount || 0));
+  }
+
+  async function markBalancePaid(id: string) {
+    await supabase.from("applications").update({ pay_plan: "full" }).eq("id", id);
+    push("Balance marked as paid.", "success");
+    reload();
   }
 
   const visible = apps
@@ -97,6 +110,7 @@ export default function ApplicationsClient({ initial }: { initial: App[] }) {
             </div>
             <div className="flex items-center gap-3">
               {a.camp && <span className="pill-amber">☀️ Summer Camp</span>}
+              {a.pay_plan === "part" && <span className="pill-red">Part payment</span>}
               <span className={a.status === "approved" ? "pill-green" : a.status === "rejected" ? "pill-red" : "pill-amber"}>{a.status}</span>
               {a.status === "rejected" && (
                 <button className="text-xs font-bold text-red-600 hover:underline"
@@ -115,11 +129,21 @@ export default function ApplicationsClient({ initial }: { initial: App[] }) {
             {a.camp && <Info k="Camp package" v={findTier(a.plan)?.name ?? a.plan} />}
             <Info k="Payment ref" v={a.payment_ref} />
             {a.payment_verified && <div><dt className="text-[11px] font-bold uppercase tracking-wide text-ink/35">Status</dt><dd className="font-semibold"><span className="pill-green">✓ Verified</span></dd></div>}
-            <Info k="Amount" v={`₦${Number(a.payment_amount).toLocaleString("en-NG")}`} />
+            <Info k={a.pay_plan === "part" ? "Paid so far" : "Amount"} v={`₦${Number(a.payment_amount).toLocaleString("en-NG")}`} />
             <Info k="Method" v={a.payment_method} />
             <Info k="Guardian" v={`${a.guardian_name} (${a.guardian_contact})`} />
           </dl>
           {a.notes && <p className="mt-3 rounded-xl bg-chalk px-4 py-2.5 text-[13px] text-ink/60">"{a.notes}"</p>}
+
+          {balanceFor(a) > 0 && (
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5">
+              <p className="text-[13px] font-bold text-red-900">
+                Outstanding balance: {fmtNgn(balanceFor(a))}
+                <span className="ml-1 font-semibold text-red-700/70">of {fmtNgn(discountedNgn(findTier(a.plan)!))} total</span>
+              </p>
+              <button onClick={() => markBalancePaid(a.id)} className="btn-ghost !min-h-[34px] text-xs">Mark balance paid</button>
+            </div>
+          )}
 
           {a.status === "pending" && (
             <div className="mt-4 flex gap-3 border-t border-line pt-4">
