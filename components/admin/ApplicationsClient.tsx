@@ -41,6 +41,16 @@ export default function ApplicationsClient({ initial }: { initial: App[] }) {
     reload();
   }
 
+  async function sendBalanceReminder(id: string) {
+    const res = await fetch("/api/applications/balance-reminder", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    const json = await res.json();
+    if (!res.ok) { push(json.error || "Could not send reminder.", "error"); return; }
+    push("Balance reminder emailed.", "success");
+  }
+
   const visible = apps
     .filter(a => filter === "all" || a.status === filter)
     .filter(a => !q || `${a.first_name} ${a.last_name} ${a.email} ${a.payment_ref} ${a.camp || ""} ${findTier(a.plan)?.name ?? ""}`.toLowerCase().includes(q.toLowerCase()));
@@ -141,7 +151,10 @@ export default function ApplicationsClient({ initial }: { initial: App[] }) {
                 Outstanding balance: {fmtNgn(balanceFor(a))}
                 <span className="ml-1 font-semibold text-red-700/70">of {fmtNgn(discountedNgn(findTier(a.plan)!))} total</span>
               </p>
-              <button onClick={() => markBalancePaid(a.id)} className="btn-ghost !min-h-[34px] text-xs">Mark balance paid</button>
+              <div className="flex gap-2">
+                <button onClick={() => sendBalanceReminder(a.id)} className="btn-ghost !min-h-[34px] text-xs">Send reminder</button>
+                <button onClick={() => markBalancePaid(a.id)} className="btn-ghost !min-h-[34px] text-xs">Mark balance paid</button>
+              </div>
             </div>
           )}
 
