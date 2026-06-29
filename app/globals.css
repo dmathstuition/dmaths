@@ -251,3 +251,15 @@ html { scroll-behavior: smooth; }
 }
 .badge-pulse { animation: badgePulse 2.4s ease-in-out infinite; }
 /* The global prefers-reduced-motion rule (top of file) disables both. */
+
+/* ── Drifting math symbols (homepage "math in motion") ──── */
+/* Gentle vertical + slight horizontal float with a small rotation —
+   distinct from .float (vertical-only). Used by <FloatingMath>. */
+@keyframes drift {
+  0%, 100% { transform: translate(0, 0) rotate(-4deg); }
+  50%      { transform: translate(6px, -14px) rotate(4deg); }
+}
+.drift { animation: drift 9s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .drift { animation: none; }
+}
