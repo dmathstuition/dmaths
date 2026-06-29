@@ -21,5 +21,7 @@ export async function POST(req: Request) {
     .eq("parent_id", parentId)
     .eq("student_id", studentId);
 
+  await admin.from("audit_log").insert({ actor_id: user.id, action: "parent_unlinked", detail: { parentId, studentId } });
+
   return NextResponse.json({ ok: true });
 }

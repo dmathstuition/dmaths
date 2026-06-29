@@ -38,5 +38,10 @@ export async function POST(req: Request) {
   });
 
   if (!ok) return NextResponse.json({ error: "Email could not be sent." }, { status: 502 });
+
+  await admin.from("audit_log").insert({
+    actor_id: user.id, action: "balance_reminder_sent",
+    detail: { id, name: `${app.first_name} ${app.last_name}`.trim(), balance: fmtNgn(balance) },
+  });
   return NextResponse.json({ ok: true });
 }

@@ -37,6 +37,7 @@ export async function POST(req: Request) {
       { parent_id: existing.id, student_id: studentId },
       { onConflict: "parent_id,student_id" },
     );
+    await admin.from("audit_log").insert({ actor_id: user.id, action: "parent_linked", detail: { parentEmail: email, studentId } });
     return NextResponse.json({ ok: true, created: false });
   }
 
@@ -83,6 +84,8 @@ export async function POST(req: Request) {
     tempPassword,
     loginUrl: loginUrl(),
   });
+
+  await admin.from("audit_log").insert({ actor_id: user.id, action: "parent_linked", detail: { parentEmail: email, studentId } });
 
   return NextResponse.json({ ok: true, created: true });
 }
