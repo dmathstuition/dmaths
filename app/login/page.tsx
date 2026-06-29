@@ -68,6 +68,9 @@ export default function Login() {
       setBusy(false);
       return;
     }
+    // Record last sign-in (accountability) — fire-and-forget, never blocks login.
+    fetch("/api/auth/touch", { method: "POST" }).catch(() => {});
+
     const dest = profile?.role === "admin" ? "/admin" : profile?.role === "parent" ? "/parent" : "/portal";
     router.replace(dest);
   }

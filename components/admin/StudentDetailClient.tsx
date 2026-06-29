@@ -225,6 +225,7 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
         </div>
         <p className="mt-4 border-t border-line pt-3 text-sm text-ink/55">
           {student.email} · {student.phone} · Guardian: {student.guardian_name} ({student.guardian_contact}) · {graded} graded, {pending} pending
+          {" · "}Last seen: {student.last_login_at ? new Date(student.last_login_at).toLocaleString("en-NG", { dateStyle: "medium", timeStyle: "short" }) : "never"}
         </p>
         <div className="mt-3 space-y-2 border-t border-line pt-3">
           <div className="flex flex-wrap items-center gap-2">

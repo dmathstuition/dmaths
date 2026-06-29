@@ -36,7 +36,11 @@ export default function ApplicationsClient({ initial }: { initial: App[] }) {
   }
 
   async function markBalancePaid(id: string) {
-    await supabase.from("applications").update({ pay_plan: "full" }).eq("id", id);
+    const res = await fetch("/api/applications/balance-paid", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    if (!res.ok) { push("Could not update.", "error"); return; }
     push("Balance marked as paid.", "success");
     reload();
   }
