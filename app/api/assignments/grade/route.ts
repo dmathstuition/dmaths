@@ -3,6 +3,7 @@ import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { sendEmail } from "@/lib/email";
 import { loginUrl } from "@/lib/siteUrl";
+import { notifyUser } from "@/lib/notify";
 
 // POST { submissionId, grade, feedback } — grade + email the student
 export async function POST(req: Request) {
@@ -35,8 +36,7 @@ export async function POST(req: Request) {
       const { error: badgeErr } = await admin.from("student_badges")
         .insert({ student_id: sub.student_id, badge_id: (perfectBadge as any).id });
       if (!badgeErr) {
-        await admin.from("notifications").insert({
-          user_id: sub.student_id,
+        await notifyUser(admin, sub.student_id, {
           title: `Badge unlocked: ${(perfectBadge as any).name}!`,
           body: (perfectBadge as any).description,
           link: "/portal/badges",
@@ -46,8 +46,7 @@ export async function POST(req: Request) {
   }
 
   await admin.from("audit_log").insert({ actor_id: user.id, action: "grade_assignment", detail: { submissionId, grade } });
-  await admin.from("notifications").insert({
-    user_id: sub.student_id,
+  await notifyUser(admin, sub.student_id, {
     title: "Assignment graded",
     body: `${g}/100 — ${sub.assignment.title}`,
     link: "/portal/assignments",

@@ -92,3 +92,40 @@ const serwist = new Serwist({
 });
 
 serwist.addEventListeners();
+
+// ── Web Push ──────────────────────────────────────────────────────────
+// Payload (from lib/push/send.ts) is JSON: { title, body, url }.
+self.addEventListener("push", (event: PushEvent) => {
+  let data: { title?: string; body?: string; url?: string } = {};
+  try {
+    data = event.data?.json() ?? {};
+  } catch {
+    data = { title: event.data?.text() };
+  }
+  const title = data.title || "D-Maths";
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body: data.body || "",
+      icon: "/icons/icon-192.png",
+      badge: "/icons/icon-192.png",
+      data: { url: data.url || "/" },
+    }),
+  );
+});
+
+// Focus an open tab on the target URL, or open a new one.
+self.addEventListener("notificationclick", (event: NotificationEvent) => {
+  event.notification.close();
+  const url = (event.notification.data as { url?: string })?.url || "/";
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+      for (const client of clients) {
+        if ("focus" in client) {
+          (client as WindowClient).navigate(url);
+          return (client as WindowClient).focus();
+        }
+      }
+      return self.clients.openWindow(url);
+    }),
+  );
+});

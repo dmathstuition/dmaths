@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { recordPayment, depositNgnForPlan, type PaystackTxn } from "@/lib/paystack";
+import { notifyAdmins } from "@/lib/notify";
+import { fmtNgn } from "@/lib/summerCamp";
 
 // Node runtime required: we need `crypto` and the raw request body to verify
 // Paystack's signature. (Edge runtime would not give us a stable raw body.)
@@ -40,8 +42,26 @@ export async function POST(req: Request) {
     const data = event.data as PaystackTxn;
     const admin = supabaseAdmin();
 
+    // Was this reference already recorded? (Paystack retries the same event,
+    // so we only alert admins the FIRST time we see it.)
+    const { data: prior } = await admin
+      .from("payments").select("reference").eq("reference", data.reference).maybeSingle();
+    const isNew = !prior;
+
     // 1. Authoritative ledger (idempotent on reference — safe against retries/replays).
     await recordPayment(admin, data);
+
+    // 1b. Alert admins that money came in (in-app bell + push). Best-effort,
+    //     and only once per reference.
+    if (isNew) {
+      const ngn = Math.round((data.amount ?? 0) / 100);
+      const payer = data.customer?.email || "a customer";
+      await notifyAdmins(admin, {
+        title: "New payment received",
+        body: `${fmtNgn(ngn)} from ${payer}`,
+        link: "/admin/applications",
+      });
+    }
 
     // 2. If the payment carries an applicationId in metadata, stamp that
     //    application verified — but only when email + currency + amount check out.

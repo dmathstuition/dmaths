@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { notifyUser } from "@/lib/notify";
 
 async function awardPointsBadges(admin: ReturnType<typeof supabaseAdmin>, studentId: string, rewardPoints: number) {
   const [{ data: badges }, { data: earned }] = await Promise.all([
@@ -12,8 +13,7 @@ async function awardPointsBadges(admin: ReturnType<typeof supabaseAdmin>, studen
   for (const badge of toAward) {
     const { error } = await admin.from("student_badges").insert({ student_id: studentId, badge_id: badge.id });
     if (!error) {
-      await admin.from("notifications").insert({
-        user_id: studentId,
+      await notifyUser(admin, studentId, {
         title: `Badge unlocked: ${(badge as any).name}!`,
         body: (badge as any).description,
         link: "/portal/badges",
@@ -133,10 +133,9 @@ export async function POST(req: Request) {
   await admin.from("profiles").update({ reward_points: rewardPoints, sanction_points: sanctionPoints }).eq("id", studentId);
   await awardPointsBadges(admin, studentId, rewardPoints);
   await admin.from("audit_log").insert({ actor_id: user.id, action: "log_behaviour", detail: { studentId, behaviorTypeId, points: btype.points } });
-  await admin.from("notifications").insert({
-    user_id: studentId,
+  await notifyUser(admin, studentId, {
     title: btype.category === "positive" ? `+${btype.points} pts — ${btype.name}` : `${btype.points} pts — ${btype.name}`,
-    body: notes || null,
+    body: notes || undefined,
     link: "/portal/behavior",
   });
 
