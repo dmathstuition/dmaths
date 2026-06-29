@@ -15,7 +15,7 @@ vi.mock("@/lib/supabase/admin", () => ({
 
 import { POST } from "@/app/api/students/delete/route";
 
-const STUDENT = { first_name: "Alice", last_name: "Smith", role: "student" };
+const STUDENT = { first_name: "Alice", last_name: "Smith", email: "alice@example.com", role: "student" };
 
 function makeRequest(body: object) {
   return new Request("https://dmaths.test/api/students/delete", {
@@ -40,6 +40,18 @@ describe("POST /api/students/delete", () => {
     expect(res.status).toBe(200);
     expect((await res.json()).ok).toBe(true);
     expect(mockAdmin.auth.admin.deleteUser).toHaveBeenCalledWith("stu-1");
+  });
+
+  it("also clears the learner's application and payment records (by email)", async () => {
+    mockServer.auth.getUser.mockResolvedValue({ data: { user: { id: "admin-1" } }, error: null });
+    mockServer._qb.single.mockResolvedValue({ data: { role: "admin" }, error: null });
+    mockAdmin._qb.single.mockResolvedValue({ data: STUDENT, error: null });
+
+    const res = await POST(makeRequest({ studentId: "stu-1", confirmName: "alice smith" }));
+    expect(res.status).toBe(200);
+    expect(mockAdmin.from).toHaveBeenCalledWith("applications");
+    expect(mockAdmin.from).toHaveBeenCalledWith("payments");
+    expect(mockAdmin._qb.ilike).toHaveBeenCalledWith("email", "alice@example.com");
   });
 
   it("is case-insensitive for the confirmation name", async () => {

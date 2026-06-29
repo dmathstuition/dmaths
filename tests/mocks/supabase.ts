@@ -7,6 +7,7 @@ export function makeMockSupabaseClient() {
   const queryBuilder: any = {
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
+    ilike: vi.fn().mockReturnThis(),
     neq: vi.fn().mockReturnThis(),
     in: vi.fn().mockReturnThis(),
     not: vi.fn().mockReturnThis(),

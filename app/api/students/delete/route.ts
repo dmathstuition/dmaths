@@ -15,7 +15,7 @@ export async function POST(req: Request) {
 
   const admin = supabaseAdmin();
   const { data: student } = await admin.from("profiles")
-    .select("first_name,last_name,role").eq("id", studentId).single();
+    .select("first_name,last_name,email,role").eq("id", studentId).single();
   if (!student) return NextResponse.json({ error: "Student not found" }, { status: 404 });
   if (student.role === "admin") return NextResponse.json({ error: "Cannot delete an admin" }, { status: 400 });
 
@@ -52,6 +52,32 @@ export async function POST(req: Request) {
   ];
   for (const { table, col } of childTables) {
     await admin.from(table).delete().eq(col, studentId); // per-table errors ignored
+  }
+
+  // 1b) Null any NON-cascade "creator / actor" references so the profile
+  //     delete (below) can't be blocked by a leftover FK. These are normally
+  //     empty for a student, but a deleted account could in theory have
+  //     authored a note/log; clearing them keeps deletion robust.
+  const actorRefs: { table: string; col: string }[] = [
+    { table: "notices",          col: "created_by" },
+    { table: "admin_notes",      col: "created_by" },
+    { table: "behavior_logs",    col: "logged_by" },
+    { table: "lesson_materials", col: "uploaded_by" },
+    { table: "curricula",        col: "uploaded_by" },
+  ];
+  for (const { table, col } of actorRefs) {
+    await admin.from(table).update({ [col]: null }).eq(col, studentId); // ignored if table absent
+  }
+
+  // 1c) The learner's original enrolment application and payment-ledger rows
+  //     link only by email (no profile FK), so the UI's promise to remove
+  //     "payment history" is only true if we clear them here too. Matched
+  //     case-insensitively. (If the same email was reused for another learner,
+  //     those shared rows are removed as well — consistent with the SQL tool.)
+  const email = student.email?.trim();
+  if (email) {
+    await admin.from("applications").delete().ilike("email", email);
+    await admin.from("payments").delete().ilike("email", email);
   }
 
   // 2) Delete the AUTH user. profiles.id → auth.users ON DELETE CASCADE removes
