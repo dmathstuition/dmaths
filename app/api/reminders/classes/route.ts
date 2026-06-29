@@ -10,8 +10,17 @@ import { notifyUser } from "@/lib/notify";
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
-  const auth = req.headers.get("authorization");
-  if (!process.env.CRON_SECRET || auth !== `Bearer ${process.env.CRON_SECRET}`) {
+  // Auth accepts EITHER the bearer header OR a ?key= query param, so a cron
+  // service can authenticate without custom headers (the common failure point).
+  // Both sides are trimmed so a stray newline/space pasted into the Vercel value
+  // can't cause a silent mismatch. The URL is HTTPS-encrypted in transit; the
+  // key does appear in server/cron logs, which is acceptable for this low-stakes
+  // reminder trigger.
+  const secret = process.env.CRON_SECRET?.trim();
+  const header = req.headers.get("authorization")?.trim();
+  const keyParam = new URL(req.url).searchParams.get("key")?.trim();
+  const authorized = !!secret && (header === `Bearer ${secret}` || keyParam === secret);
+  if (!authorized) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
