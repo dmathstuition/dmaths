@@ -1,3 +1,5 @@
+import withSerwistInit from "@serwist/next";
+
 /** @type {import('next').NextConfig} */
 
 // Content-Security-Policy: defense-in-depth against XSS. Allows only the
@@ -10,6 +12,8 @@ const csp = [
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com data:",
   "img-src 'self' data: blob: https:",
+  "worker-src 'self' blob:",
+  "manifest-src 'self'",
   "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.paystack.co https://script.google.com https://script.googleusercontent.com",
   "frame-src https://checkout.paystack.com https://*.paystack.co",
   "object-src 'none'",
@@ -57,4 +61,14 @@ const nextConfig = {
     ];
   },
 };
-export default nextConfig;
+
+// Service worker / PWA (Serwist). Disabled in dev so it never caches while
+// developing; in production it compiles app/sw.ts → public/sw.js.
+const withSerwist = withSerwistInit({
+  swSrc: "app/sw.ts",
+  swDest: "public/sw.js",
+  disable: process.env.NODE_ENV === "development",
+  reloadOnOnline: true,
+});
+
+export default withSerwist(nextConfig);

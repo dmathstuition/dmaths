@@ -6,6 +6,7 @@ import CountUp from "@/components/landing/CountUp";
 import LandingNav from "@/components/landing/LandingNav";
 import SummerCampBanner from "@/components/landing/SummerCampBanner";
 import FloatingMath from "@/components/landing/FloatingMath";
+import InstallPrompt from "@/components/InstallPrompt";
 
 const SERVICES = [
   { t: "Algebra & Calculus", d: "From linear equations to derivatives and integrals, built step by step.", c: "#EFAE56", sym: "ƒ(x)" },
@@ -317,6 +318,9 @@ export default function Landing() {
           © {new Date().getFullYear()} D-Maths Tuition Centre · dmathstuition@gmail.com · Asaba, Delta State
         </div>
       </footer>
+      {/* INSTALL-AS-APP PROMPT (dismissible) */}
+      <InstallPrompt />
+
       {/* FLOATING SUMMER CAMP CTA */}
       <Link
         href="/summer-camp"

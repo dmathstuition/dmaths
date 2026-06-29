@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Poppins, Fira_Code } from "next/font/google";
 import "./globals.css";
 import CookieBanner from "@/components/CookieBanner";
@@ -28,6 +28,21 @@ export const metadata: Metadata = {
     description: "World-class online mathematics tuition for JSS & SSS students across Nigeria.",
     images: ["/api/og"],
   },
+  // Installable-app (PWA) hints. The manifest link is emitted automatically
+  // from app/manifest.ts; these add the iOS home-screen behaviour + icon.
+  applicationName: "D-Maths",
+  appleWebApp: { capable: true, statusBarStyle: "default", title: "D-Maths" },
+  icons: {
+    icon: "/icons/icon-192.png",
+    apple: "/icons/apple-touch-icon.png",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#1A60AB",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

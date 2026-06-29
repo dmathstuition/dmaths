@@ -2,3 +2,8 @@ node_modules
 .next
 .env
 .env.local
+
+# Serwist service-worker build artifacts (regenerated on every build)
+public/sw.js
+public/sw.js.map
+public/swe-worker-*.js
