@@ -8,6 +8,7 @@ import Logo from "@/components/Logo";
 import ThemeToggle from "@/components/ThemeToggle";
 import NotificationBell from "@/components/NotificationBell";
 import AdminSearch from "@/components/admin/AdminSearch";
+import PushManager from "@/components/PushManager";
 
 export type NavItem = { href: string; label: string; icon: IconName };
 
@@ -90,6 +91,7 @@ export default function PortalShell({
       </div>
 
       <main className="px-4 pb-10 pt-4 sm:px-7 lg:ml-64 lg:px-10">{children}</main>
+      <PushManager />
     </div>
   );
 }

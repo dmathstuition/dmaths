@@ -5,6 +5,7 @@ import { sendEmail } from "@/lib/email";
 import { expectedNgnForPlan, depositNgnForPlan } from "@/lib/paystack";
 import { loginUrl } from "@/lib/siteUrl";
 import { findTier, fmtNgn } from "@/lib/summerCamp";
+import { notifyUser } from "@/lib/notify";
 
 // POST { id } — approve an application: create login, profile, email credentials.
 export async function POST(req: Request) {
@@ -155,6 +156,14 @@ export async function POST(req: Request) {
       balanceDue: app.pay_plan === "part" && bal > 0 ? fmtNgn(bal) : "",
     });
   }
+
+  // 6c. Welcome push + in-app notification for the new student (best-effort;
+  //     they'll see it once they sign in and, if installed, on their device).
+  await notifyUser(admin, created.user.id, {
+    title: "Welcome to D-Maths! 🎉",
+    body: "Your enrolment is approved — tap to sign in to your portal.",
+    link: "/portal",
+  });
 
   // 7. If a guardian email was provided, create a parent portal account
   const guardianEmail = ((app.guardian_email as string) || "").trim();

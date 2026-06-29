@@ -3,6 +3,7 @@ import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { sendEmail } from "@/lib/email";
 import { loginUrl } from "@/lib/siteUrl";
+import { notifyUser } from "@/lib/notify";
 
 export async function POST(req: Request) {
   const supa = supabaseServer();
@@ -25,8 +26,7 @@ export async function POST(req: Request) {
   // Reflect latest star rating on the profile
   await admin.from("profiles").update({ stars: s }).eq("id", studentId);
   await admin.from("audit_log").insert({ actor_id: user.id, action: "reward_given", detail: { studentId, stars: s } });
-  await admin.from("notifications").insert({
-    user_id: studentId,
+  await notifyUser(admin, studentId, {
     title: `You earned ${s} star${s > 1 ? "s" : ""}!`,
     body: message,
     link: "/portal/progress",

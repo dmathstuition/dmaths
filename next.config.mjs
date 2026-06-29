@@ -45,7 +45,7 @@ const nextConfig = {
   poweredByHeader: false,
   compress: true,
   experimental: {
-    serverComponentsExternalPackages: ["@supabase/ssr"],
+    serverComponentsExternalPackages: ["@supabase/ssr", "web-push"],
   },
   images: {
     formats: ["image/avif", "image/webp"],
