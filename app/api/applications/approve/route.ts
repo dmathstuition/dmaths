@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
-import { sendEmail } from "@/lib/email";
+import { sendEmail, sendEmailResult } from "@/lib/email";
 import { expectedNgnForPlan, depositNgnForPlan } from "@/lib/paystack";
 import { loginUrl } from "@/lib/siteUrl";
 import { findTier, fmtNgn } from "@/lib/summerCamp";
@@ -114,11 +114,12 @@ export async function POST(req: Request) {
   // 6. Email login details via the Apps Script relay. Camp registrations get a
   //    dedicated welcome email (with package + any outstanding balance); regular
   //    enrolments get the standard credentials email.
+  let emailResult: { ok: boolean; error?: string };
   if (app.camp) {
     const full = expectedNgnForPlan(app.plan);
     const balance = Math.max(0, full - Number(app.payment_amount || 0));
     const balanceDue = app.pay_plan === "part" && balance > 0 ? fmtNgn(balance) : "";
-    await sendEmail("camp_welcome", app.email, {
+    emailResult = await sendEmailResult("camp_welcome", app.email, {
       firstName: app.first_name,
       studentCode: code,
       email: app.email,
@@ -128,7 +129,7 @@ export async function POST(req: Request) {
       balanceDue,
     });
   } else {
-    await sendEmail("credentials", app.email, {
+    emailResult = await sendEmailResult("credentials", app.email, {
       firstName: app.first_name,
       studentCode: code,
       email: app.email,
@@ -223,5 +224,10 @@ export async function POST(req: Request) {
     }
   }
 
-  return NextResponse.json({ ok: true, studentCode: code });
+  return NextResponse.json({
+    ok: true,
+    studentCode: code,
+    emailed: emailResult.ok,
+    emailError: emailResult.ok ? undefined : emailResult.error,
+  });
 }

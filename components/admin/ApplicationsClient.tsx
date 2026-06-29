@@ -68,8 +68,30 @@ export default function ApplicationsClient({ initial }: { initial: App[] }) {
     const json = await res.json();
     setBusyId(null);
     if (!res.ok) { push(`Approval failed: ${json.error}`, "error"); return; }
-    push(`Approved — Student ID ${json.studentCode} emailed to the applicant.`, "success");
+    if (json.emailed === false) {
+      push(
+        `Approved (ID ${json.studentCode}), but the welcome email did NOT send: ${json.emailError || "unknown error"}. Use "Send test email" to check your email setup.`,
+        "error",
+      );
+    } else {
+      push(`Approved — Student ID ${json.studentCode} emailed to the applicant.`, "success");
+    }
     reload();
+  }
+
+  async function sendTestEmail() {
+    const to = window.prompt("Send a test email to which address?", "dmathstuition@gmail.com");
+    if (!to) return;
+    const res = await fetch("/api/admin/test-email", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ to }),
+    });
+    const json = await res.json();
+    if (res.ok && json.ok) {
+      push(`✅ Test email sent to ${to}. Check the inbox (and spam).`, "success");
+    } else {
+      push(`❌ Email failed: ${json.error || "unknown error"}`, "error");
+    }
   }
 
   async function doReject(id: string, reason: string) {
@@ -93,9 +115,14 @@ export default function ApplicationsClient({ initial }: { initial: App[] }) {
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="font-display text-3xl font-semibold">Enrolment applications</h1>
-        <p className="text-sm text-ink/45">{counts.pending} pending · {counts.approved} approved · {counts.rejected} rejected</p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="font-display text-3xl font-semibold">Enrolment applications</h1>
+          <p className="text-sm text-ink/45">{counts.pending} pending · {counts.approved} approved · {counts.rejected} rejected</p>
+        </div>
+        <button onClick={sendTestEmail} className="btn-ghost !min-h-[38px] text-xs" title="Send a test email to verify the email setup is working">
+          ✉️ Send test email
+        </button>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">

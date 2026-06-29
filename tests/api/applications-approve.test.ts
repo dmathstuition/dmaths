@@ -2,7 +2,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { makeMockSupabaseClient } from "../mocks/supabase";
 
 vi.mock("next/headers", () => ({ cookies: vi.fn(() => ({ getAll: () => [], set: vi.fn() })) }));
-vi.mock("@/lib/email", () => ({ sendEmail: vi.fn().mockResolvedValue(true) }));
+vi.mock("@/lib/email", () => ({
+  sendEmail: vi.fn().mockResolvedValue(true),
+  sendEmailResult: vi.fn().mockResolvedValue({ ok: true }),
+}));
 
 let mockServer: ReturnType<typeof makeMockSupabaseClient>;
 let mockAdmin: ReturnType<typeof makeMockSupabaseClient>;
@@ -15,7 +18,7 @@ vi.mock("@/lib/supabase/admin", () => ({
 }));
 
 import { POST } from "@/app/api/applications/approve/route";
-import { sendEmail } from "@/lib/email";
+import { sendEmail, sendEmailResult } from "@/lib/email";
 
 const PENDING_APP = {
   id: "app-1",
@@ -54,6 +57,7 @@ beforeEach(() => {
   mockServer = makeMockSupabaseClient();
   mockAdmin = makeMockSupabaseClient();
   vi.mocked(sendEmail).mockResolvedValue(true);
+  vi.mocked(sendEmailResult).mockResolvedValue({ ok: true });
 });
 
 describe("POST /api/applications/approve", () => {
@@ -71,11 +75,12 @@ describe("POST /api/applications/approve", () => {
       expect.objectContaining({ email: PENDING_APP.email, email_confirm: true })
     );
     expect(mockAdmin._qb.insert).toHaveBeenCalled();
-    expect(sendEmail).toHaveBeenCalledWith(
+    expect(sendEmailResult).toHaveBeenCalledWith(
       "credentials",
       PENDING_APP.email,
       expect.objectContaining({ email: PENDING_APP.email })
     );
+    expect(json.emailed).toBe(true);
   });
 
   it("returns 403 when the caller is not an admin", async () => {
@@ -141,14 +146,17 @@ describe("POST /api/applications/approve", () => {
     expect(mockAdmin.auth.admin.deleteUser).toHaveBeenCalledWith("new-user-1");
   });
 
-  it("still returns ok: true even when sendEmail fails", async () => {
+  it("still returns ok: true but flags emailed:false when the email fails", async () => {
     setupAuth("admin");
     setupAdmin();
-    vi.mocked(sendEmail).mockResolvedValue(false);
+    vi.mocked(sendEmailResult).mockResolvedValue({ ok: false, error: "unauthorized" });
 
     const res = await POST(makeRequest({ id: "app-1" }));
     expect(res.status).toBe(200);
-    expect((await res.json()).ok).toBe(true);
+    const json = await res.json();
+    expect(json.ok).toBe(true);
+    expect(json.emailed).toBe(false);
+    expect(json.emailError).toBe("unauthorized");
   });
 
   it("returns 400 when id is a number instead of a string", async () => {
