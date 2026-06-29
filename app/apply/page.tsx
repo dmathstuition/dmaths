@@ -2,7 +2,6 @@
 import Logo from "@/components/Logo";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { supabaseBrowser } from "@/lib/supabase/client";
 import PaystackButton from "@/components/PaystackButton";
 import { SUMMER_CAMP_TIERS, findTier, fmtUsd, fmtNgn, DISCOUNT_PCT, discountedUsd, discountedNgn, depositNgn, balanceNgn, tierModules, type CampTier } from "@/lib/summerCamp";
 
@@ -121,26 +120,26 @@ export default function Apply() {
   async function doSubmit(free: boolean) {
     setError("");
     setBusy(true);
-    const supabase = supabaseBrowser();
-    const { error: err } = await supabase.from("applications").insert({
-      first_name: f.first_name, last_name: f.last_name, email: f.email, phone: f.phone,
-      dob: f.dob || null, address: f.address || "", level: f.level || "JSS 1",
-      guardian_name: f.guardian_name, guardian_contact: f.guardian_contact,
-      guardian_email: f.guardian_email || "",
-      subjects: f.subjects, notes: f.notes || "",
-      camp: camp || "", plan: f.plan || "",
-      pay_plan: selectedTier && payHalf ? "part" : "full",
-      payment_ref: free ? "FREE-ENROLMENT" : f.payment_ref,
-      payment_method: free ? "Free promotion" : f.payment_method,
-      payment_amount: free ? 0 : Number(f.payment_amount),
-      payment_date: f.payment_date || null,
-      // payment_verified is intentionally NOT sent from the browser. The DB
-      // trigger forces it false on insert; only the server (Paystack verify /
-      // webhook / approval gate) can ever set it true.
-      consented_at: new Date().toISOString(),
+    // Submit through a rate-limited, server-validated route (not a direct insert).
+    const res = await fetch("/api/applications/submit", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        first_name: f.first_name, last_name: f.last_name, email: f.email, phone: f.phone,
+        dob: f.dob || null, address: f.address || "", level: f.level || "JSS 1",
+        guardian_name: f.guardian_name, guardian_contact: f.guardian_contact,
+        guardian_email: f.guardian_email || "",
+        subjects: f.subjects, notes: f.notes || "",
+        camp: camp || "", plan: f.plan || "",
+        pay_plan: selectedTier && payHalf ? "part" : "full",
+        payment_ref: free ? "FREE-ENROLMENT" : f.payment_ref,
+        payment_method: free ? "Free promotion" : f.payment_method,
+        payment_amount: free ? 0 : Number(f.payment_amount),
+        payment_date: f.payment_date || null,
+      }),
     });
+    const json = await res.json().catch(() => ({}));
     setBusy(false);
-    if (err) return setError("Could not submit — please check your connection and try again.");
+    if (!res.ok) return setError(json.error || "Could not submit — please check your connection and try again.");
     try { sessionStorage.removeItem(DRAFT_KEY); } catch {}
     setDone(true);
   }
