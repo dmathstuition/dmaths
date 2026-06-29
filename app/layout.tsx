@@ -4,7 +4,17 @@ import "./globals.css";
 import CookieBanner from "@/components/CookieBanner";
 import { ToastProvider } from "@/components/Toast";
 import { Analytics } from "@vercel/analytics/react";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 import { siteBaseUrl } from "@/lib/siteUrl";
+
+// Search-engine ownership verification (Google Search Console / Bing). Each is
+// only emitted when its env var is set, so no blank tags appear before setup.
+const googleVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
+const bingVerification = process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION;
+const verification = {
+  ...(googleVerification ? { google: googleVerification } : {}),
+  ...(bingVerification ? { other: { "msvalidate.01": bingVerification } } : {}),
+};
 
 const poppins = Poppins({ subsets: ["latin"], variable: "--font-poppins", weight: ["400","500","600","700","800"] });
 const fira = Fira_Code({ subsets: ["latin"], variable: "--font-fira", weight: ["400","500"] });
@@ -28,6 +38,8 @@ export const metadata: Metadata = {
     description: "World-class online mathematics tuition for JSS & SSS students across Nigeria.",
     images: ["/api/og"],
   },
+  alternates: { canonical: "/" },
+  ...(Object.keys(verification).length ? { verification } : {}),
   // Installable-app (PWA) hints. The manifest link is emitted automatically
   // from app/manifest.ts; these add the iOS home-screen behaviour + icon.
   applicationName: "D-Maths",
@@ -51,6 +63,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <ToastProvider>{children}<CookieBanner /></ToastProvider>
         <Analytics />
+        <GoogleAnalytics />
       </body>
     </html>
   );
