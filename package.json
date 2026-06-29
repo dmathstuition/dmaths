@@ -11,13 +11,15 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@serwist/next": "^9.5.11",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.45.0",
     "@vercel/analytics": "^2.0.1",
     "next": "^14.2.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "recharts": "^3.8.1"
+    "recharts": "^3.8.1",
+    "serwist": "^9.5.11"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
@@ -31,6 +33,7 @@
     "jsdom": "^29.1.1",
     "msw": "^2.14.6",
     "postcss": "^8.4.39",
+    "sharp": "^0.35.2",
     "tailwindcss": "^3.4.6",
     "typescript": "^5.5.3",
     "vitest": "^4.1.9"
