@@ -56,10 +56,10 @@ export default function PrivacyPage() {
       <H2>Who we share it with</H2>
       <p>
         We share data only with the service providers required to run the portal: Supabase
-        (database and authentication), Vercel (website hosting), Google (email delivery), and
-        Paystack (processing online card and bank payments). Each processes data on our
-        instructions. We may disclose information if required by Nigerian law or a valid legal
-        process.
+        (database and authentication), Vercel (website hosting), Google (email delivery and —
+        with your agreement — anonymous Google Analytics usage statistics), and Paystack
+        (processing online card and bank payments). Each processes data on our instructions. We
+        may disclose information if required by Nigerian law or a valid legal process.
       </p>
 
       <H2>How long we keep it</H2>
