@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { DISCOUNT_PCT } from "@/lib/summerCamp";
+import { DISCOUNT_PCT, campShortDates } from "@/lib/summerCamp";
 
 const DISMISS_KEY = "dmaths-summer-camp-banner-dismissed";
 
@@ -25,7 +25,7 @@ export default function SummerCampBanner() {
       <Link href="/summer-camp" className="group inline-flex flex-wrap items-center justify-center gap-x-2">
         <span aria-hidden="true">☀️</span>
         <span>
-          Summer Camp is open — Maths &amp; Coding, all summer break.
+          Summer Camp is open — Maths &amp; Coding, {campShortDates()}.
           {DISCOUNT_PCT > 0 && <strong className="text-gold"> {DISCOUNT_PCT}% off!</strong>}
         </span>
         <span className="text-gold underline decoration-gold/60 underline-offset-2 group-hover:decoration-gold">

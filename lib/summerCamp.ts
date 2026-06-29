@@ -8,10 +8,47 @@
 export const SUMMER_CAMP = {
   season: "summer-2026",
   title: "D-Maths Online Summer Camp",
-  // Runs for the full two-month summer break.
-  durationLabel: "Full two-month summer break",
+  // ┌──────────────────────────────────────────────────────────────────┐
+  // │  ✏️  EDIT THE CAMP DATES HERE  (format: yyyy-mm-dd)               │
+  // │  These two lines are the ONLY place the camp dates live — change  │
+  // │  them and every date shown on the site updates automatically.     │
+  // │  They are PLACEHOLDERS for now; set the real dates once confirmed.│
+  // │  To change later: open this file on GitHub → pencil (edit) icon → │
+  // │  edit the two lines below → "Commit changes". The site redeploys  │
+  // │  on its own in about a minute. No coding or developer needed.     │
+  // └──────────────────────────────────────────────────────────────────┘
+  startDate: "2026-07-01", // ← placeholder camp START date
+  endDate: "2026-08-31", //   ← placeholder camp END date
   ngnPerUsd: 1500,
 } as const;
+
+// ── Date display helpers ─────────────────────────────────────────────
+// The human-readable date labels are DERIVED from startDate/endDate above,
+// so editing just those two lines updates the hero, badge, packages note
+// and refund policy everywhere at once. Built at midnight to avoid any
+// timezone drift, and the year is shown once when both dates share it.
+const campStart = () => new Date(`${SUMMER_CAMP.startDate}T00:00:00`);
+const campEnd = () => new Date(`${SUMMER_CAMP.endDate}T00:00:00`);
+
+// e.g. "1 July – 31 August 2026"  (or "… 2026 – … 2027" across a year)
+export const campDateRange = () => {
+  const s = campStart();
+  const e = campEnd();
+  const sameYear = s.getFullYear() === e.getFullYear();
+  const day = (d: Date) => d.toLocaleDateString("en-GB", { day: "numeric", month: "long" });
+  const start = sameYear ? day(s) : `${day(s)} ${s.getFullYear()}`;
+  return `${start} – ${day(e)} ${e.getFullYear()}`;
+};
+
+// e.g. "Jul 1 – Aug 31"  (compact, for the small hero badge)
+export const campShortDates = () => {
+  const fmt = (d: Date) => d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return `${fmt(campStart())} – ${fmt(campEnd())}`;
+};
+
+// e.g. "1 July 2026"  (single date — used by the refund-deadline copy)
+export const campStartLabel = () =>
+  campStart().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 
 // ── Promotional discount ─────────────────────────────────────────────
 // Percentage off every package. The `usd`/`ngn` on each tier are the LIST
