@@ -136,6 +136,26 @@ export async function POST(req: Request) {
     });
   }
 
+  // 6b. Payment receipt (skip free enrolments). One clean receipt at the moment
+  //     enrolment is confirmed, covering both online and manual payments.
+  const paidAmount = Number(app.payment_amount || 0);
+  if (paidAmount > 0) {
+    const bal = app.camp ? Math.max(0, expectedNgnForPlan(app.plan) - paidAmount) : 0;
+    const paidDate = app.payment_date
+      ? new Date(app.payment_date).toLocaleDateString("en-NG", { dateStyle: "medium" })
+      : new Date().toLocaleDateString("en-NG", { dateStyle: "medium" });
+    await sendEmail("receipt", app.email, {
+      firstName: app.first_name,
+      studentCode: code,
+      packageName: app.camp ? (findTier(app.plan)?.name ?? app.plan) : "",
+      amount: fmtNgn(paidAmount),
+      method: app.payment_method || "—",
+      reference: app.payment_ref || "—",
+      date: paidDate,
+      balanceDue: app.pay_plan === "part" && bal > 0 ? fmtNgn(bal) : "",
+    });
+  }
+
   // 7. If a guardian email was provided, create a parent portal account
   const guardianEmail = ((app.guardian_email as string) || "").trim();
   if (guardianEmail) {

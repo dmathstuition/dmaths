@@ -115,6 +115,25 @@ const TEMPLATES = {
       '<p>' + esc_(d.message) + '</p>',
   }),
 
+  receipt: (d) => ({
+    subject: '🧾 D-Maths payment receipt — ' + esc_(d.reference),
+    html:
+      '<h2 style="color:#0A1F3D">Payment receipt</h2>' +
+      '<p>Thank you, ' + esc_(d.firstName) + '. We have recorded your payment to D-Maths Tuition Centre.</p>' +
+      '<table style="border-collapse:collapse;margin:16px 0">' +
+      (d.packageName ? row_('Package', esc_(d.packageName)) : '') +
+      row_('Amount received', '<strong>' + esc_(d.amount) + '</strong>') +
+      row_('Method', esc_(d.method)) +
+      row_('Reference', '<code>' + esc_(d.reference) + '</code>') +
+      row_('Date', esc_(d.date)) +
+      (d.studentCode ? row_('Student ID', '<code>' + esc_(d.studentCode) + '</code>') : '') +
+      '</table>' +
+      (d.balanceDue
+        ? '<p style="background:#FEF3C7;border:1px solid #FCD34D;border-radius:8px;padding:10px 14px;color:#92400E"><strong>Outstanding balance:</strong> ' + esc_(d.balanceDue) + ' — our team will arrange this with you.</p>'
+        : '') +
+      '<p style="color:#64748B;font-size:13px">Please keep this receipt for your records. Questions about a payment? Reply to this email with the reference above.</p>',
+  }),
+
   camp_welcome: (d) => ({
     subject: '☀️ Welcome to the D-Maths Online Summer Camp!',
     html:
