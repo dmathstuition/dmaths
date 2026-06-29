@@ -281,7 +281,7 @@ export default function Landing() {
             </p>
           </div>
           <FooterCol title="Centre" links={[["About","#agency"],["Services","#services"],["Results","#results"],["Apply","/apply"]]} />
-          <FooterCol title="Learn" links={[["Login","/login"],["How it works","#how"],["Python Challenge","/apply"]]} />
+          <FooterCol title="Learn" links={[["Login","/login"],["How it works","#how"],["Help & FAQ","/help"]]} />
           <FooterCol title="Legal" links={[["Privacy Policy","/privacy"],["Terms of Service","/terms"],["Refund Policy","/refunds"]]} />
           <div>
             <h4 className="font-display text-sm font-bold text-ink">Contact</h4>
