@@ -5,6 +5,7 @@ import Reveal from "@/components/landing/Reveal";
 import CountUp from "@/components/landing/CountUp";
 import LandingNav from "@/components/landing/LandingNav";
 import SummerCampBanner from "@/components/landing/SummerCampBanner";
+import FloatingMath from "@/components/landing/FloatingMath";
 
 const SERVICES = [
   { t: "Algebra & Calculus", d: "From linear equations to derivatives and integrals, built step by step.", c: "#EFAE56", sym: "ƒ(x)" },
@@ -59,33 +60,36 @@ export default function Landing() {
 
       {/* HERO */}
       <header className="relative pt-28 pb-16">
-        <DotsScatter className="pointer-events-none absolute left-6 top-28 h-24 w-24 opacity-70" />
-        <DotsScatter className="pointer-events-none absolute right-10 bottom-10 h-20 w-20 opacity-50" />
-        <div className="mx-auto grid max-w-7xl items-center gap-8 px-5 md:grid-cols-2">
+        <FloatingMath />
+        <DotsScatter className="float pointer-events-none absolute left-6 top-28 h-24 w-24 opacity-70" />
+        <DotsScatter className="float pointer-events-none absolute right-10 bottom-10 h-20 w-20 opacity-50 [animation-delay:1.5s]" />
+        <div className="relative mx-auto grid max-w-7xl items-center gap-8 px-5 md:grid-cols-2">
           <Reveal className="space-y-0">
             <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold-pale px-4 py-1.5 text-xs font-bold text-gold-deep">
-              <span className="h-1.5 w-1.5 rounded-full bg-gold-deep" />
+              <span className="badge-pulse h-1.5 w-1.5 rounded-full bg-gold-deep" />
               Trusted by 200+ students across Nigeria
             </span>
             <h1 className="mt-5 font-display text-5xl font-extrabold leading-[1.08] tracking-tight md:text-6xl">
-              We create <span className="text-gold-deep">solutions</span> for your success
+              We create <span className="text-shimmer">solutions</span> for your success
             </h1>
             <p className="mt-5 max-w-md text-[15px] leading-relaxed text-ink/55">
               Our tutors keep a keen eye on every student's progress to ensure mathematics
               becomes a strength — through live video sessions, personalised feedback and a portal built for results.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-4">
-              <Link href="/apply" className="btn-gold !min-h-[50px] !rounded-full !px-7 !text-base">Get started</Link>
+              <Link href="/apply" className="btn-gold group !min-h-[50px] !rounded-full !px-7 !text-base">
+                Get started <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+              </Link>
               <a href="#how" className="group flex items-center gap-3 text-sm font-semibold text-ink/70">
-                <span className="flex h-11 w-11 items-center justify-center rounded-full border border-line bg-white shadow-sm transition group-hover:border-gold">
-                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="#1A60AB" strokeWidth="2.5"><path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                <span className="flex h-11 w-11 items-center justify-center rounded-full border border-line bg-white shadow-sm transition group-hover:border-gold group-hover:shadow-md">
+                  <svg className="float h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="#1A60AB" strokeWidth="2.5"><path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </span>
                 Explore more
               </a>
             </div>
           </Reveal>
 
-          <Reveal delay={120} className="relative">
+          <Reveal delay={120} className="group relative">
             {/* soft glow behind the cut-out figure for depth */}
             <div className="hero-glow absolute inset-0 scale-110" />
             <Image
@@ -95,15 +99,15 @@ export default function Landing() {
               height={760}
               quality={90}
               sizes="(max-width: 768px) 100vw, 50vw"
-              className="relative z-10 mx-auto h-auto w-full object-contain drop-shadow-2xl"
+              className="relative z-10 mx-auto h-auto w-full object-contain drop-shadow-2xl transition-transform duration-500 group-hover:scale-[1.03]"
               priority
             />
             {/* floating stat badges */}
-            <div className="float absolute -left-3 top-8 z-20 rounded-2xl bg-white px-4 py-3 shadow-xl">
+            <div className="hovlift float absolute -left-3 top-8 z-20 rounded-2xl bg-white px-4 py-3 shadow-xl">
               <p className="font-display text-xl font-extrabold text-ink">98%</p>
               <p className="text-[11px] font-semibold text-ink/45">Pass rate</p>
             </div>
-            <div className="float absolute -right-3 bottom-10 z-20 rounded-2xl bg-gold px-4 py-3 shadow-xl" style={{ animationDelay: "1.2s" }}>
+            <div className="hovlift float absolute -right-3 bottom-10 z-20 rounded-2xl bg-gold px-4 py-3 shadow-xl" style={{ animationDelay: "1.2s" }}>
               <p className="font-display text-xl font-extrabold text-white">★ 4.9</p>
               <p className="text-[11px] font-semibold text-white/70">Student rating</p>
             </div>
@@ -113,11 +117,11 @@ export default function Landing() {
 
       {/* FEATURES STRIP */}
       <section className="border-y border-line/40 bg-chalk/40 py-5">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-10 gap-y-4 px-5">
+        <Reveal className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-10 gap-y-4 px-5">
           {FEATURES.map(({ label, icon }) => (
-            <div key={label} className="flex items-center gap-2.5">
-              <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-gold/10">
-                <svg className="h-[15px] w-[15px] text-gold-deep" viewBox="0 0 24 24"
+            <div key={label} className="group flex items-center gap-2.5">
+              <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-gold/10 transition-all duration-300 group-hover:scale-110 group-hover:bg-gold group-hover:text-white">
+                <svg className="h-[15px] w-[15px] text-gold-deep transition-colors group-hover:text-white" viewBox="0 0 24 24"
                   fill="none" stroke="currentColor" strokeWidth="2"
                   strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   {icon}
@@ -126,7 +130,7 @@ export default function Landing() {
               <span className="text-sm font-semibold text-ink/65">{label}</span>
             </div>
           ))}
-        </div>
+        </Reveal>
       </section>
 
       {/* SERVICES */}
@@ -138,8 +142,8 @@ export default function Landing() {
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {SERVICES.map((s, i) => (
             <Reveal key={s.t} delay={i * 80}>
-              <div className="hovlift group h-full rounded-3xl border border-line bg-white p-6 text-center">
-                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl font-mono text-xl font-bold text-white shadow-lg" style={{ background: s.c }}>{s.sym}</div>
+              <div className="hovlift stat-shimmer group relative h-full overflow-hidden rounded-3xl border border-line bg-white p-6 text-center transition-transform duration-300 hover:scale-[1.02]">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl font-mono text-xl font-bold text-white shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6" style={{ background: s.c }}>{s.sym}</div>
                 <h3 className="font-display text-lg font-bold">{s.t}</h3>
                 <p className="mt-2 text-[13px] leading-relaxed text-ink/55">{s.d}</p>
               </div>
@@ -153,7 +157,8 @@ export default function Landing() {
         <div className="mx-auto max-w-7xl px-5">
           <div className="rounded-[2.5rem] bg-gold-pale px-6 py-14 sm:px-12">
             <div className="grid items-center gap-10 md:grid-cols-2">
-              <Reveal className="relative overflow-hidden rounded-2xl shadow-lg">
+              <Reveal className="group relative overflow-hidden rounded-2xl shadow-lg">
+                <div className="hero-glow absolute -inset-4 z-0" />
                 <Image
                   src="https://images.unsplash.com/photo-1509062522246-3755977927d7?w=1200&q=85"
                   alt="Students in an online classroom"
@@ -161,7 +166,7 @@ export default function Landing() {
                   height={820}
                   quality={90}
                   sizes="(max-width: 768px) 100vw, 50vw"
-                  className="h-auto w-full object-cover"
+                  className="relative z-10 h-auto w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               </Reveal>
               <Reveal delay={100}>
@@ -172,8 +177,8 @@ export default function Landing() {
                 </p>
                 <ol className="mt-7 space-y-4">
                   {STEPS.map((s, i) => (
-                    <li key={s.t} className="flex items-start gap-4">
-                      <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gold font-display text-sm font-bold text-white">{i+1}</span>
+                    <li key={s.t} className="group flex items-start gap-4">
+                      <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gold font-display text-sm font-bold text-white shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:shadow-md">{i+1}</span>
                       <div>
                         <p className="font-display font-bold text-ink">{s.t}</p>
                         <p className="text-[13px] text-ink/55">{s.d}</p>
@@ -182,7 +187,9 @@ export default function Landing() {
                   ))}
                 </ol>
                 <div className="mt-8 flex flex-wrap gap-3">
-                  <Link href="/apply" className="btn-gold !rounded-full !px-6">Get started</Link>
+                  <Link href="/apply" className="btn-gold group !rounded-full !px-6">
+                    Get started <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+                  </Link>
                   <Link href="/login" className="btn !rounded-full border border-gold/50 bg-white !px-6 text-gold-deep hover:bg-white/60">Read more</Link>
                 </div>
               </Reveal>
@@ -203,7 +210,7 @@ export default function Landing() {
             </p>
             <div className="mt-6 grid grid-cols-3 gap-4">
               {STATS.map(({ v, suffix, l }) => (
-                <div key={l} className="rounded-2xl bg-chalk p-4 text-center">
+                <div key={l} className="hovlift stat-shimmer group relative overflow-hidden rounded-2xl bg-chalk p-4 text-center">
                   <div className="font-display text-2xl font-extrabold text-ink">
                     <CountUp to={v} suffix={suffix} />
                   </div>
@@ -211,11 +218,13 @@ export default function Landing() {
                 </div>
               ))}
             </div>
-            <Link href="/apply" className="btn-gold mt-7 inline-flex !rounded-full !px-6">Read more</Link>
+            <Link href="/apply" className="btn-gold group mt-7 inline-flex !rounded-full !px-6">
+              Read more <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+            </Link>
           </Reveal>
-          <Reveal delay={120} className="relative order-1 md:order-2">
+          <Reveal delay={120} className="group relative order-1 md:order-2">
             {/* decorative soft blob behind the cut-out figure */}
-            <div className="absolute inset-0 scale-95 rounded-full bg-gold-pale/70 blur-2xl" />
+            <div className="float absolute inset-0 scale-95 rounded-full bg-gold-pale/70 blur-2xl" />
             <Image
               src="/camp-about.png"
               alt="D-Maths learner with the D-Maths robot"
@@ -223,7 +232,7 @@ export default function Landing() {
               height={760}
               quality={90}
               sizes="(max-width: 768px) 100vw, 50vw"
-              className="relative z-10 mx-auto h-auto w-full object-contain drop-shadow-2xl"
+              className="relative z-10 mx-auto h-auto w-full object-contain drop-shadow-2xl transition-transform duration-500 group-hover:scale-[1.03]"
             />
           </Reveal>
         </div>
@@ -239,9 +248,10 @@ export default function Landing() {
           <div className="grid gap-5 md:grid-cols-3">
             {TESTIMONIALS.map((t, i) => (
               <Reveal key={t.n} delay={i * 80}>
-                <figure className="hovlift h-full rounded-3xl border border-line bg-white p-6">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gold font-display font-bold text-white">
+                <figure className="hovlift group relative h-full overflow-hidden rounded-3xl border border-line bg-white p-6">
+                  <span className="pointer-events-none absolute -right-1 -top-3 font-display text-7xl font-extrabold text-gold/10 transition-colors duration-300 group-hover:text-gold/20" aria-hidden="true">&rdquo;</span>
+                  <div className="relative flex items-center gap-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gold font-display font-bold text-white shadow-sm transition-transform duration-300 group-hover:scale-110">
                       {t.n.split(" ").map(w=>w[0]).slice(0,2).join("")}
                     </div>
                     <div>
@@ -249,8 +259,8 @@ export default function Landing() {
                       <p className="text-xs text-ink/45">{t.r}</p>
                     </div>
                   </div>
-                  <blockquote className="mt-4 text-[13px] leading-relaxed text-ink/60">{t.t}</blockquote>
-                  <div className="mt-4 text-gold">{"★".repeat(5)}</div>
+                  <blockquote className="relative mt-4 text-[13px] leading-relaxed text-ink/60">{t.t}</blockquote>
+                  <div className="mt-4 inline-flex text-gold transition-transform duration-300 group-hover:scale-110">{"★".repeat(5)}</div>
                 </figure>
               </Reveal>
             ))}
@@ -261,12 +271,14 @@ export default function Landing() {
       {/* CTA BAND */}
       <section className="mx-auto max-w-7xl px-5 py-16">
         <Reveal>
-          <div className="flex flex-col items-center justify-between gap-5 rounded-[2rem] bg-gold-pale px-8 py-8 sm:flex-row">
+          <div className="stat-shimmer group relative flex flex-col items-center justify-between gap-5 overflow-hidden rounded-[2rem] bg-gold-pale px-8 py-8 sm:flex-row">
             <div>
               <p className="font-display text-2xl font-bold text-ink">Ready to get started?</p>
               <p className="mt-1 text-sm text-ink/55">100% online — study from home, anywhere in Nigeria.</p>
             </div>
-            <Link href="/apply" className="btn-gold !rounded-full !px-8 !text-base">Apply now</Link>
+            <Link href="/apply" className="btn-gold inline-flex items-center gap-1.5 !rounded-full !px-8 !text-base">
+              Apply now <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+            </Link>
           </div>
         </Reveal>
       </section>
@@ -309,7 +321,7 @@ export default function Landing() {
       <Link
         href="/summer-camp"
         aria-label="Register for the D-Maths Summer Camp"
-        className="btn-gold fixed bottom-6 left-6 z-50 flex items-center gap-2 !rounded-full !px-5 shadow-xl transition hover:scale-105 hover:shadow-2xl"
+        className="btn-gold badge-pulse fixed bottom-6 left-6 z-50 flex items-center gap-2 !rounded-full !px-5 shadow-xl transition hover:scale-105 hover:shadow-2xl"
       >
         <span aria-hidden="true">☀️</span>
         <span className="text-sm font-bold">Summer Camp</span>
