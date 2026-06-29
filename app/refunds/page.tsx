@@ -1,4 +1,5 @@
 import LegalPage, { H2 } from "@/components/LegalPage";
+import { campStartLabel } from "@/lib/summerCamp";
 
 export const metadata = { title: "Payment & Refund Policy — D-Maths Tuition Centre" };
 
@@ -36,7 +37,8 @@ export default function RefundsPage() {
 
       <H2>Summer Camp &amp; fixed programmes</H2>
       <p>
-        For fixed programmes such as the D-Maths Online Summer Camp: if you cancel
+        For fixed programmes such as the D-Maths Online Summer Camp (starts{" "}
+        <strong>{campStartLabel()}</strong>): if you cancel
         <strong> before the programme's start date</strong>, you receive a full refund of amounts
         paid, less any non-refundable deposit. <strong>Once the programme has started, fees are
         non-refundable</strong>, as your place can no longer be offered to someone else.

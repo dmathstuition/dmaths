@@ -14,16 +14,16 @@ import {
   discountedNgn,
   fmtUsd,
   fmtNgn,
+  campDateRange,
+  campShortDates,
 } from "@/lib/summerCamp";
 
 export const metadata: Metadata = {
   title: "Summer Camp — D-Maths Online",
-  description:
-    "D-Maths Online Summer Camp: hands-on Maths & Coding for the full summer break. Foundation maths, coding, game development, AI, web development and Python — with a personalized portal to track every learner's growth.",
+  description: `D-Maths Online Summer Camp (${campDateRange()}): hands-on Maths & Coding. Foundation maths, coding, game development, AI, web development and Python — with a personalized portal to track every learner's growth.`,
   openGraph: {
     title: "D-Maths Online Summer Camp",
-    description:
-      "Hands-on Maths & Coding for the full summer break. Registration is open.",
+    description: `Hands-on Maths & Coding, ${campDateRange()}. Registration is open.`,
   },
 };
 
@@ -60,6 +60,9 @@ export default function SummerCamp() {
                 <span className="h-1.5 w-1.5 rounded-full bg-gold" />
                 Registration is open
               </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/5 px-4 py-1.5 text-xs font-semibold text-white/80">
+                📅 {campDateRange()}
+              </span>
               {DISCOUNT_PCT > 0 && (
                 <span className="badge-pulse inline-flex items-center gap-1 rounded-full bg-gold px-4 py-1.5 text-xs font-extrabold uppercase tracking-wide text-board">
                   🎉 {DISCOUNT_PCT}% off — limited time
@@ -70,8 +73,8 @@ export default function SummerCamp() {
               D-Maths Online <span className="text-shimmer">Summer Camp</span>
             </h1>
             <p className="mt-5 text-[15px] leading-relaxed text-white/70 md:text-base">
-              Hands-on <strong className="text-white">Maths &amp; Coding</strong> for the{" "}
-              <strong className="text-white">full two-month summer break</strong>. Live online
+              Hands-on <strong className="text-white">Maths &amp; Coding</strong> running{" "}
+              <strong className="text-white">{campDateRange()}</strong>. Live online
               sessions, real projects, and a personalized portal so you can track every learner's
               growth — all summer long.
             </p>
@@ -105,8 +108,8 @@ export default function SummerCamp() {
             </div>
             {/* floating badge */}
             <div className="float absolute -left-3 bottom-6 rounded-2xl bg-gold px-4 py-3 shadow-xl">
-              <p className="font-display text-lg font-extrabold text-white">2 months</p>
-              <p className="text-[11px] font-semibold text-white/80">All summer break</p>
+              <p className="font-display text-lg font-extrabold text-white">{campShortDates()}</p>
+              <p className="text-[11px] font-semibold text-white/80">Summer 2026</p>
             </div>
           </Reveal>
         </div>
@@ -148,8 +151,8 @@ export default function SummerCamp() {
               Choose your <span className="text-gold-deep">package</span>
             </h2>
             <p className="mx-auto mt-3 max-w-lg text-sm text-ink/50">
-              One flat price for the entire summer break. Pick a track and reserve your place —
-              prices shown in USD with the naira amount you'll be charged.
+              One flat price for the whole camp ({campDateRange()}). Pick a track and reserve your
+              place — prices shown in USD with the naira amount you'll be charged.
             </p>
           </Reveal>
 
