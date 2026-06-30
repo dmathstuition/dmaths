@@ -2,7 +2,7 @@
 // Reads NEXT_PUBLIC_SITE_URL, validates it, and falls back to the production
 // domain so a missing/malformed env var never produces a broken/empty button.
 
-const FALLBACK = "https://dmaths.vercel.app";
+const FALLBACK = "https://dmaths.academy";
 
 export function siteBaseUrl(): string {
   const raw = process.env.NEXT_PUBLIC_SITE_URL?.trim();
