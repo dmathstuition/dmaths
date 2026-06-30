@@ -17,8 +17,8 @@ export const SUMMER_CAMP = {
   // │  edit the two lines below → "Commit changes". The site redeploys  │
   // │  on its own in about a minute. No coding or developer needed.     │
   // └──────────────────────────────────────────────────────────────────┘
-  startDate: "2026-07-01", // ← placeholder camp START date
-  endDate: "2026-08-31", //   ← placeholder camp END date
+  startDate: "2026-08-01", // ← placeholder camp START date
+  endDate: "2026-09-31", //   ← placeholder camp END date
   ngnPerUsd: 1500,
 } as const;
 
