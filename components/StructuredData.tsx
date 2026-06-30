@@ -25,7 +25,7 @@ export default function StructuredData() {
       logo: `${base}/dmathslogo.png`,
       image: `${base}/dmathslogo.png`,
       description:
-        "World-class online mathematics and coding tuition for JSS & SSS students across Nigeria — live classes, personalised feedback and a portal built for results.",
+        "A virtual learning community for students across Nigeria — expert online tuition in maths, sciences and coding, with exam prep for WAEC, JAMB, IGCSE, SAT and A-Levels. Live classes, personalised feedback and a portal built for results.",
       email: "dmathstuition@gmail.com",
       telephone: "+2347025674894",
       address: {
@@ -35,6 +35,17 @@ export default function StructuredData() {
         addressCountry: "NG",
       },
       areaServed: { "@type": "Country", name: "Nigeria" },
+      knowsAbout: [
+        "Mathematics",
+        "Sciences",
+        "Coding",
+        "SAT preparation",
+        "IGCSE",
+        "A-Level",
+        "WAEC/WASSCE",
+        "JAMB",
+        "BECE",
+      ],
       ...(SOCIAL_LINKS.length ? { sameAs: SOCIAL_LINKS } : {}),
     },
     {

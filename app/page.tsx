@@ -9,10 +9,10 @@ import FloatingMath from "@/components/landing/FloatingMath";
 import InstallPrompt from "@/components/InstallPrompt";
 
 const SERVICES = [
-  { t: "Algebra & Calculus", d: "From linear equations to derivatives and integrals, built step by step.", c: "#EFAE56", sym: "ƒ(x)" },
-  { t: "Exam Preparation", d: "Focused BECE, WASSCE and university entrance coaching that delivers.", c: "#1A60AB", sym: "★" },
-  { t: "Python Challenge", d: "Programming fundamentals and our hands-on Python Practice Challenge.", c: "#7BA3CA", sym: ">_" },
-  { t: "Statistics & More", d: "Data, probability, geometry and physics across every level.", c: "#EFAE56", sym: "σ" },
+  { t: "Maths & Calculus", d: "From algebra and geometry to derivatives and integrals, built step by step.", c: "#EFAE56", sym: "ƒ(x)" },
+  { t: "Exam Preparation", d: "Focused prep for WAEC, JAMB, IGCSE, SAT & A-Levels that delivers.", c: "#1A60AB", sym: "★" },
+  { t: "Coding & Python", d: "Programming fundamentals — Python, web and our hands-on coding challenges.", c: "#7BA3CA", sym: ">_" },
+  { t: "Sciences & Statistics", d: "Physics, data, probability and more across every level and curriculum.", c: "#EFAE56", sym: "σ" },
 ];
 
 const FEATURES = [
@@ -74,8 +74,9 @@ export default function Landing() {
               We create <span className="text-shimmer">solutions</span> for your success
             </h1>
             <p className="mt-5 max-w-md text-[15px] leading-relaxed text-ink/55">
-              Our tutors keep a keen eye on every student's progress to ensure mathematics
-              becomes a strength — through live video sessions, personalised feedback and a portal built for results.
+              A virtual learning community for students across Nigeria. Our tutors keep a keen eye
+              on every learner's progress in maths, sciences and coding — through live online
+              sessions, personalised feedback and a portal built for results.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-4">
               <Link href="/apply" className="btn-gold group !min-h-[50px] !rounded-full !px-7 !text-base">
@@ -205,9 +206,10 @@ export default function Landing() {
           <Reveal className="order-2 md:order-1">
             <h2 className="font-display text-3xl font-bold md:text-4xl">Our <span className="text-gold-deep">Centre</span></h2>
             <p className="mt-4 text-[15px] leading-relaxed text-ink/55">
-              We believe in the power of personalised teaching. Our approach lets us make informed
-              decisions and optimise each student's learning for maximum results. Let's turn effort
-              into achievement — tailored mathematics tuition for every learner.
+              We believe in the power of personalised teaching. As a fully virtual community, we
+              reach learners anywhere in Nigeria and prepare them for WAEC, JAMB, IGCSE, SAT and
+              A-Levels. Let's turn effort into achievement — tailored maths, science and coding
+              tuition for every learner.
             </p>
             <div className="mt-6 grid grid-cols-3 gap-4">
               {STATS.map(({ v, suffix, l }) => (
@@ -290,7 +292,8 @@ export default function Landing() {
           <div>
             <p className="font-display text-lg font-bold text-ink">D-Maths</p>
             <p className="mt-4 max-w-xs text-[13px] leading-relaxed text-ink/50">
-              World-class online mathematics education for JSS and SSS students across Nigeria.
+              A virtual learning community delivering world-class online tuition in maths, sciences
+              and coding to learners across Nigeria — with prep for WAEC, JAMB, IGCSE, SAT and A-Levels.
             </p>
           </div>
           <FooterCol title="Centre" links={[["About","#agency"],["Services","#services"],["Results","#results"],["Apply","/apply"]]} />
