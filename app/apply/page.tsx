@@ -167,7 +167,7 @@ export default function Apply() {
       <div className="mx-auto mb-6 max-w-2xl text-center">
         <h1 className="font-display text-2xl font-bold sm:text-3xl">Register with D-Maths</h1>
         <p className="mt-1 text-sm text-ink/50">
-          Enrol in online maths &amp; coding tuition — it only takes a few minutes.
+          Enrol in online maths, science &amp; coding tuition — it only takes a few minutes.
         </p>
       </div>
 

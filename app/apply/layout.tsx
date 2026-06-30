@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Register — D-Maths Tuition Centre",
   description:
-    "Enrol in D-Maths online maths & coding tuition. Quick registration for JSS & SSS students across Nigeria — live classes, exam prep (BECE/WASSCE) and a progress portal.",
+    "Enrol in D-Maths online maths, science & coding tuition. Quick registration for learners across Nigeria — live classes, exam prep (WAEC, JAMB, IGCSE, SAT, A-Levels) and a progress portal.",
   alternates: { canonical: "/apply" },
 };
 
