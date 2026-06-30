@@ -22,11 +22,21 @@ const fira = Fira_Code({ subsets: ["latin"], variable: "--font-fira", weight: ["
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteBaseUrl()),
-  title: "D-Maths Tuition Centre — Excellence in Mathematics",
-  description: "World-class online mathematics tuition for JSS & SSS students across Nigeria.",
+  title: "D-Maths Tuition Centre — Online Maths & Coding Tuition in Nigeria",
+  description:
+    "Online maths & coding tuition for JSS & SSS students in Asaba and across Nigeria — live classes, exam prep (BECE/WASSCE), personalised feedback and a results-focused portal.",
+  keywords: [
+    "online maths tuition Nigeria",
+    "coding classes for students Nigeria",
+    "WAEC maths preparation",
+    "JAMB maths",
+    "BECE maths",
+    "D-Maths Tuition Centre",
+    "maths tutor Asaba",
+  ],
   openGraph: {
-    title: "D-Maths Tuition Centre — Excellence in Mathematics",
-    description: "World-class online mathematics tuition for JSS & SSS students across Nigeria. Live video sessions, personalised feedback, and a portal built for results.",
+    title: "D-Maths Tuition Centre — Online Maths & Coding Tuition in Nigeria",
+    description: "Online maths & coding tuition for JSS & SSS students across Nigeria. Live classes, exam prep, personalised feedback, and a portal built for results.",
     url: "/",
     siteName: "D-Maths Tuition Centre",
     images: [{ url: "/api/og", width: 1200, height: 630, alt: "D-Maths Tuition Centre" }],
@@ -35,8 +45,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "D-Maths Tuition Centre — Excellence in Mathematics",
-    description: "World-class online mathematics tuition for JSS & SSS students across Nigeria.",
+    title: "D-Maths Tuition Centre — Online Maths & Coding Tuition in Nigeria",
+    description: "Online maths & coding tuition for JSS & SSS students across Nigeria — live classes, exam prep and a results-focused portal.",
     images: ["/api/og"],
   },
   alternates: { canonical: "/" },
