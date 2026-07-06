@@ -4,6 +4,7 @@ import { supabaseBrowser } from "@/lib/supabase/client";
 import ConfirmModal from "@/components/ConfirmModal";
 import { useToast } from "@/components/Toast";
 import { Icon, type IconName } from "@/components/Icons";
+import EmptyState from "@/components/ui/EmptyState";
 
 type ConfirmState = {
   title: string; message: string; confirmLabel?: string; danger?: boolean; onConfirm: () => void;
@@ -244,8 +245,14 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
           </article>
         );
       })}
-      {!items.length && <div className="card p-12 text-center text-ink/40">No assignments yet — they'll appear here once your tutor posts them.</div>}
-      {items.length > 0 && !visible.length && <div className="card p-10 text-center text-ink/40">Nothing in "{FILTERS.find(f => f.key === filter)?.label}".</div>}
+      {!items.length && (
+        <EmptyState icon="assignments" title="No assignments yet"
+          body="When your tutor posts homework or a CBT test, it'll appear here for you to complete and submit." />
+      )}
+      {items.length > 0 && !visible.length && (
+        <EmptyState icon="checkCircle" title={`Nothing in "${FILTERS.find(f => f.key === filter)?.label}"`}
+          body="Try another tab above." />
+      )}
 
       {confirmState && (
         <ConfirmModal {...confirmState} onCancel={() => setConfirmState(null)} />

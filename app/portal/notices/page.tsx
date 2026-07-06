@@ -1,5 +1,6 @@
 import { supabaseServer } from "@/lib/supabase/server";
 import { getProfile } from "@/lib/auth";
+import EmptyState from "@/components/ui/EmptyState";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +24,10 @@ export default async function StudentNotices() {
           <p className="mt-3 text-sm leading-relaxed text-ink/65">{n.body}</p>
         </article>
       ))}
-      {!mine.length && <div className="card p-12 text-center text-ink/40">No notices yet.</div>}
+      {!mine.length && (
+        <EmptyState icon="notices" title="No notices yet"
+          body="Announcements from D-Maths — schedule changes, reminders and news — will show up here." />
+      )}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import JoinClassButton from "@/components/portal/JoinClassButton";
 import { supabaseServer } from "@/lib/supabase/server";
 import { Icon } from "@/components/Icons";
+import EmptyState from "@/components/ui/EmptyState";
 
 export const dynamic = "force-dynamic";
 
@@ -83,8 +84,9 @@ export default async function MyClasses() {
           );
         })}
         {!withStatus.length && (
-          <div className="card p-12 text-center text-ink/40 md:col-span-2">
-            No classes yet — they appear here once your tutor assigns you.
+          <div className="md:col-span-2">
+            <EmptyState icon="classes" title="No classes scheduled yet"
+              body="Your live sessions will show up here as soon as your tutor assigns you to a class. You'll also get a reminder before each one starts." />
           </div>
         )}
       </div>
