@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { supabaseServer } from "@/lib/supabase/server";
 import ParentSignOutButton from "@/components/ParentSignOutButton";
 import Logo from "@/components/Logo";
+import IdleLogout from "@/components/IdleLogout";
 
 export const metadata = { title: "Parent Portal · D-Maths Tuition" };
 
@@ -33,6 +34,7 @@ export default async function ParentLayout({ children }: { children: React.React
         </div>
       </header>
       <main className="mx-auto max-w-3xl px-4 py-8">{children}</main>
+      <IdleLogout />
     </div>
   );
 }

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { useToast } from "@/components/Toast";
 import { Icon } from "@/components/Icons";
+import FloatingMath from "@/components/landing/FloatingMath";
 
 export default function Login() {
   const [notice, setNotice] = useState<{ kind: "success" | "error"; text: string } | null>(null);
@@ -22,6 +23,8 @@ export default function Login() {
       setNotice({ kind: "success", text: "Password updated — sign in with your new password." });
     } else if (params.get("error") === "reset") {
       setNotice({ kind: "error", text: "That reset link is invalid or has expired — please request a new one." });
+    } else if (params.get("timeout") === "1") {
+      setNotice({ kind: "success", text: "You were signed out after 30 minutes of inactivity, for your security." });
     }
   }, []);
 
@@ -99,14 +102,18 @@ export default function Login() {
   }
 
   return (
-    <main className="boardgrid flex min-h-screen items-center justify-center bg-board p-5">
-      <div className="w-full max-w-md">
+    <main className="boardgrid relative flex min-h-screen items-center justify-center overflow-hidden bg-board p-5">
+      <FloatingMath />
+      <div className="hero-glow pointer-events-none absolute h-[32rem] w-[32rem] rounded-full" />
+      <div className="relative z-10 w-full max-w-md page-enter">
         {!standalone && (
           <Link href="/" className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-white/45 hover:text-white/80">← Back to D-Maths</Link>
         )}
         <div className="overflow-hidden rounded-2xl bg-white shadow-lift">
           <div className="bg-ink p-7">
-            <h1 className="font-display text-2xl font-semibold text-white">Sign in to your portal</h1>
+            <h1 className="font-display text-2xl font-semibold text-white">
+              Sign in to your <span className="text-shimmer">portal</span>
+            </h1>
             <p className="mt-1.5 text-sm text-white/45">Students use their Student ID. Parents and staff use their email.</p>
           </div>
           <form onSubmit={signIn} className="space-y-4 p-7">

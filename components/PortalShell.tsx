@@ -10,6 +10,7 @@ import NotificationBell from "@/components/NotificationBell";
 import AdminSearch from "@/components/admin/AdminSearch";
 import PushManager from "@/components/PushManager";
 import PortalTabBar, { type Tab } from "@/components/PortalTabBar";
+import IdleLogout from "@/components/IdleLogout";
 
 export type NavItem = { href: string; label: string; icon: IconName };
 
@@ -114,6 +115,7 @@ export default function PortalShell({
       {tabs && <PortalTabBar tabs={tabs} path={path} onMore={() => setOpen(true)} />}
 
       <PushManager />
+      <IdleLogout />
     </div>
   );
 }
