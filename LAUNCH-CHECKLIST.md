@@ -85,12 +85,8 @@ Run in this order (skip `schema.sql` if the project already has data):
 - [ ] **Paystack go-live** (when taking real money): switch to **live** API keys in
       Vercel, and in Paystack → Settings → **Webhooks** set the URL to
       `https://dmaths.vercel.app/api/paystack/webhook`. Enable 2FA + set a settlement bank.
-- [ ] **"Forgot password?"** (optional but recommended): Supabase → Authentication →
-      **URL Configuration** (Site URL = your live URL; add it to Redirect URLs), set the
-      **Reset Password** email template link to
-      `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/reset-password`,
-      and ideally configure **custom SMTP** (e.g. Resend/Brevo free tier) so reset mail
-      is reliable.
+- [ ] **Make "Forgot password?" work** — the code is already built; it just needs 3
+      Supabase settings (see the dedicated section **6** below).
 - [ ] *(Optional)* Re-upload sharper `public/camp-hero.png` & `public/camp-about.png`
       (≥1200px wide, same filenames) for a crisper homepage.
 
@@ -116,3 +112,28 @@ Run in this order (skip `schema.sql` if the project already has data):
 
 For environment variables, edit them in **Vercel → Settings → Environment Variables**,
 then **Redeploy**.
+
+---
+
+## 6) Make "Forgot password?" work (Supabase settings — no code)
+
+The reset flow is fully built in the app (`/auth/confirm` + `/reset-password`). It only
+needs three Supabase settings:
+
+1. **Authentication → URL Configuration**
+   - **Site URL:** `https://dmaths.academy`
+   - **Redirect URLs:** add `https://dmaths.academy/**` (and `http://localhost:3000/**`
+     for local testing).
+2. **Authentication → Emails → "Reset Password" template** — set the link/button href to
+   exactly:
+   ```
+   {{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/reset-password
+   ```
+   (The default template uses a different flow, which is why resets don't currently work.)
+3. **Authentication → Emails → SMTP (strongly recommended):** configure custom SMTP with a
+   free service like **Resend** or **Brevo**. Supabase's built-in mail is rate-limited to a
+   few messages/hour and often lands in spam, so resets are unreliable without it.
+
+**Test:** `/login` → "Forgot password?" → enter your email → open the emailed link → set a
+new password → you're returned to sign in. If the link says "invalid or expired", re-check
+steps 1–2 (usually the email-template href).

@@ -2,14 +2,15 @@
 import { useEffect } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
 
-// Security: sign the user out after 30 minutes of inactivity (and immediately
-// if the app is reopened after having been idle that long). Mounted only in
+// Security: sign the user out after a period of inactivity (and immediately if
+// the app is reopened after having been idle that long). Mounted only in
 // authenticated shells, so it never runs on the landing/login pages.
-const IDLE_MS = 30 * 60 * 1000;
+// `minutes` lets each role set its own window (students/parents 30, admins 120).
 const KEY = "dmaths-last-activity";
 
-export default function IdleLogout() {
+export default function IdleLogout({ minutes = 30 }: { minutes?: number }) {
   useEffect(() => {
+    const IDLE_MS = minutes * 60 * 1000;
     let timer: number | undefined;
 
     const now = () => Date.now();
@@ -54,7 +55,7 @@ export default function IdleLogout() {
       window.removeEventListener("focus", check);
       if (timer) clearInterval(timer);
     };
-  }, []);
+  }, [minutes]);
 
   return null;
 }
