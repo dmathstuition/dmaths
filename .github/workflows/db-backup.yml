@@ -1,0 +1,53 @@
+name: Database backup
+
+# Nightly off-site backup of the Supabase Postgres database, independent of
+# Supabase's own backups. Produces a gzipped pg_dump stored as a downloadable
+# GitHub artifact (kept 30 days). Add the connection string as the repo secret
+# SUPABASE_DB_URL to enable it — until then the job runs green but does nothing.
+
+on:
+  schedule:
+    - cron: "0 2 * * *" # every day at 02:00 UTC
+  workflow_dispatch: {} # allow manual "Run workflow"
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+    steps:
+      - name: Guard — require the DB URL secret
+        id: guard
+        run: |
+          if [ -z "${SUPABASE_DB_URL}" ]; then
+            echo "::notice::SUPABASE_DB_URL is not set — skipping backup. Add it in Settings → Secrets and variables → Actions."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Match Supabase's Postgres major (16) so pg_dump is version-compatible.
+      - name: Install PostgreSQL 16 client
+        if: steps.guard.outputs.run == 'true'
+        run: |
+          sudo sh -c 'echo "deb https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/pgdg.gpg
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-16
+
+      - name: Dump database
+        if: steps.guard.outputs.run == 'true'
+        run: |
+          STAMP="$(date -u +%Y%m%d-%H%M%S)"
+          echo "STAMP=$STAMP" >> "$GITHUB_ENV"
+          # --no-owner / --no-privileges keep the dump portable for restores.
+          pg_dump --no-owner --no-privileges "$SUPABASE_DB_URL" | gzip > "dmaths-backup-${STAMP}.sql.gz"
+          ls -lh "dmaths-backup-${STAMP}.sql.gz"
+
+      - name: Upload backup artifact
+        if: steps.guard.outputs.run == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-backup-${{ env.STAMP }}
+          path: dmaths-backup-*.sql.gz
+          retention-days: 30

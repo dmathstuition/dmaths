@@ -1,11 +1,13 @@
 "use client";
 import Link from "next/link";
 import { useEffect } from "react";
+import * as Sentry from "@sentry/nextjs";
 import Logo from "@/components/Logo";
 
 export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   useEffect(() => {
-    // Surface to the console; a monitoring tool (e.g. Sentry) would hook in here.
+    // Report to Sentry (a no-op unless NEXT_PUBLIC_SENTRY_DSN is set) and log locally.
+    Sentry.captureException(error);
     console.error(error);
   }, [error]);
 

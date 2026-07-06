@@ -1,4 +1,5 @@
 import withSerwistInit from "@serwist/next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 /** @type {import('next').NextConfig} */
 
@@ -14,7 +15,7 @@ const csp = [
   "img-src 'self' data: blob: https:",
   "worker-src 'self' blob:",
   "manifest-src 'self'",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.paystack.co https://script.google.com https://script.googleusercontent.com https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.paystack.co https://script.google.com https://script.googleusercontent.com https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.sentry.io",
   "frame-src https://checkout.paystack.com https://*.paystack.co",
   "object-src 'none'",
   "base-uri 'self'",
@@ -71,4 +72,10 @@ const withSerwist = withSerwistInit({
   reloadOnOnline: true,
 });
 
-export default withSerwist(nextConfig);
+// Sentry (error monitoring) wraps the already-Serwist-wrapped config. It stays
+// inert at runtime unless NEXT_PUBLIC_SENTRY_DSN is set, and source-map upload
+// is skipped when SENTRY_AUTH_TOKEN is absent — so CI builds pass unchanged.
+export default withSentryConfig(withSerwist(nextConfig), {
+  silent: true,
+  widenClientFileUpload: true,
+});
