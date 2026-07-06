@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { supabaseServer } from "@/lib/supabase/server";
 import ParentSignOutButton from "@/components/ParentSignOutButton";
+import Logo from "@/components/Logo";
 
 export const metadata = { title: "Parent Portal · D-Maths Tuition" };
 
@@ -18,15 +19,15 @@ export default async function ParentLayout({ children }: { children: React.React
   if (profile?.role !== "parent") redirect("/login");
 
   return (
-    <div className="min-h-screen bg-chalk">
-      <header className="border-b border-line bg-white px-6 py-4">
+    <div className="portal-bg min-h-screen">
+      <header className="glass-dark sticky top-0 z-40 px-5 py-3.5">
         <div className="mx-auto flex max-w-3xl items-center justify-between">
-          <p className="font-display text-lg font-semibold text-ink">
-            D-Maths Tuition{" "}
-            <span className="ml-2 text-xs font-normal text-ink/40">Parent Portal</span>
-          </p>
+          <div className="flex items-center gap-3">
+            <Logo light />
+            <span className="hidden rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] font-bold text-white/60 sm:inline">Parent Portal</span>
+          </div>
           <div className="flex items-center gap-4 text-sm">
-            <span className="hidden text-ink/55 sm:block">{profile.first_name}</span>
+            <span className="hidden font-semibold text-white/70 sm:block">Hi, {profile.first_name} 👋</span>
             <ParentSignOutButton />
           </div>
         </div>
