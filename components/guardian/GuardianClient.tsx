@@ -1,3 +1,5 @@
+import ProgressRing from "@/components/ui/ProgressRing";
+
 interface Student {
   first_name: string; last_name: string; student_code: string; level: string;
   avg_score: number; attendance: number; reward_points: number; sanction_points: number;
@@ -19,24 +21,42 @@ export default function GuardianClient({
 }) {
   return (
     <div className="space-y-6">
-      {/* Student header */}
-      <div className="rounded-2xl bg-board p-6 text-white">
-        <h1 className="font-display text-2xl font-semibold">
-          {student.first_name} {student.last_name}
-        </h1>
-        <p className="mt-1 text-sm text-white/55">
-          {student.student_code} · {student.level}
-        </p>
-      </div>
+      {/* Student header hero */}
+      <div className="boardgrid overflow-hidden rounded-2xl bg-board p-6 text-white">
+        <div className="flex items-center gap-4">
+          <span className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-white/10 font-display text-lg font-bold text-gold-soft">
+            {student.first_name?.[0]}{student.last_name?.[0]}
+          </span>
+          <div>
+            <h1 className="font-display text-2xl font-semibold">{student.first_name} {student.last_name}</h1>
+            <p className="mt-0.5 text-sm text-white/55">{student.student_code} · {student.level}</p>
+          </div>
+        </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <StatCard label="Avg grade" value={`${student.avg_score}%`}
-          color={student.avg_score >= 70 ? "text-emerald-600" : student.avg_score >= 50 ? "text-amber-600" : "text-red-600"} />
-        <StatCard label="Attendance" value={`${student.attendance}%`}
-          color={student.attendance >= 70 ? "text-emerald-600" : "text-amber-600"} />
-        <StatCard label="Reward pts" value={`+${student.reward_points}`} color="text-emerald-600" />
-        <StatCard label="Sanction pts" value={String(student.sanction_points)} color="text-red-500" />
+        <div className="mt-6 flex flex-wrap items-center gap-6">
+          <div className="flex flex-col items-center gap-1.5">
+            <ProgressRing value={student.avg_score} size={84} stroke={8} color="#EFAE56" track="rgba(255,255,255,.14)">
+              <span className="font-display text-lg font-bold text-white">{student.avg_score}%</span>
+            </ProgressRing>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-white/45">Avg grade</p>
+          </div>
+          <div className="flex flex-col items-center gap-1.5">
+            <ProgressRing value={student.attendance} size={84} stroke={8} color="#7BA3CA" track="rgba(255,255,255,.14)">
+              <span className="font-display text-lg font-bold text-white">{student.attendance}%</span>
+            </ProgressRing>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-white/45">Attendance</p>
+          </div>
+          <div className="flex gap-3">
+            <div className="glass-hero-chip px-4 py-3 text-center">
+              <p className="font-display text-2xl font-semibold text-emerald-300">+{student.reward_points}</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">Reward pts</p>
+            </div>
+            <div className="glass-hero-chip px-4 py-3 text-center">
+              <p className="font-display text-2xl font-semibold text-red-300">{student.sanction_points}</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">Sanctions</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {student.grade_target !== null && (
@@ -118,15 +138,6 @@ export default function GuardianClient({
       <p className="text-center text-xs text-ink/30">
         This is a read-only parent view · D-Maths Tuition
       </p>
-    </div>
-  );
-}
-
-function StatCard({ label, value, color }: { label: string; value: string; color?: string }) {
-  return (
-    <div className="card p-4 text-center">
-      <p className="text-[11px] font-extrabold uppercase tracking-wider text-ink/40">{label}</p>
-      <p className={`mt-1 font-display text-2xl font-semibold ${color ?? ""}`}>{value}</p>
     </div>
   );
 }

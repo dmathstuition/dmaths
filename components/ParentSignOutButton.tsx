@@ -9,7 +9,8 @@ export default function ParentSignOutButton() {
     router.replace("/login");
   }
   return (
-    <button onClick={signOut} className="font-semibold text-gold-deep hover:underline text-sm">
+    <button onClick={signOut}
+      className="rounded-lg bg-white/10 px-3 py-1.5 text-sm font-semibold text-white/80 transition hover:bg-white/20 hover:text-white">
       Sign out
     </button>
   );
