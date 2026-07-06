@@ -3,10 +3,20 @@ import { useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import ConfirmModal from "@/components/ConfirmModal";
 import { useToast } from "@/components/Toast";
+import { Icon, type IconName } from "@/components/Icons";
 
 type ConfirmState = {
   title: string; message: string; confirmLabel?: string; danger?: boolean; onConfirm: () => void;
 };
+
+const FILTERS = [
+  { key: "all", label: "All" },
+  { key: "todo", label: "To do" },
+  { key: "submitted", label: "Submitted" },
+  { key: "graded", label: "Graded" },
+] as const;
+type FilterKey = (typeof FILTERS)[number]["key"];
+const bucketOf = (status: string): FilterKey => (status === "pending" ? "todo" : (status as FilterKey));
 
 export default function AssignmentsClient({ initial }: { initial: any[] }) {
   const supabase = supabaseBrowser();
@@ -16,6 +26,7 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
   const [uploading, setUploading] = useState<string | null>(null);
   const [uploadPct, setUploadPct] = useState(0);
   const [confirmState, setConfirmState] = useState<ConfirmState | null>(null);
+  const [filter, setFilter] = useState<FilterKey>("all");
 
   async function reload() {
     const { data: { user } } = await supabase.auth.getUser();
@@ -90,11 +101,42 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
     });
   }
 
+  const counts = {
+    all: items.length,
+    todo: items.filter(s => bucketOf(s.status) === "todo").length,
+    submitted: items.filter(s => bucketOf(s.status) === "submitted").length,
+    graded: items.filter(s => bucketOf(s.status) === "graded").length,
+  } as Record<FilterKey, number>;
+  const visible = filter === "all" ? items : items.filter(s => bucketOf(s.status) === filter);
+
+  const STATUS_ICON: Record<string, { icon: IconName; cls: string }> = {
+    graded: { icon: "checkCircle", cls: "bg-emerald-50 text-emerald-600" },
+    submitted: { icon: "assignments", cls: "bg-blue-50 text-blue-600" },
+    pending: { icon: "assignments", cls: "bg-gold-pale text-gold-deep" },
+  };
+
   return (
     <div className="space-y-5">
-      <h1 className="font-display text-3xl font-semibold">Assignments</h1>
-      {items.map(s => {
+      <div>
+        <h1 className="font-display text-3xl font-semibold">Assignments</h1>
+        <p className="text-sm text-ink/45">Submit your work and see your grades.</p>
+      </div>
+
+      {/* Filter tabs */}
+      <div className="flex flex-wrap gap-2">
+        {FILTERS.map(f => (
+          <button key={f.key} onClick={() => setFilter(f.key)}
+            className={`rounded-full px-4 py-1.5 text-[13px] font-bold transition ${
+              filter === f.key ? "bg-ink text-white" : "border border-line bg-white text-ink/60 hover:bg-chalk"
+            }`}>
+            {f.label} <span className="opacity-60">{counts[f.key]}</span>
+          </button>
+        ))}
+      </div>
+
+      {visible.map(s => {
         const a = s.assignment;
+        const st = STATUS_ICON[s.status] ?? STATUS_ICON.pending;
         const now = new Date();
         const cbtOpen = a.type === "cbt" &&
           (!a.cbt_open || now >= new Date(a.cbt_open)) &&
@@ -105,15 +147,20 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
         return (
           <article key={s.id} className="card p-6">
             <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <h2 className="font-extrabold">
-                  {a.title}
-                  {a.type === "cbt" && <span className="pill-blue ml-1">CBT</span>}
-                  {hasInlineCBT && <span className="pill ml-1 bg-purple-100 text-purple-800">{a.cbt_questions.length} Qs</span>}
-                </h2>
-                <p className="text-sm text-ink/45">
-                  {a.subject} · Due {a.due_date ? new Date(a.due_date).toLocaleDateString("en-NG", { dateStyle: "medium" }) : "TBD"}
-                </p>
+              <div className="flex items-start gap-3">
+                <span className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl ${st.cls}`}>
+                  <Icon name={st.icon} className="h-5 w-5" />
+                </span>
+                <div>
+                  <h2 className="font-extrabold">
+                    {a.title}
+                    {a.type === "cbt" && <span className="pill-blue ml-1">CBT</span>}
+                    {hasInlineCBT && <span className="pill ml-1 bg-purple-100 text-purple-800">{a.cbt_questions.length} Qs</span>}
+                  </h2>
+                  <p className="text-sm text-ink/45">
+                    {a.subject} · Due {a.due_date ? new Date(a.due_date).toLocaleDateString("en-NG", { dateStyle: "medium" }) : "TBD"}
+                  </p>
+                </div>
               </div>
               <span className={s.status === "graded" ? "pill-green" : s.status === "submitted" ? "pill-blue" : "pill-amber"}>{s.status}</span>
             </div>
@@ -198,6 +245,7 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
         );
       })}
       {!items.length && <div className="card p-12 text-center text-ink/40">No assignments yet — they'll appear here once your tutor posts them.</div>}
+      {items.length > 0 && !visible.length && <div className="card p-10 text-center text-ink/40">Nothing in "{FILTERS.find(f => f.key === filter)?.label}".</div>}
 
       {confirmState && (
         <ConfirmModal {...confirmState} onCancel={() => setConfirmState(null)} />

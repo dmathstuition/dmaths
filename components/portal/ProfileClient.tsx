@@ -3,6 +3,7 @@ import { useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { useToast } from "@/components/Toast";
 import { Icon } from "@/components/Icons";
+import ProgressRing from "@/components/ui/ProgressRing";
 
 export default function ProfileClient({ me }: { me: any }) {
   const supabase = supabaseBrowser();
@@ -36,8 +37,18 @@ export default function ProfileClient({ me }: { me: any }) {
         <p className="font-mono text-sm text-ink/45">{me.student_code}</p>
         <p className="pill-gold mt-3">{me.level}</p>
         <div className="mt-5 grid grid-cols-2 gap-3 border-t border-line pt-5">
-          <div><p className="font-display text-2xl font-semibold text-emerald-600">{me.avg_score}%</p><p className="text-[11px] font-bold text-ink/40">Avg score</p></div>
-          <div><p className="font-display text-2xl font-semibold text-blue-600">{me.attendance}%</p><p className="text-[11px] font-bold text-ink/40">Attendance</p></div>
+          <div className="flex flex-col items-center gap-1.5">
+            <ProgressRing value={me.avg_score} size={72} stroke={7} color="#059669">
+              <span className="font-display text-base font-bold text-ink">{me.avg_score}%</span>
+            </ProgressRing>
+            <p className="text-[11px] font-bold text-ink/40">Avg score</p>
+          </div>
+          <div className="flex flex-col items-center gap-1.5">
+            <ProgressRing value={me.attendance} size={72} stroke={7} color="#1A60AB">
+              <span className="font-display text-base font-bold text-ink">{me.attendance}%</span>
+            </ProgressRing>
+            <p className="text-[11px] font-bold text-ink/40">Attendance</p>
+          </div>
         </div>
         <div className="mt-4 flex flex-wrap justify-center gap-1.5">
           {(me.subjects ?? []).map((s: string) => <span key={s} className="pill-blue">{s}</span>)}
