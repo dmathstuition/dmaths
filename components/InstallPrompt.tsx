@@ -1,7 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
 
-const DISMISS_KEY = "dmaths-install-dismissed";
+// Session-only key: "Not now" hides it for THIS visit but it returns on the
+// next visit — it keeps prompting until the app is actually installed.
+const DISMISS_KEY = "dmaths-install-dismissed-session";
 
 // Captured beforeinstallprompt event (Chrome/Edge/Android). Not in TS lib types.
 type BIPEvent = Event & {
@@ -15,18 +17,19 @@ export default function InstallPrompt() {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    // Already installed (standalone) or previously dismissed → never show.
+    // Already installed (standalone) → never show. Otherwise show, and only
+    // stay hidden if dismissed earlier in THIS browser session.
     const standalone =
       window.matchMedia("(display-mode: standalone)").matches ||
-      // iOS Safari
       (navigator as unknown as { standalone?: boolean }).standalone === true;
-    if (standalone || localStorage.getItem(DISMISS_KEY) === "1") return;
+    if (standalone) return;
+    const dismissedThisSession = sessionStorage.getItem(DISMISS_KEY) === "1";
 
     // Android / desktop Chrome: the browser fires this when installable.
     const onBIP = (e: Event) => {
       e.preventDefault();
       setDeferred(e as BIPEvent);
-      setShow(true);
+      if (!dismissedThisSession) setShow(true);
     };
     window.addEventListener("beforeinstallprompt", onBIP);
 
@@ -34,7 +37,7 @@ export default function InstallPrompt() {
     const ua = window.navigator.userAgent;
     const isIOS = /iphone|ipad|ipod/i.test(ua);
     const isSafari = /safari/i.test(ua) && !/crios|fxios|chrome/i.test(ua);
-    if (isIOS && isSafari) {
+    if (isIOS && isSafari && !dismissedThisSession) {
       setIosHint(true);
       setShow(true);
     }
@@ -49,55 +52,48 @@ export default function InstallPrompt() {
   }, []);
 
   function dismiss() {
-    localStorage.setItem(DISMISS_KEY, "1");
+    sessionStorage.setItem(DISMISS_KEY, "1"); // returns next visit
     setShow(false);
   }
 
   async function install() {
     if (!deferred) return;
     await deferred.prompt();
-    await deferred.userChoice;
+    const { outcome } = await deferred.userChoice;
     setDeferred(null);
-    setShow(false);
+    if (outcome === "accepted") setShow(false);
+    else dismiss(); // declined — rest this session, ask again next visit
   }
 
   if (!show) return null;
 
   return (
-    <div className="fixed inset-x-3 bottom-24 z-40 mx-auto max-w-sm sm:left-6 sm:right-auto">
-      <div className="glass-card flex items-start gap-3 p-4 shadow-2xl">
+    <div className="fixed inset-x-0 bottom-0 z-[70] p-3 sm:inset-x-auto sm:left-6 sm:bottom-6 sm:max-w-sm">
+      <div className="glass-card flex items-start gap-3 p-4 shadow-2xl ring-1 ring-gold/30">
         <span className="text-2xl" aria-hidden="true">📲</span>
         <div className="min-w-0 flex-1">
-          <p className="font-display text-sm font-bold text-ink">Install the D-Maths app</p>
+          <p className="font-display text-sm font-bold text-ink">Get the D-Maths app</p>
           {iosHint ? (
             <p className="mt-0.5 text-[13px] leading-relaxed text-ink/60">
-              Tap the <strong>Share</strong> button, then{" "}
-              <strong>"Add to Home Screen"</strong> to install.
+              Tap the <strong>Share</strong> icon, then <strong>"Add to Home Screen"</strong> to install.
             </p>
           ) : (
             <p className="mt-0.5 text-[13px] leading-relaxed text-ink/60">
-              Add it to your home screen for one-tap access — works like a real app.
+              Install it for one-tap access, class reminders and notifications — works like a real app.
             </p>
           )}
           <div className="mt-3 flex items-center gap-2">
             {!iosHint && (
-              <button onClick={install} className="btn-gold !min-h-[38px] !rounded-full !px-4 !text-[13px]">
-                Install
+              <button onClick={install} className="btn-gold !min-h-[40px] !rounded-full !px-5 !text-[13px]">
+                Install app
               </button>
             )}
-            <button
-              onClick={dismiss}
-              className="text-[13px] font-semibold text-ink/45 hover:text-ink/70"
-            >
+            <button onClick={dismiss} className="text-[13px] font-semibold text-ink/45 hover:text-ink/70">
               Not now
             </button>
           </div>
         </div>
-        <button
-          onClick={dismiss}
-          aria-label="Dismiss install prompt"
-          className="flex-shrink-0 text-ink/35 transition hover:text-ink/70"
-        >
+        <button onClick={dismiss} aria-label="Dismiss" className="flex-shrink-0 text-ink/35 transition hover:text-ink/70">
           ✕
         </button>
       </div>
