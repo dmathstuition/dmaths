@@ -7,7 +7,7 @@ import LandingNav from "@/components/landing/LandingNav";
 import SummerCampBanner from "@/components/landing/SummerCampBanner";
 import FloatingMath from "@/components/landing/FloatingMath";
 import InstallPrompt from "@/components/InstallPrompt";
-import OnboardingSplash from "@/components/OnboardingSplash";
+import AppLauncher from "@/components/AppLauncher";
 
 const SERVICES = [
   { t: "Maths & Calculus", d: "From algebra and geometry to derivatives and integrals, built step by step.", c: "#EFAE56", sym: "ƒ(x)" },
@@ -57,7 +57,7 @@ const STATS = [
 export default function Landing() {
   return (
     <main className="overflow-hidden bg-white font-body text-ink">
-      <OnboardingSplash />
+      <AppLauncher />
       <SummerCampBanner />
       <LandingNav />
 

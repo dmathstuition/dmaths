@@ -33,6 +33,14 @@ export default function Login() {
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [standalone, setStandalone] = useState(false);
+
+  useEffect(() => {
+    setStandalone(
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (navigator as unknown as { standalone?: boolean }).standalone === true,
+    );
+  }, []);
 
   async function signIn(e: React.FormEvent) {
     e.preventDefault();
@@ -93,7 +101,9 @@ export default function Login() {
   return (
     <main className="boardgrid flex min-h-screen items-center justify-center bg-board p-5">
       <div className="w-full max-w-md">
-        <Link href="/" className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-white/45 hover:text-white/80">← Back to D-Maths</Link>
+        {!standalone && (
+          <Link href="/" className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-white/45 hover:text-white/80">← Back to D-Maths</Link>
+        )}
         <div className="overflow-hidden rounded-2xl bg-white shadow-lift">
           <div className="bg-ink p-7">
             <h1 className="font-display text-2xl font-semibold text-white">Sign in to your portal</h1>
@@ -129,9 +139,14 @@ export default function Login() {
             <button className="btn-gold w-full !min-h-[50px] !text-base" disabled={busy}>
               {busy ? "Signing in…" : "Sign in →"}
             </button>
-            <p className="text-center text-[13px] text-ink/45">
-              Not enrolled yet? <Link href="/apply" className="font-bold text-gold-deep hover:underline">Apply here →</Link>
-            </p>
+
+            <div className="flex items-center gap-3 text-[11px] font-bold uppercase tracking-wider text-ink/30">
+              <span className="h-px flex-1 bg-line" /> New to D-Maths? <span className="h-px flex-1 bg-line" />
+            </div>
+            <Link href="/apply"
+              className="btn w-full !min-h-[48px] border border-gold/50 bg-white text-center text-gold-deep hover:bg-gold-pale">
+              Create an account
+            </Link>
           </form>
         </div>
       </div>
