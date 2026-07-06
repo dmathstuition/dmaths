@@ -5,6 +5,7 @@ import Logo from "@/components/Logo";
 import Reveal from "@/components/landing/Reveal";
 import CountUp from "@/components/landing/CountUp";
 import { DotsScatter } from "@/components/illustrations";
+import InstallPrompt from "@/components/InstallPrompt";
 import {
   SUMMER_CAMP,
   SUMMER_CAMP_TIERS,
@@ -280,6 +281,9 @@ export default function SummerCamp() {
           © {new Date().getFullYear()} D-Maths Tuition Centre · dmathstuition@gmail.com · Asaba, Delta State
         </div>
       </footer>
+
+      {/* INSTALL-AS-APP PROMPT (persistent until installed) */}
+      <InstallPrompt />
 
       {/* FLOATING WHATSAPP BUTTON */}
       <a
