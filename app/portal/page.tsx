@@ -21,6 +21,7 @@ export default async function StudentDashboard() {
 
   const pending = (subs ?? []).filter(s => s.status === "pending").length;
   const unread = unreadMsgs?.length ?? 0;
+  const streak: number = (me as any)?.streak_count ?? 0;
   const rewardPts: number = (me as any)?.reward_points ?? 0;
   const sanctionPts: number = (me as any)?.sanction_points ?? 0;
 
@@ -43,6 +44,11 @@ export default async function StudentDashboard() {
             <p className="mt-2 text-sm text-white/50">
               ID: <span className="font-mono text-white/80">{me?.student_code}</span>
             </p>
+            {streak > 0 && (
+              <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-gold/15 px-3 py-1 text-sm font-bold text-gold ring-1 ring-gold/30">
+                🔥 {streak}-day learning streak
+              </p>
+            )}
           </div>
         </div>
       </Reveal>
