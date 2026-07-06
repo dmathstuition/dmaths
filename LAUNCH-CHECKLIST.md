@@ -41,6 +41,10 @@ Set these for **Production, Preview, Development**. 🔓 = safe to expose · �
 | `VAPID_PRIVATE_KEY` | 🔒 | Web-push private key |
 | `VAPID_SUBJECT` | 🔓 | `mailto:dmathstuition@gmail.com` |
 | `CRON_SECRET` | 🔒 | Random string protecting the cron endpoints |
+| `NEXT_PUBLIC_SENTRY_DSN` | 🔓 | *(optional)* Sentry project DSN — turns on error monitoring (see section **7**). Leave unset to keep Sentry fully off. |
+| `SENTRY_AUTH_TOKEN` | 🔒 | *(optional)* Only for readable stack traces (source-map upload) at build time |
+| `SENTRY_ORG` | 🔓 | *(optional)* Sentry org slug — pairs with `SENTRY_AUTH_TOKEN` |
+| `SENTRY_PROJECT` | 🔓 | *(optional)* Sentry project slug — pairs with `SENTRY_AUTH_TOKEN` |
 
 > To regenerate keys later: VAPID → `npx web-push generate-vapid-keys`; `CRON_SECRET` →
 > any long random string. After changing either, redeploy and update the matching place
@@ -66,7 +70,11 @@ Run in this order (skip `schema.sql` if the project already has data):
 10. `migration-notifications.sql`
 11. `migration-audit-extras.sql`
 12. **`migration-push.sql`**  ← needed for push notifications to remember devices
-13. `migration-schema-fixes.sql` *(run last — patches any missing columns)*
+13. `migration-messages.sql` *(admin ↔ learner direct messages)*
+14. `migration-streaks.sql` *(learning streaks)*
+15. `migration-weekly-digest.sql` *(weekly progress digest)*
+16. `migration-referrals-ratings.sql` *(referral links + in-app ratings)*
+17. `migration-schema-fixes.sql` *(run last — patches any missing columns)*
 
 ---
 
@@ -100,6 +108,12 @@ Run in this order (skip `schema.sql` if the project already has data):
   (edit the Student ID / email at the top first). ⚠️ Permanent. (The admin portal's
   "Danger zone → Permanently delete" does the same thing through the UI.)
 - **Discounts/prices:** edit `DISCOUNT_PCT` and the tier prices in `lib/summerCamp.ts`.
+- **Refer a friend:** every student has a referral link — `…/apply?ref=<their Student ID>`
+  (they'll find a **Refer a friend** page in their portal). When a referred applicant is
+  approved, the referrer is credited and notified. See who referred whom on each student's
+  admin detail page.
+- **Read student/parent feedback:** star ratings + comments appear under
+  **Admin → Feedback** (`/admin/ratings`), with a running average.
 
 ---
 
@@ -137,3 +151,43 @@ needs three Supabase settings:
 **Test:** `/login` → "Forgot password?" → enter your email → open the emailed link → set a
 new password → you're returned to sign in. If the link says "invalid or expired", re-check
 steps 1–2 (usually the email-template href).
+
+---
+
+## 7) Error monitoring (Sentry) — optional but recommended
+
+So you hear about a crash before a parent has to tell you. It's **free** and takes ~2 min.
+The app ships **fully off** — it does nothing at all until you add a DSN.
+
+1. Create a free account at **sentry.io** → **Create project** → platform **Next.js**.
+2. Copy the project's **DSN** (a URL like `https://abc123@o0.ingest.sentry.io/456`).
+3. In **Vercel → Settings → Environment Variables**, add
+   `NEXT_PUBLIC_SENTRY_DSN` = that DSN (Production, Preview, Development), then **Redeploy**.
+4. That's it — errors now appear in your Sentry dashboard with a stack trace.
+
+> *(Optional, for nicer stack traces)* add `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, and
+> `SENTRY_PROJECT` (from Sentry → Settings) so build-time source maps are uploaded.
+> Skipping these is completely fine — errors are still captured either way.
+
+**To turn it off:** delete `NEXT_PUBLIC_SENTRY_DSN` and redeploy. No code change needed.
+
+---
+
+## 8) Nightly database backups (GitHub Actions) — optional but recommended
+
+An independent, downloadable copy of the database, on top of Supabase's own backups. Runs
+automatically every night and keeps each backup for **30 days**. Add **one secret** to
+switch it on (until then the workflow runs green but does nothing):
+
+1. In **Supabase → Project Settings → Database → Connection string**, copy the
+   **URI** (the `postgresql://…` one; the *Session pooler* or *Direct connection* both work).
+2. In **GitHub → your repo → Settings → Secrets and variables → Actions → New repository
+   secret**, add:
+   - **Name:** `SUPABASE_DB_URL`
+   - **Value:** the connection string from step 1 (it contains the DB password — keep it secret).
+3. Done. The **Database backup** workflow runs nightly.
+
+**To fetch a backup:** GitHub → **Actions** tab → **Database backup** → open the latest run →
+download the **`db-backup-…`** artifact (a `.sql.gz`).
+**To run one now:** Actions → **Database backup** → **Run workflow**.
+**To restore:** `gunzip -c dmaths-backup-*.sql.gz | psql "<your SUPABASE_DB_URL>"`.

@@ -5,6 +5,7 @@ import { getUser, getProfile } from "@/lib/auth";
 import CountUp from "@/components/landing/CountUp";
 import Reveal from "@/components/landing/Reveal";
 import { Icon, type IconName } from "@/components/Icons";
+import RateCard from "@/components/portal/RateCard";
 
 export const dynamic = "force-dynamic";
 
@@ -49,6 +50,12 @@ export default async function StudentDashboard() {
                 🔥 {streak}-day learning streak
               </p>
             )}
+            <div className="mt-5">
+              <Link href="/portal/refer"
+                className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-white ring-1 ring-white/15 transition hover:bg-white/20">
+                🎁 Refer a friend
+              </Link>
+            </div>
           </div>
         </div>
       </Reveal>
@@ -133,6 +140,8 @@ export default async function StudentDashboard() {
           </div>
         </Reveal>
       </div>
+
+      <Reveal delay={160}><RateCard /></Reveal>
     </div>
   );
 }

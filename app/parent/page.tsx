@@ -1,6 +1,7 @@
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import GuardianClient from "@/components/guardian/GuardianClient";
+import RateCard from "@/components/portal/RateCard";
 
 export const dynamic = "force-dynamic";
 
@@ -94,6 +95,7 @@ export default async function ParentPage() {
           />
         ) : null,
       )}
+      <RateCard />
     </div>
   );
 }

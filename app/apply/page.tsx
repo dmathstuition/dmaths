@@ -35,6 +35,8 @@ export default function Apply() {
   const [consent, setConsent] = useState(false);
   // Summer-camp tag from the URL (?camp=summer-2026&plan=<id>)
   const [camp, setCamp] = useState("");
+  // Referral code from the URL (?ref=DM-2026-0001) — the referring student's ID.
+  const [ref, setRef] = useState("");
   // Part payment: pay the full discounted price, or a 50% deposit now.
   const [payHalf, setPayHalf] = useState(false);
 
@@ -65,6 +67,7 @@ export default function Apply() {
         if (d.f) setF(d.f);
         if (typeof d.step === "number") setStep(d.step);
         if (typeof d.camp === "string") setCamp(d.camp);
+        if (typeof d.ref === "string") setRef(d.ref);
         setPayHalf(!!d.payHalf);
         setConsent(!!d.consent);
         return; // restored — don't let URL params overwrite the chosen tier/amount
@@ -72,6 +75,9 @@ export default function Apply() {
     } catch { /* ignore malformed draft */ }
 
     const params = new URLSearchParams(window.location.search);
+    // A referral link can accompany any enrolment (camp or regular).
+    const r = (params.get("ref") || "").trim().slice(0, 40);
+    if (r) setRef(r);
     const c = params.get("camp") || "";
     if (!c) return;
     setCamp(c);
@@ -84,9 +90,9 @@ export default function Apply() {
   useEffect(() => {
     if (done) return;
     try {
-      sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ f, step, camp, payHalf, consent }));
+      sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ f, step, camp, ref, payHalf, consent }));
     } catch { /* storage unavailable — non-fatal */ }
-  }, [f, step, camp, payHalf, consent, done]);
+  }, [f, step, camp, ref, payHalf, consent, done]);
 
   const selectedTier = camp ? findTier(f.plan) : undefined;
 
@@ -130,6 +136,7 @@ export default function Apply() {
         guardian_email: f.guardian_email || "",
         subjects: f.subjects, notes: f.notes || "",
         camp: camp || "", plan: f.plan || "",
+        ref: ref || "",
         pay_plan: selectedTier && payHalf ? "part" : "full",
         payment_ref: free ? "FREE-ENROLMENT" : f.payment_ref,
         payment_method: free ? "Free promotion" : f.payment_method,
