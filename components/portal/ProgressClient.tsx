@@ -1,8 +1,16 @@
 "use client";
 import { useMemo } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, CartesianGrid, PieChart, Pie, Cell, Legend, ReferenceLine } from "recharts";
+import ProgressRing from "@/components/ui/ProgressRing";
 
 const COLORS = ["#1A60AB", "#EFAE56", "#059669", "#dc2626", "#8b5cf6", "#ec4899"];
+
+function encouragement(score: number) {
+  if (score >= 80) return "Outstanding work — keep it up! 🌟";
+  if (score >= 60) return "Consistent effort — you're doing great.";
+  if (score >= 40) return "Good progress — keep pushing.";
+  return "Every step counts — let's build momentum.";
+}
 
 export default function ProgressClient({
   profile, submissions, history = [], attendanceRecords, gradeTarget = null,
@@ -89,6 +97,42 @@ export default function ProgressClient({
       <div className="boardgrid relative overflow-hidden rounded-2xl bg-board p-7 text-white">
         <h1 className="font-display text-2xl font-semibold sm:text-3xl">My progress</h1>
         <p className="mt-1 text-sm text-white/50">{profile.first_name} {profile.last_name} · {profile.student_code}</p>
+      </div>
+
+      {/* Overall progress hero + subject performance (app-style) */}
+      <div className="grid gap-5 lg:grid-cols-2">
+        <div className="card flex items-center gap-5 p-6">
+          <ProgressRing value={profile.avg_score} size={110} color="#1A60AB">
+            <span className="font-display text-2xl font-extrabold text-ink">{profile.avg_score}%</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-ink/40">Overall</span>
+          </ProgressRing>
+          <div>
+            <h2 className="font-display text-lg font-semibold">Overall progress</h2>
+            <p className="mt-1 text-sm text-ink/55">{encouragement(profile.avg_score)}</p>
+          </div>
+        </div>
+
+        <div className="card p-6">
+          <h2 className="mb-4 font-display text-lg font-semibold">Subject performance</h2>
+          {subjectBreakdown.length > 0 ? (
+            <div className="space-y-3.5">
+              {subjectBreakdown.map((sb, i) => (
+                <div key={sb.subject}>
+                  <div className="mb-1 flex items-center justify-between text-sm">
+                    <span className="font-semibold text-ink/75">{sb.subject}</span>
+                    <span className="font-bold text-ink">{sb.avg}%</span>
+                  </div>
+                  <div className="h-2.5 overflow-hidden rounded-full bg-ink/10">
+                    <div className="bar-animate h-full rounded-full"
+                      style={{ width: `${sb.avg}%`, backgroundColor: COLORS[i % COLORS.length] }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="py-6 text-center text-sm text-ink/40">No graded assignments yet.</p>
+          )}
+        </div>
       </div>
 
       {/* KPIs */}

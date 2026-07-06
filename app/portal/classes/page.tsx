@@ -1,38 +1,88 @@
 import JoinClassButton from "@/components/portal/JoinClassButton";
 import { supabaseServer } from "@/lib/supabase/server";
+import { Icon } from "@/components/Icons";
 
 export const dynamic = "force-dynamic";
+
+// A small palette so each subject gets a consistent coloured avatar.
+const AVATAR_COLORS = ["#1A60AB", "#EFAE56", "#7BA3CA", "#059669", "#8b5cf6", "#ec4899"];
+function avatarColor(subject: string) {
+  let h = 0;
+  for (let i = 0; i < subject.length; i++) h = (h * 31 + subject.charCodeAt(i)) >>> 0;
+  return AVATAR_COLORS[h % AVATAR_COLORS.length];
+}
 
 export default async function MyClasses() {
   const supa = supabaseServer();
   // RLS already limits this to classes the student is assigned to
   const { data: classes } = await supa.from("classes").select("*").order("starts_at");
 
+  const now = Date.now();
+  const withStatus = (classes ?? []).map(c => {
+    const start = new Date(c.starts_at).getTime();
+    const mins = (start - now) / 60000;
+    const status = mins < 0 ? "past" : mins <= 30 ? "soon" : "upcoming";
+    return { ...c, _status: status as "past" | "soon" | "upcoming", _start: start };
+  });
+  // Upcoming first (soonest first), past last (most recent first).
+  withStatus.sort((a, b) => {
+    const ap = a._status === "past", bp = b._status === "past";
+    if (ap !== bp) return ap ? 1 : -1;
+    return ap ? b._start - a._start : a._start - b._start;
+  });
+
   return (
     <div className="space-y-5">
-      <h1 className="font-display text-3xl font-semibold">My classes</h1>
+      <div>
+        <h1 className="font-display text-3xl font-semibold">My classes</h1>
+        <p className="text-sm text-ink/45">Your live sessions — join right from here.</p>
+      </div>
+
       <div className="grid gap-4 md:grid-cols-2">
-        {(classes ?? []).map(c => (
-          <div key={c.id} className="card overflow-hidden">
-            <div className="h-1 bg-gold" />
-            <div className="p-6">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h2 className="font-display text-lg font-semibold">{c.subject}</h2>
-                  <p className="text-sm text-ink/50">with {c.tutor}</p>
+        {withStatus.map(c => {
+          const past = c._status === "past";
+          return (
+            <div key={c.id} className={`card p-5 ${past ? "opacity-60" : ""}`}>
+              <div className="flex items-start gap-3">
+                <span
+                  className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl font-display text-lg font-bold text-white"
+                  style={{ background: avatarColor(c.subject) }}
+                >
+                  {c.subject?.[0]?.toUpperCase() ?? "?"}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <h2 className="font-display text-base font-bold leading-tight">{c.subject}</h2>
+                    {c._status === "soon" ? (
+                      <span className="badge-pulse pill bg-gold text-board">Starting soon</span>
+                    ) : c._status === "upcoming" ? (
+                      <span className="pill-blue">Upcoming</span>
+                    ) : (
+                      <span className="pill bg-ink/10 text-ink/50">Past</span>
+                    )}
+                  </div>
+                  <p className="mt-0.5 text-sm text-ink/50">with {c.tutor} · {c.platform}</p>
                 </div>
-                <span className="pill-blue">{c.platform}</span>
               </div>
-              <p className="mt-3 text-sm text-ink/65">
-                {new Date(c.starts_at).toLocaleString("en-NG", { dateStyle: "full", timeStyle: "short" })} · {c.duration_minutes} min
-              </p>
-              {c.link
-                ? <JoinClassButton classId={c.id} link={c.link} className="btn-gold mt-4 w-full inline-block text-center" />
-                : <p className="mt-4 rounded-xl bg-chalk px-4 py-2.5 text-center text-sm font-semibold text-ink/45">Class link coming soon</p>}
+
+              <div className="mt-4 space-y-1.5 text-sm text-ink/65">
+                <p className="flex items-center gap-2">
+                  <Icon name="calendar" className="h-4 w-4 text-ink/35" />
+                  {new Date(c.starts_at).toLocaleString("en-NG", { dateStyle: "medium", timeStyle: "short" })}
+                </p>
+                <p className="flex items-center gap-2">
+                  <Icon name="classes" className="h-4 w-4 text-ink/35" />
+                  {c.duration_minutes} minutes
+                </p>
+              </div>
+
+              {!past && (c.link
+                ? <JoinClassButton classId={c.id} link={c.link} className="btn-gold mt-4 inline-block w-full text-center" />
+                : <p className="mt-4 rounded-xl bg-chalk px-4 py-2.5 text-center text-sm font-semibold text-ink/45">Class link coming soon</p>)}
             </div>
-          </div>
-        ))}
-        {!classes?.length && (
+          );
+        })}
+        {!withStatus.length && (
           <div className="card p-12 text-center text-ink/40 md:col-span-2">
             No classes yet — they appear here once your tutor assigns you.
           </div>
