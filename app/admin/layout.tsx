@@ -21,13 +21,21 @@ const NAV: NavItem[] = [
   { href: "/admin/behavior", label: "Behaviour", icon: "checkCircle" },
 ];
 
+// Primary mobile tabs (the rest live under "More").
+const TABS = [
+  { href: "/admin", label: "Home", icon: "home" as const },
+  { href: "/admin/applications", label: "Applications", icon: "applications" as const },
+  { href: "/admin/students", label: "Students", icon: "students" as const },
+  { href: "/admin/classes", label: "Classes", icon: "classes" as const },
+];
+
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const p = await getProfile();
   if (!p || p.role !== "admin") {
     redirect("/login?gone=1");
   }
   return (
-    <PortalShell nav={NAV} name={`${p?.first_name ?? ""} ${p?.last_name ?? ""}`} subtitle="Administrator"
+    <PortalShell nav={NAV} tabs={TABS} name={`${p?.first_name ?? ""} ${p?.last_name ?? ""}`} subtitle="Administrator"
       bell={{ mode: "admin", noticesHref: "/admin/applications" }} search>
       <AuthGuard />
       <ErrorBoundary>{children}</ErrorBoundary>

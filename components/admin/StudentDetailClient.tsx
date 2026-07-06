@@ -43,6 +43,42 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
   const [parentName, setParentName] = useState("");
   const [linkingParent, setLinkingParent] = useState(false);
 
+  // Direct messages (admin ↔ this learner)
+  const [messages, setMessages] = useState<any[]>([]);
+  const [msgText, setMsgText] = useState("");
+  const [sendingMsg, setSendingMsg] = useState(false);
+
+  async function loadMessages() {
+    const { data } = await supabase.from("messages")
+      .select("*").eq("student_id", student.id).order("created_at", { ascending: true });
+    setMessages(data ?? []);
+  }
+
+  useEffect(() => {
+    loadMessages();
+    // Mark the learner's messages as read once the admin opens this page.
+    supabase.from("messages").update({ read: true })
+      .eq("student_id", student.id).eq("sender_role", "student").eq("read", false).then(() => {});
+    const i = setInterval(loadMessages, 15000);
+    return () => clearInterval(i);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [student.id]);
+
+  async function sendMessage() {
+    const body = msgText.trim();
+    if (!body || sendingMsg) return;
+    setSendingMsg(true);
+    const res = await fetch("/api/messages/send", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ studentId: student.id, body }),
+    });
+    const json = await res.json();
+    setSendingMsg(false);
+    if (!res.ok) { push(json.error || "Could not send message.", "error"); return; }
+    setMessages(prev => [...prev, json.message]);
+    setMsgText("");
+  }
+
   const typeMap = new Map(behaviorTypes.map((t: any) => [t.id, t]));
 
   const graded = subs.filter(s => s.status === "graded").length;
@@ -450,6 +486,46 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
           <input className="field max-w-[180px]" type="text" placeholder="Parent name (optional)" value={parentName} onChange={e => setParentName(e.target.value)} />
           <button className="btn-gold !min-h-[40px]" onClick={linkParent} disabled={linkingParent || !parentEmail.trim()}>
             {linkingParent ? <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" /> : "Link parent →"}
+          </button>
+        </div>
+      </div>
+
+      {/* Direct messages */}
+      <div className="card p-6">
+        <h2 className="font-display text-lg font-semibold">Messages</h2>
+        <p className="mt-1 text-sm text-ink/55">
+          Send {student.first_name} a private message. They're alerted in their portal and on their device.
+        </p>
+        <div className="mt-4 flex max-h-80 flex-col gap-3 overflow-y-auto rounded-xl border border-line bg-chalk/40 p-4">
+          {messages.length === 0 && <p className="py-8 text-center text-sm text-ink/40">No messages yet.</p>}
+          {messages.map(m => {
+            const mine = m.sender_role === "admin";
+            return (
+              <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
+                <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm ${mine ? "bg-gold text-board" : "bg-white text-ink border border-line"}`}>
+                  <p className={`mb-0.5 text-[11px] font-bold ${mine ? "text-board/70" : "text-gold-deep"}`}>
+                    {mine ? "You" : student.first_name}
+                  </p>
+                  <p className="whitespace-pre-wrap leading-relaxed">{m.body}</p>
+                  <p className={`mt-1 text-[10px] ${mine ? "text-board/60" : "text-ink/35"}`}>
+                    {new Date(m.created_at).toLocaleString("en-NG", { dateStyle: "medium", timeStyle: "short" })}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div className="mt-3 flex items-end gap-2">
+          <textarea
+            className="field max-h-32 flex-1 resize-none"
+            rows={1}
+            placeholder={`Message ${student.first_name}…`}
+            value={msgText}
+            onChange={e => setMsgText(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
+          />
+          <button onClick={sendMessage} disabled={sendingMsg || !msgText.trim()} className="btn-gold !min-h-[42px] !px-5">
+            {sendingMsg ? "…" : "Send"}
           </button>
         </div>
       </div>

@@ -11,14 +11,16 @@ export const dynamic = "force-dynamic";
 export default async function StudentDashboard() {
   const user = await getUser();
   const supa = supabaseServer();
-  const [me, { data: classes }, { data: subs }, { data: notices }] = await Promise.all([
+  const [me, { data: classes }, { data: subs }, { data: notices }, { data: unreadMsgs }] = await Promise.all([
     getProfile(),
     supa.from("classes").select("*").gte("starts_at", new Date().toISOString()).order("starts_at").limit(3),
     supa.from("assignment_submissions").select("status").eq("student_id", user!.id),
     supa.from("notices").select("id,title,created_at").order("created_at", { ascending: false }).limit(3),
+    supa.from("messages").select("id").eq("sender_role", "admin").eq("read", false),
   ]);
 
   const pending = (subs ?? []).filter(s => s.status === "pending").length;
+  const unread = unreadMsgs?.length ?? 0;
   const rewardPts: number = (me as any)?.reward_points ?? 0;
   const sanctionPts: number = (me as any)?.sanction_points ?? 0;
 
@@ -64,6 +66,11 @@ export default async function StudentDashboard() {
         </Reveal>
         <Reveal delay={300}>
           <Stat icon="checkCircle" label="Sanctions" value={Math.abs(sanctionPts)} prefix={sanctionPts < 0 ? "−" : ""} accent="red" red={sanctionPts < 0} />
+        </Reveal>
+        <Reveal delay={360}>
+          <Link href="/portal/messages" className="block">
+            <Stat icon="messages" label="Messages" value={unread} accent="gold" highlight={unread > 0} />
+          </Link>
         </Reveal>
       </div>
 
