@@ -70,7 +70,8 @@ export default function StudentsClient({ initial }: { initial: any[] }) {
       </div>
       <input className="field max-w-sm" placeholder="Search name, ID, level or email…" value={q} onChange={e => setQ(e.target.value)} />
 
-      <div className="card overflow-x-auto">
+      {/* Desktop: table */}
+      <div className="card hidden overflow-x-auto lg:block">
         <table className="w-full min-w-[720px] text-sm">
           <thead>
             <tr className="bg-chalk text-left text-[11px] uppercase tracking-wider text-ink/40">
@@ -107,6 +108,41 @@ export default function StudentsClient({ initial }: { initial: any[] }) {
             {!visible.length && <tr><td colSpan={8} className="px-5 py-12 text-center text-ink/40">No students found.</td></tr>}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile: cards */}
+      <div className="space-y-3 lg:hidden">
+        {visible.map(s => (
+          <div key={s.id} className="card p-4">
+            <div className="flex items-center gap-3">
+              <Link href={`/admin/students/${s.id}`}
+                className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-ink font-display text-sm font-bold text-gold-soft">
+                {s.first_name?.[0]}{s.last_name?.[0]}
+              </Link>
+              <div className="min-w-0 flex-1">
+                <Link href={`/admin/students/${s.id}`} className="block truncate font-bold hover:text-gold-deep">
+                  {s.first_name} {s.last_name}
+                </Link>
+                <p className="truncate font-mono text-xs text-ink/45">{s.student_code} · {s.level}</p>
+              </div>
+              <span className={s.is_active ? "pill-green" : "pill-red"}>{s.is_active ? "Active" : "Inactive"}</span>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-1">
+              {(s.subjects ?? []).slice(0, 3).map((x: string) => <span key={x} className="pill-blue">{x}</span>)}
+              {(s.subjects ?? []).length > 3 && <span className="pill bg-line text-ink/50">+{s.subjects.length - 3}</span>}
+            </div>
+            <div className="mt-3 flex items-center justify-between border-t border-line pt-3 text-sm">
+              <span className="text-ink/60">Avg <b className="text-ink">{s.avg_score}%</b> · Attend <b className="text-ink">{s.attendance}%</b></span>
+              <button className="text-[13px] font-bold text-gold-deep disabled:opacity-40"
+                disabled={busyId === s.id} onClick={() => confirmToggleActive(s)}>
+                {busyId === s.id
+                  ? <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-ink/20 border-t-ink/60" />
+                  : s.is_active ? "Deactivate" : "Activate"}
+              </button>
+            </div>
+          </div>
+        ))}
+        {!visible.length && <div className="card p-10 text-center text-ink/40">No students found.</div>}
       </div>
 
       {confirmState && (
