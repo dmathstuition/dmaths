@@ -36,7 +36,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
   return (
     <PortalShell nav={NAV} tabs={TABS} name={`${p?.first_name ?? ""} ${p?.last_name ?? ""}`} subtitle="Administrator"
-      bell={{ mode: "admin", noticesHref: "/admin/applications" }} search>
+      bell={{ mode: "admin", noticesHref: "/admin/applications" }} search idleMinutes={120}>
       <AuthGuard />
       <ErrorBoundary>{children}</ErrorBoundary>
     </PortalShell>

@@ -21,12 +21,13 @@ function greeting() {
 }
 
 export default function PortalShell({
-  nav, name, subtitle, children, bell, search, tabs,
+  nav, name, subtitle, children, bell, search, tabs, idleMinutes = 30,
 }: {
   nav: NavItem[]; name: string; subtitle: string; children: React.ReactNode;
   bell?: { mode: "student" | "admin"; subjects?: string[]; noticesHref: string };
   search?: boolean;
   tabs?: Tab[];
+  idleMinutes?: number;
 }) {
   const path = usePathname();
   const router = useRouter();
@@ -115,7 +116,7 @@ export default function PortalShell({
       {tabs && <PortalTabBar tabs={tabs} path={path} onMore={() => setOpen(true)} />}
 
       <PushManager />
-      <IdleLogout />
+      <IdleLogout minutes={idleMinutes} />
     </div>
   );
 }
