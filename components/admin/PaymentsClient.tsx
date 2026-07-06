@@ -86,8 +86,9 @@ export default function PaymentsClient({ initial }: { initial: Payment[] }) {
           </p>
         </div>
       ) : (
-        <div className="card overflow-hidden">
-          <div className="overflow-x-auto">
+        <>
+          {/* Desktop: table */}
+          <div className="card hidden overflow-x-auto lg:block">
             <table className="w-full min-w-[760px] text-sm">
               <thead>
                 <tr className="bg-chalk text-left text-[11px] uppercase tracking-wider text-ink/40">
@@ -127,7 +128,30 @@ export default function PaymentsClient({ initial }: { initial: Payment[] }) {
               </tbody>
             </table>
           </div>
-        </div>
+
+          {/* Mobile: cards */}
+          <div className="space-y-3 lg:hidden">
+            {visible.map((p) => (
+              <div key={p.id ?? p.reference} className="card p-4">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="truncate font-semibold text-ink/80">{planName(p)}</p>
+                    <p className="truncate text-xs text-ink/50">{p.email || "—"}</p>
+                  </div>
+                  <span className="flex-shrink-0 font-display text-lg font-extrabold text-ink">{fmtNgn(Number(p.amount || 0))}</span>
+                </div>
+                <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-line pt-3 text-xs text-ink/50">
+                  <span className={p.status === "success" ? "pill-green" : "pill-amber"}>{p.status}</span>
+                  {p.camp && <span className="pill-amber">☀️ {p.camp}</span>}
+                  {p.channel && <span className="capitalize">{p.channel}</span>}
+                  <span className="ml-auto">{new Date(p.paid_at || p.created_at).toLocaleDateString("en-NG", { dateStyle: "medium" })}</span>
+                </div>
+                <p className="mt-2 truncate font-mono text-[11px] text-ink/35">{p.reference}</p>
+              </div>
+            ))}
+            {!visible.length && <div className="card p-10 text-center text-ink/40">No payments match your search.</div>}
+          </div>
+        </>
       )}
     </div>
   );
