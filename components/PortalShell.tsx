@@ -9,19 +9,28 @@ import ThemeToggle from "@/components/ThemeToggle";
 import NotificationBell from "@/components/NotificationBell";
 import AdminSearch from "@/components/admin/AdminSearch";
 import PushManager from "@/components/PushManager";
+import PortalTabBar, { type Tab } from "@/components/PortalTabBar";
 
 export type NavItem = { href: string; label: string; icon: IconName };
 
+// Time-aware greeting for the mobile app header.
+function greeting() {
+  const h = new Date().getHours();
+  return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
+}
+
 export default function PortalShell({
-  nav, name, subtitle, children, bell, search,
+  nav, name, subtitle, children, bell, search, tabs,
 }: {
   nav: NavItem[]; name: string; subtitle: string; children: React.ReactNode;
   bell?: { mode: "student" | "admin"; subjects?: string[]; noticesHref: string };
   search?: boolean;
+  tabs?: Tab[];
 }) {
   const path = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const firstName = name.trim().split(" ")[0] || "there";
 
   async function signOut() {
     await supabaseBrowser().auth.signOut();
@@ -65,12 +74,21 @@ export default function PortalShell({
 
       {/* Top bar — visible on every screen size; holds the notification bell */}
       <header className="glass-dark sticky top-0 z-40 flex items-center justify-between px-4 py-3 lg:ml-64 lg:bg-transparent lg:px-10 lg:backdrop-blur-none">
-        {/* mobile: hamburger; desktop: page area title spacer */}
-        <button onClick={() => setOpen(true)} aria-label="Open menu"
-          className="rounded-lg bg-white/10 p-2.5 text-white lg:hidden">
-          <Icon name="menu" />
-        </button>
-        <span className="lg:hidden"><Logo light /></span>
+        {/* mobile: greeting (when app tabs are on) or hamburger fallback */}
+        {tabs ? (
+          <div className="lg:hidden">
+            <p className="text-[11px] font-semibold text-white/45">{greeting()} 👋</p>
+            <p className="font-display text-base font-bold leading-tight text-white">{firstName}</p>
+          </div>
+        ) : (
+          <>
+            <button onClick={() => setOpen(true)} aria-label="Open menu"
+              className="rounded-lg bg-white/10 p-2.5 text-white lg:hidden">
+              <Icon name="menu" />
+            </button>
+            <span className="lg:hidden"><Logo light /></span>
+          </>
+        )}
 
         <div className="ml-auto flex items-center gap-3">
           {search && <AdminSearch />}
@@ -90,7 +108,11 @@ export default function PortalShell({
         </div>
       </div>
 
-      <main className="px-4 pb-10 pt-4 sm:px-7 lg:ml-64 lg:px-10">{children}</main>
+      <main className={`px-4 pt-4 sm:px-7 lg:ml-64 lg:px-10 lg:pb-10 ${tabs ? "pb-28" : "pb-10"}`}>{children}</main>
+
+      {/* App-style bottom tab bar (mobile only) */}
+      {tabs && <PortalTabBar tabs={tabs} path={path} onMore={() => setOpen(true)} />}
+
       <PushManager />
     </div>
   );
