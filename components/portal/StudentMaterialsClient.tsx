@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Icon } from "@/components/Icons";
+import EmptyState from "@/components/ui/EmptyState";
 
 const ALL = "all";
 
@@ -60,11 +61,14 @@ export default function StudentMaterialsClient({ materials, subjects }: {
           </div>
         ))}
         {materials.length > 0 && !visible.length && (
-          <div className="card p-12 text-center text-ink/40 md:col-span-2">No materials match your search.</div>
+          <div className="md:col-span-2">
+            <EmptyState icon="search" title="No materials match your search" body="Try a different keyword or subject." />
+          </div>
         )}
         {!materials.length && (
-          <div className="card p-12 text-center text-ink/40 md:col-span-2">
-            No lesson materials available for your subjects yet.
+          <div className="md:col-span-2">
+            <EmptyState icon="materials" title="No materials yet"
+              body="Lesson notes, slides and resources your tutor shares will appear here for your subjects." />
           </div>
         )}
       </div>
