@@ -166,6 +166,30 @@ export async function POST(req: Request) {
     link: "/portal",
   });
 
+  // 6d. Referral attribution — if this applicant came through a referral link
+  //     (?ref=<student_code>), link them to the referring student and bump that
+  //     student's referral count. Best-effort: a referral is a nicety and must
+  //     never block an approval.
+  const refCode = ((app.referred_by_code as string) || "").trim();
+  if (refCode && refCode !== code) {
+    try {
+      const { data: referrer } = await admin
+        .from("profiles").select("id, referral_count")
+        .eq("student_code", refCode).eq("role", "student").maybeSingle();
+      if (referrer) {
+        await admin.from("profiles").update({ referred_by: referrer.id }).eq("id", created.user.id);
+        await admin.from("profiles")
+          .update({ referral_count: (referrer.referral_count ?? 0) + 1 })
+          .eq("id", referrer.id);
+        await notifyUser(admin, referrer.id, {
+          title: "🎉 Someone you referred just joined!",
+          body: "Thanks for spreading the word about D-Maths.",
+          link: "/portal/refer",
+        });
+      }
+    } catch { /* non-fatal — approval already succeeded */ }
+  }
+
   // 7. If a guardian email was provided, create a parent portal account
   const guardianEmail = ((app.guardian_email as string) || "").trim();
   if (guardianEmail) {

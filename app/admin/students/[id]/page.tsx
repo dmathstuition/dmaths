@@ -22,6 +22,15 @@ export default async function StudentDetail({ params }: { params: { id: string }
       .limit(30),
   ]);
   if (!student) redirect("/admin/students");
+
+  // Who referred this learner (for the header badge), if anyone.
+  let referredByName: string | null = null;
+  if (student.referred_by) {
+    const { data: referrer } = await supa
+      .from("profiles").select("first_name, last_name").eq("id", student.referred_by).maybeSingle();
+    if (referrer) referredByName = `${referrer.first_name ?? ""} ${referrer.last_name ?? ""}`.trim() || null;
+  }
+
   return (
     <StudentDetailClient
       student={student}
@@ -30,6 +39,7 @@ export default async function StudentDetail({ params }: { params: { id: string }
       subs={subs ?? []}
       behaviorTypes={behaviorTypes ?? []}
       initialBehaviorLogs={behaviorLogs ?? []}
+      referredByName={referredByName}
     />
   );
 }

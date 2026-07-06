@@ -70,7 +70,11 @@ Run in this order (skip `schema.sql` if the project already has data):
 10. `migration-notifications.sql`
 11. `migration-audit-extras.sql`
 12. **`migration-push.sql`**  ← needed for push notifications to remember devices
-13. `migration-schema-fixes.sql` *(run last — patches any missing columns)*
+13. `migration-messages.sql` *(admin ↔ learner direct messages)*
+14. `migration-streaks.sql` *(learning streaks)*
+15. `migration-weekly-digest.sql` *(weekly progress digest)*
+16. `migration-referrals-ratings.sql` *(referral links + in-app ratings)*
+17. `migration-schema-fixes.sql` *(run last — patches any missing columns)*
 
 ---
 
@@ -104,6 +108,12 @@ Run in this order (skip `schema.sql` if the project already has data):
   (edit the Student ID / email at the top first). ⚠️ Permanent. (The admin portal's
   "Danger zone → Permanently delete" does the same thing through the UI.)
 - **Discounts/prices:** edit `DISCOUNT_PCT` and the tier prices in `lib/summerCamp.ts`.
+- **Refer a friend:** every student has a referral link — `…/apply?ref=<their Student ID>`
+  (they'll find a **Refer a friend** page in their portal). When a referred applicant is
+  approved, the referrer is credited and notified. See who referred whom on each student's
+  admin detail page.
+- **Read student/parent feedback:** star ratings + comments appear under
+  **Admin → Feedback** (`/admin/ratings`), with a running average.
 
 ---
 

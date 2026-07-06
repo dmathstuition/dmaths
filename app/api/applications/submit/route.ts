@@ -38,6 +38,7 @@ export async function POST(req: Request) {
     payment_ref: body.payment_ref || "", payment_method: body.payment_method || "",
     payment_amount: Number(body.payment_amount) || 0,
     payment_date: body.payment_date || null,
+    referred_by_code: String(body.ref || "").trim().slice(0, 40) || null,
     consented_at: new Date().toISOString(),
   });
 

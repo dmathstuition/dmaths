@@ -6,9 +6,9 @@ import { useToast } from "@/components/Toast";
 import { Icon, type IconName } from "@/components/Icons";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 
-export default function StudentDetailClient({ student, initialNotes, initialRewards, subs, behaviorTypes, initialBehaviorLogs }: {
+export default function StudentDetailClient({ student, initialNotes, initialRewards, subs, behaviorTypes, initialBehaviorLogs, referredByName }: {
   student: any; initialNotes: any[]; initialRewards: any[]; subs: any[];
-  behaviorTypes: any[]; initialBehaviorLogs: any[];
+  behaviorTypes: any[]; initialBehaviorLogs: any[]; referredByName?: string | null;
 }) {
   const supabase = supabaseBrowser();
   const push = useToast();
@@ -250,6 +250,20 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
             <div className="mt-2 flex flex-wrap gap-1.5">
               {(student.subjects ?? []).map((s: string) => <span key={s} className="pill-blue">{s}</span>)}
             </div>
+            {((student.referral_count ?? 0) > 0 || referredByName) && (
+              <div className="mt-2 flex flex-wrap gap-1.5 text-xs">
+                {(student.referral_count ?? 0) > 0 && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-gold-pale px-2.5 py-1 font-bold text-gold-deep">
+                    🎁 Referred {student.referral_count} student{student.referral_count === 1 ? "" : "s"}
+                  </span>
+                )}
+                {referredByName && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-chalk px-2.5 py-1 font-semibold text-ink/55">
+                    Referred by {referredByName}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
           <div className="grid grid-cols-5 gap-3 text-center">
             <Stat label="Avg" value={`${student.avg_score}%`} />
