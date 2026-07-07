@@ -49,7 +49,11 @@ begin
         ('guardian_tokens',       'student_id'),
         ('parent_student_links',  'student_id'),
         ('behavior_logs',         'student_id'),
-        ('notifications',         'user_id')
+        ('notifications',         'user_id'),
+        ('messages',              'student_id'),
+        ('messages',              'sender_id'),
+        ('ratings',               'user_id'),
+        ('push_subscriptions',    'user_id')
       ) as x(tbl, col)
   loop
     begin
@@ -89,6 +93,13 @@ begin
       end;
     end loop;
   end if;
+
+  -- 3b) Null any referral link pointing at this learner — that self-FK is not
+  --     cascade, so it would otherwise block the profile delete below.
+  begin
+    update profiles set referred_by = null where referred_by = v_id;
+  exception when undefined_column then null; -- referrals migration not applied
+  end;
 
   -- 4) Finally, the profile row and the login account itself.
   --    Removing the auth user is what permanently stops them signing in.

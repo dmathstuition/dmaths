@@ -49,10 +49,23 @@ export async function POST(req: Request) {
     { table: "parent_student_links",   col: "student_id" },
     { table: "notifications",          col: "user_id" },
     { table: "audit_log",              col: "actor_id" },
+    // Newer tables (added after this route was written). Most cascade off
+    // profiles/auth.users already, but clearing them explicitly keeps deletion
+    // robust against any non-cascade FK.
+    { table: "messages",               col: "student_id" },
+    { table: "messages",               col: "sender_id" },
+    { table: "ratings",                col: "user_id" },
+    { table: "push_subscriptions",     col: "user_id" },
   ];
   for (const { table, col } of childTables) {
     await admin.from(table).delete().eq(col, studentId); // per-table errors ignored
   }
+
+  // 1a-bis) Null the referral self-reference. `profiles.referred_by` points at
+  //    the student who referred this learner; if THIS learner referred anyone,
+  //    those rows point back here. That FK is NOT cascade, so it would block the
+  //    profile delete (Postgres → "Database error deleting user"). Clear it.
+  await admin.from("profiles").update({ referred_by: null }).eq("referred_by", studentId);
 
   // 1b) Null any NON-cascade "creator / actor" references so the profile
   //     delete (below) can't be blocked by a leftover FK. These are normally
@@ -80,42 +93,38 @@ export async function POST(req: Request) {
     await admin.from("payments").delete().ilike("email", email);
   }
 
-  // 2) Delete the AUTH user. profiles.id → auth.users ON DELETE CASCADE removes
-  //    the profile row too. This is what stops them logging in.
-  const { error: authErr } = await admin.auth.admin.deleteUser(studentId);
-
-  if (authErr) {
-    // If the auth user simply doesn't exist, the profile is an orphan — safe to delete directly.
-    const notFound =
-      authErr.message?.toLowerCase().includes("not found") ||
-      (authErr as any).status === 404;
-
-    if (notFound) {
-      await admin.from("profiles").delete().eq("id", studentId);
-      return NextResponse.json({ ok: true });
-    }
-
-    // Real failure (key missing, network, etc.) — deactivate as fallback.
-    const { error: deactivateErr } = await admin
-      .from("profiles")
-      .update({ is_active: false })
-      .eq("id", studentId);
-
-    const deactivated = !deactivateErr;
+  // 2) Delete the PROFILE row *before* the auth user. This mirrors the working
+  //    delete-learner.sql tool. Doing it first means the delete never depends on
+  //    the profiles → auth.users cascade being configured, and a non-cascade FK
+  //    can't leave the auth deletion blocked with the profile still present.
+  const { error: profileErr } = await admin.from("profiles").delete().eq("id", studentId);
+  if (profileErr) {
+    // Something still references this profile with a non-cascade FK we didn't
+    // clear. Surface the exact DB error so the specific table can be pinpointed.
     return NextResponse.json(
-      {
-        error:
-          `Auth removal failed (${authErr.message}). ` +
-          (deactivated
-            ? "The learner has been deactivated and locked out instead."
-            : "Deactivation also failed — check SUPABASE_SERVICE_ROLE_KEY in Vercel."),
-      },
+      { error: `Could not remove the student record: ${profileErr.message}. Run supabase/delete-learner.sql for this learner, or check for a table still linking to them.` },
       { status: 500 },
     );
   }
 
-  // Safety net: ensure the profile row is gone even if the cascade didn't fire.
-  await admin.from("profiles").delete().eq("id", studentId);
+  // 3) Delete the AUTH login so they can no longer sign in and the email frees up.
+  const { error: authErr } = await admin.auth.admin.deleteUser(studentId);
+
+  if (authErr) {
+    // "Not found" means the auth user was already gone — the profile (now also
+    // deleted) was an orphan, so the learner is fully removed. Success.
+    const notFound =
+      authErr.message?.toLowerCase().includes("not found") ||
+      (authErr as any).status === 404;
+    if (notFound) return NextResponse.json({ ok: true });
+
+    // The student record is already gone (they've disappeared from the portal),
+    // but the login row lingered. Report the raw error so it can be cleared.
+    return NextResponse.json(
+      { error: `The student was removed, but their login could not be fully deleted (${authErr.message}). Run supabase/delete-learner.sql to clear the leftover login.` },
+      { status: 500 },
+    );
+  }
 
   return NextResponse.json({ ok: true });
 }
