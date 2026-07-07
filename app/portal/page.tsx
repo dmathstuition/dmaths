@@ -9,7 +9,7 @@ import RateCard from "@/components/portal/RateCard";
 import DashboardTip from "@/components/portal/DashboardTip";
 import Tour from "@/components/tour/Tour";
 import { studentTour } from "@/components/tour/steps";
-import { fmtWAT } from "@/lib/time";
+import { fmtWAT, fmtWATDate } from "@/lib/time";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +26,13 @@ export default async function StudentDashboard() {
 
   const pending = (subs ?? []).filter(s => s.status === "pending").length;
   const unread = unreadMsgs?.length ?? 0;
+
+  // In-app reminder: is the next class today or starting within 2 hours?
+  const nextClass = classes?.[0];
+  const nextMins = nextClass ? (new Date(nextClass.starts_at).getTime() - Date.now()) / 60000 : Infinity;
+  const classSoon = nextMins <= 120;
+  const classToday = nextClass ? fmtWATDate(nextClass.starts_at) === fmtWATDate(Date.now()) : false;
+  const showClassReminder = nextClass && (classSoon || classToday);
   const streak: number = (me as any)?.streak_count ?? 0;
   const rewardPts: number = (me as any)?.reward_points ?? 0;
   const sanctionPts: number = (me as any)?.sanction_points ?? 0;
@@ -71,6 +78,24 @@ export default async function StudentDashboard() {
           </div>
         </div>
       </Reveal>
+
+      {/* Reminder: a class today / starting soon */}
+      {showClassReminder && (
+        <Reveal>
+          <Link href="/portal/classes"
+            className="group flex flex-wrap items-center gap-4 rounded-2xl border border-gold/40 bg-gold-pale px-5 py-4 transition hover:shadow-lift">
+            <span className="relative flex">
+              <span className="absolute inset-0 animate-ping rounded-full bg-gold opacity-25" />
+              <span className="relative flex h-10 w-10 items-center justify-center rounded-full bg-gold text-lg">⏰</span>
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-bold text-ink">{classSoon ? "Class starting soon" : "You have a class today"}</p>
+              <p className="truncate text-sm text-ink/60">{nextClass!.subject} · {fmtWAT(nextClass!.starts_at)}</p>
+            </div>
+            <span className="btn-gold !min-h-[38px] transition group-hover:translate-x-0.5">View →</span>
+          </Link>
+        </Reveal>
+      )}
 
       {/* Stat grid */}
       <div data-tour="stats" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
