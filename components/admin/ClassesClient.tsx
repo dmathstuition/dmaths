@@ -113,24 +113,34 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
   }
 
   function deleteClass(c: any) {
-    if (c.attendance_locked) {
-      push("This class has locked attendance and cannot be deleted.", "error");
-      return;
-    }
     setConfirmState({
       title: `Delete "${c.subject}"?`,
-      message: "This also removes its roster and cannot be undone.",
+      message: c.attendance_locked
+        ? "This class has locked attendance — deleting it also removes that attendance record. This cannot be undone."
+        : "This also removes its roster and cannot be undone.",
       confirmLabel: "Delete",
       danger: true,
       onConfirm: async () => {
         setConfirmState(null);
-        await supabase.from("classes").delete().eq("id", c.id);
+        const res = await fetch("/api/classes/delete", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ classId: c.id }),
+        });
+        if (!res.ok) {
+          const j = await res.json().catch(() => ({}));
+          push(j.error || "Could not delete class.", "error");
+          return;
+        }
         reload();
       },
     });
   }
 
-  const upcoming = classes.filter(c => new Date(c.starts_at) >= new Date(Date.now() - 86400000));
+  const CUTOFF = Date.now() - 86400000;
+  const upcoming = classes.filter(c => new Date(c.starts_at).getTime() >= CUTOFF);
+  const past = classes
+    .filter(c => new Date(c.starts_at).getTime() < CUTOFF)
+    .sort((a, b) => new Date(b.starts_at).getTime() - new Date(a.starts_at).getTime());
 
   return (
     <div className="space-y-5">
@@ -209,24 +219,46 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
             <p className="mt-3 text-sm text-ink/65">
               {new Date(c.starts_at).toLocaleString("en-NG", { dateStyle: "medium", timeStyle: "short" })} · {c.duration_minutes} min · {c.class_students?.length ?? 0} student(s)
             </p>
-            <div className="mt-4 flex gap-2 border-t border-line pt-4">
+            <div className="mt-4 flex flex-wrap gap-2 border-t border-line pt-4">
               {c.attendance_locked ? (
-                <span className="pill-green flex-1 text-center !py-2.5">✓ Attendance locked</span>
+                <span className="pill-green flex-1 text-center !py-2.5 min-w-[130px]">✓ Attendance locked</span>
               ) : (
-                <button className="btn-gold !min-h-[38px] flex-1" onClick={() => openAttendance(c)}>Take attendance</button>
+                <button className="btn-gold !min-h-[38px] flex-1 min-w-[130px]" onClick={() => openAttendance(c)}>Take attendance</button>
               )}
               {c.link && <a className="btn-ghost !min-h-[38px]" href={c.link} target="_blank" rel="noopener noreferrer">Open link</a>}
               {!c.attendance_locked && (
-                <>
-                  <button className="btn-ghost !min-h-[38px]" onClick={() => startEditClass(c)}>Edit</button>
-                  <button className="btn-danger !min-h-[38px]" onClick={() => deleteClass(c)} aria-label="Delete class">Delete</button>
-                </>
+                <button className="btn-ghost !min-h-[38px]" onClick={() => startEditClass(c)}>Edit</button>
               )}
+              <button className="btn-danger !min-h-[38px]" onClick={() => deleteClass(c)} aria-label="Delete class">Delete</button>
             </div>
           </div>
         ))}
         {!upcoming.length && <div className="card p-12 text-center text-ink/40 md:col-span-2">No upcoming classes — create one above.</div>}
       </div>
+
+      {/* Past / finished classes — collapsed by default; delete any you no longer need. */}
+      {past.length > 0 && (
+        <details className="card p-5">
+          <summary className="cursor-pointer select-none font-display text-lg font-semibold">
+            Past classes <span className="text-ink/40">({past.length})</span>
+          </summary>
+          <p className="mt-1 text-sm text-ink/45">Finished sessions. Delete any you no longer need — this also clears their attendance.</p>
+          <div className="mt-4 space-y-2">
+            {past.map(c => (
+              <div key={c.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-chalk/40 px-4 py-3">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-bold">{c.subject} <span className="font-normal text-ink/45">· {c.tutor}</span></p>
+                  <p className="text-xs text-ink/45">
+                    {new Date(c.starts_at).toLocaleString("en-NG", { dateStyle: "medium", timeStyle: "short" })}
+                    {c.attendance_locked ? " · attendance locked" : ""}
+                  </p>
+                </div>
+                <button className="btn-danger !min-h-[36px] !px-4 !text-sm" onClick={() => deleteClass(c)}>Delete</button>
+              </div>
+            ))}
+          </div>
+        </details>
+      )}
 
       {attendanceFor && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm p-0 sm:items-center sm:p-4">

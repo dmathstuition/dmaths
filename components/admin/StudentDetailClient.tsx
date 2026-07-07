@@ -79,6 +79,17 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
     setMsgText("");
   }
 
+  async function deleteMessage(id: string) {
+    if (!window.confirm("Delete this message?")) return;
+    const prev = messages;
+    setMessages(m => m.filter((x: any) => x.id !== id)); // optimistic
+    const res = await fetch("/api/messages/delete", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    if (!res.ok) { setMessages(prev); push("Could not delete message.", "error"); }
+  }
+
   const typeMap = new Map(behaviorTypes.map((t: any) => [t.id, t]));
 
   const graded = subs.filter(s => s.status === "graded").length;
@@ -515,7 +526,11 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
           {messages.map(m => {
             const mine = m.sender_role === "admin";
             return (
-              <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
+              <div key={m.id} className={`flex items-center gap-1.5 ${mine ? "justify-end" : "justify-start"}`}>
+                {mine && (
+                  <button onClick={() => deleteMessage(m.id)} aria-label="Delete message"
+                    className="shrink-0 px-1 text-xs text-ink/30 transition hover:text-red-500">✕</button>
+                )}
                 <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm ${mine ? "bg-gold text-board" : "bg-white text-ink border border-line"}`}>
                   <p className={`mb-0.5 text-[11px] font-bold ${mine ? "text-board/70" : "text-gold-deep"}`}>
                     {mine ? "You" : student.first_name}
@@ -525,6 +540,10 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
                     {new Date(m.created_at).toLocaleString("en-NG", { dateStyle: "medium", timeStyle: "short" })}
                   </p>
                 </div>
+                {!mine && (
+                  <button onClick={() => deleteMessage(m.id)} aria-label="Delete message"
+                    className="shrink-0 px-1 text-xs text-ink/30 transition hover:text-red-500">✕</button>
+                )}
               </div>
             );
           })}
