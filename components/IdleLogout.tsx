@@ -6,7 +6,10 @@ import { supabaseBrowser } from "@/lib/supabase/client";
 // the app is reopened after having been idle that long). Mounted only in
 // authenticated shells, so it never runs on the landing/login pages.
 // `minutes` lets each role set its own window (students/parents 30, admins 120).
-const KEY = "dmaths-last-activity";
+// Exported so the login flow can reset the clock on a fresh sign-in — otherwise a
+// stale timestamp from a previous session would sign the user out the instant they
+// land on the portal, in an unbreakable loop.
+export const IDLE_ACTIVITY_KEY = "dmaths-last-activity";
 
 export default function IdleLogout({ minutes = 30 }: { minutes?: number }) {
   useEffect(() => {
@@ -15,10 +18,10 @@ export default function IdleLogout({ minutes = 30 }: { minutes?: number }) {
 
     const now = () => Date.now();
     const setLast = () => {
-      try { localStorage.setItem(KEY, String(now())); } catch {}
+      try { localStorage.setItem(IDLE_ACTIVITY_KEY, String(now())); } catch {}
     };
     const getLast = () => {
-      try { return Number(localStorage.getItem(KEY)) || now(); } catch { return now(); }
+      try { return Number(localStorage.getItem(IDLE_ACTIVITY_KEY)) || now(); } catch { return now(); }
     };
 
     async function logout() {
@@ -38,7 +41,7 @@ export default function IdleLogout({ minutes = 30 }: { minutes?: number }) {
     }
 
     // If there's no timestamp yet (fresh sign-in), start the clock now.
-    try { if (!localStorage.getItem(KEY)) setLast(); } catch {}
+    try { if (!localStorage.getItem(IDLE_ACTIVITY_KEY)) setLast(); } catch {}
 
     const events = ["mousemove", "keydown", "click", "scroll", "touchstart"];
     events.forEach(e => window.addEventListener(e, onActivity, { passive: true }));
