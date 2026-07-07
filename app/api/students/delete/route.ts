@@ -39,7 +39,6 @@ export async function POST(req: Request) {
   //    Tables that may not exist yet (un-applied migrations) error harmlessly.
   const childTables: { table: string; col: string }[] = [
     { table: "assignment_submissions", col: "student_id" },
-    { table: "attendance_records",     col: "student_id" },
     { table: "class_students",         col: "student_id" },
     { table: "admin_notes",            col: "student_id" },
     { table: "rewards",                col: "student_id" },
@@ -60,6 +59,35 @@ export async function POST(req: Request) {
   for (const { table, col } of childTables) {
     await admin.from(table).delete().eq(col, studentId); // per-table errors ignored
   }
+
+  // 1a-attendance) Attendance rows can be guarded by an "attendance locked"
+  //    trigger that refuses any change once an admin finalises a class — which
+  //    otherwise blocks deleting the learner. Temporarily unlock only the
+  //    classes THIS learner has locked attendance in, remove their rows, then
+  //    re-lock those same classes, so other students' locked attendance is
+  //    untouched but this learner can be fully removed. Best-effort.
+  try {
+    const { data: att } = await admin
+      .from("attendance_records").select("class_id").eq("student_id", studentId);
+    const classIds = Array.from(
+      new Set((att ?? []).map((a: { class_id?: string }) => a.class_id).filter(Boolean)),
+    ) as string[];
+    let lockedIds: string[] = [];
+    if (classIds.length) {
+      const { data: cls } = await admin
+        .from("classes").select("id, attendance_locked").in("id", classIds);
+      lockedIds = (cls ?? [])
+        .filter((c: { attendance_locked?: boolean }) => c.attendance_locked)
+        .map((c: { id: string }) => c.id);
+      if (lockedIds.length) {
+        await admin.from("classes").update({ attendance_locked: false }).in("id", lockedIds);
+      }
+    }
+    await admin.from("attendance_records").delete().eq("student_id", studentId);
+    if (lockedIds.length) {
+      await admin.from("classes").update({ attendance_locked: true }).in("id", lockedIds);
+    }
+  } catch { /* best-effort — the profile delete below still reports any real blocker */ }
 
   // 1a-bis) Null the referral self-reference. `profiles.referred_by` points at
   //    the student who referred this learner; if THIS learner referred anyone,
