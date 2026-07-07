@@ -118,13 +118,13 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
 
   return (
     <div className="space-y-5">
-      <div>
+      <div data-tour="assignments-intro">
         <h1 className="font-display text-3xl font-semibold">Assignments</h1>
         <p className="text-sm text-ink/45">Submit your work and see your grades.</p>
       </div>
 
       {/* Filter tabs */}
-      <div className="flex flex-wrap gap-2">
+      <div data-tour="assignments-filters" className="flex flex-wrap gap-2">
         {FILTERS.map(f => (
           <button key={f.key} onClick={() => setFilter(f.key)}
             className={`rounded-full px-4 py-1.5 text-[13px] font-bold transition ${
@@ -213,7 +213,7 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
             )}
 
             {s.status === "pending" && a.type !== "cbt" && (
-              <div className="mt-4 space-y-3">
+              <div data-tour="assignments-submit" className="mt-4 space-y-3">
                 <label className={`flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-line py-3 text-sm font-semibold text-ink/60 transition hover:border-gold hover:text-ink ${uploading === s.id ? "opacity-50" : ""}`}>
                   {uploading === s.id ? "Uploading…" : "Snap or upload a photo of your work"}
                   <input type="file" accept="image/*" capture="environment" className="hidden"

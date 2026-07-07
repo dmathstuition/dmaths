@@ -59,18 +59,19 @@ export default function PaymentsClient({ initial }: { initial: Payment[] }) {
           </p>
         </div>
         {visible.length > 0 && (
-          <button onClick={exportCsv} className="btn-ghost !min-h-[40px] text-sm">Export CSV</button>
+          <button onClick={exportCsv} data-tour="payments-export" className="btn-ghost !min-h-[40px] text-sm">Export CSV</button>
         )}
       </div>
 
       {/* Summary cards */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div data-tour="payments-summary" className="grid gap-4 sm:grid-cols-3">
         <SummaryCard label="Total received" value={fmtNgn(total)} tint="emerald" />
         <SummaryCard label="This month" value={fmtNgn(monthTotal)} tint="gold" />
         <SummaryCard label="Successful payments" value={String(success.length)} tint="ink" />
       </div>
 
       <input
+        data-tour="payments-search"
         className="field max-w-sm"
         placeholder="Search reference, email, package…"
         value={q}
