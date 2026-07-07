@@ -285,25 +285,25 @@ export default function Landing() {
               </div>
               <div className="mt-6 space-y-4 text-[15px] leading-relaxed text-ink/60">
                 <p>
-                  The D-Maths Learning Portal was founded by a passionate educator and technology
+                  I founded the D-Maths Learning Portal as a passionate educator and technology
                   professional committed to transforming learning through innovation.
                 </p>
                 <p>
-                  As a Web Developer, Data Analyst, and AI Engineer, the founder combines expertise in
-                  software development, data-driven decision-making, and artificial intelligence to build
+                  As a Web Developer, Data Analyst, and AI Engineer, I combine expertise in software
+                  development, data-driven decision-making, and artificial intelligence to build
                   educational solutions that are practical, engaging, and impactful. With a strong
-                  background in mathematics education and technology, the vision is to bridge the gap
+                  background in mathematics education and technology, my vision is to bridge the gap
                   between traditional teaching and modern digital learning.
                 </p>
                 <p>
-                  Driven by a belief that every learner deserves access to quality education, the founder
-                  developed the D-Maths Learning Portal to provide an interactive platform where students
-                  can learn, practice, track their progress, and develop future-ready skills in
-                  mathematics, coding, and technology.
+                  Driven by a belief that every learner deserves access to quality education, I developed
+                  the D-Maths Learning Portal to provide an interactive platform where students can learn,
+                  practice, track their progress, and develop future-ready skills in mathematics, coding,
+                  and technology.
                 </p>
                 <p>
-                  Beyond teaching, the founder is dedicated to creating innovative digital products that
-                  empower schools, educators, and learners across Africa and beyond.
+                  Beyond teaching, I am dedicated to creating innovative digital products that empower
+                  schools, educators, and learners across Africa and beyond.
                 </p>
               </div>
             </Reveal>
