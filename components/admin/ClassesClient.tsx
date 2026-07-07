@@ -43,10 +43,22 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
         if (error) { setFormError("Could not update class."); return; }
         setEditId(null);
       } else {
-        const { data: cls, error } = await supabase.from("classes").insert(payload).select().single();
-        if (error || !cls) { setFormError("Could not create class."); return; }
+        // Weekly recurring: generate one class per week (same time, +7 days each),
+        // all sharing a series_id. WAT has no DST, so +168h keeps the same clock time.
+        const weeks = f.repeat_weekly ? Math.max(2, Math.min(26, Number(f.repeat_weeks) || 8)) : 1;
+        const seriesId = weeks > 1 ? crypto.randomUUID() : null;
+        const baseMs = new Date(starts_at).getTime();
+        const rows = Array.from({ length: weeks }, (_, i) => ({
+          ...payload,
+          starts_at: new Date(baseMs + i * 7 * 86_400_000).toISOString(),
+          ...(seriesId ? { series_id: seriesId } : {}),
+        }));
+        const { data: created, error } = await supabase.from("classes").insert(rows).select();
+        if (error || !created?.length) { setFormError("Could not create class."); return; }
         if (f.roster.length) {
-          await supabase.from("class_students").insert(f.roster.map((sid: string) => ({ class_id: cls.id, student_id: sid })));
+          const links = created.flatMap((cls: any) =>
+            f.roster.map((sid: string) => ({ class_id: cls.id, student_id: sid })));
+          await supabase.from("class_students").insert(links);
         }
       }
       setShowForm(false); setF({ platform: "Zoom", duration_minutes: 60, roster: [] }); reload();
@@ -111,19 +123,21 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
     reload();
   }
 
-  function deleteClass(c: any) {
+  function deleteClass(c: any, series = false) {
     setConfirmState({
-      title: `Delete "${c.subject}"?`,
-      message: c.attendance_locked
-        ? "This class has locked attendance — deleting it also removes that attendance record. This cannot be undone."
-        : "This also removes its roster and cannot be undone.",
-      confirmLabel: "Delete",
+      title: series ? `Delete the whole weekly series?` : `Delete "${c.subject}"?`,
+      message: series
+        ? "Every session in this weekly series (past and upcoming) will be removed, along with their rosters and attendance. This cannot be undone."
+        : c.attendance_locked
+          ? "This class has locked attendance — deleting it also removes that attendance record. This cannot be undone."
+          : "This also removes its roster and cannot be undone.",
+      confirmLabel: series ? "Delete series" : "Delete",
       danger: true,
       onConfirm: async () => {
         setConfirmState(null);
         const res = await fetch("/api/classes/delete", {
           method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ classId: c.id }),
+          body: JSON.stringify(series ? { seriesId: c.series_id } : { classId: c.id }),
         });
         if (!res.ok) {
           const j = await res.json().catch(() => ({}));
@@ -164,6 +178,26 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
             <input className="field" type="number" min={15} step={15} placeholder="Duration (minutes)" value={f.duration_minutes} onChange={e => setF({ ...f, duration_minutes: e.target.value })} />
             <input className="field sm:col-span-2" placeholder="Class link (https://…)" value={f.link || ""} onChange={e => setF({ ...f, link: e.target.value })} />
           </div>
+
+          {/* Weekly recurrence (new classes only) */}
+          {!editId && (
+            <div className="rounded-xl border border-line bg-chalk/40 p-4">
+              <label className="flex items-center gap-3">
+                <input type="checkbox" className="h-4 w-4 accent-gold"
+                  checked={!!f.repeat_weekly} onChange={e => setF({ ...f, repeat_weekly: e.target.checked })} />
+                <span className="text-sm font-bold text-ink">🔁 Repeat weekly</span>
+              </label>
+              {f.repeat_weekly && (
+                <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-ink/70">
+                  <span>Create it every week for</span>
+                  <input type="number" min={2} max={26} className="field !w-20 !py-1.5"
+                    value={f.repeat_weeks ?? 8} onChange={e => setF({ ...f, repeat_weeks: e.target.value })} />
+                  <span>weeks (same day &amp; time).</span>
+                </div>
+              )}
+            </div>
+          )}
+
           {!editId && <div>
             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
               <p className="flabel mb-0">Assign students</p>
@@ -213,7 +247,10 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
                 <h2 className="font-display text-lg font-semibold">{c.subject}</h2>
                 <p className="text-sm text-ink/50">with {c.tutor}</p>
               </div>
-              <span className="pill-blue">{c.platform}</span>
+              <div className="flex flex-col items-end gap-1">
+                <span className="pill-blue">{c.platform}</span>
+                {c.series_id && <span className="pill bg-gold-pale text-gold-deep">🔁 Weekly</span>}
+              </div>
             </div>
             <p className="mt-3 text-sm text-ink/65">
               {fmtWAT(c.starts_at)} · {c.duration_minutes} min · {c.class_students?.length ?? 0} student(s)
@@ -229,6 +266,9 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
                 <button className="btn-ghost !min-h-[38px]" onClick={() => startEditClass(c)}>Edit</button>
               )}
               <button className="btn-danger !min-h-[38px]" onClick={() => deleteClass(c)} aria-label="Delete class">Delete</button>
+              {c.series_id && (
+                <button className="btn-ghost !min-h-[38px] !text-red-600" onClick={() => deleteClass(c, true)}>Delete series</button>
+              )}
             </div>
           </div>
         ))}

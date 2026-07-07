@@ -14,18 +14,31 @@ export async function POST(req: Request) {
   const { data: me } = await supa.from("profiles").select("role").eq("id", user.id).single();
   if (me?.role !== "admin") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  const { classId } = await req.json().catch(() => ({}));
-  if (!classId) return NextResponse.json({ error: "classId required" }, { status: 400 });
+  const { classId, seriesId } = await req.json().catch(() => ({}));
+  if (!classId && !seriesId) return NextResponse.json({ error: "classId or seriesId required" }, { status: 400 });
 
   const admin = supabaseAdmin();
-  await admin.from("classes").update({ attendance_locked: false }).eq("id", classId);
-  await admin.from("attendance_records").delete().eq("class_id", classId);
-  await admin.from("class_students").delete().eq("class_id", classId);
-  const { error } = await admin.from("classes").delete().eq("id", classId);
+
+  // Resolve the target class ids: a single class, or every class in a weekly series.
+  let ids: string[] = [];
+  if (seriesId) {
+    const { data: cls } = await admin.from("classes").select("id").eq("series_id", seriesId);
+    ids = (cls ?? []).map((c: { id: string }) => c.id);
+  } else {
+    ids = [classId];
+  }
+  if (!ids.length) return NextResponse.json({ ok: true });
+
+  // Unlock so the attendance-lock trigger permits removing the rows, then delete
+  // attendance + roster + the class(es) themselves.
+  await admin.from("classes").update({ attendance_locked: false }).in("id", ids);
+  await admin.from("attendance_records").delete().in("class_id", ids);
+  await admin.from("class_students").delete().in("class_id", ids);
+  const { error } = await admin.from("classes").delete().in("id", ids);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   await admin.from("audit_log").insert({
-    actor_id: user.id, action: "class_deleted", detail: { classId },
+    actor_id: user.id, action: "class_deleted", detail: seriesId ? { seriesId, count: ids.length } : { classId },
   });
   return NextResponse.json({ ok: true });
 }
