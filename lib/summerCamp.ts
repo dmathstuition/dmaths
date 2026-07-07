@@ -18,7 +18,7 @@ export const SUMMER_CAMP = {
   // │  on its own in about a minute. No coding or developer needed.     │
   // └──────────────────────────────────────────────────────────────────┘
   startDate: "2026-08-01", // ← placeholder camp START date
-  endDate: "2026-09-31", //   ← placeholder camp END date
+  endDate: "2026-09-30", //   ← placeholder camp END date
   ngnPerUsd: 1500,
 } as const;
 
