@@ -11,6 +11,7 @@ import AdminSearch from "@/components/admin/AdminSearch";
 import PushManager from "@/components/PushManager";
 import PortalTabBar, { type Tab } from "@/components/PortalTabBar";
 import IdleLogout from "@/components/IdleLogout";
+import TourButton from "@/components/tour/TourButton";
 
 export type NavItem = { href: string; label: string; icon: IconName };
 
@@ -93,8 +94,9 @@ export default function PortalShell({
         )}
 
         <div className="ml-auto flex items-center gap-3">
-          {search && <AdminSearch />}
-          {bell && <NotificationBell mode={bell.mode} subjects={bell.subjects} noticesHref={bell.noticesHref} />}
+          <TourButton light />
+          {search && <span data-tour="search"><AdminSearch /></span>}
+          {bell && <span data-tour="bell"><NotificationBell mode={bell.mode} subjects={bell.subjects} noticesHref={bell.noticesHref} /></span>}
         </div>
       </header>
 

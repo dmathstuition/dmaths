@@ -3,6 +3,8 @@ import { supabaseServer } from "@/lib/supabase/server";
 import { Icon } from "@/components/Icons";
 import CountUp from "@/components/landing/CountUp";
 import Reveal from "@/components/landing/Reveal";
+import Tour from "@/components/tour/Tour";
+import { adminTour } from "@/components/tour/steps";
 
 export const dynamic = "force-dynamic";
 
@@ -42,7 +44,8 @@ export default async function AdminDashboard() {
     <div className="space-y-6">
       {/* Hero */}
       <Reveal>
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-board to-boardDeep p-7 text-white sm:p-9">
+        <div data-tour="hero" className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-board to-boardDeep p-7 text-white sm:p-9">
+          <div className="aurora pointer-events-none absolute inset-0 opacity-70" />
           <div className="absolute right-0 top-0 h-full w-1/2 opacity-20"
             style={{ background: "radial-gradient(circle at 80% 20%, #EFAE56, transparent 60%)" }} />
           <div className="absolute -right-10 top-1/2 h-1 w-64 -rotate-45 bg-gold/60" />
@@ -66,7 +69,7 @@ export default async function AdminDashboard() {
       {/* Pending banner */}
       {(pending ?? 0) > 0 && (
         <Reveal>
-          <Link href="/admin/applications"
+          <Link href="/admin/applications" data-tour="pending"
             className="group flex flex-wrap items-center gap-4 rounded-2xl border border-gold/40 bg-gold-pale px-5 py-4 transition hover:shadow-lift">
             <span className="relative flex">
               <span className="absolute inset-0 animate-ping rounded-full bg-gold opacity-25" />
@@ -83,7 +86,7 @@ export default async function AdminDashboard() {
       )}
 
       {/* Stat cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div data-tour="stats" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Reveal delay={0}>
           <StatCard icon="students" label="Total students" value={students ?? 0} href="/admin/students" tint="blue" />
         </Reveal>
@@ -99,7 +102,7 @@ export default async function AdminDashboard() {
       </div>
 
       {/* Quick actions */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div data-tour="quick" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <QuickAction icon="applications" label="Review applications" href="/admin/applications" />
         <QuickAction icon="classes" label="Schedule a class" href="/admin/classes" />
         <QuickAction icon="assignments" label="Post assignment" href="/admin/assignments" />
@@ -162,6 +165,8 @@ export default async function AdminDashboard() {
           </div>
         </div>
       </Reveal>
+
+      <Tour tourId="admin" steps={adminTour} />
     </div>
   );
 }
@@ -185,8 +190,8 @@ const TINTS: Record<string, string> = {
 
 function StatCard({ icon, label, value, href, tint }: { icon: any; label: string; value: number; href: string; tint: string }) {
   return (
-    <Link href={href} className="card stat-shimmer group relative flex items-center gap-4 overflow-hidden p-5 hovlift">
-      <span className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl transition group-hover:scale-105 ${TINTS[tint]}`}>
+    <Link href={href} className="card card-interactive stat-shimmer group relative flex items-center gap-4 overflow-hidden p-5">
+      <span className={`ci-icon flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl ${TINTS[tint]}`}>
         <Icon name={icon} />
       </span>
       <div>
