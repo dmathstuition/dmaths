@@ -47,7 +47,7 @@ export async function POST() {
       firstName: student.first_name,
       assignmentTitle: assignment.title,
       subject: assignment.subject,
-      dueDate: new Date(assignment.due_date).toLocaleDateString("en-NG", { dateStyle: "medium" }),
+      dueDate: new Date(assignment.due_date).toLocaleDateString("en-NG", { timeZone: "Africa/Lagos", dateStyle: "medium" }),
       loginUrl: loginUrl(),
     });
     if (ok) sent++;

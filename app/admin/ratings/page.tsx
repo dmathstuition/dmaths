@@ -79,7 +79,7 @@ export default async function AdminRatings() {
                   </span>
                 </div>
                 <span className="text-xs text-ink/40">
-                  {new Date(r.created_at).toLocaleDateString("en-NG", { dateStyle: "medium" })}
+                  {new Date(r.created_at).toLocaleDateString("en-NG", { timeZone: "Africa/Lagos", dateStyle: "medium" })}
                 </span>
               </div>
               {r.comment && <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-ink/70">{r.comment}</p>}

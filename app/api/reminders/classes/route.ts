@@ -47,6 +47,7 @@ export async function GET(req: Request) {
       .eq("class_id", cls.id);
 
     const time = new Date(cls.starts_at).toLocaleTimeString("en-NG", {
+      timeZone: "Africa/Lagos",
       hour: "2-digit",
       minute: "2-digit",
     });

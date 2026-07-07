@@ -63,7 +63,7 @@ export default async function ActivityPage() {
                 {describe(a) && <p className="text-sm text-ink/55">{describe(a)}</p>}
                 <p className="mt-1 text-xs text-ink/35">
                   {a.actor ? `${a.actor.first_name} ${a.actor.last_name} · ` : ""}
-                  {new Date(a.created_at).toLocaleString("en-NG", { dateStyle: "medium", timeStyle: "short" })}
+                  {new Date(a.created_at).toLocaleString("en-NG", { timeZone: "Africa/Lagos", dateStyle: "medium", timeStyle: "short" })}
                 </p>
               </div>
             </div>
