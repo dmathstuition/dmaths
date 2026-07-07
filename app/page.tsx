@@ -243,6 +243,74 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* FOUNDER */}
+      <section id="founder" className="bg-chalk/40 py-20">
+        <div className="mx-auto max-w-7xl px-5">
+          <div className="grid items-center gap-12 md:grid-cols-2">
+            <Reveal className="group relative mx-auto w-full max-w-sm">
+              {/* soft gold blob behind the portrait for depth */}
+              <div className="float absolute inset-0 -z-0 scale-95 rounded-full bg-gold-pale/70 blur-2xl" />
+              <div className="relative z-10 overflow-hidden rounded-3xl shadow-2xl ring-1 ring-line/60">
+                <Image
+                  src="/founder.jpg"
+                  alt="Bakare Oladapo E., founder of D-Maths"
+                  width={1086}
+                  height={1448}
+                  quality={90}
+                  sizes="(max-width: 768px) 90vw, 40vw"
+                  className="h-auto w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                />
+              </div>
+              {/* floating name badge */}
+              <div className="hovlift float absolute -bottom-4 left-1/2 z-20 -translate-x-1/2 rounded-2xl bg-white px-5 py-2.5 text-center shadow-xl">
+                <p className="font-display text-sm font-extrabold text-ink">Bakare Oladapo E.</p>
+                <p className="text-[11px] font-semibold text-gold-deep">Founder &amp; Lead Educator</p>
+              </div>
+            </Reveal>
+
+            <Reveal delay={120}>
+              <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold-pale px-4 py-1.5 text-xs font-bold text-gold-deep">
+                <span className="badge-pulse h-1.5 w-1.5 rounded-full bg-gold-deep" />
+                About the Founder
+              </span>
+              <h2 className="mt-5 font-display text-3xl font-bold md:text-4xl">
+                Bakare <span className="text-gold-deep">Oladapo E.</span>
+              </h2>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {["Web Developer", "Data Analyst", "AI Engineer"].map((role) => (
+                  <span key={role} className="rounded-full bg-white px-3 py-1 text-[12px] font-semibold text-ink/70 shadow-sm ring-1 ring-line/70">
+                    {role}
+                  </span>
+                ))}
+              </div>
+              <div className="mt-6 space-y-4 text-[15px] leading-relaxed text-ink/60">
+                <p>
+                  I founded the D-Maths Learning Portal as a passionate educator and technology
+                  professional committed to transforming learning through innovation.
+                </p>
+                <p>
+                  As a Web Developer, Data Analyst, and AI Engineer, I combine expertise in software
+                  development, data-driven decision-making, and artificial intelligence to build
+                  educational solutions that are practical, engaging, and impactful. With a strong
+                  background in mathematics education and technology, my vision is to bridge the gap
+                  between traditional teaching and modern digital learning.
+                </p>
+                <p>
+                  Driven by a belief that every learner deserves access to quality education, I developed
+                  the D-Maths Learning Portal to provide an interactive platform where students can learn,
+                  practice, track their progress, and develop future-ready skills in mathematics, coding,
+                  and technology.
+                </p>
+                <p>
+                  Beyond teaching, I am dedicated to creating innovative digital products that empower
+                  schools, educators, and learners across Africa and beyond.
+                </p>
+              </div>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
       {/* TESTIMONIALS */}
       <section id="results" className="bg-chalk py-20">
         <div className="mx-auto max-w-7xl px-5">
@@ -298,7 +366,7 @@ export default function Landing() {
               and coding to learners across Nigeria — with prep for WAEC, JAMB, IGCSE, SAT and A-Levels.
             </p>
           </div>
-          <FooterCol title="Centre" links={[["About","#agency"],["Services","#services"],["Results","#results"],["Apply","/apply"]]} />
+          <FooterCol title="Centre" links={[["About","#agency"],["Founder","#founder"],["Services","#services"],["Results","#results"],["Apply","/apply"]]} />
           <FooterCol title="Learn" links={[["Login","/login"],["How it works","#how"],["Help & FAQ","/help"]]} />
           <FooterCol title="Legal" links={[["Privacy Policy","/privacy"],["Terms of Service","/terms"],["Refund Policy","/refunds"]]} />
           <div>

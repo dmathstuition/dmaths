@@ -6,6 +6,7 @@ import { supabaseBrowser } from "@/lib/supabase/client";
 import { useToast } from "@/components/Toast";
 import { Icon } from "@/components/Icons";
 import FloatingMath from "@/components/landing/FloatingMath";
+import { IDLE_ACTIVITY_KEY } from "@/components/IdleLogout";
 
 export default function Login() {
   const [notice, setNotice] = useState<{ kind: "success" | "error"; text: string } | null>(null);
@@ -81,6 +82,11 @@ export default function Login() {
     }
     // Record last sign-in (accountability) — fire-and-forget, never blocks login.
     fetch("/api/auth/touch", { method: "POST" }).catch(() => {});
+
+    // Reset the idle clock on this fresh sign-in. Without this, a stale timestamp
+    // from a previous session makes IdleLogout sign the user straight back out on
+    // arrival — an unbreakable "signed out after 30 minutes" loop.
+    try { localStorage.setItem(IDLE_ACTIVITY_KEY, String(Date.now())); } catch {}
 
     const dest = profile?.role === "admin" ? "/admin" : profile?.role === "parent" ? "/parent" : "/portal";
     router.replace(dest);

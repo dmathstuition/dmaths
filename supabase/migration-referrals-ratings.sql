@@ -1,8 +1,11 @@
 -- ════════════════════════════════════════════════════════════════════
 --  D-MATHS — REFERRALS + IN-APP RATINGS
 --  Run in: Supabase Dashboard → SQL Editor → New query
---  Idempotent — safe to run again.
+--  Idempotent — safe to run again. Wrapped in a transaction so a dropped
+--  connection can never leave it half-applied (all-or-nothing).
 -- ════════════════════════════════════════════════════════════════════
+
+begin;
 
 -- ── 1) REFERRALS ────────────────────────────────────────────────────
 -- A student's referral "code" is simply their existing student_code
@@ -43,3 +46,5 @@ create policy "admins read ratings" on ratings
   for select using (is_admin());
 
 create index if not exists ratings_created on ratings (created_at desc);
+
+commit;
