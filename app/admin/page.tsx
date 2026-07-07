@@ -45,7 +45,9 @@ export default async function AdminDashboard() {
       {/* Hero */}
       <Reveal>
         <div data-tour="hero" className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-board to-boardDeep p-7 text-white sm:p-9">
-          <div className="aurora pointer-events-none absolute inset-0 opacity-70" />
+          <div className="aurora pointer-events-none absolute inset-0 opacity-40" />
+          <div aria-hidden className="pointer-events-none absolute right-6 top-6 select-none text-4xl float drop-shadow">🤖</div>
+          <div aria-hidden className="pointer-events-none absolute right-24 bottom-8 select-none font-display text-xl font-bold text-gold/50 float" style={{ animationDelay: "1.4s" }}>∑</div>
           <div className="absolute right-0 top-0 h-full w-1/2 opacity-20"
             style={{ background: "radial-gradient(circle at 80% 20%, #EFAE56, transparent 60%)" }} />
           <div className="absolute -right-10 top-1/2 h-1 w-64 -rotate-45 bg-gold/60" />

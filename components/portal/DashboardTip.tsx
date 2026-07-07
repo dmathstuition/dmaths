@@ -21,7 +21,7 @@ export default function DashboardTip({ tips = DEFAULT_TIPS }: { tips?: string[] 
   }, [tips.length]);
 
   return (
-    <p key={i} className="page-enter mt-4 max-w-md text-[13px] font-medium leading-relaxed text-white/70">
+    <p key={i} className="page-enter mt-4 max-w-md text-[13px] font-medium leading-relaxed text-white/85">
       <span aria-hidden="true">💡</span> {tips[i]}
     </p>
   );

@@ -23,7 +23,7 @@ export default function GuardianClient({
     <div className="space-y-6">
       {/* Student header hero */}
       <div data-tour="hero" className="boardgrid relative overflow-hidden rounded-2xl bg-board p-6 text-white">
-        <div className="aurora pointer-events-none absolute inset-0 opacity-60" />
+        <div className="aurora pointer-events-none absolute inset-0 opacity-35" />
         <div className="relative flex items-center gap-4">
           <span className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-white/10 font-display text-lg font-bold text-gold-soft">
             {student.first_name?.[0]}{student.last_name?.[0]}
