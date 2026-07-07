@@ -7,11 +7,12 @@ const NAV_LINKS = [
   ["#services", "Services"],
   ["#how", "How it works"],
   ["#agency", "About"],
+  ["#founder", "Founder"],
   ["#results", "Results"],
   ["#contact", "Contact"],
 ] as const;
 
-const SECTION_IDS = ["services", "how", "agency", "results", "contact"];
+const SECTION_IDS = ["services", "how", "agency", "founder", "results", "contact"];
 
 export default function LandingNav() {
   const [scrolled, setScrolled] = useState(false);
