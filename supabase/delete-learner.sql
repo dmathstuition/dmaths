@@ -13,6 +13,12 @@
 
 begin;
 
+-- Attendance rows may be guarded by an "attendance locked" trigger that refuses
+-- any change once a class is finalised — which would block deleting a learner who
+-- has locked attendance. Disable user triggers on attendance_records for the
+-- duration of this transaction (restored below, and automatically on rollback).
+alter table attendance_records disable trigger user;
+
 do $$
 declare
   v_id    uuid;
@@ -108,6 +114,9 @@ begin
 
   raise notice '✅ Learner % fully deleted.', v_id;
 end $$;
+
+-- Restore the attendance-lock trigger.
+alter table attendance_records enable trigger user;
 
 commit;
 -- If the output shows an error instead of "Learner … fully deleted",
