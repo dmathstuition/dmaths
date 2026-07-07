@@ -54,7 +54,7 @@ export async function POST() {
       upcomingAssignments: upcoming.map((a: any) => ({
         title: a.title,
         subject: a.subject,
-        dueDate: new Date(a.due_date).toLocaleDateString("en-NG", { dateStyle: "medium" }),
+        dueDate: new Date(a.due_date).toLocaleDateString("en-NG", { timeZone: "Africa/Lagos", dateStyle: "medium" }),
       })),
       loginUrl: loginUrl(),
     });

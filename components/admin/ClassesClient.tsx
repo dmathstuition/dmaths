@@ -3,6 +3,7 @@ import { useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import ConfirmModal from "@/components/ConfirmModal";
 import { useToast } from "@/components/Toast";
+import { fmtWAT, watToUtcISO, utcToWatParts } from "@/lib/time";
 
 type ConfirmState = {
   title: string; message: string; confirmLabel?: string; danger?: boolean; onConfirm: () => void;
@@ -33,7 +34,7 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
     setFormError("");
     setBusy(true);
     try {
-      const starts_at = new Date(`${f.date}T${f.time}:00`).toISOString();
+      const starts_at = watToUtcISO(f.date, f.time); // interpret the typed time as WAT
       const payload = { subject: f.subject, tutor: f.tutor, platform: f.platform, starts_at,
         duration_minutes: Number(f.duration_minutes) || 60, link: f.link || "" };
 
@@ -56,13 +57,11 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
 
   function startEditClass(c: any) {
     if (c.attendance_locked) { push("Locked classes cannot be edited.", "error"); return; }
-    const d = new Date(c.starts_at);
-    const pad = (n: number) => String(n).padStart(2, "0");
+    const { date, time } = utcToWatParts(c.starts_at); // show the stored time back as WAT
     setEditId(c.id);
     setF({
       subject: c.subject, tutor: c.tutor, platform: c.platform,
-      date: `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`,
-      time: `${pad(d.getHours())}:${pad(d.getMinutes())}`,
+      date, time,
       duration_minutes: c.duration_minutes, link: c.link || "", roster: [],
     });
     setShowForm(true);
@@ -217,7 +216,7 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
               <span className="pill-blue">{c.platform}</span>
             </div>
             <p className="mt-3 text-sm text-ink/65">
-              {new Date(c.starts_at).toLocaleString("en-NG", { dateStyle: "medium", timeStyle: "short" })} · {c.duration_minutes} min · {c.class_students?.length ?? 0} student(s)
+              {fmtWAT(c.starts_at)} · {c.duration_minutes} min · {c.class_students?.length ?? 0} student(s)
             </p>
             <div className="mt-4 flex flex-wrap gap-2 border-t border-line pt-4">
               {c.attendance_locked ? (
@@ -249,7 +248,7 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
                 <div className="min-w-0">
                   <p className="truncate text-sm font-bold">{c.subject} <span className="font-normal text-ink/45">· {c.tutor}</span></p>
                   <p className="text-xs text-ink/45">
-                    {new Date(c.starts_at).toLocaleString("en-NG", { dateStyle: "medium", timeStyle: "short" })}
+                    {fmtWAT(c.starts_at)}
                     {c.attendance_locked ? " · attendance locked" : ""}
                   </p>
                 </div>

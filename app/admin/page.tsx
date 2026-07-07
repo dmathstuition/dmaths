@@ -38,7 +38,7 @@ export default async function AdminDashboard() {
       return d.getMonth() === new Date().getMonth() && d.getFullYear() === new Date().getFullYear();
     })
     .reduce((a: number, p: any) => a + Number(p.amount || 0), 0);
-  const today = new Date().toLocaleDateString("en-NG", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  const today = new Date().toLocaleDateString("en-NG", { timeZone: "Africa/Lagos", weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
   return (
     <div className="space-y-6">

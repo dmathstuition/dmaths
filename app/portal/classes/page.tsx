@@ -2,6 +2,7 @@ import JoinClassButton from "@/components/portal/JoinClassButton";
 import { supabaseServer } from "@/lib/supabase/server";
 import { Icon } from "@/components/Icons";
 import EmptyState from "@/components/ui/EmptyState";
+import { fmtWAT } from "@/lib/time";
 
 export const dynamic = "force-dynamic";
 
@@ -69,7 +70,7 @@ export default async function MyClasses() {
               <div className="mt-4 space-y-1.5 text-sm text-ink/65">
                 <p className="flex items-center gap-2">
                   <Icon name="calendar" className="h-4 w-4 text-ink/35" />
-                  {new Date(c.starts_at).toLocaleString("en-NG", { dateStyle: "medium", timeStyle: "short" })}
+                  {fmtWAT(c.starts_at)}
                 </p>
                 <p className="flex items-center gap-2">
                   <Icon name="classes" className="h-4 w-4 text-ink/35" />

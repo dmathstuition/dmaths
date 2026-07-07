@@ -9,6 +9,7 @@ import RateCard from "@/components/portal/RateCard";
 import DashboardTip from "@/components/portal/DashboardTip";
 import Tour from "@/components/tour/Tour";
 import { studentTour } from "@/components/tour/steps";
+import { fmtWAT } from "@/lib/time";
 
 export const dynamic = "force-dynamic";
 
@@ -109,7 +110,7 @@ export default async function StudentDashboard() {
                 <div>
                   <p className="text-sm font-extrabold">{c.subject}</p>
                   <p className="text-xs text-ink/45">
-                    {new Date(c.starts_at).toLocaleString("en-NG", { dateStyle: "medium", timeStyle: "short" })} · {c.tutor}
+                    {fmtWAT(c.starts_at)} · {c.tutor}
                   </p>
                 </div>
                 {c.link && <JoinClassButton classId={c.id} link={c.link} label="Join" className="btn-gold !min-h-[34px] !px-3 !text-xs" />}

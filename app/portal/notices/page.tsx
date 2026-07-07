@@ -19,7 +19,7 @@ export default async function StudentNotices() {
         <article key={n.id} className="card border-l-4 border-l-gold p-6">
           <h2 className="font-extrabold">{n.title}</h2>
           <p className="text-xs text-ink/40">
-            {new Date(n.created_at).toLocaleDateString("en-NG", { dateStyle: "medium" })} · {n.target === "all" ? "All students" : n.target}
+            {new Date(n.created_at).toLocaleDateString("en-NG", { timeZone: "Africa/Lagos", dateStyle: "medium" })} · {n.target === "all" ? "All students" : n.target}
           </p>
           <p className="mt-3 text-sm leading-relaxed text-ink/65">{n.body}</p>
         </article>
