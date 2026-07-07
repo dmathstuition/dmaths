@@ -20,6 +20,15 @@ alter table profiles
   add column if not exists referred_by    uuid references profiles(id),
   add column if not exists referral_count int not null default 0;
 
+-- The referral link must NOT block deleting a learner. Ensure the self-FK is
+-- ON DELETE SET NULL (an earlier version created it with the default RESTRICT,
+-- which made "permanently delete" fail for anyone who had referred someone).
+-- Idempotent: drop-if-exists then re-add.
+alter table profiles drop constraint if exists profiles_referred_by_fkey;
+alter table profiles
+  add constraint profiles_referred_by_fkey
+  foreign key (referred_by) references profiles(id) on delete set null;
+
 -- ── 2) RATINGS ──────────────────────────────────────────────────────
 -- Quick star rating (1–5) + optional comment from a student or parent.
 -- Admins read all; a user may only insert their own row.

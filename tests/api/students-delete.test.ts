@@ -115,15 +115,28 @@ describe("POST /api/students/delete", () => {
     expect(res.status).toBe(400);
   });
 
-  it("deactivates the student instead of deleting when auth removal fails", async () => {
+  it("removes the profile first, then reports if the auth login can't be deleted", async () => {
     mockServer.auth.getUser.mockResolvedValue({ data: { user: { id: "admin-1" } }, error: null });
     mockServer._qb.single.mockResolvedValue({ data: { role: "admin" }, error: null });
     mockAdmin._qb.single.mockResolvedValue({ data: STUDENT, error: null });
-    mockAdmin.auth.admin.deleteUser.mockResolvedValue({ error: { message: "service role key missing" } });
+    mockAdmin.auth.admin.deleteUser.mockResolvedValue({ error: { message: "Database error deleting user" } });
 
     const res = await POST(makeRequest({ studentId: "stu-1", confirmName: "alice smith" }));
+    // Profile is deleted before the auth call, so the student is gone from the app…
+    expect(mockAdmin.from).toHaveBeenCalledWith("profiles");
+    expect(mockAdmin._qb.delete).toHaveBeenCalled();
+    // …and we surface the raw auth error rather than silently succeeding.
     expect(res.status).toBe(500);
-    // Must deactivate rather than leave in a broken state
-    expect(mockAdmin._qb.update).toHaveBeenCalledWith({ is_active: false });
+    expect((await res.json()).error).toMatch(/could not be fully deleted/i);
+  });
+
+  it("nulls out referral links pointing at the student before deleting", async () => {
+    mockServer.auth.getUser.mockResolvedValue({ data: { user: { id: "admin-1" } }, error: null });
+    mockServer._qb.single.mockResolvedValue({ data: { role: "admin" }, error: null });
+    mockAdmin._qb.single.mockResolvedValue({ data: STUDENT, error: null });
+
+    const res = await POST(makeRequest({ studentId: "stu-1", confirmName: "alice smith" }));
+    expect(res.status).toBe(200);
+    expect(mockAdmin._qb.update).toHaveBeenCalledWith({ referred_by: null });
   });
 });
