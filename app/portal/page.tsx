@@ -34,20 +34,26 @@ export default async function StudentDashboard() {
       {/* Welcome hero */}
       <Reveal>
         <div data-tour="hero" className="boardgrid relative overflow-hidden rounded-2xl bg-gradient-to-br from-board to-boardDeep p-7 text-white sm:p-9">
-          <div className="aurora pointer-events-none absolute inset-0 opacity-70" />
-          <div className="pointer-events-none absolute right-0 top-0 h-full w-1/2 opacity-20"
+          <div className="aurora pointer-events-none absolute inset-0 opacity-40" />
+          <div className="pointer-events-none absolute right-0 top-0 h-full w-1/2 opacity-15"
             style={{ background: "radial-gradient(circle at 80% 20%, #EFAE56, transparent 60%)" }} />
           <div className="pointer-events-none absolute -right-10 top-1/2 h-1 w-64 -rotate-45 bg-gold/40" />
           <div className="pointer-events-none absolute right-8 top-5 h-16 w-16 rounded-full border border-white/10 float" />
           <div className="pointer-events-none absolute right-20 bottom-5 h-9 w-9 rounded-full border border-gold/25 float"
             style={{ animationDelay: "1.6s" }} />
+          {/* Animated mascot + floating maths — decorative, kept to the right so
+              they never sit behind the text (disabled under reduced-motion). */}
+          <div aria-hidden className="pointer-events-none absolute right-5 top-6 select-none text-4xl float drop-shadow">🤖</div>
+          <div aria-hidden className="pointer-events-none absolute right-24 top-14 select-none font-display text-2xl font-bold text-gold/70 float" style={{ animationDelay: "0.8s" }}>π</div>
+          <div aria-hidden className="pointer-events-none absolute right-14 bottom-8 select-none font-display text-xl font-bold text-white/40 float" style={{ animationDelay: "1.9s" }}>√</div>
+          <div aria-hidden className="pointer-events-none absolute right-36 bottom-16 select-none font-display text-lg font-bold text-gold/50 float" style={{ animationDelay: "2.6s" }}>∑</div>
           <div className="relative">
             <p className="pill-gold mb-3">🎓 {me?.level || "Student"}</p>
             <h1 className="font-display text-2xl font-semibold sm:text-3xl">
               Welcome back, <span className="text-gold">{me?.first_name}</span>!
             </h1>
-            <p className="mt-2 text-sm text-white/50">
-              ID: <span className="font-mono text-white/80">{me?.student_code}</span>
+            <p className="mt-2 text-sm text-white/70">
+              ID: <span className="font-mono font-semibold text-white">{me?.student_code}</span>
             </p>
             {streak > 0 && (
               <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-gold/15 px-3 py-1 text-sm font-bold text-gold ring-1 ring-gold/30">

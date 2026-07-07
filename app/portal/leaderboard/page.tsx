@@ -12,8 +12,9 @@ export default async function LeaderboardPage() {
     .select("id, first_name, reward_points")
     .eq("role", "student")
     .eq("is_active", true)
+    .gt("reward_points", 0)          // only learners who've actually earned points
     .order("reward_points", { ascending: false })
-    .limit(10);
+    .limit(50);
 
   const myRank = top ? top.findIndex(s => s.id === me?.id) + 1 : 0;
 
@@ -54,7 +55,7 @@ export default async function LeaderboardPage() {
             </div>
           );
         })}
-        {!top?.length && <p className="p-6 text-center text-sm text-ink/40">No data yet.</p>}
+        {!top?.length && <p className="p-6 text-center text-sm text-ink/40">No reward points earned yet — be the first to top the board! 🏆</p>}
       </div>
     </div>
   );

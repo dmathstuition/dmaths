@@ -55,6 +55,17 @@ export default function MessagesClient({ meId, initialMessages }: { meId: string
     setText("");
   }
 
+  async function remove(id: string) {
+    if (!window.confirm("Delete this message?")) return;
+    const prev = messages;
+    setMessages(m => m.filter(x => x.id !== id)); // optimistic
+    const res = await fetch("/api/messages/delete", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    if (!res.ok) { setMessages(prev); push("Could not delete message.", "error"); }
+  }
+
   return (
     <div className="card flex h-[70vh] flex-col overflow-hidden">
       <div className="flex-1 space-y-3 overflow-y-auto p-5">
@@ -64,7 +75,11 @@ export default function MessagesClient({ meId, initialMessages }: { meId: string
         {messages.map(m => {
           const mine = m.sender_role === "student";
           return (
-            <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
+            <div key={m.id} className={`group flex items-center gap-1.5 ${mine ? "justify-end" : "justify-start"}`}>
+              {mine && (
+                <button onClick={() => remove(m.id)} aria-label="Delete message"
+                  className="shrink-0 px-1 text-xs text-ink/30 transition hover:text-red-500">✕</button>
+              )}
               <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm ${
                 mine ? "bg-gold text-board" : "bg-chalk text-ink"
               }`}>
@@ -74,6 +89,10 @@ export default function MessagesClient({ meId, initialMessages }: { meId: string
                   {new Date(m.created_at).toLocaleString("en-NG", { dateStyle: "medium", timeStyle: "short" })}
                 </p>
               </div>
+              {!mine && (
+                <button onClick={() => remove(m.id)} aria-label="Delete message"
+                  className="shrink-0 px-1 text-xs text-ink/30 transition hover:text-red-500">✕</button>
+              )}
             </div>
           );
         })}
