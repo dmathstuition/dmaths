@@ -12,5 +12,18 @@ if (dsn) {
     tracesSampleRate: 0.1,
     // Don't report noisy, expected client conditions.
     ignoreErrors: ["Network request failed", "Failed to fetch", "Load failed"],
+    // Drop PWA service-worker registration rejections — these are environmental
+    // (private mode, restricted/old browsers, iOS quirks, leaving mid-load) and
+    // harmless (the app works fine without the service worker), but noisy. We
+    // match the SW-registration stack frame specifically, so unrelated errors —
+    // including other "Rejected" promises — still report.
+    beforeSend(event) {
+      const frames = event.exception?.values?.flatMap((v) => v.stacktrace?.frames ?? []) ?? [];
+      const isSwRegister = frames.some((f) =>
+        /serviceWorker\.register|_?registerScript/i.test(`${f.function ?? ""}`),
+      );
+      if (isSwRegister) return null;
+      return event;
+    },
   });
 }
