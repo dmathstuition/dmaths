@@ -18,6 +18,7 @@ export default function PortalTabBar({
 
   return (
     <nav
+      data-tour="tabs"
       className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white/90 backdrop-blur-xl lg:hidden dark:border-white/10 dark:bg-board/90"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       aria-label="Primary"

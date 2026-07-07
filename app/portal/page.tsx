@@ -6,6 +6,9 @@ import CountUp from "@/components/landing/CountUp";
 import Reveal from "@/components/landing/Reveal";
 import { Icon, type IconName } from "@/components/Icons";
 import RateCard from "@/components/portal/RateCard";
+import DashboardTip from "@/components/portal/DashboardTip";
+import Tour from "@/components/tour/Tour";
+import { studentTour } from "@/components/tour/steps";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +33,8 @@ export default async function StudentDashboard() {
     <div className="space-y-6">
       {/* Welcome hero */}
       <Reveal>
-        <div className="boardgrid relative overflow-hidden rounded-2xl bg-gradient-to-br from-board to-boardDeep p-7 text-white sm:p-9">
+        <div data-tour="hero" className="boardgrid relative overflow-hidden rounded-2xl bg-gradient-to-br from-board to-boardDeep p-7 text-white sm:p-9">
+          <div className="aurora pointer-events-none absolute inset-0 opacity-70" />
           <div className="pointer-events-none absolute right-0 top-0 h-full w-1/2 opacity-20"
             style={{ background: "radial-gradient(circle at 80% 20%, #EFAE56, transparent 60%)" }} />
           <div className="pointer-events-none absolute -right-10 top-1/2 h-1 w-64 -rotate-45 bg-gold/40" />
@@ -51,17 +55,18 @@ export default async function StudentDashboard() {
               </p>
             )}
             <div className="mt-5">
-              <Link href="/portal/refer"
-                className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-white ring-1 ring-white/15 transition hover:bg-white/20">
+              <Link href="/portal/refer" data-tour="refer"
+                className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-white ring-1 ring-white/15 transition hover:bg-white/20 hover:scale-[1.03]">
                 🎁 Refer a friend
               </Link>
             </div>
+            <DashboardTip />
           </div>
         </div>
       </Reveal>
 
       {/* Stat grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <div data-tour="stats" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <Reveal delay={0}>
           <Stat icon="classes" label="Upcoming classes" value={classes?.length ?? 0} accent="sky" />
         </Reveal>
@@ -90,7 +95,7 @@ export default async function StudentDashboard() {
       {/* Content cards */}
       <div className="grid gap-5 lg:grid-cols-2">
         <Reveal delay={80}>
-          <div className="card h-full p-6">
+          <div data-tour="classes" className="card h-full p-6">
             <h2 className="mb-4 font-display text-lg font-semibold">Next classes</h2>
             {(classes ?? []).map(c => (
               <div key={c.id}
@@ -141,7 +146,9 @@ export default async function StudentDashboard() {
         </Reveal>
       </div>
 
-      <Reveal delay={160}><RateCard /></Reveal>
+      <Reveal delay={160}><div data-tour="rate"><RateCard /></div></Reveal>
+
+      <Tour tourId="student" steps={studentTour} />
     </div>
   );
 }
@@ -162,8 +169,8 @@ function Stat({ label, value, icon, accent = "blue", suffix = "", prefix = "", b
 }) {
   const a = ACCENTS[accent] ?? ACCENTS.blue;
   return (
-    <div className={`card stat-shimmer relative flex flex-col gap-2 overflow-hidden p-5 hovlift ${highlight ? "ring-2 ring-gold/40" : ""}`}>
-      <span className={`flex h-9 w-9 items-center justify-center rounded-xl ${a.icon}`}>
+    <div className={`card card-interactive stat-shimmer relative flex flex-col gap-2 overflow-hidden p-5 ${highlight ? "ring-2 ring-gold/40" : ""}`}>
+      <span className={`ci-icon flex h-9 w-9 items-center justify-center rounded-xl ${a.icon}`}>
         <Icon name={icon} className="h-4 w-4" />
       </span>
       <p className={`font-display text-3xl font-semibold leading-none ${green ? "text-emerald-600" : red ? "text-red-500" : ""}`}>

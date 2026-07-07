@@ -3,6 +3,7 @@ import { supabaseServer } from "@/lib/supabase/server";
 import ParentSignOutButton from "@/components/ParentSignOutButton";
 import Logo from "@/components/Logo";
 import IdleLogout from "@/components/IdleLogout";
+import TourButton from "@/components/tour/TourButton";
 
 export const metadata = { title: "Parent Portal · D-Maths Tuition" };
 
@@ -27,8 +28,9 @@ export default async function ParentLayout({ children }: { children: React.React
             <Logo light />
             <span className="hidden rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] font-bold text-white/60 sm:inline">Parent Portal</span>
           </div>
-          <div className="flex items-center gap-4 text-sm">
+          <div className="flex items-center gap-3 text-sm">
             <span className="hidden font-semibold text-white/70 sm:block">Hi, {profile.first_name} 👋</span>
+            <TourButton light />
             <ParentSignOutButton />
           </div>
         </div>

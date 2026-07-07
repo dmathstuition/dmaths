@@ -22,18 +22,20 @@ export default function GuardianClient({
   return (
     <div className="space-y-6">
       {/* Student header hero */}
-      <div className="boardgrid overflow-hidden rounded-2xl bg-board p-6 text-white">
-        <div className="flex items-center gap-4">
+      <div data-tour="hero" className="boardgrid relative overflow-hidden rounded-2xl bg-board p-6 text-white">
+        <div className="aurora pointer-events-none absolute inset-0 opacity-60" />
+        <div className="relative flex items-center gap-4">
           <span className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-white/10 font-display text-lg font-bold text-gold-soft">
             {student.first_name?.[0]}{student.last_name?.[0]}
           </span>
           <div>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-white/40">Your child's progress</p>
             <h1 className="font-display text-2xl font-semibold">{student.first_name} {student.last_name}</h1>
             <p className="mt-0.5 text-sm text-white/55">{student.student_code} · {student.level}</p>
           </div>
         </div>
 
-        <div className="mt-6 flex flex-wrap items-center gap-6">
+        <div data-tour="rings" className="relative mt-6 flex flex-wrap items-center gap-6">
           <div className="flex flex-col items-center gap-1.5">
             <ProgressRing value={student.avg_score} size={84} stroke={8} color="#EFAE56" track="rgba(255,255,255,.14)">
               <span className="font-display text-lg font-bold text-white">{student.avg_score}%</span>
@@ -78,7 +80,7 @@ export default function GuardianClient({
       )}
 
       {/* Recent behaviour */}
-      <div className="card p-5">
+      <div data-tour="behaviour" className="card hovlift p-5">
         <h2 className="mb-4 font-display text-lg font-semibold">Recent behaviour</h2>
         {behaviorLogs.length === 0 ? (
           <p className="text-sm text-ink/40">No behaviour entries yet.</p>
@@ -105,7 +107,7 @@ export default function GuardianClient({
       </div>
 
       {/* Recent grades */}
-      <div className="card p-5">
+      <div data-tour="grades" className="card hovlift p-5">
         <h2 className="mb-4 font-display text-lg font-semibold">Recent grades</h2>
         {gradedSubs.length === 0 ? (
           <p className="text-sm text-ink/40">No graded assignments yet.</p>
