@@ -192,3 +192,40 @@ switch it on (until then the workflow runs green but does nothing):
 download the **`db-backup-…`** artifact (a `.sql.gz`).
 **To run one now:** Actions → **Database backup** → **Run workflow**.
 **To restore:** `gunzip -c dmaths-backup-*.sql.gz | psql "<your SUPABASE_DB_URL>"`.
+
+---
+
+## 9) Publish to Google Play (the app is already store-ready as a PWA/TWA)
+
+The Play app is a thin wrapper (**Trusted Web Activity**) around `https://dmaths.academy` —
+so every Vercel deploy updates the "app" instantly with **no store re-submission**.
+
+1. **Developer account** — play.google.com/console, one-time **$25**, identity
+   verification (can take days). ⚠️ New *personal* accounts must run a **closed test
+   with ≥12 testers for 14 days** before production; organisation accounts skip this.
+2. **Package the PWA** — use **PWABuilder.com** → enter `https://dmaths.academy` →
+   download the Android package (`.aab`) + note the package id (e.g. `academy.dmaths.twa`)
+   and signing details.
+3. **Upload to Play Console** → create the app → upload the `.aab` to a testing track.
+4. **Digital Asset Links** (removes the browser bar): Play Console → **Setup → App
+   signing** → copy the **SHA-256 certificate fingerprint**. In **Vercel → Environment
+   Variables** set:
+   - `ANDROID_PACKAGE_NAME` = your package id
+   - `ANDROID_CERT_SHA256` = the fingerprint (comma-separate to also allow your upload key)
+   Redeploy, then check `https://dmaths.academy/.well-known/assetlinks.json` shows it.
+5. **Store listing** — name (≤30 chars), short description (≤80), full description,
+   the 512×512 icon (already in `public/icons/icon-512.png`), a **1024×500 feature
+   graphic**, and **2–8 phone screenshots** (take them from the installed app).
+6. **Play forms**:
+   - **Privacy policy URL:** `https://dmaths.academy/privacy`
+   - **Account deletion URL** (required): `https://dmaths.academy/delete-account`
+     (self-service deletion is built into the portals: Profile → *Delete my account*).
+   - **Data safety:** declare name, email, phone, academic records; GA4 analytics.
+   - **Content rating** questionnaire (education).
+   - **Target audience:** most tutoring apps declare **13+** and "not primarily
+     child-directed" (parents manage younger learners) — declaring under-13 triggers
+     Google's stricter Families policies.
+   - **App access:** provide a demo student login for the reviewers.
+7. **Payments** — no change needed: tutoring is a *real-world service*, which is exempt
+   from Google Play Billing, so Paystack stays as-is.
+8. Roll out: closed testing → (14 days / 12 testers if required) → **Production**.

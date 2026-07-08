@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { deleteLearnerCompletely } from "@/lib/deleteLearner";
 
 export async function POST(req: Request) {
   const supa = supabaseServer();
@@ -29,130 +30,11 @@ export async function POST(req: Request) {
     detail: { studentId, name: expected },
   });
 
-  // 1) Explicitly remove the student's child rows BEFORE deleting the auth user.
-  //    In theory profiles.id → auth.users is ON DELETE CASCADE and every child
-  //    table cascades off profiles, so deleting the auth user would be enough.
-  //    In practice, if any of these FKs in the live database is NOT cascade
-  //    (schema drift), the auth deletion fails with "Database error deleting
-  //    user". Clearing the children first makes deletion robust regardless of
-  //    how the constraints are configured. The service role bypasses RLS.
-  //    Tables that may not exist yet (un-applied migrations) error harmlessly.
-  const childTables: { table: string; col: string }[] = [
-    { table: "assignment_submissions", col: "student_id" },
-    { table: "class_students",         col: "student_id" },
-    { table: "admin_notes",            col: "student_id" },
-    { table: "rewards",                col: "student_id" },
-    { table: "behavior_logs",          col: "student_id" },
-    { table: "student_badges",         col: "student_id" },
-    { table: "guardian_tokens",        col: "student_id" },
-    { table: "parent_student_links",   col: "student_id" },
-    { table: "notifications",          col: "user_id" },
-    { table: "audit_log",              col: "actor_id" },
-    // Newer tables (added after this route was written). Most cascade off
-    // profiles/auth.users already, but clearing them explicitly keeps deletion
-    // robust against any non-cascade FK.
-    { table: "messages",               col: "student_id" },
-    { table: "messages",               col: "sender_id" },
-    { table: "ratings",                col: "user_id" },
-    { table: "push_subscriptions",     col: "user_id" },
-  ];
-  for (const { table, col } of childTables) {
-    await admin.from(table).delete().eq(col, studentId); // per-table errors ignored
-  }
-
-  // 1a-attendance) Attendance rows can be guarded by an "attendance locked"
-  //    trigger that refuses any change once an admin finalises a class — which
-  //    otherwise blocks deleting the learner. Temporarily unlock only the
-  //    classes THIS learner has locked attendance in, remove their rows, then
-  //    re-lock those same classes, so other students' locked attendance is
-  //    untouched but this learner can be fully removed. Best-effort.
-  try {
-    const { data: att } = await admin
-      .from("attendance_records").select("class_id").eq("student_id", studentId);
-    const classIds = Array.from(
-      new Set((att ?? []).map((a: { class_id?: string }) => a.class_id).filter(Boolean)),
-    ) as string[];
-    let lockedIds: string[] = [];
-    if (classIds.length) {
-      const { data: cls } = await admin
-        .from("classes").select("id, attendance_locked").in("id", classIds);
-      lockedIds = (cls ?? [])
-        .filter((c: { attendance_locked?: boolean }) => c.attendance_locked)
-        .map((c: { id: string }) => c.id);
-      if (lockedIds.length) {
-        await admin.from("classes").update({ attendance_locked: false }).in("id", lockedIds);
-      }
-    }
-    await admin.from("attendance_records").delete().eq("student_id", studentId);
-    if (lockedIds.length) {
-      await admin.from("classes").update({ attendance_locked: true }).in("id", lockedIds);
-    }
-  } catch { /* best-effort — the profile delete below still reports any real blocker */ }
-
-  // 1a-bis) Null the referral self-reference. `profiles.referred_by` points at
-  //    the student who referred this learner; if THIS learner referred anyone,
-  //    those rows point back here. That FK is NOT cascade, so it would block the
-  //    profile delete (Postgres → "Database error deleting user"). Clear it.
-  await admin.from("profiles").update({ referred_by: null }).eq("referred_by", studentId);
-
-  // 1b) Null any NON-cascade "creator / actor" references so the profile
-  //     delete (below) can't be blocked by a leftover FK. These are normally
-  //     empty for a student, but a deleted account could in theory have
-  //     authored a note/log; clearing them keeps deletion robust.
-  const actorRefs: { table: string; col: string }[] = [
-    { table: "notices",          col: "created_by" },
-    { table: "admin_notes",      col: "created_by" },
-    { table: "behavior_logs",    col: "logged_by" },
-    { table: "lesson_materials", col: "uploaded_by" },
-    { table: "curricula",        col: "uploaded_by" },
-  ];
-  for (const { table, col } of actorRefs) {
-    await admin.from(table).update({ [col]: null }).eq(col, studentId); // ignored if table absent
-  }
-
-  // 1c) The learner's original enrolment application and payment-ledger rows
-  //     link only by email (no profile FK), so the UI's promise to remove
-  //     "payment history" is only true if we clear them here too. Matched
-  //     case-insensitively. (If the same email was reused for another learner,
-  //     those shared rows are removed as well — consistent with the SQL tool.)
-  const email = student.email?.trim();
-  if (email) {
-    await admin.from("applications").delete().ilike("email", email);
-    await admin.from("payments").delete().ilike("email", email);
-  }
-
-  // 2) Delete the PROFILE row *before* the auth user. This mirrors the working
-  //    delete-learner.sql tool. Doing it first means the delete never depends on
-  //    the profiles → auth.users cascade being configured, and a non-cascade FK
-  //    can't leave the auth deletion blocked with the profile still present.
-  const { error: profileErr } = await admin.from("profiles").delete().eq("id", studentId);
-  if (profileErr) {
-    // Something still references this profile with a non-cascade FK we didn't
-    // clear. Surface the exact DB error so the specific table can be pinpointed.
-    return NextResponse.json(
-      { error: `Could not remove the student record: ${profileErr.message}. Run supabase/delete-learner.sql for this learner, or check for a table still linking to them.` },
-      { status: 500 },
-    );
-  }
-
-  // 3) Delete the AUTH login so they can no longer sign in and the email frees up.
-  const { error: authErr } = await admin.auth.admin.deleteUser(studentId);
-
-  if (authErr) {
-    // "Not found" means the auth user was already gone — the profile (now also
-    // deleted) was an orphan, so the learner is fully removed. Success.
-    const notFound =
-      authErr.message?.toLowerCase().includes("not found") ||
-      (authErr as any).status === 404;
-    if (notFound) return NextResponse.json({ ok: true });
-
-    // The student record is already gone (they've disappeared from the portal),
-    // but the login row lingered. Report the raw error so it can be cleared.
-    return NextResponse.json(
-      { error: `The student was removed, but their login could not be fully deleted (${authErr.message}). Run supabase/delete-learner.sql to clear the leftover login.` },
-      { status: 500 },
-    );
-  }
+  // The full removal machinery lives in lib/deleteLearner.ts (shared with the
+  // learner's own "Delete my account" flow): children → attendance-lock
+  // workaround → non-cascade refs → application/payment rows → profile → login.
+  const result = await deleteLearnerCompletely(admin, studentId, student.email);
+  if (!result.ok) return NextResponse.json({ error: result.error }, { status: 500 });
 
   return NextResponse.json({ ok: true });
 }

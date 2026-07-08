@@ -24,5 +24,11 @@ export default function manifest(): MetadataRoute.Manifest {
       { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
       { src: "/icons/maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
     ],
+    // Long-press the app icon → quick actions (also carried into the Play TWA).
+    shortcuts: [
+      { name: "Sign in", url: "/login", icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }] },
+      { name: "My portal", url: "/portal", icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }] },
+      { name: "Register", url: "/apply", icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }] },
+    ],
   };
 }
