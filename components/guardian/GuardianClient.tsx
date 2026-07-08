@@ -22,8 +22,12 @@ export default function GuardianClient({
   return (
     <div className="space-y-6">
       {/* Student header hero */}
-      <div data-tour="hero" className="boardgrid relative overflow-hidden rounded-2xl bg-board p-6 text-white">
-        <div className="aurora pointer-events-none absolute inset-0 opacity-35" />
+      <div data-tour="hero" className="boardgrid text-crisp relative overflow-hidden rounded-2xl p-6 text-white"
+        style={{ background: "linear-gradient(135deg, #10406F 0%, #0A2A4F 60%, #071C36 100%)" }}>
+        <div className="aurora pointer-events-none absolute inset-0 opacity-25" />
+        {/* contrast guard: keeps the text side dark no matter what effects render */}
+        <div className="pointer-events-none absolute inset-0"
+          style={{ background: "linear-gradient(100deg, rgba(7,25,48,.82) 0%, rgba(7,25,48,.35) 55%, rgba(7,25,48,0) 100%)" }} />
         <div className="relative flex items-center gap-4">
           <span className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-white/10 font-display text-lg font-bold text-gold-soft">
             {student.first_name?.[0]}{student.last_name?.[0]}

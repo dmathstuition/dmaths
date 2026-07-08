@@ -307,4 +307,23 @@ html { scroll-behavior: smooth; }
   outline-offset: 2px;
   animation: tourPulse 1.8s ease-in-out infinite;
 }
+
+/* ── Crisp text over busy/dark backdrops (text-shadow inherits) ── */
+.text-crisp { text-shadow: 0 1px 3px rgba(7,22,44,.55); }
+
+/* ── Slow decorative rotating ring (behind hero imagery) ───────── */
+@keyframes ringSpin { to { transform: rotate(360deg); } }
+.ring-spin { animation: ringSpin 32s linear infinite; }
+
+/* ── Shine sweep across an image/card on hover ─────────────────── */
+.sheen { position: relative; overflow: hidden; }
+.sheen::after {
+  content: "";
+  position: absolute; inset: 0; z-index: 2;
+  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.38) 50%, transparent 60%);
+  transform: translateX(-130%);
+  transition: transform .9s ease;
+  pointer-events: none;
+}
+.sheen:hover::after { transform: translateX(130%); }
 /* The global prefers-reduced-motion rule (top of file) disables all of the above. */
