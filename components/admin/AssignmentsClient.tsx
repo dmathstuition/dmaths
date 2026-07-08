@@ -5,6 +5,7 @@ import CBTPreview from "@/components/admin/CBTPreview";
 import ConfirmModal from "@/components/ConfirmModal";
 import GradeModal from "@/components/GradeModal";
 import { useToast } from "@/components/Toast";
+import { fmtWAT, watToUtcISO, utcToWatParts } from "@/lib/time";
 
 const SUBJECTS = ["Algebra","Calculus","Statistics","Geometry","Further Mathematics","Core Maths Revision","Physics","JavaScript","Python","Python Practice Challenge","External Examinations"];
 
@@ -115,14 +116,22 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
     }
 
     const roster = f.roster.length ? f.roster : students.map(s => s.id);
-    const { data: a, error } = await supabase.from("assignments").insert({
+    // The typed deadline (date + time) is interpreted as WAT; 23:59 by default.
+    const due_at = f.due_date ? watToUtcISO(f.due_date, f.due_time || "23:59") : null;
+    const payload: any = {
       title: f.title, subject: f.subject, type: f.type, instructions: f.instructions || "",
-      due_date: f.due_date || null,
+      due_date: f.due_date || null, due_at,
       cbt_link: f.cbt_mode === "link" ? (f.cbt_link || "") : "",
       cbt_open: f.cbt_open || null, cbt_close: f.cbt_close || null,
       cbt_questions: f.type === "cbt" && f.cbt_mode === "inline" ? questions : null,
       file_url: fileUrl, file_name: fileName,
-    }).select().single();
+    };
+    let { data: a, error } = await supabase.from("assignments").insert(payload).select().single();
+    if (error && /due_at/i.test(error.message)) {
+      // Migration not applied yet — create without the deadline time (date-only).
+      const { due_at: _omit, ...withoutDueAt } = payload;
+      ({ data: a, error } = await supabase.from("assignments").insert(withoutDueAt).select().single());
+    }
 
     if (error || !a) { setBusy(false); setFormError("Could not create assignment."); return; }
     await supabase.from("assignment_submissions")
@@ -148,17 +157,27 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
   async function saveEdit() {
     setFormError("");
     if (!f.title) { setFormError("Add a title."); return; }
-    await supabase.from("assignments").update({
-      title: f.title, subject: f.subject, due_date: f.due_date || null, instructions: f.instructions || "",
-    }).eq("id", editId!);
+    const due_at = f.due_date ? watToUtcISO(f.due_date, f.due_time || "23:59") : null;
+    const payload: any = {
+      title: f.title, subject: f.subject, due_date: f.due_date || null, due_at,
+      instructions: f.instructions || "",
+    };
+    let { error } = await supabase.from("assignments").update(payload).eq("id", editId!);
+    if (error && /due_at/i.test(error.message)) {
+      const { due_at: _omit, ...withoutDueAt } = payload;
+      ({ error } = await supabase.from("assignments").update(withoutDueAt).eq("id", editId!));
+    }
     setEditId(null); setShowForm(false);
     setF({ subject: "Algebra", type: "written", roster: [], cbt_mode: "link" });
     reload();
   }
 
   function startEditAssignment(a: any) {
+    // Show the stored deadline back as WAT date + time (23:59 for legacy date-only).
+    const parts = a.due_at ? utcToWatParts(a.due_at) : { date: a.due_date || "", time: "23:59" };
     setEditId(a.id);
-    setF({ title: a.title, subject: a.subject, type: a.type, due_date: a.due_date || "",
+    setF({ title: a.title, subject: a.subject, type: a.type,
+           due_date: parts.date, due_time: parts.time,
            instructions: a.instructions || "", roster: [], cbt_mode: "link" });
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -212,6 +231,10 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
             <div>
               <label className="flabel">Due date <span className="font-normal text-ink/40">(when students must submit by)</span></label>
               <input className="field" type="date" value={f.due_date || ""} onChange={e => setF({ ...f, due_date: e.target.value })} />
+            </div>
+            <div>
+              <label className="flabel">Deadline time <span className="font-normal text-ink/40">(WAT — submissions close then)</span></label>
+              <input className="field" type="time" value={f.due_time || "23:59"} onChange={e => setF({ ...f, due_time: e.target.value })} />
             </div>
             <div>
               <label className="flabel">Type</label>
@@ -346,7 +369,9 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
                 {g.assignment.cbt_questions?.length > 0 && <span className="pill ml-1 bg-purple-100 text-purple-800">Inline</span>}
                 {g.assignment.file_url && <span className="pill ml-1 bg-cyan-100 text-cyan-800">PDF</span>}
               </h2>
-              <p className="text-xs text-ink/45">{g.assignment.subject} · due {g.assignment.due_date ?? "TBD"}</p>
+              <p className="text-xs text-ink/45">
+                {g.assignment.subject} · due {g.assignment.due_at ? `${fmtWAT(g.assignment.due_at)} WAT` : (g.assignment.due_date ?? "TBD")}
+              </p>
             </div>
             <div className="flex items-center gap-3">
               {g.assignment.file_url && (

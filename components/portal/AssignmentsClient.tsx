@@ -5,6 +5,7 @@ import ConfirmModal from "@/components/ConfirmModal";
 import { useToast } from "@/components/Toast";
 import { Icon, type IconName } from "@/components/Icons";
 import EmptyState from "@/components/ui/EmptyState";
+import { fmtWAT } from "@/lib/time";
 
 type ConfirmState = {
   title: string; message: string; confirmLabel?: string; danger?: boolean; onConfirm: () => void;
@@ -139,6 +140,9 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
         const a = s.assignment;
         const st = STATUS_ICON[s.status] ?? STATUS_ICON.pending;
         const now = new Date();
+        // Deadline: due_at is the exact WAT deadline; legacy rows may only have due_date.
+        const deadline = a.due_at ? new Date(a.due_at).getTime() : null;
+        const overdue = s.status === "pending" && deadline !== null && now.getTime() > deadline;
         const cbtOpen = a.type === "cbt" &&
           (!a.cbt_open || now >= new Date(a.cbt_open)) &&
           (!a.cbt_close || now <= new Date(a.cbt_close));
@@ -159,11 +163,16 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
                     {hasInlineCBT && <span className="pill ml-1 bg-purple-100 text-purple-800">{a.cbt_questions.length} Qs</span>}
                   </h2>
                   <p className="text-sm text-ink/45">
-                    {a.subject} · Due {a.due_date ? new Date(a.due_date).toLocaleDateString("en-NG", { dateStyle: "medium" }) : "TBD"}
+                    {a.subject} · Due {a.due_at
+                      ? `${fmtWAT(a.due_at)} WAT`
+                      : a.due_date ? new Date(a.due_date).toLocaleDateString("en-NG", { timeZone: "Africa/Lagos", dateStyle: "medium" }) : "TBD"}
                   </p>
                 </div>
               </div>
-              <span className={s.status === "graded" ? "pill-green" : s.status === "submitted" ? "pill-blue" : "pill-amber"}>{s.status}</span>
+              <span className="flex flex-col items-end gap-1">
+                <span className={s.status === "graded" ? "pill-green" : s.status === "submitted" ? "pill-blue" : "pill-amber"}>{s.status}</span>
+                {overdue && <span className="pill-red">⏰ overdue</span>}
+              </span>
             </div>
             {a.instructions && <p className="mt-3 text-sm leading-relaxed text-ink/60">{a.instructions}</p>}
 
@@ -212,7 +221,13 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
               </>
             )}
 
-            {s.status === "pending" && a.type !== "cbt" && (
+            {s.status === "pending" && a.type !== "cbt" && overdue && (
+              <p className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-bold text-red-800">
+                ⏰ The deadline has passed — submissions are closed. Contact your tutor if you still need to hand this in.
+              </p>
+            )}
+
+            {s.status === "pending" && a.type !== "cbt" && !overdue && (
               <div data-tour="assignments-submit" className="mt-4 space-y-3">
                 <label className={`flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-line py-3 text-sm font-semibold text-ink/60 transition hover:border-gold hover:text-ink ${uploading === s.id ? "opacity-50" : ""}`}>
                   {uploading === s.id ? "Uploading…" : "Snap or upload a photo of your work"}

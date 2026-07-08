@@ -76,7 +76,8 @@ Run in this order (skip `schema.sql` if the project already has data):
 16. `migration-referrals-ratings.sql` *(referral links + in-app ratings)*
 17. `migration-class-series.sql` *(weekly recurring classes)*
 18. `migration-class-recordings.sql` *(rewatchable class recordings)*
-19. `migration-schema-fixes.sql` *(run last — patches any missing columns)*
+19. `migration-assignment-deadline.sql` *(assignment deadline time)*
+20. `migration-schema-fixes.sql` *(run last — patches any missing columns)*
 
 ---
 
