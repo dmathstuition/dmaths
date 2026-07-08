@@ -1,5 +1,6 @@
 "use client";
 import Calendar, { type CalendarEvent } from "@/components/Calendar";
+import { fmtWATTime } from "@/lib/time";
 
 export default function CalendarPage({
   classes, assignments, title,
@@ -22,13 +23,13 @@ export default function CalendarPage({
   });
 
   assignments.forEach(a => {
-    if (a.due_date) {
+    if (a.due_at || a.due_date) {
       events.push({
         id: `assign-${a.id}`,
         title: a.title,
-        date: new Date(a.due_date),
+        date: new Date(a.due_at ?? a.due_date),
         type: a.type === "cbt" ? "cbt" : "assignment",
-        meta: `${a.subject}${a.type === "cbt" ? " · CBT" : ""}`,
+        meta: `${a.subject}${a.type === "cbt" ? " · CBT" : ""}${a.due_at ? ` · due ${fmtWATTime(a.due_at)} WAT` : ""}`,
       });
     }
     if (a.type === "cbt" && a.cbt_open) {
