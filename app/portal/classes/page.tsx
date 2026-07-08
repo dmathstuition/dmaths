@@ -44,7 +44,7 @@ export default async function MyClasses() {
         {withStatus.map(c => {
           const past = c._status === "past";
           return (
-            <div key={c.id} className={`card p-5 ${past ? "opacity-60" : ""}`}>
+            <div key={c.id} className={`card p-5 ${past && !c.recording_url ? "opacity-60" : ""}`}>
               <div className="flex items-start gap-3">
                 <span
                   className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl font-display text-lg font-bold text-white"
@@ -81,6 +81,14 @@ export default async function MyClasses() {
               {!past && (c.link
                 ? <JoinClassButton classId={c.id} link={c.link} className="btn-gold mt-4 inline-block w-full text-center" />
                 : <p className="mt-4 rounded-xl bg-chalk px-4 py-2.5 text-center text-sm font-semibold text-ink/45">Class link coming soon</p>)}
+
+              {/* Rewatch the lesson once the admin attaches a recording */}
+              {past && c.recording_url && (
+                <a href={c.recording_url} target="_blank" rel="noopener noreferrer"
+                  className="btn-ink mt-4 block w-full text-center">
+                  ▶ Watch recording
+                </a>
+              )}
             </div>
           );
         })}
