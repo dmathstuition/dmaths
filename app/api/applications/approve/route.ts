@@ -158,6 +158,28 @@ export async function POST(req: Request) {
     });
   }
 
+  // 6b-2. Manual (non-Paystack) money is vouched for by the admin at approval —
+  //       mirror it into the payments ledger so the Payments dashboard and the
+  //       revenue analytics include it. MANUAL-<application id> keeps this
+  //       idempotent (reference is unique); conflicts / missing table are
+  //       non-fatal.
+  if (!isPaystack && paidAmount > 0) {
+    try {
+      await admin.from("payments").insert({
+        reference: `MANUAL-${app.id}`,
+        email: app.email,
+        amount: paidAmount,
+        currency: "NGN",
+        channel: `Manual · ${app.payment_method || "transfer"}`,
+        plan: app.plan || "",
+        camp: app.camp || "",
+        status: "success",
+        paid_at: app.payment_date ? new Date(app.payment_date).toISOString() : new Date().toISOString(),
+        raw: { source: "manual-approval", application_id: app.id, typed_reference: app.payment_ref || "" },
+      });
+    } catch { /* ledger mirror is best-effort */ }
+  }
+
   // 6c. Welcome push + in-app notification for the new student (best-effort;
   //     they'll see it once they sign in and, if installed, on their device).
   await notifyUser(admin, created.user.id, {
