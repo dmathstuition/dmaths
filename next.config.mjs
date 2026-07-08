@@ -13,6 +13,7 @@ const csp = [
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com data:",
   "img-src 'self' data: blob: https:",
+  "media-src 'self' blob: https://*.supabase.co", // chat voice notes
   "worker-src 'self' blob:",
   "manifest-src 'self'",
   "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.paystack.co https://script.google.com https://script.googleusercontent.com https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.sentry.io",
@@ -30,7 +31,9 @@ const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
-  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+  // microphone=(self) lets the chat record voice notes; camera stays off
+  // (assignment photos use the native file picker, which needs no permission).
+  { key: "Permissions-Policy", value: "camera=(), microphone=(self), geolocation=()" },
   { key: "X-XSS-Protection", value: "1; mode=block" },
 ];
 
