@@ -1,5 +1,6 @@
 "use client";
 import { startTourEvent } from "@/components/tour/Tour";
+import { Icon } from "@/components/Icons";
 
 // Small pill that (re)launches the on-page tour. The Tour component listens for
 // the `dmaths:start-tour` event, so this stays decoupled from where Tour mounts.
@@ -16,7 +17,7 @@ export default function TourButton({ light = false, className = "" }: { light?: 
           : "bg-gold-pale text-gold-deep hover:bg-gold/20"
       } ${className}`}
     >
-      <span aria-hidden="true">🧭</span>
+      <Icon name="compass" className="!h-[15px] !w-[15px]" />
       <span className="hidden sm:inline">Tour</span>
     </button>
   );

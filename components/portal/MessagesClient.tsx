@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { useToast } from "@/components/Toast";
+import { Icon } from "@/components/Icons";
 
 type Message = {
   id: string;
@@ -231,14 +232,14 @@ export default function MessagesClient({ meId, initialMessages }: { meId: string
         <textarea
           className="field max-h-32 flex-1 resize-none"
           rows={1}
-          placeholder={recording ? "Recording… tap ⏹ to send" : "Write a message…"}
+          placeholder={recording ? "Recording… tap stop to send" : "Write a message…"}
           value={text}
           onChange={e => { setText(e.target.value); broadcastTyping(); }}
           onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
         />
         <button onClick={toggleRecording} disabled={sending} aria-label={recording ? "Stop and send voice note" : "Record a voice note"}
           className={`btn !min-h-[42px] !px-4 ${recording ? "bg-red-500 text-white badge-pulse" : "border border-line bg-white text-ink/60 hover:bg-chalk"}`}>
-          {recording ? "⏹" : "🎤"}
+          <Icon name={recording ? "stop" : "mic"} />
         </button>
         <button onClick={send} disabled={sending || !text.trim()} className="btn-gold !min-h-[42px] !px-5">
           {sending ? "…" : "Send"}
