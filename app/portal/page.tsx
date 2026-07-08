@@ -131,7 +131,7 @@ export default async function StudentDashboard() {
       {/* Content cards */}
       <div className="grid gap-5 lg:grid-cols-2">
         <Reveal delay={80}>
-          <div data-tour="classes" className="card h-full p-6">
+          <div data-tour="classes" className="card neu-card h-full p-6">
             <h2 className="mb-4 font-display text-lg font-semibold">Next classes</h2>
             {(classes ?? []).map(c => (
               <div key={c.id}
@@ -158,7 +158,7 @@ export default async function StudentDashboard() {
         </Reveal>
 
         <Reveal delay={120}>
-          <div className="card h-full p-6">
+          <div className="card neu-card h-full p-6">
             <h2 className="mb-4 font-display text-lg font-semibold">Latest notices</h2>
             {(notices ?? []).map(n => (
               <div key={n.id}
@@ -205,7 +205,7 @@ function Stat({ label, value, icon, accent = "blue", suffix = "", prefix = "", b
 }) {
   const a = ACCENTS[accent] ?? ACCENTS.blue;
   return (
-    <div className={`card card-interactive stat-shimmer relative flex flex-col gap-2 overflow-hidden p-5 ${highlight ? "ring-2 ring-gold/40" : ""}`}>
+    <div className={`card neu-card card-interactive stat-shimmer relative flex flex-col gap-2 overflow-hidden p-5 ${highlight ? "ring-2 ring-gold/40" : ""}`}>
       <span className={`ci-icon flex h-9 w-9 items-center justify-center rounded-xl ${a.icon}`}>
         <Icon name={icon} className="h-4 w-4" />
       </span>

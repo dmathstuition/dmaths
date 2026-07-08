@@ -5,6 +5,7 @@ import CountUp from "@/components/landing/CountUp";
 import Reveal from "@/components/landing/Reveal";
 import Tour from "@/components/tour/Tour";
 import { adminTour } from "@/components/tour/steps";
+import AdminCharts from "@/components/admin/AdminCharts";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +23,7 @@ export default async function AdminDashboard() {
     supa.from("profiles").select("*", { count: "exact", head: true }).eq("role", "student").eq("is_active", true),
     supa.from("profiles").select("id,student_code,first_name,last_name,level,avg_score,attendance,is_active")
       .eq("role", "student").order("created_at", { ascending: false }).limit(6),
-    supa.from("profiles").select("avg_score,attendance").eq("role", "student"),
+    supa.from("profiles").select("avg_score,attendance,created_at,subjects").eq("role", "student"),
     supa.from("assignments").select("*", { count: "exact", head: true }),
     supa.from("payments").select("amount,status,paid_at,created_at").eq("status", "success"),
   ]);
@@ -115,9 +116,16 @@ export default async function AdminDashboard() {
         <QuickAction icon="notices" label="Make announcement" href="/admin/notices" />
       </div>
 
+      {/* Analytics */}
+      <Reveal>
+        <div data-tour="charts">
+          <AdminCharts students={(allStudents ?? []) as any[]} payments={(payments ?? []) as any[]} />
+        </div>
+      </Reveal>
+
       {/* Recent students */}
       <Reveal>
-        <div className="card overflow-hidden">
+        <div className="card neu-card overflow-hidden">
           <div className="flex items-center justify-between border-b border-line px-6 py-4">
             <h2 className="font-display text-lg font-semibold text-ink">Recent students</h2>
             <Link href="/admin/students" className="text-sm font-bold text-gold-deep hover:underline">View all →</Link>
@@ -196,7 +204,7 @@ const TINTS: Record<string, string> = {
 
 function StatCard({ icon, label, value, href, tint }: { icon: any; label: string; value: number; href: string; tint: string }) {
   return (
-    <Link href={href} className="card card-interactive stat-shimmer group relative flex items-center gap-4 overflow-hidden p-5">
+    <Link href={href} className="card neu-card card-interactive stat-shimmer group relative flex items-center gap-4 overflow-hidden p-5">
       <span className={`ci-icon flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl ${TINTS[tint]}`}>
         <Icon name={icon} />
       </span>
@@ -213,7 +221,7 @@ function StatCard({ icon, label, value, href, tint }: { icon: any; label: string
 function QuickAction({ icon, label, href }: { icon: any; label: string; href: string }) {
   return (
     <Link href={href}
-      className="group flex items-center gap-3 rounded-2xl border border-line bg-white px-4 py-3.5 text-sm font-semibold text-ink/70 transition hover:border-gold/40 hover:bg-gold-pale hover:text-ink hover:shadow-card">
+      className="neu-card group flex items-center gap-3 rounded-2xl border border-line px-4 py-3.5 text-sm font-semibold text-ink/70 transition hover:border-gold/40 hover:text-ink">
       <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-chalk text-gold-deep transition group-hover:bg-gold group-hover:text-board group-hover:scale-110">
         <Icon name={icon} />
       </span>

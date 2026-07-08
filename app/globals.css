@@ -326,4 +326,41 @@ html { scroll-behavior: smooth; }
   pointer-events: none;
 }
 .sheen:hover::after { transform: translateX(130%); }
+
+/* ── Neumorphism (soft-UI) for dashboard surfaces ───────────────── */
+/* Cards look gently extruded from the page: near-background fill with a
+   light top-left + dark bottom-right shadow pair. Dark mode gets its own
+   tuned pair (never an automatic flip). */
+.neu-card {
+  background: linear-gradient(145deg, #fdfdfb 0%, #eff0ec 100%);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow:
+    7px 7px 14px rgba(166, 175, 195, 0.34),
+    -7px -7px 14px rgba(255, 255, 255, 0.9);
+}
+.neu-card:hover {
+  box-shadow:
+    9px 9px 18px rgba(166, 175, 195, 0.42),
+    -9px -9px 18px rgba(255, 255, 255, 1);
+}
+.dark .neu-card {
+  background: linear-gradient(145deg, #114073 0%, #0B2B50 100%);
+  border-color: rgba(255, 255, 255, 0.07);
+  box-shadow:
+    7px 7px 14px rgba(3, 12, 24, 0.55),
+    -7px -7px 14px rgba(74, 122, 180, 0.16);
+}
+/* Sunken well (icon chips, tracks, inputs) */
+.neu-inset {
+  background: #eef0ec;
+  box-shadow:
+    inset 4px 4px 8px rgba(166, 175, 195, 0.35),
+    inset -4px -4px 8px rgba(255, 255, 255, 0.95);
+}
+.dark .neu-inset {
+  background: #0B2B50;
+  box-shadow:
+    inset 4px 4px 8px rgba(3, 12, 24, 0.6),
+    inset -4px -4px 8px rgba(74, 122, 180, 0.14);
+}
 /* The global prefers-reduced-motion rule (top of file) disables all of the above. */
