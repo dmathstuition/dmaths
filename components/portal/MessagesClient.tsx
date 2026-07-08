@@ -38,20 +38,40 @@ export default function MessagesClient({ meId, initialMessages }: { meId: string
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length, peerTyping]);
 
-  // Mark the team's messages as read, and poll for new ones (~15s).
+  // Add a message without duplicating one we already have (keeps chronological
+  // order). Used by both realtime pushes and the reconciliation poll.
+  function upsertMessage(msg: Message) {
+    setMessages(prev => {
+      if (prev.some(x => x.id === msg.id)) return prev;
+      return [...prev, msg].sort((a, b) => a.created_at.localeCompare(b.created_at));
+    });
+  }
+
+  // Mark the team's messages as read once on mount.
   useEffect(() => {
     supabase.from("messages").update({ read: true })
       .eq("sender_role", "admin").eq("read", false).then(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
+  // Light reconciliation poll (~45s): a safety net if a realtime event was
+  // missed. Only re-renders when the thread actually changed, so it doesn't
+  // cause the lag a full 15s refetch-and-rerender did.
+  useEffect(() => {
     const i = setInterval(async () => {
       const { data } = await supabase.from("messages").select("*").order("created_at", { ascending: true });
-      if (data) setMessages(data);
-    }, 15000);
+      if (!data) return;
+      setMessages(prev => {
+        if (prev.length === data.length && prev.every((m, idx) => m.id === data[idx].id)) return prev;
+        return data;
+      });
+    }, 45000);
     return () => clearInterval(i);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Live typing indicator — both sides broadcast on chat-<studentId>.
+  // Realtime channel chat-<studentId>: typing indicator + instant delivery of
+  // new messages and deletes (both sides broadcast here).
   useEffect(() => {
     const ch = supabase.channel(`chat-${meId}`);
     ch.on("broadcast", { event: "typing" }, ({ payload }: any) => {
@@ -59,6 +79,14 @@ export default function MessagesClient({ meId, initialMessages }: { meId: string
       setPeerTyping(true);
       clearTimeout(typingTimeout.current);
       typingTimeout.current = setTimeout(() => setPeerTyping(false), 3000);
+    }).on("broadcast", { event: "message" }, ({ payload }: any) => {
+      const msg = payload?.message as Message | undefined;
+      if (!msg || msg.sender_role === "student") return; // ignore our own echo
+      upsertMessage(msg);
+      // A team message just arrived while we're looking at the thread → mark read.
+      supabase.from("messages").update({ read: true }).eq("id", msg.id).then(() => {});
+    }).on("broadcast", { event: "delete" }, ({ payload }: any) => {
+      if (payload?.id) setMessages(prev => prev.filter(x => x.id !== payload.id));
     }).subscribe();
     typingChannel.current = ch;
     return () => {
@@ -75,6 +103,14 @@ export default function MessagesClient({ meId, initialMessages }: { meId: string
     typingChannel.current?.send({ type: "broadcast", event: "typing", payload: { role: "student" } });
   }
 
+  // Push a just-sent/deleted message to the other device instantly.
+  function broadcastMessage(message: Message) {
+    typingChannel.current?.send({ type: "broadcast", event: "message", payload: { message } });
+  }
+  function broadcastDelete(id: string) {
+    typingChannel.current?.send({ type: "broadcast", event: "delete", payload: { id } });
+  }
+
   async function send() {
     const body = text.trim();
     if (!body || sending) return;
@@ -86,7 +122,8 @@ export default function MessagesClient({ meId, initialMessages }: { meId: string
     const json = await res.json();
     setSending(false);
     if (!res.ok) { push(json.error || "Could not send.", "error"); return; }
-    setMessages(prev => [...prev, json.message]);
+    upsertMessage(json.message);
+    broadcastMessage(json.message);
     setText("");
   }
 
@@ -129,7 +166,8 @@ export default function MessagesClient({ meId, initialMessages }: { meId: string
     const json = await res.json().catch(() => ({}));
     setSending(false);
     if (!res.ok) { push(json.error || "Could not send the voice note.", "error"); return; }
-    setMessages(prev => [...prev, json.message]);
+    upsertMessage(json.message);
+    broadcastMessage(json.message);
   }
 
   async function remove(id: string) {
@@ -140,7 +178,8 @@ export default function MessagesClient({ meId, initialMessages }: { meId: string
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),
     });
-    if (!res.ok) { setMessages(prev); push("Could not delete message.", "error"); }
+    if (!res.ok) { setMessages(prev); push("Could not delete message.", "error"); return; }
+    broadcastDelete(id); // remove it from the other device instantly
   }
 
   return (

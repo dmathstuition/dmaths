@@ -80,7 +80,16 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
   const recorder = useRef<MediaRecorder | null>(null);
   const chunks = useRef<Blob[]>([]);
 
-  // Live typing indicator — shared with the learner on channel chat-<studentId>.
+  // Add a message without duplicating one we already have (chronological).
+  function upsertMessage(msg: any) {
+    setMessages(prev => {
+      if (prev.some((x: any) => x.id === msg.id)) return prev;
+      return [...prev, msg].sort((a: any, b: any) => a.created_at.localeCompare(b.created_at));
+    });
+  }
+
+  // Realtime channel chat-<studentId>: typing + instant delivery of new
+  // messages and deletes (both sides broadcast here).
   useEffect(() => {
     const ch = supabase.channel(`chat-${student.id}`);
     ch.on("broadcast", { event: "typing" }, ({ payload }: any) => {
@@ -88,6 +97,14 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
       setPeerTyping(true);
       clearTimeout(typingTimeout.current);
       typingTimeout.current = setTimeout(() => setPeerTyping(false), 3000);
+    }).on("broadcast", { event: "message" }, ({ payload }: any) => {
+      const msg = payload?.message;
+      if (!msg || msg.sender_role === "admin") return; // ignore our own echo
+      upsertMessage(msg);
+      // Learner message arrived while we're viewing → mark it read.
+      supabase.from("messages").update({ read: true }).eq("id", msg.id).then(() => {});
+    }).on("broadcast", { event: "delete" }, ({ payload }: any) => {
+      if (payload?.id) setMessages(prev => prev.filter((x: any) => x.id !== payload.id));
     }).subscribe();
     typingChannel.current = ch;
     return () => {
@@ -102,6 +119,13 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
     if (now - lastTypingSent.current < 1500) return;
     lastTypingSent.current = now;
     typingChannel.current?.send({ type: "broadcast", event: "typing", payload: { role: "admin" } });
+  }
+
+  function broadcastMessage(message: any) {
+    typingChannel.current?.send({ type: "broadcast", event: "message", payload: { message } });
+  }
+  function broadcastDelete(id: string) {
+    typingChannel.current?.send({ type: "broadcast", event: "delete", payload: { id } });
   }
 
   async function toggleRecording() {
@@ -141,13 +165,20 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
     const json = await res.json().catch(() => ({}));
     setSendingMsg(false);
     if (!res.ok) { push(json.error || "Could not send the voice note.", "error"); return; }
-    setMessages(prev => [...prev, json.message]);
+    upsertMessage(json.message);
+    broadcastMessage(json.message);
   }
 
-  async function loadMessages() {
+  async function loadMessages(reconcile = false) {
     const { data } = await supabase.from("messages")
       .select("*").eq("student_id", student.id).order("created_at", { ascending: true });
-    setMessages(data ?? []);
+    if (!data) return;
+    if (!reconcile) { setMessages(data); return; }
+    // Reconciliation: only re-render if the thread actually changed.
+    setMessages(prev => {
+      if (prev.length === data.length && prev.every((m: any, idx: number) => m.id === data[idx].id)) return prev;
+      return data;
+    });
   }
 
   useEffect(() => {
@@ -155,7 +186,8 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
     // Mark the learner's messages as read once the admin opens this page.
     supabase.from("messages").update({ read: true })
       .eq("student_id", student.id).eq("sender_role", "student").eq("read", false).then(() => {});
-    const i = setInterval(loadMessages, 15000);
+    // Light reconciliation poll (~45s) as a safety net for missed realtime events.
+    const i = setInterval(() => loadMessages(true), 45000);
     return () => clearInterval(i);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [student.id]);
@@ -171,7 +203,8 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
     const json = await res.json();
     setSendingMsg(false);
     if (!res.ok) { push(json.error || "Could not send message.", "error"); return; }
-    setMessages(prev => [...prev, json.message]);
+    upsertMessage(json.message);
+    broadcastMessage(json.message);
     setMsgText("");
   }
 
@@ -183,7 +216,8 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),
     });
-    if (!res.ok) { setMessages(prev); push("Could not delete message.", "error"); }
+    if (!res.ok) { setMessages(prev); push("Could not delete message.", "error"); return; }
+    broadcastDelete(id); // remove it from the learner's device instantly
   }
 
   const typeMap = new Map(behaviorTypes.map((t: any) => [t.id, t]));

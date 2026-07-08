@@ -15,8 +15,10 @@ export async function POST(req: Request) {
   if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
 
   const admin = supabaseAdmin();
-  const { data: msg } = await admin.from("messages").select("id, student_id").eq("id", id).single();
-  if (!msg) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  const { data: msg } = await admin.from("messages").select("id, student_id").eq("id", id).maybeSingle();
+  // Idempotent: a message that's already gone (deleted on the other device, or
+  // a stale list) is a successful delete, not an error — nothing to toast about.
+  if (!msg) return NextResponse.json({ ok: true, alreadyGone: true });
 
   const allowed = me?.role === "admin" || msg.student_id === user.id;
   if (!allowed) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
