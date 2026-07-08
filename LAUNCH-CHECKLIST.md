@@ -117,6 +117,10 @@ Run in this order (skip `schema.sql` if the project already has data):
   admin detail page.
 - **Read student/parent feedback:** star ratings + comments appear under
   **Admin → Feedback** (`/admin/ratings`), with a running average.
+- **Manual payments:** approving an application with a transfer/Opay/cash payment now
+  records it in **Admin → Payments** automatically; use **+ Record manual payment** there
+  for balances or money outside an application. Run `supabase/backfill-manual-payments.sql`
+  **once** to pull in learners approved before this existed.
 
 ---
 

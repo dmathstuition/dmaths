@@ -4,8 +4,34 @@ import { findTier, fmtNgn } from "@/lib/summerCamp";
 
 type Payment = Record<string, any>;
 
+const MANUAL_METHODS = ["Access Bank Transfer", "Opay Bank Transfer", "Cash", "Other"];
+
 export default function PaymentsClient({ initial }: { initial: Payment[] }) {
   const [q, setQ] = useState("");
+  // "Record manual payment" form (bank transfer / cash / balance payments)
+  const [showRecord, setShowRecord] = useState(false);
+  const [rec, setRec] = useState<any>({ method: MANUAL_METHODS[0] });
+  const [recBusy, setRecBusy] = useState(false);
+  const [recError, setRecError] = useState("");
+
+  async function recordPayment() {
+    setRecError("");
+    setRecBusy(true);
+    const res = await fetch("/api/payments/manual", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: rec.email, amount: Number(rec.amount), method: rec.method,
+        reference: rec.reference || "", paidAt: rec.paidAt || "", note: rec.note || "",
+      }),
+    });
+    setRecBusy(false);
+    if (!res.ok) {
+      const j = await res.json().catch(() => ({}));
+      setRecError(j.error || "Could not record the payment.");
+      return;
+    }
+    window.location.reload(); // pick up the fresh ledger row
+  }
 
   const planName = (p: Payment) => findTier(p.plan)?.name ?? (p.plan || "—");
 
@@ -58,10 +84,66 @@ export default function PaymentsClient({ initial }: { initial: Payment[] }) {
             Verified Paystack transactions recorded directly from Paystack — the trusted record of money received.
           </p>
         </div>
-        {visible.length > 0 && (
-          <button onClick={exportCsv} data-tour="payments-export" className="btn-ghost !min-h-[40px] text-sm">Export CSV</button>
-        )}
+        <div className="flex flex-wrap gap-2">
+          <button onClick={() => setShowRecord(v => !v)} className="btn-gold !min-h-[40px] text-sm">
+            {showRecord ? "Cancel" : "+ Record manual payment"}
+          </button>
+          {visible.length > 0 && (
+            <button onClick={exportCsv} data-tour="payments-export" className="btn-ghost !min-h-[40px] text-sm">Export CSV</button>
+          )}
+        </div>
       </div>
+
+      {/* Record a manual payment (bank transfer / Opay / cash / balance) */}
+      {showRecord && (
+        <div className="card neu-card space-y-4 p-6">
+          <div>
+            <h2 className="font-display text-lg font-semibold">Record a manual payment</h2>
+            <p className="text-sm text-ink/45">
+              Bank transfer, Opay or cash — including part-payment balances. It lands in this
+              ledger and counts in the revenue analytics.
+            </p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="flabel">Payer&apos;s email</label>
+              <input className="field" type="email" placeholder="learner or parent email"
+                value={rec.email || ""} onChange={e => setRec({ ...rec, email: e.target.value })} />
+            </div>
+            <div>
+              <label className="flabel">Amount (₦)</label>
+              <input className="field" type="number" min={1} placeholder="e.g. 25000"
+                value={rec.amount || ""} onChange={e => setRec({ ...rec, amount: e.target.value })} />
+            </div>
+            <div>
+              <label className="flabel">Method</label>
+              <select className="field" value={rec.method} onChange={e => setRec({ ...rec, method: e.target.value })}>
+                {MANUAL_METHODS.map(m => <option key={m}>{m}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="flabel">Payment date <span className="font-normal text-ink/40">(optional — today if blank)</span></label>
+              <input className="field" type="date" value={rec.paidAt || ""} onChange={e => setRec({ ...rec, paidAt: e.target.value })} />
+            </div>
+            <div>
+              <label className="flabel">Reference <span className="font-normal text-ink/40">(optional — auto-generated if blank)</span></label>
+              <input className="field font-mono" placeholder="e.g. bank narration"
+                value={rec.reference || ""} onChange={e => setRec({ ...rec, reference: e.target.value })} />
+            </div>
+            <div>
+              <label className="flabel">Note <span className="font-normal text-ink/40">(optional)</span></label>
+              <input className="field" placeholder="e.g. camp balance — second instalment"
+                value={rec.note || ""} onChange={e => setRec({ ...rec, note: e.target.value })} />
+            </div>
+          </div>
+          {recError && <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-800">{recError}</p>}
+          <button className="btn-gold" onClick={recordPayment} disabled={recBusy}>
+            {recBusy
+              ? <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+              : "Record payment"}
+          </button>
+        </div>
+      )}
 
       {/* Summary cards */}
       <div data-tour="payments-summary" className="grid gap-4 sm:grid-cols-3">
@@ -82,8 +164,9 @@ export default function PaymentsClient({ initial }: { initial: Payment[] }) {
         <div className="card p-12 text-center text-ink/45">
           <p className="font-semibold text-ink/60">No payments recorded yet.</p>
           <p className="mx-auto mt-2 max-w-md text-sm">
-            Once Paystack is live and the <code className="rounded bg-chalk px-1">payments</code> migration has been
-            run, every verified card/bank payment appears here automatically.
+            Approved manual payments land here automatically, or use <strong>+ Record manual
+            payment</strong> above for transfers/cash. Once Paystack is live, every verified
+            card payment appears here too.
           </p>
         </div>
       ) : (
