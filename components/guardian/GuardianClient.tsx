@@ -66,7 +66,7 @@ export default function GuardianClient({
       </div>
 
       {student.grade_target !== null && (
-        <div className="card flex items-center gap-4 p-4">
+        <div className="card neu-card flex items-center gap-4 p-4">
           <div className="flex-1">
             <p className="text-xs font-bold uppercase tracking-wide text-ink/40">Grade target</p>
             <p className="mt-1 font-display text-xl font-semibold text-gold-deep">{student.grade_target}%</p>
@@ -84,7 +84,7 @@ export default function GuardianClient({
       )}
 
       {/* Recent behaviour */}
-      <div data-tour="behaviour" className="card hovlift p-5">
+      <div data-tour="behaviour" className="card neu-card hovlift p-5">
         <h2 className="mb-4 font-display text-lg font-semibold">Recent behaviour</h2>
         {behaviorLogs.length === 0 ? (
           <p className="text-sm text-ink/40">No behaviour entries yet.</p>
@@ -111,7 +111,7 @@ export default function GuardianClient({
       </div>
 
       {/* Recent grades */}
-      <div data-tour="grades" className="card hovlift p-5">
+      <div data-tour="grades" className="card neu-card hovlift p-5">
         <h2 className="mb-4 font-display text-lg font-semibold">Recent grades</h2>
         {gradedSubs.length === 0 ? (
           <p className="text-sm text-ink/40">No graded assignments yet.</p>

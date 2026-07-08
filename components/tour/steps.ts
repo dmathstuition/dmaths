@@ -19,6 +19,7 @@ export const adminTour: TourStep[] = [
   { target: "pending", title: "Approve new students", body: "Enrolments waiting for review show up here — tap to check the payment and approve." },
   { target: "stats", title: "Your key numbers", body: "Students, pending applications, upcoming classes and assignments — each tile opens its full page." },
   { target: "quick", title: "One-tap actions", body: "Shortcuts to review applications, schedule a class, post an assignment or make an announcement." },
+  { target: "charts", title: "Your analytics 📊", body: "Enrolment growth, monthly revenue, score spread and subject popularity — live from your data." },
   { target: "search", title: "Find anyone instantly", body: "Search any student by name or ID from anywhere in the admin area." },
   { target: "bell", title: "Stay in the loop", body: "New payments, messages and applications alert you here and on your device." },
 ];
