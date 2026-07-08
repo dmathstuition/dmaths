@@ -77,7 +77,8 @@ Run in this order (skip `schema.sql` if the project already has data):
 17. `migration-class-series.sql` *(weekly recurring classes)*
 18. `migration-class-recordings.sql` *(rewatchable class recordings)*
 19. `migration-assignment-deadline.sql` *(assignment deadline time)*
-20. `migration-schema-fixes.sql` *(run last — patches any missing columns)*
+20. `migration-subscriptions.sql` *(monthly subscriptions + payment reminders)*
+21. `migration-schema-fixes.sql` *(run last — patches any missing columns)*
 
 ---
 
@@ -93,6 +94,10 @@ Run in this order (skip `schema.sql` if the project already has data):
       web-app URL so `EMAIL_RELAY_URL` stays valid.)
 - [ ] **Class reminders (cron-job.org)** — ✅ DONE. The job calls
       `https://dmaths.vercel.app/api/reminders/classes?key=<CRON_SECRET>` every 15 min.
+- [ ] **Subscription payment reminders (cron-job.org):** add a **daily** job calling
+      `https://dmaths.academy/api/reminders/subscriptions?key=<CRON_SECRET>` — nudges
+      monthly subscribers (and their parents) from 3 days before their due date, then
+      weekly while overdue. Requires `migration-subscriptions.sql`.
 - [ ] **Paystack go-live** (when taking real money): switch to **live** API keys in
       Vercel, and in Paystack → Settings → **Webhooks** set the URL to
       `https://dmaths.vercel.app/api/paystack/webhook`. Enable 2FA + set a settlement bank.

@@ -25,6 +25,31 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
   const [savingGuardian, setSavingGuardian] = useState(false);
   const [gradeTarget, setGradeTarget] = useState<string>(student.grade_target != null ? String(student.grade_target) : "");
   const [savingTarget, setSavingTarget] = useState(false);
+  // Monthly subscription (continuing learners after camp)
+  const [sub, setSub] = useState<any>({
+    active: !!student.sub_active,
+    amount: student.sub_amount ? String(student.sub_amount) : "",
+    due: student.sub_due_date || "",
+  });
+  const [savingSub, setSavingSub] = useState(false);
+
+  async function saveSubscription() {
+    setSavingSub(true);
+    const { error } = await supabase.from("profiles").update({
+      sub_active: sub.active,
+      sub_amount: Number(sub.amount) || 0,
+      sub_due_date: sub.active ? (sub.due || null) : null,
+      sub_reminded_at: null,
+    }).eq("id", student.id);
+    setSavingSub(false);
+    if (error) {
+      push(/sub_active/i.test(error.message)
+        ? "Run migration-subscriptions.sql in Supabase first."
+        : "Could not save the subscription.", "error");
+      return;
+    }
+    push(sub.active ? "Subscription saved." : "Subscription turned off.", "success");
+  }
   const [sendingInvite, setSendingInvite] = useState(false);
   const [guardianPortalUrl, setGuardianPortalUrl] = useState("");
 
@@ -314,6 +339,25 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
               {savingTarget ? "Saving…" : "Save"}
             </button>
             <span className="text-xs text-ink/35">Shown as a target line on the student's progress chart</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <label className="text-xs font-bold uppercase tracking-wide text-ink/35 shrink-0">Monthly subscription</label>
+            <button type="button" onClick={() => setSub((s: any) => ({ ...s, active: !s.active }))}
+              className={`pill !py-1 ${sub.active ? "pill-green" : "bg-ink/10 text-ink/50"}`}>
+              {sub.active ? "Active" : "Off"}
+            </button>
+            {sub.active && (
+              <>
+                <input className="field w-28" type="number" min="0" placeholder="₦ / month"
+                  value={sub.amount} onChange={e => setSub((s: any) => ({ ...s, amount: e.target.value }))} />
+                <input className="field w-40" type="date" title="Next due date"
+                  value={sub.due} onChange={e => setSub((s: any) => ({ ...s, due: e.target.value }))} />
+              </>
+            )}
+            <button className="btn-ghost !min-h-[36px]" onClick={saveSubscription} disabled={savingSub}>
+              {savingSub ? "Saving…" : "Save"}
+            </button>
+            <span className="text-xs text-ink/35">Recording a payment for their email rolls the due date +1 month</span>
           </div>
         </div>
       </div>

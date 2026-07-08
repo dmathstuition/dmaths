@@ -55,5 +55,24 @@ export async function POST(req: Request) {
     detail: { reference: ref, email, amount, method },
   });
 
+  // If the payer is a monthly subscriber, roll their next due date forward a
+  // month (from the later of today / the current due date) and clear the
+  // reminder stamp. Best-effort — no-op before the subscriptions migration.
+  try {
+    const { data: subscriber } = await admin
+      .from("profiles").select("id, sub_active, sub_due_date")
+      .eq("role", "student").ilike("email", email).maybeSingle();
+    if (subscriber?.sub_active) {
+      const base = subscriber.sub_due_date && new Date(subscriber.sub_due_date) > new Date()
+        ? new Date(subscriber.sub_due_date)
+        : new Date();
+      base.setMonth(base.getMonth() + 1);
+      await admin.from("profiles").update({
+        sub_due_date: base.toISOString().slice(0, 10),
+        sub_reminded_at: null,
+      }).eq("id", subscriber.id);
+    }
+  } catch { /* subscriptions not enabled yet */ }
+
   return NextResponse.json({ ok: true, payment: row });
 }

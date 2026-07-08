@@ -6,7 +6,7 @@ type Payment = Record<string, any>;
 
 const MANUAL_METHODS = ["Access Bank Transfer", "Opay Bank Transfer", "Cash", "Other"];
 
-export default function PaymentsClient({ initial }: { initial: Payment[] }) {
+export default function PaymentsClient({ initial, subscribers = [] }: { initial: Payment[]; subscribers?: any[] }) {
   const [q, setQ] = useState("");
   // "Record manual payment" form (bank transfer / cash / balance payments)
   const [showRecord, setShowRecord] = useState(false);
@@ -151,6 +151,59 @@ export default function PaymentsClient({ initial }: { initial: Payment[] }) {
         <SummaryCard label="This month" value={fmtNgn(monthTotal)} tint="gold" />
         <SummaryCard label="Successful payments" value={String(success.length)} tint="ink" />
       </div>
+
+      {/* Monthly subscriptions — continuing learners after camp */}
+      {subscribers.length > 0 && (
+        <div className="card neu-card p-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="font-display text-lg font-semibold">Monthly subscriptions</h2>
+              <p className="text-sm text-ink/45">
+                {subscribers.length} active · expected{" "}
+                <strong className="text-ink/70">
+                  {fmtNgn(subscribers.reduce((a, s) => a + Number(s.sub_amount || 0), 0))}
+                </strong>{" "}
+                / month
+              </p>
+            </div>
+          </div>
+          <div className="mt-4 space-y-2">
+            {subscribers.map((s) => {
+              const due = s.sub_due_date ? new Date(`${s.sub_due_date}T00:00:00+01:00`) : null;
+              const days = due ? Math.ceil((due.getTime() - Date.now()) / 86_400_000) : null;
+              const state = days === null ? { pill: "bg-ink/10 text-ink/50", label: "no due date" }
+                : days < 0 ? { pill: "pill-red", label: `overdue ${Math.abs(days)}d` }
+                : days <= 5 ? { pill: "pill-amber", label: `due in ${days}d` }
+                : { pill: "pill-green", label: "paid up" };
+              return (
+                <div key={s.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-chalk/40 px-4 py-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-bold">
+                      {s.first_name} {s.last_name}
+                      <span className={`pill ml-2 ${state.pill}`}>{state.label}</span>
+                    </p>
+                    <p className="text-xs text-ink/45">
+                      {s.email} · {fmtNgn(Number(s.sub_amount || 0))}/mo
+                      {s.sub_due_date ? ` · next due ${new Date(`${s.sub_due_date}T00:00:00+01:00`).toLocaleDateString("en-NG", { timeZone: "Africa/Lagos", dateStyle: "medium" })}` : ""}
+                    </p>
+                  </div>
+                  <button className="btn-ghost !min-h-[36px] !px-4 !text-sm"
+                    onClick={() => {
+                      setRec({ method: MANUAL_METHODS[0], email: s.email, amount: s.sub_amount || "", note: "Monthly subscription" });
+                      setShowRecord(true);
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }}>
+                    Record payment
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+          <p className="mt-3 text-xs text-ink/40">
+            Recording a payment for a subscriber's email automatically moves their due date forward one month.
+          </p>
+        </div>
+      )}
 
       <input
         data-tour="payments-search"

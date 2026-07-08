@@ -33,6 +33,14 @@ export default async function StudentDashboard() {
   const classSoon = nextMins <= 120;
   const classToday = nextClass ? fmtWATDate(nextClass.starts_at) === fmtWATDate(Date.now()) : false;
   const showClassReminder = nextClass && (classSoon || classToday);
+  // Monthly-subscription banner: show from 5 days before the due date; red once overdue.
+  const subDueRaw = (me as any)?.sub_active ? (me as any)?.sub_due_date : null;
+  const subDue = subDueRaw ? new Date(`${subDueRaw}T00:00:00+01:00`) : null;
+  const subDaysLeft = subDue ? Math.ceil((subDue.getTime() - Date.now()) / 86_400_000) : null;
+  const showSubBanner = subDaysLeft !== null && subDaysLeft <= 5;
+  const subOverdue = subDaysLeft !== null && subDaysLeft < 0;
+  const subAmount = Number((me as any)?.sub_amount || 0);
+
   const streak: number = (me as any)?.streak_count ?? 0;
   const rewardPts: number = (me as any)?.reward_points ?? 0;
   const sanctionPts: number = (me as any)?.sanction_points ?? 0;
@@ -98,6 +106,27 @@ export default async function StudentDashboard() {
             </div>
             <span className="btn-gold !min-h-[38px] transition group-hover:translate-x-0.5">View →</span>
           </Link>
+        </Reveal>
+      )}
+
+      {/* Monthly tuition due / overdue */}
+      {showSubBanner && subDue && (
+        <Reveal>
+          <div className={`flex flex-wrap items-center gap-4 rounded-2xl border px-5 py-4 ${
+            subOverdue ? "border-red-200 bg-red-50" : "border-gold/40 bg-gold-pale"}`}>
+            <span className={`flex h-10 w-10 items-center justify-center rounded-full text-lg ${
+              subOverdue ? "bg-red-500 text-white" : "bg-gold"}`}>{subOverdue ? "⚠️" : "💛"}</span>
+            <div className="min-w-0 flex-1">
+              <p className={`text-sm font-bold ${subOverdue ? "text-red-800" : "text-ink"}`}>
+                {subOverdue ? "Monthly tuition overdue" : "Monthly tuition due soon"}
+              </p>
+              <p className={`text-sm ${subOverdue ? "text-red-700/80" : "text-ink/60"}`}>
+                {subAmount > 0 ? `₦${subAmount.toLocaleString("en-NG")} · ` : ""}
+                {subOverdue ? "was due" : "due"} {fmtWATDate(subDue)} — pay via transfer
+                (Opay 7025674894 / Access 1534530227) or message us from the portal.
+              </p>
+            </div>
+          </div>
         </Reveal>
       )}
 
