@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { useToast } from "@/components/Toast";
@@ -72,6 +72,77 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
   const [messages, setMessages] = useState<any[]>([]);
   const [msgText, setMsgText] = useState("");
   const [sendingMsg, setSendingMsg] = useState(false);
+  const [peerTyping, setPeerTyping] = useState(false);
+  const [recording, setRecording] = useState(false);
+  const typingChannel = useRef<any>(null);
+  const typingTimeout = useRef<any>(null);
+  const lastTypingSent = useRef(0);
+  const recorder = useRef<MediaRecorder | null>(null);
+  const chunks = useRef<Blob[]>([]);
+
+  // Live typing indicator — shared with the learner on channel chat-<studentId>.
+  useEffect(() => {
+    const ch = supabase.channel(`chat-${student.id}`);
+    ch.on("broadcast", { event: "typing" }, ({ payload }: any) => {
+      if (payload?.role === "admin") return; // that's us
+      setPeerTyping(true);
+      clearTimeout(typingTimeout.current);
+      typingTimeout.current = setTimeout(() => setPeerTyping(false), 3000);
+    }).subscribe();
+    typingChannel.current = ch;
+    return () => {
+      clearTimeout(typingTimeout.current);
+      supabase.removeChannel(ch);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [student.id]);
+
+  function broadcastTyping() {
+    const now = Date.now();
+    if (now - lastTypingSent.current < 1500) return;
+    lastTypingSent.current = now;
+    typingChannel.current?.send({ type: "broadcast", event: "typing", payload: { role: "admin" } });
+  }
+
+  async function toggleRecording() {
+    if (recording) { recorder.current?.stop(); return; }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mime = MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : "audio/mp4";
+      const rec = new MediaRecorder(stream, { mimeType: mime });
+      chunks.current = [];
+      rec.ondataavailable = (e) => { if (e.data.size) chunks.current.push(e.data); };
+      rec.onstop = async () => {
+        stream.getTracks().forEach(t => t.stop());
+        setRecording(false);
+        const blob = new Blob(chunks.current, { type: mime });
+        if (blob.size < 1000) return;
+        await sendVoice(blob, mime);
+      };
+      rec.start();
+      recorder.current = rec;
+      setRecording(true);
+    } catch {
+      push("Microphone access was blocked — allow it in your browser settings.", "error");
+    }
+  }
+
+  async function sendVoice(blob: Blob, mime: string) {
+    setSendingMsg(true);
+    const fd = new FormData();
+    fd.append("file", new File([blob], `vn.${mime.includes("mp4") ? "m4a" : "webm"}`, { type: mime }));
+    const up = await fetch("/api/messages/voice", { method: "POST", body: fd });
+    const upJson = await up.json().catch(() => ({}));
+    if (!up.ok) { setSendingMsg(false); push(upJson.error || "Could not upload the voice note.", "error"); return; }
+    const res = await fetch("/api/messages/send", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ studentId: student.id, body: "", audioUrl: upJson.url }),
+    });
+    const json = await res.json().catch(() => ({}));
+    setSendingMsg(false);
+    if (!res.ok) { push(json.error || "Could not send the voice note.", "error"); return; }
+    setMessages(prev => [...prev, json.message]);
+  }
 
   async function loadMessages() {
     const { data } = await supabase.from("messages")
@@ -570,7 +641,7 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
           {messages.map(m => {
             const mine = m.sender_role === "admin";
             return (
-              <div key={m.id} className={`flex items-center gap-1.5 ${mine ? "justify-end" : "justify-start"}`}>
+              <div key={m.id} className={`page-enter flex items-center gap-1.5 ${mine ? "justify-end" : "justify-start"}`}>
                 {mine && (
                   <button onClick={() => deleteMessage(m.id)} aria-label="Delete message"
                     className="shrink-0 px-1 text-xs text-ink/30 transition hover:text-red-500">✕</button>
@@ -579,7 +650,9 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
                   <p className={`mb-0.5 text-[11px] font-bold ${mine ? "text-board/70" : "text-gold-deep"}`}>
                     {mine ? "You" : student.first_name}
                   </p>
-                  <p className="whitespace-pre-wrap leading-relaxed">{m.body}</p>
+                  {m.audio_url
+                    ? <audio controls preload="metadata" src={m.audio_url} className="max-w-full" style={{ height: 36 }} />
+                    : <p className="whitespace-pre-wrap leading-relaxed">{m.body}</p>}
                   <p className={`mt-1 text-[10px] ${mine ? "text-board/60" : "text-ink/35"}`}>
                     {new Date(m.created_at).toLocaleString("en-NG", { dateStyle: "medium", timeStyle: "short" })}
                   </p>
@@ -592,15 +665,27 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
             );
           })}
         </div>
+        {peerTyping && (
+          <div className="mt-2 flex items-center gap-1.5 px-1">
+            <span className="text-[11px] font-bold text-gold-deep">{student.first_name} is typing</span>
+            <span className="typing-dot h-1.5 w-1.5 rounded-full bg-ink/40" />
+            <span className="typing-dot h-1.5 w-1.5 rounded-full bg-ink/40" />
+            <span className="typing-dot h-1.5 w-1.5 rounded-full bg-ink/40" />
+          </div>
+        )}
         <div className="mt-3 flex items-end gap-2">
           <textarea
             className="field max-h-32 flex-1 resize-none"
             rows={1}
-            placeholder={`Message ${student.first_name}…`}
+            placeholder={recording ? "Recording… tap ⏹ to send" : `Message ${student.first_name}…`}
             value={msgText}
-            onChange={e => setMsgText(e.target.value)}
+            onChange={e => { setMsgText(e.target.value); broadcastTyping(); }}
             onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
           />
+          <button onClick={toggleRecording} disabled={sendingMsg} aria-label={recording ? "Stop and send voice note" : "Record a voice note"}
+            className={`btn !min-h-[42px] !px-4 ${recording ? "bg-red-500 text-white badge-pulse" : "border border-line bg-white text-ink/60 hover:bg-chalk"}`}>
+            {recording ? "⏹" : "🎤"}
+          </button>
           <button onClick={sendMessage} disabled={sendingMsg || !msgText.trim()} className="btn-gold !min-h-[42px] !px-5">
             {sendingMsg ? "…" : "Send"}
           </button>
