@@ -23,6 +23,27 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
   const [busy, setBusy] = useState(false);
   const [formError, setFormError] = useState("");
   const [confirmState, setConfirmState] = useState<ConfirmState | null>(null);
+  // Recording link editor (past classes)
+  const [recFor, setRecFor] = useState<string | null>(null);
+  const [recUrl, setRecUrl] = useState("");
+
+  async function saveRecording(classId: string) {
+    setBusy(true);
+    const res = await fetch("/api/classes/recording", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ classId, url: recUrl.trim() }),
+    });
+    setBusy(false);
+    if (!res.ok) {
+      const j = await res.json().catch(() => ({}));
+      push(j.error || "Could not save the recording link.", "error");
+      return;
+    }
+    push(recUrl.trim() ? "Recording saved — the class has been notified. 🎥" : "Recording link removed.", "success");
+    setRecFor(null);
+    setRecUrl("");
+    reload();
+  }
 
   async function reload() {
     const { data: c } = await supabase.from("classes").select("*, class_students(student_id)").order("starts_at", { ascending: true });
@@ -284,15 +305,37 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
           <p className="mt-1 text-sm text-ink/45">Finished sessions. Delete any you no longer need — this also clears their attendance.</p>
           <div className="mt-4 space-y-2">
             {past.map(c => (
-              <div key={c.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-chalk/40 px-4 py-3">
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-bold">{c.subject} <span className="font-normal text-ink/45">· {c.tutor}</span></p>
-                  <p className="text-xs text-ink/45">
-                    {fmtWAT(c.starts_at)}
-                    {c.attendance_locked ? " · attendance locked" : ""}
-                  </p>
+              <div key={c.id} className="rounded-xl border border-line bg-chalk/40 px-4 py-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-bold">{c.subject} <span className="font-normal text-ink/45">· {c.tutor}</span></p>
+                    <p className="text-xs text-ink/45">
+                      {fmtWAT(c.starts_at)}
+                      {c.attendance_locked ? " · attendance locked" : ""}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {c.recording_url && (
+                      <a href={c.recording_url} target="_blank" rel="noopener noreferrer"
+                        className="btn-ghost !min-h-[36px] !px-3 !text-sm text-gold-deep">▶ Recording</a>
+                    )}
+                    <button className="btn-ghost !min-h-[36px] !px-3 !text-sm"
+                      onClick={() => { setRecFor(recFor === c.id ? null : c.id); setRecUrl(c.recording_url || ""); }}>
+                      {c.recording_url ? "Edit recording" : "🎥 Add recording"}
+                    </button>
+                    <button className="btn-danger !min-h-[36px] !px-4 !text-sm" onClick={() => deleteClass(c)}>Delete</button>
+                  </div>
                 </div>
-                <button className="btn-danger !min-h-[36px] !px-4 !text-sm" onClick={() => deleteClass(c)}>Delete</button>
+                {recFor === c.id && (
+                  <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-line pt-3">
+                    <input className="field min-w-0 flex-1" placeholder="Recording link (https://…)"
+                      value={recUrl} onChange={e => setRecUrl(e.target.value)} />
+                    <button className="btn-gold !min-h-[40px] !px-4 !text-sm" disabled={busy}
+                      onClick={() => saveRecording(c.id)}>
+                      Save & notify class
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
