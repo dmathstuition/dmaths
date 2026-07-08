@@ -41,8 +41,12 @@ export default async function StudentDashboard() {
     <div className="space-y-6">
       {/* Welcome hero */}
       <Reveal>
-        <div data-tour="hero" className="boardgrid relative overflow-hidden rounded-2xl bg-gradient-to-br from-board to-boardDeep p-7 text-white sm:p-9">
-          <div className="aurora pointer-events-none absolute inset-0 opacity-40" />
+        <div data-tour="hero" className="boardgrid text-crisp relative overflow-hidden rounded-2xl p-7 text-white sm:p-9"
+          style={{ background: "linear-gradient(135deg, #10406F 0%, #0A2A4F 60%, #071C36 100%)" }}>
+          <div className="aurora pointer-events-none absolute inset-0 opacity-25" />
+          {/* contrast guard: keeps the text side dark no matter what effects render */}
+          <div className="pointer-events-none absolute inset-0"
+            style={{ background: "linear-gradient(100deg, rgba(7,25,48,.82) 0%, rgba(7,25,48,.35) 55%, rgba(7,25,48,0) 100%)" }} />
           <div className="pointer-events-none absolute right-0 top-0 h-full w-1/2 opacity-15"
             style={{ background: "radial-gradient(circle at 80% 20%, #EFAE56, transparent 60%)" }} />
           <div className="pointer-events-none absolute -right-10 top-1/2 h-1 w-64 -rotate-45 bg-gold/40" />

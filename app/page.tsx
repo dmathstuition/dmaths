@@ -63,6 +63,8 @@ export default function Landing() {
 
       {/* HERO */}
       <header className="relative pt-28 pb-16">
+        {/* soft animated colour wash behind the hero */}
+        <div className="aurora pointer-events-none absolute inset-x-0 top-0 h-[30rem] opacity-40" />
         <FloatingMath />
         <DotsScatter className="float pointer-events-none absolute left-6 top-28 h-24 w-24 opacity-70" />
         <DotsScatter className="float pointer-events-none absolute right-10 bottom-10 h-20 w-20 opacity-50 [animation-delay:1.5s]" />
@@ -94,8 +96,9 @@ export default function Landing() {
           </Reveal>
 
           <Reveal delay={120} className="group relative">
-            {/* soft glow behind the cut-out figure for depth */}
+            {/* soft glow + slowly rotating dashed ring behind the cut-out figure */}
             <div className="hero-glow absolute inset-0 scale-110" />
+            <div className="ring-spin pointer-events-none absolute inset-8 rounded-full border-2 border-dashed border-gold/25" />
             <Image
               src="/camp-hero.png"
               alt="D-Maths student with the D-Maths robot"
@@ -103,7 +106,8 @@ export default function Landing() {
               height={760}
               quality={90}
               sizes="(max-width: 768px) 100vw, 50vw"
-              className="relative z-10 mx-auto h-auto w-full object-contain drop-shadow-2xl transition-transform duration-500 group-hover:scale-[1.03]"
+              className="float relative z-10 mx-auto h-auto w-full object-contain drop-shadow-2xl transition-transform duration-500 group-hover:scale-[1.03]"
+              style={{ animationDuration: "7s" }}
               priority
             />
             {/* floating stat badges */}
@@ -138,9 +142,12 @@ export default function Landing() {
       </section>
 
       {/* SERVICES */}
-      <section id="services" className="mx-auto max-w-7xl px-5 py-16">
+      <section id="services" className="relative mx-auto max-w-7xl px-5 py-16">
+        <DotsScatter className="float pointer-events-none absolute right-6 top-10 h-16 w-16 opacity-40" />
+        <DotsScatter className="float pointer-events-none absolute left-4 bottom-8 h-14 w-14 opacity-30 [animation-delay:1.2s]" />
         <Reveal className="mb-12 text-center">
           <h2 className="font-display text-3xl font-bold md:text-4xl">We Provide The Best <span className="text-gold-deep">Services</span></h2>
+          <span className="bar-animate mx-auto mt-3 block h-1 w-16 rounded-full bg-gradient-to-r from-gold to-gold-deep" />
           <p className="mx-auto mt-3 max-w-md text-sm text-ink/50">Unleash the full potential of every student with our subject expertise.</p>
         </Reveal>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -161,7 +168,7 @@ export default function Landing() {
         <div className="mx-auto max-w-7xl px-5">
           <div className="rounded-[2.5rem] bg-gold-pale px-6 py-14 sm:px-12">
             <div className="grid items-center gap-10 md:grid-cols-2">
-              <Reveal className="group relative overflow-hidden rounded-2xl shadow-lg">
+              <Reveal className="sheen group relative overflow-hidden rounded-2xl shadow-lg">
                 <div className="hero-glow absolute -inset-4 z-0" />
                 <Image
                   src="https://images.unsplash.com/photo-1509062522246-3755977927d7?w=1200&q=85"
@@ -175,6 +182,7 @@ export default function Landing() {
               </Reveal>
               <Reveal delay={100}>
                 <h2 className="font-display text-3xl font-bold md:text-4xl">Simple <span className="text-gold-deep">Solutions!</span></h2>
+                <span className="bar-animate mt-3 block h-1 w-16 rounded-full bg-gradient-to-r from-gold to-gold-deep" />
                 <p className="mt-3 text-sm leading-relaxed text-ink/60">
                   We understand that no two students learn alike. That's why we take the time to
                   understand each learner and build a path that works.
@@ -207,6 +215,7 @@ export default function Landing() {
         <div className="grid items-center gap-12 md:grid-cols-2">
           <Reveal className="order-2 md:order-1">
             <h2 className="font-display text-3xl font-bold md:text-4xl">Our <span className="text-gold-deep">Centre</span></h2>
+            <span className="bar-animate mt-3 block h-1 w-16 rounded-full bg-gradient-to-r from-gold to-gold-deep" />
             <p className="mt-4 text-[15px] leading-relaxed text-ink/55">
               We believe in the power of personalised teaching. As a fully virtual community, we
               reach learners anywhere in Nigeria and prepare them for WAEC, JAMB, IGCSE, SAT and
@@ -230,6 +239,7 @@ export default function Landing() {
           <Reveal delay={120} className="group relative order-1 md:order-2">
             {/* decorative soft blob behind the cut-out figure */}
             <div className="float absolute inset-0 scale-95 rounded-full bg-gold-pale/70 blur-2xl" />
+            <div className="ring-spin pointer-events-none absolute inset-10 rounded-full border-2 border-dashed border-gold/20" />
             <Image
               src="/camp-about.png"
               alt="D-Maths learner with the D-Maths robot"
@@ -237,7 +247,8 @@ export default function Landing() {
               height={760}
               quality={90}
               sizes="(max-width: 768px) 100vw, 50vw"
-              className="relative z-10 mx-auto h-auto w-full object-contain drop-shadow-2xl transition-transform duration-500 group-hover:scale-[1.03]"
+              className="float relative z-10 mx-auto h-auto w-full object-contain drop-shadow-2xl transition-transform duration-500 group-hover:scale-[1.03]"
+              style={{ animationDuration: "9s" }}
             />
           </Reveal>
         </div>
@@ -250,7 +261,7 @@ export default function Landing() {
             <Reveal className="group relative mx-auto w-full max-w-sm">
               {/* soft gold blob behind the portrait for depth */}
               <div className="float absolute inset-0 -z-0 scale-95 rounded-full bg-gold-pale/70 blur-2xl" />
-              <div className="relative z-10 overflow-hidden rounded-3xl shadow-2xl ring-1 ring-line/60">
+              <div className="sheen relative z-10 overflow-hidden rounded-3xl shadow-2xl ring-1 ring-line/60">
                 <Image
                   src="/founder.jpg"
                   alt="Bakare Oladapo E., founder of D-Maths"
@@ -312,10 +323,13 @@ export default function Landing() {
       </section>
 
       {/* TESTIMONIALS */}
-      <section id="results" className="bg-chalk py-20">
-        <div className="mx-auto max-w-7xl px-5">
+      <section id="results" className="relative overflow-hidden bg-chalk py-20">
+        <DotsScatter className="float pointer-events-none absolute right-8 top-12 h-16 w-16 opacity-40" />
+        <div className="aurora pointer-events-none absolute inset-x-0 bottom-0 h-72 opacity-30" />
+        <div className="relative mx-auto max-w-7xl px-5">
           <Reveal className="mb-12 text-center">
             <h2 className="font-display text-3xl font-bold md:text-4xl">What <span className="text-gold-deep">Clients</span> Say!</h2>
+            <span className="bar-animate mx-auto mt-3 block h-1 w-16 rounded-full bg-gradient-to-r from-gold to-gold-deep" />
             <p className="mx-auto mt-3 max-w-md text-sm text-ink/50">See how D-Maths has helped students achieve their goals.</p>
           </Reveal>
           <div className="grid gap-5 md:grid-cols-3">
@@ -345,11 +359,13 @@ export default function Landing() {
       <section className="mx-auto max-w-7xl px-5 py-16">
         <Reveal>
           <div className="stat-shimmer group relative flex flex-col items-center justify-between gap-5 overflow-hidden rounded-[2rem] bg-gold-pale px-8 py-8 sm:flex-row">
-            <div>
+            <div className="aurora pointer-events-none absolute inset-0 opacity-50" />
+            <div aria-hidden className="pointer-events-none absolute right-40 top-2 select-none font-display text-3xl font-bold text-gold/40 float">π</div>
+            <div className="relative">
               <p className="font-display text-2xl font-bold text-ink">Ready to get started?</p>
               <p className="mt-1 text-sm text-ink/55">100% online — study from home, anywhere in Nigeria.</p>
             </div>
-            <Link href="/apply" className="btn-gold inline-flex items-center gap-1.5 !rounded-full !px-8 !text-base">
+            <Link href="/apply" className="badge-pulse btn-gold relative inline-flex items-center gap-1.5 !rounded-full !px-8 !text-base">
               Apply now <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
             </Link>
           </div>
