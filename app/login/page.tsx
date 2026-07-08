@@ -26,6 +26,8 @@ export default function Login() {
       setNotice({ kind: "error", text: "That reset link is invalid or has expired — please request a new one." });
     } else if (params.get("timeout") === "1") {
       setNotice({ kind: "success", text: "You were signed out after 30 minutes of inactivity, for your security." });
+    } else if (params.get("deleted") === "1") {
+      setNotice({ kind: "success", text: "Your account and data have been permanently deleted. We're sorry to see you go." });
     }
   }, []);
 

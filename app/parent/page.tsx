@@ -2,6 +2,7 @@ import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import GuardianClient from "@/components/guardian/GuardianClient";
 import RateCard from "@/components/portal/RateCard";
+import DeleteAccountCard from "@/components/portal/DeleteAccountCard";
 import Tour from "@/components/tour/Tour";
 import { parentTour } from "@/components/tour/steps";
 
@@ -98,6 +99,7 @@ export default async function ParentPage() {
         ) : null,
       )}
       <RateCard />
+      <DeleteAccountCard />
       <Tour tourId="parent" steps={parentTour} />
     </div>
   );
