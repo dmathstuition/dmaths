@@ -711,14 +711,14 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
           <textarea
             className="field max-h-32 flex-1 resize-none"
             rows={1}
-            placeholder={recording ? "Recording… tap ⏹ to send" : `Message ${student.first_name}…`}
+            placeholder={recording ? "Recording… tap stop to send" : `Message ${student.first_name}…`}
             value={msgText}
             onChange={e => { setMsgText(e.target.value); broadcastTyping(); }}
             onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
           />
           <button onClick={toggleRecording} disabled={sendingMsg} aria-label={recording ? "Stop and send voice note" : "Record a voice note"}
             className={`btn !min-h-[42px] !px-4 ${recording ? "bg-red-500 text-white badge-pulse" : "border border-line bg-white text-ink/60 hover:bg-chalk"}`}>
-            {recording ? "⏹" : "🎤"}
+            <Icon name={recording ? "stop" : "mic"} />
           </button>
           <button onClick={sendMessage} disabled={sendingMsg || !msgText.trim()} className="btn-gold !min-h-[42px] !px-5">
             {sendingMsg ? "…" : "Send"}
