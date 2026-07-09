@@ -1,12 +1,12 @@
 "use client";
 import { createContext, useContext, useState } from "react";
 
-// Shared state for the floating Dexter assistant, so any page (or the code editor)
-// can open it and tell it what the user is working on.
+// Shared state for the floating D-Maths A.I assistant, so any page (or the code
+// editor) can open it and tell it what the user is working on.
 //  • task   — a description of the current task (e.g. the coding assignment opened),
-//             set by a page so Dexter's replies are on-topic.
-//  • draft  — the user's current editor code, attached when they tap "Ask Dexter"
-//             from inside the IDE; cleared when the panel closes.
+//             set by a page so the assistant's replies are on-topic.
+//  • draft  — the user's current editor code, attached when they tap "Ask D-Maths
+//             A.I" from inside the IDE; cleared when the panel closes.
 //  • open / setOpen — the panel's open state, so an in-editor button can open it.
 //  • available — true only when a real provider is mounted, so buttons on public
 //             pages (which have no assistant) can hide themselves.

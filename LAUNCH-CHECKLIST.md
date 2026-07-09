@@ -41,7 +41,8 @@ Set these for **Production, Preview, Development**. 🔓 = safe to expose · �
 | `VAPID_PRIVATE_KEY` | 🔒 | Web-push private key |
 | `VAPID_SUBJECT` | 🔓 | `mailto:dmathstuition@gmail.com` |
 | `CRON_SECRET` | 🔒 | Random string protecting the cron endpoints |
-| `ANTHROPIC_API_KEY` | 🔒 | *(optional)* Powers the learner "Dexter" AI hint chat (console.anthropic.com). Leave unset and the widget shows a friendly "not switched on yet" message. |
+| `OPENAI_API_KEY` | 🔒 | *(optional)* Powers the "D-Maths A.I" hint chat (platform.openai.com). Leave unset and the widget shows a friendly "not switched on yet" message. |
+| `OPENAI_MODEL` | 🔓 | *(optional)* Chat model for D-Maths A.I — defaults to `gpt-4o`. |
 | `NEXT_PUBLIC_SENTRY_DSN` | 🔓 | *(optional)* Sentry project DSN — turns on error monitoring (see section **7**). Leave unset to keep Sentry fully off. |
 | `SENTRY_AUTH_TOKEN` | 🔒 | *(optional)* Only for readable stack traces (source-map upload) at build time |
 | `SENTRY_ORG` | 🔓 | *(optional)* Sentry org slug — pairs with `SENTRY_AUTH_TOKEN` |

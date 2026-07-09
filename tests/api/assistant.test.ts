@@ -6,23 +6,26 @@ vi.mock("next/headers", () => ({ cookies: vi.fn(() => ({ getAll: () => [], set: 
 let mockServer: ReturnType<typeof makeMockSupabaseClient>;
 vi.mock("@/lib/supabase/server", () => ({ supabaseServer: () => mockServer }));
 
-// Mock the Anthropic SDK: default export is a class whose messages.create we control.
-// Everything the factory touches must be created inside it (vi.mock is hoisted).
+// Mock the OpenAI SDK: default export is a class whose chat.completions.create we
+// control. Everything the factory touches must be created inside it (vi.mock is hoisted).
 const create = vi.fn();
-vi.mock("@anthropic-ai/sdk", () => {
+vi.mock("openai", () => {
   class RateLimitError extends Error {}
   class AuthenticationError extends Error {}
-  class Anthropic {
-    messages = { create };
+  class OpenAI {
+    chat = { completions: { create } };
     static RateLimitError = RateLimitError;
     static AuthenticationError = AuthenticationError;
   }
-  return { default: Anthropic };
+  return { default: OpenAI };
 });
 
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import { POST } from "@/app/api/assistant/route";
-const { RateLimitError } = Anthropic as unknown as { RateLimitError: new (m: string) => Error };
+const { RateLimitError } = OpenAI as unknown as { RateLimitError: new (m: string) => Error };
+
+// Convenience: an OpenAI chat.completions response with a single text reply.
+const reply = (text: string) => ({ choices: [{ message: { content: text } }] });
 
 function req(body: unknown) {
   return new Request("https://dmaths.test/api/assistant", {
@@ -32,14 +35,17 @@ function req(body: unknown) {
   });
 }
 
-const OLD_KEY = process.env.ANTHROPIC_API_KEY;
+const OLD_KEY = process.env.OPENAI_API_KEY;
 beforeEach(() => {
   mockServer = makeMockSupabaseClient();
   mockServer.auth.getUser.mockResolvedValue({ data: { user: { id: "stu-1" } }, error: null });
   create.mockReset();
-  process.env.ANTHROPIC_API_KEY = "sk-test";
+  process.env.OPENAI_API_KEY = "sk-test";
 });
-afterEach(() => { process.env.ANTHROPIC_API_KEY = OLD_KEY; });
+afterEach(() => { process.env.OPENAI_API_KEY = OLD_KEY; });
+
+// The system prompt is sent as the first message in the list.
+const systemOf = (arg: any) => arg.messages[0].content as string;
 
 describe("POST /api/assistant", () => {
   it("401 when unauthenticated", async () => {
@@ -50,7 +56,7 @@ describe("POST /api/assistant", () => {
   });
 
   it("503 with a friendly message when the key is not configured", async () => {
-    delete process.env.ANTHROPIC_API_KEY;
+    delete process.env.OPENAI_API_KEY;
     const res = await POST(req({ messages: [{ role: "user", content: "help" }] }));
     expect(res.status).toBe(503);
     const json = await res.json();
@@ -59,15 +65,16 @@ describe("POST /api/assistant", () => {
   });
 
   it("returns a hint reply for a valid learner question", async () => {
-    create.mockResolvedValue({ content: [{ type: "text", text: "What have you tried so far? 🙂" }] });
+    create.mockResolvedValue(reply("What have you tried so far? 🙂"));
     const res = await POST(req({ messages: [{ role: "user", content: "2x=10, what is x?" }] }));
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.reply).toContain("tried so far");
-    // Uses the pinned model and a system prompt that forbids full answers.
+    // Default model, and a system prompt that forbids full answers.
     const arg = create.mock.calls[0][0];
-    expect(arg.model).toBe("claude-opus-4-8");
-    expect(arg.system).toMatch(/NEVER give the full/i);
+    expect(arg.model).toBe("gpt-4o");
+    expect(systemOf(arg)).toMatch(/NEVER give the full/i);
+    expect(arg.messages[0].role).toBe("system");
   });
 
   it("rejects a payload whose last turn isn't a user message", async () => {
@@ -83,26 +90,24 @@ describe("POST /api/assistant", () => {
   });
 
   it("passes optional task context into the system prompt", async () => {
-    create.mockResolvedValue({ content: [{ type: "text", text: "ok" }] });
+    create.mockResolvedValue(reply("ok"));
     await POST(req({ messages: [{ role: "user", content: "stuck" }], context: "Loop over a list in Python" }));
-    const arg = create.mock.calls[0][0];
-    expect(arg.system).toMatch(/Loop over a list in Python/);
+    expect(systemOf(create.mock.calls[0][0])).toMatch(/Loop over a list in Python/);
   });
 
   it("grants staff (full-answer) mode to a tutor", async () => {
     mockServer._qb.single.mockResolvedValue({ data: { role: "tutor" }, error: null });
-    create.mockResolvedValue({ content: [{ type: "text", text: "Here's the full solution…" }] });
+    create.mockResolvedValue(reply("Here's the full solution…"));
     await POST(req({ messages: [{ role: "user", content: "give me a worked solution" }], mode: "staff" }));
-    const arg = create.mock.calls[0][0];
-    expect(arg.system).toMatch(/teaching assistant/i);
-    expect(arg.system).toMatch(/complete answers/i);
+    const system = systemOf(create.mock.calls[0][0]);
+    expect(system).toMatch(/teaching assistant/i);
+    expect(system).toMatch(/complete answers/i);
   });
 
   it("denies staff mode to a learner — falls back to the hint-only prompt", async () => {
     mockServer._qb.single.mockResolvedValue({ data: { role: "student" }, error: null });
-    create.mockResolvedValue({ content: [{ type: "text", text: "What have you tried?" }] });
+    create.mockResolvedValue(reply("What have you tried?"));
     await POST(req({ messages: [{ role: "user", content: "just give me the answer" }], mode: "staff" }));
-    const arg = create.mock.calls[0][0];
-    expect(arg.system).toMatch(/NEVER give the full/i);
+    expect(systemOf(create.mock.calls[0][0])).toMatch(/NEVER give the full/i);
   });
 });

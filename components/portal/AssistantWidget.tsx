@@ -5,9 +5,9 @@ import { useAssistantTask } from "@/components/portal/AssistantContext";
 type Msg = { role: "user" | "assistant"; content: string };
 
 const LEARNER_GREETING =
-  "Hi, I'm Dexter — your learning buddy! 🧭 Stuck on some maths, English or code? Tell me what you're working on and I'll help you figure it out (I give hints, not the finished answer 😉).";
+  "Hi, I'm D-Maths A.I — your learning buddy! 🧭 Stuck on some maths, English or code? Tell me what you're working on and I'll help you figure it out (I give hints, not the finished answer 😉).";
 const STAFF_GREETING =
-  "Hi, I'm Dexter — your teaching assistant. 🧭 Ask me for worked solutions, lesson ideas, practice questions, marking help, or a concept explained a few ways.";
+  "Hi, I'm D-Maths A.I — your teaching assistant. 🧭 Ask me for worked solutions, lesson ideas, practice questions, marking help, or a concept explained a few ways.";
 
 // Render an assistant reply with light formatting: ```fenced``` code as a block and
 // `inline code` as a chip. Everything else is plain text (newlines preserved by the
@@ -60,7 +60,7 @@ export default function AssistantWidget({ context, mode = "learner" }: { context
   }, [open]);
 
   // Conversation-starter chips, shown before the first question. They adapt to the
-  // mode and to whether the user opened Dexter from the code editor (has draft code).
+  // mode and to whether the user opened the assistant from the code editor (has draft code).
   const chips = staff
     ? ["Give me a worked solution", "Make a practice set", "Mark a learner's answer", "Explain it three ways"]
     : draft
@@ -75,7 +75,7 @@ export default function AssistantWidget({ context, mode = "learner" }: { context
     if (!prefill) setInput("");
     setBusy(true);
     // Assemble the context: the page's task, plus the editor code if they asked
-    // Dexter from inside the IDE.
+    // from inside the IDE.
     const parts: string[] = [];
     const base = context ?? task;
     if (base) parts.push(base);
@@ -110,7 +110,7 @@ export default function AssistantWidget({ context, mode = "learner" }: { context
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          aria-label={`Open Dexter, the ${staff ? "teaching assistant" : "learning buddy"}`}
+          aria-label={`Open D-Maths A.I, the ${staff ? "teaching assistant" : "learning buddy"}`}
           className="fixed bottom-24 right-4 z-[60] flex h-14 w-14 items-center justify-center rounded-full bg-gold text-2xl shadow-xl shadow-gold/40 transition hover:scale-105 active:scale-95 lg:bottom-6 lg:right-6"
         >
           <span>🧭</span>
@@ -123,13 +123,13 @@ export default function AssistantWidget({ context, mode = "learner" }: { context
 
       {/* Panel */}
       {open && (
-        <div role="dialog" aria-label="Dexter assistant"
+        <div role="dialog" aria-label="D-Maths A.I assistant"
           className="fixed inset-x-3 bottom-24 z-[60] flex max-h-[70vh] flex-col overflow-hidden rounded-3xl border border-line bg-white shadow-2xl sm:inset-x-auto sm:right-6 sm:w-[380px] lg:bottom-6">
           {/* Header */}
           <div className="flex items-center gap-3 bg-board px-4 py-3 text-white">
             <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gold text-lg">🧭</span>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-bold leading-tight">Dexter · {staff ? "Teaching assistant" : "Learning buddy"}</p>
+              <p className="text-sm font-bold leading-tight">D-Maths A.I · {staff ? "Teaching assistant" : "Learning buddy"}</p>
               <p className="text-[11px] text-white/55">{staff ? "Solutions, lesson ideas & marking help" : "Hints to help you — not the answers"}</p>
             </div>
             {started && (
