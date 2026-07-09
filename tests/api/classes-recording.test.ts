@@ -72,9 +72,9 @@ describe("POST /api/classes/recording", () => {
     expect(res.status).toBe(403);
   });
 
-  it("401 when unauthenticated", async () => {
+  it("403 when unauthenticated (requireStaff rejects non-staff)", async () => {
     mockServer.auth.getUser.mockResolvedValue({ data: { user: null }, error: null });
     const res = await POST(req({ classId: "cls-1", url: "https://x.com/v" }));
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(403);
   });
 });

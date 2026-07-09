@@ -1,18 +1,14 @@
 import { NextResponse } from "next/server";
-import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { notifyUser } from "@/lib/notify";
+import { requireStaff, staffCanAccessClass } from "@/lib/authRole";
 
-// Admin attaches (or clears) a recording link on a class so learners can
-// rewatch the lesson. When a link is set, everyone on the class roster is
-// alerted (bell + push).
+// Staff attach (or clear) a recording link on a class so learners can rewatch
+// the lesson. Admins on any class; tutors only on their own. When a link is set,
+// everyone on the class roster is alerted (bell + push).
 export async function POST(req: Request) {
-  const supa = supabaseServer();
-  const { data: { user } } = await supa.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const { data: me } = await supa.from("profiles").select("role").eq("id", user.id).single();
-  if (me?.role !== "admin") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const staff = await requireStaff();
+  if (!staff) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const payload = await req.json().catch(() => null);
   const classId = String(payload?.classId ?? "");
@@ -20,6 +16,9 @@ export async function POST(req: Request) {
   if (!classId) return NextResponse.json({ error: "classId required" }, { status: 400 });
   if (url && !/^https?:\/\//i.test(url)) {
     return NextResponse.json({ error: "Enter a full link starting with http:// or https://" }, { status: 400 });
+  }
+  if (!(await staffCanAccessClass(staff, classId))) {
+    return NextResponse.json({ error: "That class isn't assigned to you." }, { status: 403 });
   }
 
   const admin = supabaseAdmin();

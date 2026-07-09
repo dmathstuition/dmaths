@@ -31,7 +31,11 @@ export async function POST(req: Request) {
   }
 
   const { data: profile } = await supa.from("profiles").select("role").eq("id", user.id).single();
-  if (profile?.role !== "admin" && bucket !== "submissions") {
+  // Learners upload only submissions. Tutors may also post teaching materials +
+  // assignment attachments. Everything else is admin-only.
+  const role = profile?.role;
+  const tutorAllowed = role === "tutor" && (bucket === "materials" || bucket === "assignments");
+  if (role !== "admin" && bucket !== "submissions" && !tutorAllowed) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

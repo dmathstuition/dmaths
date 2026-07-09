@@ -11,6 +11,8 @@ const NAV: NavItem[] = [
   { href: "/tutor/classes", label: "My Classes", icon: "classes" },
   { href: "/tutor/calendar", label: "Calendar", icon: "calendar" },
   { href: "/tutor/learners", label: "My Learners", icon: "students" },
+  { href: "/tutor/assignments", label: "Assignments", icon: "assignments" },
+  { href: "/tutor/materials", label: "Materials", icon: "materials" },
   { href: "/tutor/messages", label: "Messages", icon: "messages" },
 ];
 
@@ -18,7 +20,8 @@ const TABS = [
   { href: "/tutor", label: "Home", icon: "home" as const },
   { href: "/tutor/classes", label: "Classes", icon: "classes" as const },
   { href: "/tutor/learners", label: "Learners", icon: "students" as const },
-  { href: "/tutor/messages", label: "Messages", icon: "messages" as const },
+  { href: "/tutor/assignments", label: "Work", icon: "assignments" as const },
+  { href: "/tutor/messages", label: "Chat", icon: "messages" as const },
 ];
 
 export default async function TutorLayout({ children }: { children: React.ReactNode }) {
