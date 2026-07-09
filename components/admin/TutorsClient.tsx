@@ -28,6 +28,8 @@ export default function TutorsClient({ initialTutors, students, initialLinks, in
 
   const [addStudent, setAddStudent] = useState("");
   const [assigning, setAssigning] = useState(false);
+  const [resetting, setResetting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const selectedTutor = tutors.find(t => t.id === selected) || null;
   const assignedIds = selected ? (links[selected] ?? []) : [];
@@ -57,6 +59,45 @@ export default function TutorsClient({ initialTutors, students, initialLinks, in
     setCreds(json.credentials);
     setForm({ email: "", firstName: "", lastName: "" });
     push(json.emailed ? "Tutor created and emailed their login." : "Tutor created — copy their login below.", "success");
+  }
+
+  // Regenerate a temp password for an existing tutor (self-healing create).
+  async function resetPassword() {
+    if (!selectedTutor) return;
+    setResetting(true);
+    setCreds(null);
+    const res = await fetch("/api/tutors/create", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: selectedTutor.email,
+        firstName: selectedTutor.first_name,
+        lastName: selectedTutor.last_name,
+      }),
+    });
+    const json = await res.json();
+    setResetting(false);
+    if (!res.ok) { push(json.error || "Could not reset the password.", "error"); return; }
+    setCreds(json.credentials);
+    window.scrollTo({ top: 0, behavior: "smooth" }); // the credentials panel is at the top
+    push("New login generated — share it with the tutor.", "success");
+  }
+
+  async function deleteTutor() {
+    if (!selectedTutor) return;
+    if (!window.confirm(`Delete ${selectedTutor.first_name} ${selectedTutor.last_name}? This removes their account and unassigns their classes.`)) return;
+    setDeleting(true);
+    const res = await fetch("/api/tutors/delete", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tutorId: selectedTutor.id }),
+    });
+    const json = await res.json().catch(() => ({}));
+    setDeleting(false);
+    if (!res.ok) { push(json.error || "Could not delete the tutor.", "error"); return; }
+    const remaining = tutors.filter(t => t.id !== selectedTutor.id);
+    setTutors(remaining);
+    setSelected(remaining[0]?.id ?? null);
+    setCreds(null);
+    push("Tutor deleted.", "success");
   }
 
   async function assign(studentId: string, action: "add" | "remove") {
@@ -155,6 +196,23 @@ export default function TutorsClient({ initialTutors, students, initialLinks, in
                     </div>
                   ))}
                 </div>
+              </div>
+
+              {/* Account controls */}
+              <div className="card p-6">
+                <h2 className="font-display text-lg font-semibold">Account</h2>
+                <p className="text-xs text-ink/45">
+                  If a tutor can't log in, reset their password to get fresh credentials. Deleting frees the email for reuse.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button className="btn-ghost !min-h-[40px]" onClick={resetPassword} disabled={resetting}>
+                    {resetting ? "Resetting…" : "Reset password"}
+                  </button>
+                  <button className="btn-danger !min-h-[40px]" onClick={deleteTutor} disabled={deleting}>
+                    {deleting ? "Deleting…" : "Delete tutor"}
+                  </button>
+                </div>
+                <p className="mt-2 text-xs text-ink/40">{selectedTutor.email}</p>
               </div>
 
               {/* Message the tutor */}
