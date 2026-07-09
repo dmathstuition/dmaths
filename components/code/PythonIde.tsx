@@ -4,6 +4,7 @@ import { supabaseBrowser } from "@/lib/supabase/client";
 import { useToast } from "@/components/Toast";
 import CodeArea from "@/components/code/CodeArea";
 import { python } from "@/components/code/highlighters";
+import { useAssistantTask } from "@/components/portal/AssistantContext";
 
 type Snippet = { id: string; title: string; code: string };
 type Line = { stream: "out" | "err" | "sys"; text: string };
@@ -23,6 +24,7 @@ export default function PythonIde({ persist = false, meId = "", initialSnippets 
   initialCode?: string; onSubmit?: (code: string) => void | Promise<void>; submitLabel?: string;
 }) {
   const push = useToast();
+  const { ask, available } = useAssistantTask();
 
   const [snippets, setSnippets] = useState<Snippet[]>(initialSnippets);
   const [activeId, setActiveId] = useState<string | null>(initialSnippets[0]?.id ?? null);
@@ -155,6 +157,11 @@ export default function PythonIde({ persist = false, meId = "", initialSnippets 
             <button onClick={save} disabled={saving} className="btn-ghost !min-h-[42px]">{saving ? "Saving…" : "Save"}</button>
           )}
           <button onClick={() => setOutput([])} className="btn-ghost !min-h-[42px]">Clear output</button>
+          {available && (
+            <button onClick={() => ask(`\`\`\`python\n${code}\n\`\`\``)} className="btn-ghost !min-h-[42px] gap-1.5">
+              🧭 Ask Dexter
+            </button>
+          )}
           {onSubmit && (
             <button onClick={async () => { setSubmitting(true); await onSubmit(code); setSubmitting(false); }}
               disabled={submitting} className="btn-ink !min-h-[42px] !px-6">{submitting ? "Submitting…" : submitLabel}</button>

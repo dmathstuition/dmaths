@@ -4,6 +4,7 @@ import { supabaseBrowser } from "@/lib/supabase/client";
 import { useToast } from "@/components/Toast";
 import CodeArea from "@/components/code/CodeArea";
 import { html as hlHtml, css as hlCss, javascript as hlJs } from "@/components/code/highlighters";
+import { useAssistantTask } from "@/components/portal/AssistantContext";
 
 type Snippet = { id: string; title: string; code: string };
 type Doc = { html: string; css: string; js: string };
@@ -44,6 +45,7 @@ export default function WebIde({ persist = false, meId = "", initialSnippets = [
   initialCode?: string; onSubmit?: (code: string) => void | Promise<void>; submitLabel?: string;
 }) {
   const push = useToast();
+  const { ask, available } = useAssistantTask();
   const [snippets, setSnippets] = useState<Snippet[]>(initialSnippets);
   const [activeId, setActiveId] = useState<string | null>(initialSnippets[0]?.id ?? null);
   const [title, setTitle] = useState(initialSnippets[0]?.title ?? "Untitled");
@@ -140,6 +142,11 @@ export default function WebIde({ persist = false, meId = "", initialSnippets = [
           <div className="flex flex-wrap items-center gap-2">
             <button onClick={run} className="btn-gold !min-h-[42px] !px-6">▶ Run</button>
             {persist && <button onClick={save} disabled={saving} className="btn-ghost !min-h-[42px]">{saving ? "Saving…" : "Save"}</button>}
+            {available && (
+              <button onClick={() => ask(`HTML:\n${doc.html}\n\nCSS:\n${doc.css}\n\nJS:\n${doc.js}`)} className="btn-ghost !min-h-[42px] gap-1.5">
+                🧭 Ask Dexter
+              </button>
+            )}
             {onSubmit && (
               <button onClick={async () => { setSubmitting(true); await onSubmit(JSON.stringify(doc)); setSubmitting(false); }}
                 disabled={submitting} className="btn-ink !min-h-[42px] !px-6">{submitting ? "Submitting…" : submitLabel}</button>
