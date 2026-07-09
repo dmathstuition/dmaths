@@ -1,7 +1,19 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/components/Toast";
 import AdminThread from "@/components/admin/AdminThread";
+
+// Human-readable label for an audit_log action in the tutor activity feed.
+const ACTION_LABEL: Record<string, string> = {
+  reward_given: "Gave a reward",
+  log_behaviour: "Logged behaviour",
+  delete_behaviour_log: "Removed a behaviour entry",
+  assignment_created: "Created an assignment",
+  grade_assignment: "Graded a submission",
+  material_posted: "Posted a material",
+  recording_added: "Added a class recording",
+  recording_cleared: "Removed a class recording",
+};
 
 type Tutor = { id: string; first_name: string; last_name: string; email: string };
 type Student = { id: string; first_name: string; last_name: string; level: string };
@@ -30,6 +42,21 @@ export default function TutorsClient({ initialTutors, students, initialLinks, in
   const [assigning, setAssigning] = useState(false);
   const [resetting, setResetting] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  // Activity summary for the selected tutor.
+  const [activity, setActivity] = useState<any | null>(null);
+  const [loadingActivity, setLoadingActivity] = useState(false);
+
+  useEffect(() => {
+    if (!selected) { setActivity(null); return; }
+    setLoadingActivity(true);
+    setActivity(null);
+    fetch(`/api/tutors/activity?tutorId=${selected}`)
+      .then(r => r.json())
+      .then(j => { if (j.ok) setActivity(j); })
+      .catch(() => {})
+      .finally(() => setLoadingActivity(false));
+  }, [selected]);
 
   const selectedTutor = tutors.find(t => t.id === selected) || null;
   const assignedIds = selected ? (links[selected] ?? []) : [];
@@ -198,6 +225,39 @@ export default function TutorsClient({ initialTutors, students, initialLinks, in
                 </div>
               </div>
 
+              {/* Activity summary */}
+              <div className="card p-6">
+                <h2 className="font-display text-lg font-semibold">Activity</h2>
+                {loadingActivity && <p className="mt-2 text-sm text-ink/40">Loading…</p>}
+                {activity && (
+                  <>
+                    <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-4">
+                      <ActivityStat label="Learners" value={activity.summary.learners} />
+                      <ActivityStat label="Classes" value={activity.summary.classes} />
+                      <ActivityStat label="Materials" value={activity.summary.materials} />
+                      <ActivityStat label="Rewards" value={activity.summary.rewards} />
+                      <ActivityStat label="Behaviour" value={activity.summary.behaviour} />
+                      <ActivityStat label="Assignments" value={activity.summary.assignments} />
+                      <ActivityStat label="Graded" value={activity.summary.graded} />
+                      <ActivityStat label="Direct" value={activity.summary.directLearners} />
+                    </div>
+                    <div className="mt-4 space-y-1.5 border-t border-line pt-4">
+                      <p className="text-xs font-bold uppercase tracking-wide text-ink/35">Recent actions</p>
+                      {activity.recent.length === 0 && <p className="text-sm text-ink/35">No recorded activity yet.</p>}
+                      {activity.recent.map((r: any, i: number) => (
+                        <div key={i} className="flex items-center justify-between gap-3 text-sm">
+                          <span className="text-ink/70">{ACTION_LABEL[r.action] ?? r.action}</span>
+                          <span className="shrink-0 text-xs text-ink/35">
+                            {new Date(r.created_at).toLocaleString("en-NG", { dateStyle: "medium", timeStyle: "short" })}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="mt-2 text-[11px] text-ink/35">Counts reflect recent activity (last 40 logged actions).</p>
+                  </>
+                )}
+              </div>
+
               {/* Account controls */}
               <div className="card p-6">
                 <h2 className="font-display text-lg font-semibold">Account</h2>
@@ -224,6 +284,15 @@ export default function TutorsClient({ initialTutors, students, initialLinks, in
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+function ActivityStat({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-xl bg-chalk px-3 py-2 text-center">
+      <p className="font-display text-lg font-bold text-ink">{value}</p>
+      <p className="text-[10px] font-bold uppercase tracking-wide text-ink/40">{label}</p>
     </div>
   );
 }

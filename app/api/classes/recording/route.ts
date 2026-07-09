@@ -28,6 +28,11 @@ export async function POST(req: Request) {
   const { error } = await admin.from("classes").update({ recording_url: url }).eq("id", classId);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
+  await admin.from("audit_log").insert({
+    actor_id: staff.id, action: url ? "recording_added" : "recording_cleared",
+    detail: { classId, subject: cls.subject },
+  });
+
   // Tell the roster a recording is ready (only when setting, not clearing).
   if (url) {
     const { data: roster } = await admin
