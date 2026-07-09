@@ -1,6 +1,6 @@
 import LegalPage, { H2 } from "@/components/LegalPage";
 
-export const metadata = { title: "Terms of Service — D-Maths Tuition Centre" };
+export const metadata = { title: "Terms of Service — D-Maths Tuition Centre", alternates: { canonical: "/terms" } };
 
 export default function TermsPage() {
   return (

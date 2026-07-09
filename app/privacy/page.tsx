@@ -1,6 +1,6 @@
 import LegalPage, { H2 } from "@/components/LegalPage";
 
-export const metadata = { title: "Privacy Policy — D-Maths Tuition Centre" };
+export const metadata = { title: "Privacy Policy — D-Maths Tuition Centre", alternates: { canonical: "/privacy" } };
 
 export default function PrivacyPage() {
   return (

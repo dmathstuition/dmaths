@@ -5,6 +5,7 @@ import Playground from "@/components/code/Playground";
 
 export const metadata: Metadata = {
   title: "Code Playground — D-Maths Online",
+  alternates: { canonical: "/playground" },
   description: "Write and run real Python, or build a live web page with HTML, CSS & JavaScript — right in your browser, no install, no sign-up. A free taste of coding at D-Maths.",
 };
 

@@ -1,6 +1,6 @@
 import LegalPage, { H2 } from "@/components/LegalPage";
 
-export const metadata = { title: "Help & FAQ — D-Maths Tuition Centre" };
+export const metadata = { title: "Help & FAQ — D-Maths Tuition Centre", alternates: { canonical: "/help" } };
 
 export default function HelpPage() {
   return (
