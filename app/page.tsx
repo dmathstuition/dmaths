@@ -296,25 +296,26 @@ export default function Landing() {
               </div>
               <div className="mt-6 space-y-4 text-[15px] leading-relaxed text-ink/60">
                 <p>
-                  I founded the D-Maths Learning Portal as a passionate educator and technology
-                  professional committed to transforming learning through innovation.
+               Meet D-Maths, the visionary behind the D-Maths Learning Portal—a passionate educator
+                  and technology professional dedicated to transforming education through innovation.
                 </p>
                 <p>
-                  As a Web Developer, Data Analyst, and AI Engineer, I combine expertise in software
-                  development, data-driven decision-making, and artificial intelligence to build
-                  educational solutions that are practical, engaging, and impactful. With a strong
-                  background in mathematics education and technology, my vision is to bridge the gap
-                  between traditional teaching and modern digital learning.
+                 As a Web Developer, Data Analyst, and AI Engineer,
+                  he combines expertise in software development, data-driven decision-making, 
+                  and artificial intelligence to create educational solutions that are practical, engaging, and impactful. 
+                  With a strong foundation in mathematics education and technology,
+                  he is committed to bridging the gap between traditional teaching methods and modern digital learning.
                 </p>
                 <p>
-                  Driven by a belief that every learner deserves access to quality education, I developed
-                  the D-Maths Learning Portal to provide an interactive platform where students can learn,
-                  practice, track their progress, and develop future-ready skills in mathematics, coding,
-                  and technology.
+                  Driven by the belief that every learner deserves access to high-quality education,
+                  he founded the D-Maths Learning Portal to provide an interactive platform where students can learn,
+                  practice, monitor their progress, and develop future-ready skills in mathematics, coding,
+                  artificial intelligence, and technology.
                 </p>
                 <p>
-                  Beyond teaching, I am dedicated to creating innovative digital products that empower
-                  schools, educators, and learners across Africa and beyond.
+                  Beyond teaching, he is passionate about building innovative digital products that empower schools, educators, 
+                  and learners across Africa and beyond. Through his work, he continues to inspire the next generation of problem-solvers,
+                  innovators, and technology leaders.
                 </p>
               </div>
             </Reveal>
