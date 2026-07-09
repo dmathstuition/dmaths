@@ -3,16 +3,18 @@ import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { notifyUser, notifyAdmins } from "@/lib/notify";
 
-// Send a direct message in a learner's thread. Works for both directions:
-//  • admin → learner   (body + studentId)  → learner alerted via bell + push
-//  • learner → admins   (body, self)        → admins alerted via bell + push
+// Send a direct message in a thread (thread key = the non-admin party's id).
+// Works for every direction:
+//  • admin → learner/tutor (body + studentId)  → recipient alerted via bell + push
+//  • learner → admins       (body, self)        → admins alerted
+//  • tutor → admins         (body, self)        → admins alerted
 export async function POST(req: Request) {
   const supa = supabaseServer();
   const { data: { user } } = await supa.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { data: me } = await supa.from("profiles").select("role, first_name, last_name").eq("id", user.id).single();
-  if (!me || (me.role !== "admin" && me.role !== "student")) {
+  if (!me || (me.role !== "admin" && me.role !== "student" && me.role !== "tutor")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -46,15 +48,18 @@ export async function POST(req: Request) {
       }, { status: 500 });
     }
 
+    // Point the recipient at their own thread (tutors have a different portal).
+    const { data: recipient } = await admin.from("profiles").select("role").eq("id", studentId).maybeSingle();
     await notifyUser(admin, studentId, {
       title: "New message from D-Maths",
       body: preview,
-      link: "/portal/messages",
+      link: recipient?.role === "tutor" ? "/tutor/messages" : "/portal/messages",
     });
     return NextResponse.json({ ok: true, message });
   }
 
-  // Learner replying / starting a message → their own thread; alert admins.
+  // Learner or tutor replying / starting a message → their own thread; alert
+  // admins. sender_role reuses 'student' for the non-admin party (thread owner).
   const { data: message, error } = await admin.from("messages").insert({
     student_id: user.id, sender_id: user.id, sender_role: "student", body, ...extra,
   }).select().single();
@@ -66,10 +71,11 @@ export async function POST(req: Request) {
     }, { status: 500 });
   }
 
+  const who = me.role === "tutor" ? "tutor" : "learner";
   await notifyAdmins(admin, {
-    title: `New message from ${me.first_name ?? "a learner"}`,
+    title: `New message from ${me.first_name ?? `a ${who}`}`,
     body: preview,
-    link: `/admin/students/${user.id}`,
+    link: me.role === "tutor" ? `/admin/tutors?t=${user.id}` : `/admin/students/${user.id}`,
   });
   return NextResponse.json({ ok: true, message });
 }

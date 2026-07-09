@@ -81,4 +81,28 @@ describe("POST /api/messages/send", () => {
     const res = await POST(req({ body: "hi" }));
     expect(res.status).toBe(401);
   });
+
+  it("tutor sends into their own thread and alerts admins (link → /admin/tutors)", async () => {
+    mockServer.auth.getUser.mockResolvedValue({ data: { user: { id: "tut-1" } }, error: null });
+    mockServer._qb.single.mockResolvedValue({ data: { role: "tutor", first_name: "Mr T" }, error: null });
+
+    const res = await POST(req({ body: "Morning admin" }));
+    expect(res.status).toBe(200);
+    expect(mockAdmin._qb.insert).toHaveBeenCalledWith(
+      expect.objectContaining({ student_id: "tut-1", sender_id: "tut-1", sender_role: "student", body: "Morning admin" }),
+    );
+    expect(notifyAdmins).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ link: "/admin/tutors?t=tut-1" }));
+    expect(notifyUser).not.toHaveBeenCalled();
+  });
+
+  it("admin sends to a tutor and points them at the tutor portal", async () => {
+    mockServer.auth.getUser.mockResolvedValue({ data: { user: { id: "admin-1" } }, error: null });
+    mockServer._qb.single.mockResolvedValue({ data: { role: "admin", first_name: "Sir" }, error: null });
+    // Recipient role lookup (admin.from('profiles').maybeSingle()) → tutor.
+    mockAdmin._qb.maybeSingle.mockResolvedValue({ data: { role: "tutor" }, error: null });
+
+    const res = await POST(req({ studentId: "tut-1", body: "Please cover Friday" }));
+    expect(res.status).toBe(200);
+    expect(notifyUser).toHaveBeenCalledWith(expect.anything(), "tut-1", expect.objectContaining({ link: "/tutor/messages" }));
+  });
 });
