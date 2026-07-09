@@ -6,6 +6,9 @@ import { useToast } from "@/components/Toast";
 import { Icon, type IconName } from "@/components/Icons";
 import EmptyState from "@/components/ui/EmptyState";
 import { fmtWAT } from "@/lib/time";
+import PythonIde from "@/components/code/PythonIde";
+import WebIde from "@/components/code/WebIde";
+import { codeDisplay } from "@/lib/codeSubmission";
 
 type ConfirmState = {
   title: string; message: string; confirmLabel?: string; danger?: boolean; onConfirm: () => void;
@@ -29,6 +32,17 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
   const [uploadPct, setUploadPct] = useState(0);
   const [confirmState, setConfirmState] = useState<ConfirmState | null>(null);
   const [filter, setFilter] = useState<FilterKey>("all");
+  const [openCode, setOpenCode] = useState<string | null>(null); // submission id with the code editor open
+
+  async function submitCode(submissionId: string, code: string) {
+    const { error } = await supabase.from("assignment_submissions")
+      .update({ status: "submitted", submitted_at: new Date().toISOString(), code })
+      .eq("id", submissionId);
+    if (error) { push("Could not submit — try again.", "error"); return; }
+    push("Answer submitted! 🎉", "success");
+    setOpenCode(null);
+    reload();
+  }
 
   async function reload() {
     const { data: { user } } = await supabase.auth.getUser();
@@ -160,6 +174,7 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
                   <h2 className="font-extrabold">
                     {a.title}
                     {a.type === "cbt" && <span className="pill-blue ml-1">CBT</span>}
+                    {a.type === "code" && <span className="pill ml-1 bg-purple-100 text-purple-800">{a.code_language === "web" ? "Web" : "Python"} code</span>}
                     {hasInlineCBT && <span className="pill ml-1 bg-purple-100 text-purple-800">{a.cbt_questions.length} Qs</span>}
                   </h2>
                   <p className="text-sm text-ink/45">
@@ -227,7 +242,30 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
               </p>
             )}
 
-            {s.status === "pending" && a.type !== "cbt" && !overdue && (
+            {/* Coding assignment — code the answer in the embedded IDE */}
+            {s.status === "pending" && a.type === "code" && !overdue && (
+              <div className="mt-4">
+                {openCode === s.id ? (
+                  a.code_language === "web"
+                    ? <WebIde persist={false} initialCode={a.starter_code || undefined} onSubmit={(c) => submitCode(s.id, c)} />
+                    : <PythonIde persist={false} initialCode={a.starter_code || undefined} onSubmit={(c) => submitCode(s.id, c)} />
+                ) : (
+                  <button className="btn-gold w-full" onClick={() => setOpenCode(s.id)}>
+                    {"</>"} Open the code editor
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* View submitted code (once submitted / graded) */}
+            {a.type === "code" && s.code && s.status !== "pending" && (
+              <details className="mt-3">
+                <summary className="cursor-pointer text-sm font-semibold text-gold-deep">View your submitted code</summary>
+                <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap rounded-xl bg-[#0b2036] p-4 font-mono text-[12.5px] text-slate-100">{codeDisplay(s.code, a.code_language)}</pre>
+              </details>
+            )}
+
+            {s.status === "pending" && a.type !== "cbt" && a.type !== "code" && !overdue && (
               <div data-tour="assignments-submit" className="mt-4 space-y-3">
                 <label className={`flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-line py-3 text-sm font-semibold text-ink/60 transition hover:border-gold hover:text-ink ${uploading === s.id ? "opacity-50" : ""}`}>
                   {uploading === s.id ? "Uploading…" : "Snap or upload a photo of your work"}

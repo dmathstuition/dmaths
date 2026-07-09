@@ -18,15 +18,17 @@ for i in range(1, 6):
     print(i, "x", i, "=", i * i)
 `;
 
-export default function PythonIde({ persist = false, meId = "", initialSnippets = [] }: {
+export default function PythonIde({ persist = false, meId = "", initialSnippets = [], initialCode, onSubmit, submitLabel = "Submit answer" }: {
   persist?: boolean; meId?: string; initialSnippets?: Snippet[];
+  initialCode?: string; onSubmit?: (code: string) => void | Promise<void>; submitLabel?: string;
 }) {
   const push = useToast();
 
   const [snippets, setSnippets] = useState<Snippet[]>(initialSnippets);
   const [activeId, setActiveId] = useState<string | null>(initialSnippets[0]?.id ?? null);
   const [title, setTitle] = useState(initialSnippets[0]?.title ?? "Untitled");
-  const [code, setCode] = useState(initialSnippets[0]?.code ?? STARTER);
+  const [code, setCode] = useState(initialCode ?? initialSnippets[0]?.code ?? STARTER);
+  const [submitting, setSubmitting] = useState(false);
   const [stdin, setStdin] = useState("");
   const [output, setOutput] = useState<Line[]>([]);
   const [status, setStatus] = useState<"idle" | "loading" | "ready" | "running">("idle");
@@ -153,6 +155,10 @@ export default function PythonIde({ persist = false, meId = "", initialSnippets 
             <button onClick={save} disabled={saving} className="btn-ghost !min-h-[42px]">{saving ? "Saving…" : "Save"}</button>
           )}
           <button onClick={() => setOutput([])} className="btn-ghost !min-h-[42px]">Clear output</button>
+          {onSubmit && (
+            <button onClick={async () => { setSubmitting(true); await onSubmit(code); setSubmitting(false); }}
+              disabled={submitting} className="btn-ink !min-h-[42px] !px-6">{submitting ? "Submitting…" : submitLabel}</button>
+          )}
           <span className="ml-auto hidden text-xs text-ink/40 sm:block">Tip: Ctrl/⌘ + Enter to run</span>
         </div>
 

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/Toast";
 import { watToUtcISO } from "@/lib/time";
+import { codeDisplay } from "@/lib/codeSubmission";
 
 export default function TutorAssignmentsClient({ students, initialSubs }: { students: any[]; initialSubs: any[] }) {
   const router = useRouter();
@@ -37,6 +38,7 @@ export default function TutorAssignmentsClient({ students, initialSubs }: { stud
       body: JSON.stringify({
         title: f.title, subject: f.subject, type: f.type,
         instructions: f.instructions || "", cbtLink: f.cbt_link || "",
+        codeLanguage: f.code_language || "python", starterCode: f.starter_code || "",
         dueDate: f.due_date || null, dueAt,
         fileUrl, fileName,
         studentIds: f.roster,
@@ -93,13 +95,28 @@ export default function TutorAssignmentsClient({ students, initialSubs }: { stud
             <select className="field" value={f.type} onChange={(e) => setF({ ...f, type: e.target.value })}>
               <option value="written">Written</option>
               <option value="cbt">CBT (link)</option>
+              <option value="code">Code (in-browser IDE)</option>
             </select>
             {f.type === "cbt" && (
               <input className="field" placeholder="CBT link (https://…)" value={f.cbt_link || ""} onChange={(e) => setF({ ...f, cbt_link: e.target.value })} />
             )}
+            {f.type === "code" && (
+              <select className="field" value={f.code_language || "python"} onChange={(e) => setF({ ...f, code_language: e.target.value })}>
+                <option value="python">Python</option>
+                <option value="web">Web (HTML/CSS/JS)</option>
+              </select>
+            )}
             <input className="field" type="date" value={f.due_date || ""} onChange={(e) => setF({ ...f, due_date: e.target.value })} />
             <input className="field" type="time" value={f.due_time || ""} onChange={(e) => setF({ ...f, due_time: e.target.value })} title="Deadline time (WAT)" />
           </div>
+          {f.type === "code" && (
+            <div>
+              <label className="flabel">Starter code (optional — what the learner sees to begin)</label>
+              <textarea className="field min-h-[120px] font-mono text-[13px]" spellCheck={false}
+                placeholder={f.code_language === "web" ? '{"html":"…","css":"…","js":"…"} or just leave blank' : "# starter code…"}
+                value={f.starter_code || ""} onChange={(e) => setF({ ...f, starter_code: e.target.value })} />
+            </div>
+          )}
           <textarea className="field min-h-[80px]" placeholder="Instructions (optional)"
             value={f.instructions || ""} onChange={(e) => setF({ ...f, instructions: e.target.value })} />
           <div>
@@ -161,6 +178,12 @@ export default function TutorAssignmentsClient({ students, initialSubs }: { stud
                 </button>
               )}
             </div>
+            {sub.code && sub.assignment?.type === "code" && (
+              <details className="mt-2">
+                <summary className="cursor-pointer text-xs font-semibold text-gold-deep">View submitted {sub.assignment?.code_language === "web" ? "web" : "Python"} code</summary>
+                <pre className="mt-2 max-h-72 overflow-auto whitespace-pre-wrap rounded-xl bg-[#0b2036] p-3 font-mono text-[12px] text-slate-100">{codeDisplay(sub.code, sub.assignment?.code_language)}</pre>
+              </details>
+            )}
             {gradeFor === sub.id && (
               <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-line pt-3">
                 <input className="field w-24" type="number" min={0} max={100} placeholder="/100"

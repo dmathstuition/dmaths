@@ -17,7 +17,7 @@ export default async function TutorAssignments() {
       admin.from("profiles").select("id, first_name, last_name, level")
         .in("id", rosterIds).order("first_name"),
       admin.from("assignment_submissions")
-        .select("*, assignment:assignments(title, subject, type, due_at, due_date), student:profiles(first_name, last_name, student_code)")
+        .select("*, assignment:assignments(title, subject, type, code_language, due_at, due_date), student:profiles(first_name, last_name, student_code)")
         .in("student_id", rosterIds)
         .order("id", { ascending: false }),
     ]);
