@@ -5,12 +5,14 @@ import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianG
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { useToast } from "@/components/Toast";
 import { Icon, type IconName } from "@/components/Icons";
+import DirectThread from "@/components/portal/DirectThread";
 
 // Learner view for tutors: identity, headline stats, grade trend, plus the two
 // write actions a tutor most needs — give a reward and log behaviour points.
 // Every write is scoped server-side to the tutor's roster.
-export default function TutorLearnerView({ student, rewards: initialRewards, subs, behaviorTypes, initialBehaviorLogs }: {
+export default function TutorLearnerView({ student, rewards: initialRewards, subs, behaviorTypes, initialBehaviorLogs, meId, canMessage }: {
   student: any; rewards: any[]; subs: any[]; behaviorTypes: any[]; initialBehaviorLogs: any[];
+  meId: string; canMessage: boolean;
 }) {
   const supabase = supabaseBrowser();
   const push = useToast();
@@ -188,6 +190,21 @@ export default function TutorLearnerView({ student, rewards: initialRewards, sub
                 dot={{ fill: "#EFAE56", r: 4, strokeWidth: 0 }} activeDot={{ r: 6 }} />
             </LineChart>
           </ResponsiveContainer>
+        </div>
+      )}
+
+      {/* Direct message with the learner */}
+      {canMessage && (
+        <div className="card p-6">
+          <h2 className="mb-3 font-display text-lg font-semibold">Message {student.first_name}</h2>
+          <DirectThread
+            channel={`chat-${student.id}-t-${meId}`}
+            studentId={student.id}
+            tutorId={meId}
+            meRole="tutor"
+            otherName={student.first_name}
+            sendParams={{ studentId: student.id }}
+          />
         </div>
       )}
 

@@ -15,12 +15,16 @@ export async function POST(req: Request) {
   if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
 
   const admin = supabaseAdmin();
-  const { data: msg } = await admin.from("messages").select("id, student_id").eq("id", id).maybeSingle();
+  // select("*") so tutor_id is included post-migration but this still works
+  // before migration-tutor-messages.sql has been run.
+  const { data: msg } = await admin.from("messages").select("*").eq("id", id).maybeSingle();
   // Idempotent: a message that's already gone (deleted on the other device, or
   // a stale list) is a successful delete, not an error — nothing to toast about.
   if (!msg) return NextResponse.json({ ok: true, alreadyGone: true });
 
-  const allowed = me?.role === "admin" || msg.student_id === user.id;
+  // Admin: anything. Learner: their own threads (as thread owner). Tutor: the
+  // learner↔tutor threads they own.
+  const allowed = me?.role === "admin" || msg.student_id === user.id || msg.tutor_id === user.id;
   if (!allowed) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const { error } = await admin.from("messages").delete().eq("id", id);
