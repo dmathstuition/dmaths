@@ -2,6 +2,7 @@ import PortalShell, { type NavItem } from "@/components/PortalShell";
 import AuthGuard from "@/components/AuthGuard";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import StreakHeartbeat from "@/components/portal/StreakHeartbeat";
+import AssistantWidget from "@/components/portal/AssistantWidget";
 import { getProfile } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
@@ -51,6 +52,7 @@ export default async function PortalLayout({ children }: { children: React.React
       <AuthGuard />
       <StreakHeartbeat />
       <ErrorBoundary>{children}</ErrorBoundary>
+      <AssistantWidget />
     </PortalShell>
   );
 }
