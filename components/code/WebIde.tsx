@@ -144,7 +144,7 @@ export default function WebIde({ persist = false, meId = "", initialSnippets = [
             {persist && <button onClick={save} disabled={saving} className="btn-ghost !min-h-[42px]">{saving ? "Saving…" : "Save"}</button>}
             {available && (
               <button onClick={() => ask(`HTML:\n${doc.html}\n\nCSS:\n${doc.css}\n\nJS:\n${doc.js}`)} className="btn-ghost !min-h-[42px] gap-1.5">
-                🧭 Ask Dexter
+                🧭 Ask D-Maths A.I
               </button>
             )}
             {onSubmit && (

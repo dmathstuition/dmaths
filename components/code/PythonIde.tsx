@@ -159,7 +159,7 @@ export default function PythonIde({ persist = false, meId = "", initialSnippets 
           <button onClick={() => setOutput([])} className="btn-ghost !min-h-[42px]">Clear output</button>
           {available && (
             <button onClick={() => ask(`\`\`\`python\n${code}\n\`\`\``)} className="btn-ghost !min-h-[42px] gap-1.5">
-              🧭 Ask Dexter
+              🧭 Ask D-Maths A.I
             </button>
           )}
           {onSubmit && (

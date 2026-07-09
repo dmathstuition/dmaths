@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import { supabaseServer } from "@/lib/supabase/server";
 
-// The D-Maths AI assistant "Dexter". Two modes:
+// The "D-Maths A.I" assistant. Two modes:
 //  • learner (default) — gives *hints and guiding questions*, never the finished
 //    answer, so the learner still does the thinking (and it never just solves
 //    their graded assignment).
@@ -12,7 +12,10 @@ import { supabaseServer } from "@/lib/supabase/server";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-const LEARNER_SYSTEM = `You are "Dexter", the friendly learning buddy for D-Maths — an online tuition service for primary and secondary school learners in Nigeria (ages ~8–18). Subjects: Mathematics, English, and beginner coding (Python and web / HTML-CSS-JavaScript).
+// The chat model. Override with OPENAI_MODEL if you want a different one.
+const MODEL = process.env.OPENAI_MODEL || "gpt-4o";
+
+const LEARNER_SYSTEM = `You are "D-Maths A.I", the friendly learning buddy for D-Maths — an online tuition service for primary and secondary school learners in Nigeria (ages ~8–18). Subjects: Mathematics, English, and beginner coding (Python and web / HTML-CSS-JavaScript).
 
 Your job is to help a learner who is stuck, WITHOUT doing their work for them.
 
@@ -28,7 +31,7 @@ HARD RULES — follow these every time:
 
 You are talking to a young learner. Be patient, kind, and clear.`;
 
-const STAFF_SYSTEM = `You are "Dexter", the teaching assistant for D-Maths — an online tuition service for primary and secondary school learners in Nigeria (ages ~8–18). Subjects: Mathematics, English, and beginner coding (Python and web / HTML-CSS-JavaScript). You are talking to a tutor or the admin — a professional colleague, not a learner.
+const STAFF_SYSTEM = `You are "D-Maths A.I", the teaching assistant for D-Maths — an online tuition service for primary and secondary school learners in Nigeria (ages ~8–18). Subjects: Mathematics, English, and beginner coding (Python and web / HTML-CSS-JavaScript). You are talking to a tutor or the admin — a professional colleague, not a learner.
 
 Help them teach well. You CAN and SHOULD give complete answers here:
 - Full worked solutions and step-by-step explanations they can teach from.
@@ -45,10 +48,10 @@ export async function POST(req: Request) {
   const { data: { user } } = await supa.auth.getUser();
   if (!user) return NextResponse.json({ error: "Please sign in first." }, { status: 401 });
 
-  const key = process.env.ANTHROPIC_API_KEY;
+  const key = process.env.OPENAI_API_KEY;
   if (!key) {
     return NextResponse.json(
-      { error: "The learning buddy isn't switched on yet. Please ask your tutor — or set ANTHROPIC_API_KEY in the deployment." },
+      { error: "The learning buddy isn't switched on yet. Please ask your tutor — or set OPENAI_API_KEY in the deployment." },
       { status: 503 },
     );
   }
@@ -85,26 +88,22 @@ export async function POST(req: Request) {
     : base;
 
   try {
-    const client = new Anthropic({ apiKey: key });
-    const res = await client.messages.create({
-      model: "claude-opus-4-8",
+    const client = new OpenAI({ apiKey: key });
+    const res = await client.chat.completions.create({
+      model: MODEL,
       max_tokens: 1024,
-      system,
-      messages,
+      // OpenAI takes the system prompt as the first message in the list.
+      messages: [{ role: "system", content: system }, ...messages],
     });
-    const reply = res.content
-      .filter((b): b is Anthropic.TextBlock => b.type === "text")
-      .map((b) => b.text)
-      .join("\n")
-      .trim();
+    const reply = (res.choices[0]?.message?.content ?? "").trim();
     return NextResponse.json({ reply: reply || "Hmm, I lost my train of thought — try asking again?" });
   } catch (err: any) {
     // Typed SDK errors carry a status; surface a friendly line, log the detail.
     console.error("assistant error", err?.status, err?.message);
-    if (err instanceof Anthropic.RateLimitError) {
+    if (err instanceof OpenAI.RateLimitError) {
       return NextResponse.json({ error: "I'm a bit busy right now — try again in a moment." }, { status: 429 });
     }
-    if (err instanceof Anthropic.AuthenticationError) {
+    if (err instanceof OpenAI.AuthenticationError) {
       return NextResponse.json({ error: "The learning buddy is misconfigured. Please tell your tutor." }, { status: 503 });
     }
     return NextResponse.json({ error: "Sorry, I couldn't think of a reply just now. Please try again." }, { status: 502 });
