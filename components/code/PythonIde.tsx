@@ -45,7 +45,7 @@ export default function PythonIde({ persist = false, meId = "", initialSnippets 
   const [title, setTitle] = useState(initialSnippets[0]?.title ?? "Untitled");
   const [code, setCode] = useState(initialSnippets[0]?.code ?? STARTER);
   const [output, setOutput] = useState<Line[]>([]);
-  const [status, setStatus] = useState<"boot" | "loading" | "ready" | "running">("boot");
+  const [status, setStatus] = useState<"idle" | "loading" | "ready" | "running">("idle");
   const [saving, setSaving] = useState(false);
 
   const worker = useRef<Worker | null>(null);
@@ -55,28 +55,24 @@ export default function PythonIde({ persist = false, meId = "", initialSnippets 
 
   const append = useCallback((line: Line) => setOutput((p) => [...p, line]), []);
 
-  // (Re)create the worker and wire up its messages.
-  const spawn = useCallback(() => {
-    worker.current?.terminate();
+  // Create the Pyodide worker lazily — only on the first Run — so merely opening
+  // the page (or the Web tab) never downloads the ~10 MB Python engine.
+  const ensureWorker = useCallback(() => {
+    if (worker.current) return worker.current;
     const w = new Worker("/pyodide-worker.js");
     w.onmessage = (e) => {
       const m = e.data || {};
-      if (m.type === "status") setStatus("loading");
-      else if (m.type === "ready") setStatus("ready");
-      else if (m.type === "running") setStatus("running");
+      if (m.type === "running") setStatus("running");
       else if (m.type === "out") append({ stream: "out", text: m.text });
       else if (m.type === "err") append({ stream: "err", text: m.text });
       else if (m.type === "done") setStatus("ready");
       else if (m.type === "fatal") { setStatus("ready"); append({ stream: "err", text: m.text }); }
     };
-    w.postMessage({ type: "init" });
     worker.current = w;
+    return w;
   }, [append]);
 
-  useEffect(() => {
-    spawn();
-    return () => worker.current?.terminate();
-  }, [spawn]);
+  useEffect(() => () => worker.current?.terminate(), []);
 
   // Keep the highlight layer scrolled in sync with the textarea.
   const syncScroll = () => {
@@ -101,16 +97,20 @@ export default function PythonIde({ persist = false, meId = "", initialSnippets 
   }
 
   function run() {
-    if (status === "running" || status === "boot") return;
+    if (status === "loading" || status === "running") return;
     setOutput([]);
-    if (status === "loading") append({ stream: "sys", text: "Loading Python… the first run takes a few seconds." });
-    worker.current?.postMessage({ type: "run", code });
+    const first = !worker.current;
+    const w = ensureWorker();
+    setStatus("loading");
+    if (first) append({ stream: "sys", text: "Loading Python… the first run downloads the engine (a few seconds)." });
+    w.postMessage({ type: "run", code });
   }
 
   function stop() {
-    append({ stream: "sys", text: "⏹ Stopped. Python will reload on the next run." });
-    setStatus("boot");
-    spawn();
+    worker.current?.terminate();
+    worker.current = null;
+    setStatus("idle");
+    append({ stream: "sys", text: "⏹ Stopped." });
   }
 
   // ── Snippets (only when persisted + signed in) ────────────────────
@@ -127,7 +127,7 @@ export default function PythonIde({ persist = false, meId = "", initialSnippets 
       push("Saved.", "success");
     } else {
       const { data, error } = await supabaseBrowser().from("code_snippets")
-        .insert({ user_id: meId, title: title.trim() || "Untitled", code }).select().single();
+        .insert({ user_id: meId, title: title.trim() || "Untitled", code, language: "python" }).select().single();
       setSaving(false);
       if (error || !data) { push(/code_snippets/i.test(error?.message ?? "") ? "Run migration-code-snippets.sql in Supabase first." : "Could not save.", "error"); return; }
       setSnippets((p) => [{ id: data.id, title: data.title, code: data.code }, ...p]);
@@ -145,8 +145,8 @@ export default function PythonIde({ persist = false, meId = "", initialSnippets 
     if (activeId === id) newSnippet();
   }
 
-  const busy = status === "running";
-  const statusLabel = status === "boot" || status === "loading" ? "Loading Python…" : status === "running" ? "Running…" : "Ready";
+  const busy = status === "loading" || status === "running";
+  const statusLabel = status === "loading" ? "Loading Python…" : status === "running" ? "Running…" : status === "ready" ? "Ready" : "Idle";
 
   return (
     <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
@@ -183,7 +183,7 @@ export default function PythonIde({ persist = false, meId = "", initialSnippets 
           {busy ? (
             <button onClick={stop} className="btn-danger !min-h-[42px] !px-5">■ Stop</button>
           ) : (
-            <button onClick={run} disabled={status === "boot"} className="btn-gold !min-h-[42px] !px-6">▶ Run</button>
+            <button onClick={run} className="btn-gold !min-h-[42px] !px-6">▶ Run</button>
           )}
           {persist && (
             <button onClick={save} disabled={saving} className="btn-ghost !min-h-[42px]">{saving ? "Saving…" : "Save"}</button>

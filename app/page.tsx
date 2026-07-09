@@ -214,10 +214,10 @@ export default function Landing() {
               <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-white px-3.5 py-1 text-[11px] font-bold text-gold-deep">
                 <span className="badge-pulse h-1.5 w-1.5 rounded-full bg-gold-deep" /> New
               </span>
-              <h2 className="mt-4 font-display text-3xl font-bold md:text-4xl">Write <span className="text-gold-deep">Python</span> right now</h2>
+              <h2 className="mt-4 font-display text-3xl font-bold md:text-4xl">Write <span className="text-gold-deep">code</span> right now</h2>
               <p className="mt-3 max-w-md text-sm leading-relaxed text-ink/60">
-                Real code, running in your browser — no install, no sign-up. Try it for yourself and see
-                the kind of hands-on coding learners do at D-Maths.
+                Real Python — and build a live web page with HTML, CSS &amp; JavaScript — right in your
+                browser. No install, no sign-up. Try the hands-on coding learners do at D-Maths.
               </p>
               <Link href="/playground" className="btn-gold group mt-6 inline-flex !rounded-full !px-6">
                 Open the playground <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>

@@ -15,6 +15,7 @@ const NAV: NavItem[] = [
   { href: "/admin/assignments", label: "Assignments", icon: "assignments" },
   { href: "/admin/materials", label: "Materials", icon: "materials" },
   { href: "/admin/curriculum", label: "Curriculum", icon: "curriculum" },
+  { href: "/admin/code", label: "Code playground", icon: "code" },
   { href: "/admin/reports", label: "Reports", icon: "reports" },
   { href: "/admin/calendar", label: "Calendar", icon: "calendar" },
   { href: "/admin/notices", label: "Announcements", icon: "notices" },

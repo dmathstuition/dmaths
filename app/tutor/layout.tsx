@@ -13,6 +13,7 @@ const NAV: NavItem[] = [
   { href: "/tutor/learners", label: "My Learners", icon: "students" },
   { href: "/tutor/assignments", label: "Assignments", icon: "assignments" },
   { href: "/tutor/materials", label: "Materials", icon: "materials" },
+  { href: "/tutor/code", label: "Code playground", icon: "code" },
   { href: "/tutor/messages", label: "Messages", icon: "messages" },
 ];
 
