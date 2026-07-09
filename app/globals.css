@@ -463,3 +463,7 @@ html { scroll-behavior: smooth; }
 .tok-s { color: #7ee0b0; }                       /* string    */
 .tok-n { color: #fcd34d; }                       /* number    */
 .tok-c { color: #6b8299; font-style: italic; }   /* comment   */
+
+/* Extra editor tokens for HTML/CSS/JS highlighting */
+.tok-a { color: #f0c274; }                        /* html attribute / css at-rule */
+.tok-p { color: #6b8299; }                        /* punctuation (tag brackets)    */
