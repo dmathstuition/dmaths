@@ -51,10 +51,11 @@ export default function SummerCamp() {
       </header>
 
       {/* HERO */}
-      <section className="boardgrid relative bg-board pb-20 pt-16 text-white">
+      <section className="boardgrid relative overflow-hidden bg-board pb-20 pt-16 text-white">
+        <div className="mesh-dark pointer-events-none absolute inset-0 opacity-80" />
         <DotsScatter className="float pointer-events-none absolute left-6 top-20 h-24 w-24 opacity-30" />
         <DotsScatter className="float pointer-events-none absolute right-10 bottom-10 h-20 w-20 opacity-20 [animation-delay:1.5s]" />
-        <div className="mx-auto grid max-w-6xl items-center gap-10 px-5 md:grid-cols-2">
+        <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-10 px-5 md:grid-cols-2">
           <Reveal className="text-center md:text-left">
             <div className="flex flex-wrap items-center justify-center gap-2 md:justify-start">
               <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-4 py-1.5 text-xs font-bold text-gold">
@@ -71,7 +72,7 @@ export default function SummerCamp() {
               )}
             </div>
             <h1 className="mt-5 font-display text-4xl font-extrabold leading-[1.08] tracking-tight md:text-6xl">
-              D-Maths Online <span className="text-shimmer">Summer Camp</span>
+              D-Maths Online <span className="text-gradient-gold">Summer Camp</span>
             </h1>
             <p className="mt-5 text-[15px] leading-relaxed text-white/70 md:text-base">
               Hands-on <strong className="text-white">Maths &amp; Coding</strong> running{" "}
@@ -130,7 +131,7 @@ export default function SummerCamp() {
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {INCLUDED.map((item, i) => (
             <Reveal key={item} delay={i * 60}>
-              <div className="hovlift group flex h-full items-center gap-3 rounded-2xl border border-line bg-white p-4">
+              <div className="card-premium group flex h-full items-center gap-3 rounded-2xl p-4">
                 <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-gold/10 text-gold-deep transition-transform duration-300 group-hover:scale-110 group-hover:bg-gold group-hover:text-white">
                   <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -161,8 +162,8 @@ export default function SummerCamp() {
             {SUMMER_CAMP_TIERS.map((t, i) => (
               <Reveal key={t.id} delay={i * 70}>
                 <div
-                  className={`hovlift group relative flex h-full flex-col rounded-3xl border bg-white p-6 transition-transform duration-300 hover:scale-[1.02] ${
-                    t.highlight ? "border-gold shadow-lg ring-1 ring-gold/30" : "border-line"
+                  className={`card-premium group relative flex h-full flex-col rounded-3xl p-6 ${
+                    t.highlight ? "!border-gold shadow-lg ring-1 ring-gold/30" : ""
                   }`}
                 >
                   {t.highlight && (
@@ -258,16 +259,17 @@ export default function SummerCamp() {
       {/* FINAL CTA */}
       <section className="mx-auto max-w-6xl px-5 py-16">
         <Reveal>
-          <div className="stat-shimmer group relative flex flex-col items-center justify-between gap-5 overflow-hidden rounded-[2rem] bg-gold-pale px-8 py-8 sm:flex-row">
-            <div>
-              <p className="font-display text-2xl font-bold text-ink">Ready for a summer of growth?</p>
-              <p className="mt-1 text-sm text-ink/55">
+          <div className="mesh-dark group relative flex flex-col items-center justify-between gap-5 overflow-hidden rounded-[2rem] px-8 py-10 shadow-2xl sm:flex-row sm:px-12">
+            <DotsScatter className="float pointer-events-none absolute right-6 top-4 h-16 w-16 opacity-20" />
+            <div className="relative text-center sm:text-left">
+              <p className="font-display text-2xl font-bold text-white md:text-3xl">Ready for a summer of growth?</p>
+              <p className="mt-1.5 text-sm text-white/60">
                 100% online — learn from home, anywhere. Limited places per group.
               </p>
             </div>
             <Link
               href={`/apply?camp=${SUMMER_CAMP.season}`}
-              className="btn-gold inline-flex items-center gap-1.5 !rounded-full !px-8 !text-base"
+              className="btn-gold relative inline-flex items-center gap-1.5 !rounded-full !px-8 !text-base shadow-lg shadow-gold/30 transition hover:scale-105"
             >
               Register now <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
             </Link>

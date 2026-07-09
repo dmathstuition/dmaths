@@ -63,35 +63,60 @@ export default function Landing() {
 
       {/* HERO */}
       <header className="relative pt-28 pb-16">
-        {/* soft animated colour wash behind the hero */}
+        {/* premium gradient mesh + soft animated colour wash behind the hero */}
+        <div className="mesh-premium pointer-events-none absolute inset-x-0 -top-24 h-[42rem]" />
         <div className="aurora pointer-events-none absolute inset-x-0 top-0 h-[30rem] opacity-40" />
         <FloatingMath />
         <DotsScatter className="float pointer-events-none absolute left-6 top-28 h-24 w-24 opacity-70" />
         <DotsScatter className="float pointer-events-none absolute right-10 bottom-10 h-20 w-20 opacity-50 [animation-delay:1.5s]" />
         <div className="relative mx-auto grid max-w-7xl items-center gap-8 px-5 md:grid-cols-2">
           <Reveal className="space-y-0">
-            <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold-pale px-4 py-1.5 text-xs font-bold text-gold-deep">
+            <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-white/70 px-4 py-1.5 text-xs font-bold text-gold-deep shadow-sm backdrop-blur">
               <span className="badge-pulse h-1.5 w-1.5 rounded-full bg-gold-deep" />
               Trusted by 200+ students across Nigeria
             </span>
-            <h1 className="mt-5 font-display text-5xl font-extrabold leading-[1.08] tracking-tight md:text-6xl">
-              We create <span className="text-shimmer">solutions</span> for your success
+            <h1 className="mt-5 font-display text-5xl font-extrabold leading-[1.05] tracking-tight md:text-[4.2rem]">
+              We create <span className="text-gradient-gold">solutions</span> for your success
             </h1>
             <p className="mt-5 max-w-md text-[15px] leading-relaxed text-ink/55">
               A virtual learning community for students across Nigeria. Our tutors keep a keen eye
               on every learner's progress in maths, sciences and coding — through live online
               sessions, personalised feedback and a portal built for results.
             </p>
+
+            {/* exam boards we prepare learners for */}
+            <div className="mt-6 flex flex-wrap items-center gap-2">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-ink/35">Prep for</span>
+              {["WAEC", "JAMB", "IGCSE", "SAT", "A-Levels"].map((e) => (
+                <span key={e} className="rounded-lg border border-line bg-white/70 px-2.5 py-1 text-[11px] font-bold text-ink/60 backdrop-blur">{e}</span>
+              ))}
+            </div>
+
             <div className="mt-8 flex flex-wrap items-center gap-4">
-              <Link href="/apply" className="btn-gold group !min-h-[50px] !rounded-full !px-7 !text-base">
+              <Link href="/apply" className="btn-gold group !min-h-[50px] !rounded-full !px-7 !text-base shadow-lg shadow-gold/30">
                 Get started <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
               </Link>
               <a href="#how" className="group flex items-center gap-3 text-sm font-semibold text-ink/70">
                 <span className="flex h-11 w-11 items-center justify-center rounded-full border border-line bg-white shadow-sm transition group-hover:border-gold group-hover:shadow-md">
                   <svg className="float h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="#1A60AB" strokeWidth="2.5"><path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </span>
-                Explore more
+                See how it works
               </a>
+            </div>
+
+            {/* social proof: avatar stack + rating */}
+            <div className="mt-8 flex items-center gap-3">
+              <div className="flex -space-x-2.5">
+                {["#EFAE56", "#1A60AB", "#7BA3CA", "#C8881F"].map((c, i) => (
+                  <span key={i} className="avatar-ring flex h-8 w-8 items-center justify-center rounded-full font-display text-[11px] font-bold text-white" style={{ background: c }}>
+                    {["JV", "MA", "AA", "+"][i]}
+                  </span>
+                ))}
+              </div>
+              <div className="text-[13px] leading-tight">
+                <span className="font-bold text-gold">★★★★★</span>
+                <p className="text-ink/50"><span className="font-bold text-ink/70">4.9/5</span> from 200+ learners &amp; parents</p>
+              </div>
             </div>
           </Reveal>
 
@@ -123,6 +148,23 @@ export default function Landing() {
         </div>
       </header>
 
+      {/* CURRICULA MARQUEE — quiet, premium "what we cover" ticker */}
+      <section aria-hidden="true" className="border-y border-line/40 bg-white py-3.5">
+        <div className="marquee mx-auto max-w-7xl">
+          <div className="marquee-track gap-10 pr-10">
+            {[...Array(2)].flatMap((_, dup) =>
+              ["Algebra", "Calculus", "Geometry", "Physics", "Statistics", "Python", "Web Dev", "WAEC", "JAMB", "IGCSE", "SAT", "A-Levels", "Probability", "Trigonometry"]
+                .map((k) => (
+                  <span key={`${dup}-${k}`} className="flex items-center gap-3 text-sm font-bold text-ink/35">
+                    {k}
+                    <span className="h-1 w-1 rounded-full bg-gold/60" />
+                  </span>
+                )),
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* FEATURES STRIP */}
       <section className="border-y border-line/40 bg-chalk/40 py-5">
         <Reveal className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-10 gap-y-4 px-5">
@@ -153,13 +195,36 @@ export default function Landing() {
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {SERVICES.map((s, i) => (
             <Reveal key={s.t} delay={i * 80}>
-              <div className="hovlift stat-shimmer group relative h-full overflow-hidden rounded-3xl border border-line bg-white p-6 text-center transition-transform duration-300 hover:scale-[1.02]">
+              <div className="card-premium group h-full rounded-3xl p-6 text-center">
                 <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl font-mono text-xl font-bold text-white shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6" style={{ background: s.c }}>{s.sym}</div>
                 <h3 className="font-display text-lg font-bold">{s.t}</h3>
                 <p className="mt-2 text-[13px] leading-relaxed text-ink/55">{s.d}</p>
               </div>
             </Reveal>
           ))}
+        </div>
+      </section>
+
+      {/* IMPACT BAND — dark, full-contrast premium moment */}
+      <section className="relative my-10">
+        <div className="mx-auto max-w-7xl px-5">
+          <Reveal className="mesh-dark relative overflow-hidden rounded-[2.5rem] px-6 py-14 shadow-2xl sm:px-14">
+            <DotsScatter className="float pointer-events-none absolute right-8 top-8 h-20 w-20 opacity-20" />
+            <div className="relative text-center">
+              <h2 className="font-display text-3xl font-bold text-white md:text-4xl">Results that <span className="text-gradient-gold">speak</span></h2>
+              <p className="mx-auto mt-2 max-w-md text-sm text-white/60">Real outcomes from a community built entirely around each learner's progress.</p>
+            </div>
+            <div className="relative mt-10 grid gap-6 sm:grid-cols-3">
+              {STATS.map(({ v, suffix, l }) => (
+                <div key={l} className="text-center">
+                  <div className="font-display text-5xl font-extrabold text-gold md:text-6xl">
+                    <CountUp to={v} suffix={suffix} />
+                  </div>
+                  <div className="mt-2 text-sm font-semibold uppercase tracking-wide text-white/55">{l}</div>
+                </div>
+              ))}
+            </div>
+          </Reveal>
         </div>
       </section>
 
@@ -222,16 +287,20 @@ export default function Landing() {
               A-Levels. Let's turn effort into achievement — tailored maths, science and coding
               tuition for every learner.
             </p>
-            <div className="mt-6 grid grid-cols-3 gap-4">
-              {STATS.map(({ v, suffix, l }) => (
-                <div key={l} className="hovlift stat-shimmer group relative overflow-hidden rounded-2xl bg-chalk p-4 text-center">
-                  <div className="font-display text-2xl font-extrabold text-ink">
-                    <CountUp to={v} suffix={suffix} />
-                  </div>
-                  <div className="mt-1 text-[11px] font-semibold text-ink/45">{l}</div>
-                </div>
+            <ul className="mt-6 space-y-3">
+              {[
+                "Live, interactive online sessions — never pre-recorded",
+                "A tutor who tracks every learner's progress personally",
+                "One portal for classes, assignments, grades and feedback",
+              ].map((v) => (
+                <li key={v} className="flex items-start gap-3">
+                  <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-gold/15 text-gold-deep">
+                    <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                  </span>
+                  <span className="text-[14px] leading-relaxed text-ink/65">{v}</span>
+                </li>
               ))}
-            </div>
+            </ul>
             <Link href="/apply" className="btn-gold group mt-7 inline-flex !rounded-full !px-6">
               Read more <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
             </Link>
@@ -336,7 +405,7 @@ export default function Landing() {
           <div className="grid gap-5 md:grid-cols-3">
             {TESTIMONIALS.map((t, i) => (
               <Reveal key={t.n} delay={i * 80}>
-                <figure className="hovlift group relative h-full overflow-hidden rounded-3xl border border-line bg-white p-6">
+                <figure className="card-premium group relative h-full overflow-hidden rounded-3xl p-6">
                   <span className="pointer-events-none absolute -right-1 -top-3 font-display text-7xl font-extrabold text-gold/10 transition-colors duration-300 group-hover:text-gold/20" aria-hidden="true">&rdquo;</span>
                   <div className="relative flex items-center gap-3">
                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gold font-display font-bold text-white shadow-sm transition-transform duration-300 group-hover:scale-110">
@@ -359,14 +428,14 @@ export default function Landing() {
       {/* CTA BAND */}
       <section className="mx-auto max-w-7xl px-5 py-16">
         <Reveal>
-          <div className="stat-shimmer group relative flex flex-col items-center justify-between gap-5 overflow-hidden rounded-[2rem] bg-gold-pale px-8 py-8 sm:flex-row">
-            <div className="aurora pointer-events-none absolute inset-0 opacity-50" />
-            <div aria-hidden className="pointer-events-none absolute right-40 top-2 select-none font-display text-3xl font-bold text-gold/40 float">π</div>
-            <div className="relative">
-              <p className="font-display text-2xl font-bold text-ink">Ready to get started?</p>
-              <p className="mt-1 text-sm text-ink/55">100% online — study from home, anywhere in Nigeria.</p>
+          <div className="mesh-dark group relative flex flex-col items-center justify-between gap-5 overflow-hidden rounded-[2rem] px-8 py-10 shadow-2xl sm:flex-row sm:px-12">
+            <div aria-hidden className="pointer-events-none absolute right-40 top-4 select-none font-display text-4xl font-bold text-gold/25 float">π</div>
+            <DotsScatter className="float pointer-events-none absolute -left-2 bottom-2 h-16 w-16 opacity-20" />
+            <div className="relative text-center sm:text-left">
+              <p className="font-display text-2xl font-bold text-white md:text-3xl">Ready to get started?</p>
+              <p className="mt-1.5 text-sm text-white/60">100% online — study from home, anywhere in Nigeria. Setup takes minutes.</p>
             </div>
-            <Link href="/apply" className="badge-pulse btn-gold relative inline-flex items-center gap-1.5 !rounded-full !px-8 !text-base">
+            <Link href="/apply" className="btn-gold relative inline-flex items-center gap-1.5 !rounded-full !px-8 !text-base shadow-lg shadow-gold/30 transition hover:scale-105">
               Apply now <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
             </Link>
           </div>

@@ -30,7 +30,7 @@ export async function GET(req: Request) {
 
   const { data: classes } = await admin
     .from("classes")
-    .select("id, subject, starts_at, link")
+    .select("id, subject, starts_at, link, tutor_id")
     .is("reminded_at", null)
     .gte("starts_at", now.toISOString())
     .lte("starts_at", soon.toISOString());
@@ -57,6 +57,16 @@ export async function GET(req: Request) {
         title: "Class starting soon 📚",
         body: `${cls.subject} at ${time}`,
         link: "/portal/classes",
+      });
+      reminded++;
+    }
+
+    // Remind the assigned tutor too, pointing at their own portal.
+    if (cls.tutor_id) {
+      await notifyUser(admin, cls.tutor_id, {
+        title: "Your class starts soon 📚",
+        body: `${cls.subject} at ${time}`,
+        link: "/tutor/classes",
       });
       reminded++;
     }

@@ -373,3 +373,71 @@ html { scroll-behavior: smooth; }
     inset -4px -4px 8px rgba(74, 122, 180, 0.14);
 }
 /* The global prefers-reduced-motion rule (top of file) disables all of the above. */
+
+/* ══════════════════════════════════════════════════════════════════
+   PREMIUM LANDING UTILITIES
+   High-end marketing polish for the public pages. All motion is disabled
+   by the global prefers-reduced-motion rule at the top of this file.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Rich multi-point gradient mesh for hero / CTA backdrops. */
+.mesh-premium {
+  background:
+    radial-gradient(40% 55% at 15% 20%, rgba(239,174,86,.22), transparent 70%),
+    radial-gradient(45% 55% at 85% 15%, rgba(123,163,202,.22), transparent 72%),
+    radial-gradient(50% 60% at 60% 95%, rgba(239,174,86,.14), transparent 72%),
+    radial-gradient(40% 50% at 35% 80%, rgba(26,96,171,.10), transparent 70%);
+}
+/* Dark navy mesh — for full-bleed contrast bands. */
+.mesh-dark {
+  background:
+    radial-gradient(45% 60% at 12% 18%, rgba(239,174,86,.24), transparent 66%),
+    radial-gradient(50% 65% at 88% 22%, rgba(123,163,202,.20), transparent 70%),
+    radial-gradient(60% 70% at 55% 100%, rgba(239,174,86,.14), transparent 72%),
+    linear-gradient(160deg, #0F3A6B 0%, #0A2A4F 55%, #071F3B 100%);
+}
+
+/* Light frosted glass card for premium sections. */
+.glass-lite {
+  background: rgba(255,255,255,.72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255,255,255,.7);
+  box-shadow: 0 1px 2px rgba(26,96,171,.05), 0 18px 50px rgba(26,96,171,.12);
+}
+
+/* Card with a gradient hairline that glows on hover. */
+.card-premium {
+  position: relative;
+  background: #fff;
+  border: 1px solid var(--tw-prose-hr, #D6E3E9);
+  transition: transform .3s ease, box-shadow .3s ease;
+}
+.card-premium::before {
+  content: "";
+  position: absolute; inset-inline: 1.25rem; top: 0; height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #EFAE56, #C8881F);
+  opacity: 0; transition: opacity .3s ease;
+}
+.card-premium:hover { transform: translateY(-6px); box-shadow: 0 24px 60px rgba(26,96,171,.18); }
+.card-premium:hover::before { opacity: 1; }
+
+/* Gradient text — gold sweep, no animation (crisper than shimmer for big headings). */
+.text-gradient-gold {
+  background: linear-gradient(120deg, #EFAE56 0%, #C8881F 60%, #EFAE56 100%);
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent;
+}
+
+/* Infinite marquee for the exam-board trust strip. */
+@keyframes marqueeScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.marquee { overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+.marquee-track { display: inline-flex; width: max-content; animation: marqueeScroll 30s linear infinite; }
+.marquee:hover .marquee-track { animation-play-state: paused; }
+
+/* Thin gradient divider between sections. */
+.divider-fade { height: 1px; background: linear-gradient(90deg, transparent, rgba(26,96,171,.18), transparent); }
+
+/* Avatar stack ring for social proof. */
+.avatar-ring { box-shadow: 0 0 0 2px #fff; }
