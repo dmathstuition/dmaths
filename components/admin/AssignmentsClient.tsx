@@ -6,6 +6,7 @@ import ConfirmModal from "@/components/ConfirmModal";
 import GradeModal from "@/components/GradeModal";
 import { useToast } from "@/components/Toast";
 import { fmtWAT, watToUtcISO, utcToWatParts } from "@/lib/time";
+import { codeDisplay } from "@/lib/codeSubmission";
 
 const SUBJECTS = ["Algebra","Calculus","Statistics","Geometry","Further Mathematics","Core Maths Revision","Physics","JavaScript","Python","Python Practice Challenge","External Examinations"];
 
@@ -125,12 +126,16 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
       cbt_open: f.cbt_open || null, cbt_close: f.cbt_close || null,
       cbt_questions: f.type === "cbt" && f.cbt_mode === "inline" ? questions : null,
       file_url: fileUrl, file_name: fileName,
+      ...(f.type === "code" ? { code_language: f.code_language || "python", starter_code: f.starter_code || "" } : {}),
     };
     let { data: a, error } = await supabase.from("assignments").insert(payload).select().single();
     if (error && /due_at/i.test(error.message)) {
       // Migration not applied yet — create without the deadline time (date-only).
       const { due_at: _omit, ...withoutDueAt } = payload;
       ({ data: a, error } = await supabase.from("assignments").insert(withoutDueAt).select().single());
+    }
+    if (error && /code_language|starter_code/i.test(error.message)) {
+      setBusy(false); setFormError("Coding assignments need migration-code-assignments.sql — run it in Supabase."); return;
     }
 
     if (error || !a) { setBusy(false); setFormError("Could not create assignment."); return; }
@@ -178,6 +183,7 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
     setEditId(a.id);
     setF({ title: a.title, subject: a.subject, type: a.type,
            due_date: parts.date, due_time: parts.time,
+           code_language: a.code_language || "python", starter_code: a.starter_code || "",
            instructions: a.instructions || "", roster: [], cbt_mode: "link" });
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -239,14 +245,34 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
             <div>
               <label className="flabel">Type</label>
               <select className="field" value={f.type} onChange={e => setF({ ...f, type: e.target.value })}>
-                <option value="written">Written (photo / link submission)</option><option value="cbt">CBT test (multiple choice)</option>
+                <option value="written">Written (photo / link submission)</option>
+                <option value="cbt">CBT test (multiple choice)</option>
+                <option value="code">Code (in-browser IDE)</option>
               </select>
             </div>
+            {f.type === "code" && (
+              <div>
+                <label className="flabel">Language</label>
+                <select className="field" value={f.code_language || "python"} onChange={e => setF({ ...f, code_language: e.target.value })}>
+                  <option value="python">Python</option>
+                  <option value="web">Web (HTML/CSS/JS)</option>
+                </select>
+              </div>
+            )}
             <div>
               <label className="flabel">Attach question sheet <span className="font-normal text-ink/40">(optional)</span></label>
               <input className="field" type="file" accept=".pdf,.doc,.docx,.jpg,.png" onChange={e => setFile(e.target.files?.[0] || null)} />
             </div>
           </div>
+
+          {f.type === "code" && (
+            <div>
+              <label className="flabel">Starter code <span className="font-normal text-ink/40">(optional — what the learner opens with)</span></label>
+              <textarea className="field min-h-[120px] font-mono text-[13px]" spellCheck={false}
+                value={f.starter_code || ""} onChange={e => setF({ ...f, starter_code: e.target.value })}
+                placeholder={f.code_language === "web" ? 'Leave blank, or paste {"html":"…","css":"…","js":"…"}' : "# starter code the learner sees…"} />
+            </div>
+          )}
 
           {f.type === "cbt" && (
             <>
@@ -407,6 +433,12 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
                         className="text-xs font-semibold text-gold-deep hover:underline">View submitted photo / file →</a>
                     )}
                   </div>
+                  {r.code && g.assignment.type === "code" && (
+                    <details className="mt-1.5">
+                      <summary className="cursor-pointer text-xs font-semibold text-gold-deep">View submitted {g.assignment.code_language === "web" ? "web" : "Python"} code</summary>
+                      <pre className="mt-1.5 max-h-72 overflow-auto whitespace-pre-wrap rounded-xl bg-[#0b2036] p-3 font-mono text-[12px] text-slate-100">{codeDisplay(r.code, g.assignment.code_language)}</pre>
+                    </details>
+                  )}
                 </div>
                 <div className="flex items-center gap-3">
                   <span className={r.status === "graded" ? "pill-green" : r.status === "submitted" ? "pill-blue" : "pill-amber"}>

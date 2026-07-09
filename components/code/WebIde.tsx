@@ -39,14 +39,16 @@ function parseDoc(code: string): Doc {
   catch { return { html: code, css: "", js: "" }; }
 }
 
-export default function WebIde({ persist = false, meId = "", initialSnippets = [] }: {
+export default function WebIde({ persist = false, meId = "", initialSnippets = [], initialCode, onSubmit, submitLabel = "Submit answer" }: {
   persist?: boolean; meId?: string; initialSnippets?: Snippet[];
+  initialCode?: string; onSubmit?: (code: string) => void | Promise<void>; submitLabel?: string;
 }) {
   const push = useToast();
   const [snippets, setSnippets] = useState<Snippet[]>(initialSnippets);
   const [activeId, setActiveId] = useState<string | null>(initialSnippets[0]?.id ?? null);
   const [title, setTitle] = useState(initialSnippets[0]?.title ?? "Untitled");
-  const [doc, setDoc] = useState<Doc>(initialSnippets[0] ? parseDoc(initialSnippets[0].code) : STARTER);
+  const [doc, setDoc] = useState<Doc>(initialCode ? parseDoc(initialCode) : initialSnippets[0] ? parseDoc(initialSnippets[0].code) : STARTER);
+  const [submitting, setSubmitting] = useState(false);
   const [tab, setTab] = useState<"html" | "css" | "js">("html");
   const [srcDoc, setSrcDoc] = useState<string>("");
   const [logs, setLogs] = useState<{ level: string; text: string }[]>([]);
@@ -138,6 +140,10 @@ export default function WebIde({ persist = false, meId = "", initialSnippets = [
           <div className="flex flex-wrap items-center gap-2">
             <button onClick={run} className="btn-gold !min-h-[42px] !px-6">▶ Run</button>
             {persist && <button onClick={save} disabled={saving} className="btn-ghost !min-h-[42px]">{saving ? "Saving…" : "Save"}</button>}
+            {onSubmit && (
+              <button onClick={async () => { setSubmitting(true); await onSubmit(JSON.stringify(doc)); setSubmitting(false); }}
+                disabled={submitting} className="btn-ink !min-h-[42px] !px-6">{submitting ? "Submitting…" : submitLabel}</button>
+            )}
             <span className="ml-auto hidden text-xs text-ink/40 sm:block">Ctrl/⌘ + Enter to run</span>
           </div>
         </div>

@@ -13,9 +13,11 @@ export async function POST(req: Request) {
   const body = await req.json().catch(() => null);
   const title = String(body?.title ?? "").trim().slice(0, 200);
   const subject = String(body?.subject ?? "").trim().slice(0, 80) || "General";
-  const type = body?.type === "cbt" ? "cbt" : "written";
+  const type = ["cbt", "code"].includes(body?.type) ? body.type : "written";
   const instructions = String(body?.instructions ?? "").slice(0, 4000);
   const cbtLink = String(body?.cbtLink ?? "").trim();
+  const codeLanguage = body?.codeLanguage === "web" ? "web" : "python";
+  const starterCode = String(body?.starterCode ?? "").slice(0, 20000);
   const fileUrl = String(body?.fileUrl ?? "").trim();
   const fileName = String(body?.fileName ?? "").trim();
   const dueAt = body?.dueAt ? String(body.dueAt) : null;         // ISO (already WAT→UTC on client)
@@ -45,6 +47,7 @@ export async function POST(req: Request) {
     due_date: dueDate, due_at: dueAt,
     cbt_link: type === "cbt" ? cbtLink : "",
     file_url: fileUrl, file_name: fileName,
+    ...(type === "code" ? { code_language: codeLanguage, starter_code: starterCode } : {}),
   };
 
   // due_at column may not exist on older DBs — fall back to date-only.
@@ -52,6 +55,9 @@ export async function POST(req: Request) {
   if (error && /due_at/i.test(error.message)) {
     const { due_at: _omit, ...rest } = payload;
     ({ data: a, error } = await admin.from("assignments").insert(rest).select().single());
+  }
+  if (error && /code_language|starter_code/i.test(error.message)) {
+    return NextResponse.json({ error: "Coding assignments need migration-code-assignments.sql — run it in Supabase." }, { status: 500 });
   }
   if (error || !a) return NextResponse.json({ error: error?.message || "Could not create assignment." }, { status: 500 });
 
