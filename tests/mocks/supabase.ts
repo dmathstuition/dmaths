@@ -51,6 +51,9 @@ export function makeMockSupabaseClient() {
           error: null,
         }),
         deleteUser: vi.fn().mockResolvedValue({ data: {}, error: null }),
+        updateUserById: vi.fn().mockResolvedValue({ data: { user: { id: "new-user-1" } }, error: null }),
+        getUserById: vi.fn().mockResolvedValue({ data: { user: { id: "new-user-1" } }, error: null }),
+        listUsers: vi.fn().mockResolvedValue({ data: { users: [] }, error: null }),
       },
     },
     // Exposed for assertions / per-test configuration
