@@ -51,3 +51,12 @@ export async function staffCanAccessStudent(staff: Staff, studentId: string): Pr
   const roster = await getRoster(staff.id);
   return roster.includes(studentId);
 }
+
+// True if this staff member may act on a class: admins on any class, tutors only
+// on classes assigned to them. Use for recording / attendance actions.
+export async function staffCanAccessClass(staff: Staff, classId: string): Promise<boolean> {
+  if (staff.role === "admin") return true;
+  const { data } = await supabaseAdmin()
+    .from("classes").select("tutor_id").eq("id", classId).maybeSingle();
+  return data?.tutor_id === staff.id;
+}

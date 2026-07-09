@@ -111,4 +111,24 @@ describe("POST /api/assignments/grade", () => {
     const res = await POST(makeRequest({ grade: 80 }));
     expect(res.status).toBe(400);
   });
+
+  it("lets a tutor grade a learner in their roster", async () => {
+    mockServer.auth.getUser.mockResolvedValue({ data: { user: { id: "tut-1" } }, error: null });
+    mockServer._qb.single.mockResolvedValue({ data: { role: "tutor" }, error: null });
+    mockAdmin._qb.single.mockResolvedValue({ data: { ...MOCK_SUBMISSION, student_id: "stu-1" }, error: null });
+    // getRoster() direct-awaits resolve to a roster containing stu-1.
+    mockAdmin._qb._setDirectResolve({ data: [{ student_id: "stu-1", id: "c1" }] });
+
+    const res = await POST(makeRequest({ submissionId: "sub-1", grade: 80 }));
+    expect(res.status).toBe(200);
+  });
+
+  it("blocks a tutor from grading a learner outside their roster", async () => {
+    mockServer.auth.getUser.mockResolvedValue({ data: { user: { id: "tut-1" } }, error: null });
+    mockServer._qb.single.mockResolvedValue({ data: { role: "tutor" }, error: null });
+    mockAdmin._qb.single.mockResolvedValue({ data: { ...MOCK_SUBMISSION, student_id: "outsider" }, error: null });
+    // Empty roster (default direct-await resolves to null).
+    const res = await POST(makeRequest({ submissionId: "sub-1", grade: 80 }));
+    expect(res.status).toBe(403);
+  });
 });
