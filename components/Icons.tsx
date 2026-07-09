@@ -120,6 +120,9 @@ export const Icons = {
   code: (p: IconProps) => (
     <Svg {...p}><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></Svg>
   ),
+  sigma: (p: IconProps) => (
+    <Svg {...p}><path d="M18 7V4H6l6 8-6 8h12v-3"/></Svg>
+  ),
 };
 
 export type IconName = keyof typeof Icons;

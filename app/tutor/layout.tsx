@@ -14,6 +14,7 @@ const NAV: NavItem[] = [
   { href: "/tutor/assignments", label: "Assignments", icon: "assignments" },
   { href: "/tutor/materials", label: "Materials", icon: "materials" },
   { href: "/tutor/code", label: "Code playground", icon: "code" },
+  { href: "/tutor/math-lab", label: "Math Lab", icon: "sigma" },
   { href: "/tutor/messages", label: "Messages", icon: "messages" },
 ];
 
