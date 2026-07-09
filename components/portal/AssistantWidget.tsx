@@ -1,21 +1,25 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { useAssistantTask } from "@/components/portal/AssistantContext";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
-const GREETING: Msg = {
-  role: "assistant",
-  content:
-    "Hi, I'm Dexter — your learning buddy! 🧭 Stuck on some maths, English or code? Tell me what you're working on and I'll help you figure it out (I give hints, not the finished answer 😉).",
-};
+const LEARNER_GREETING =
+  "Hi, I'm Dexter — your learning buddy! 🧭 Stuck on some maths, English or code? Tell me what you're working on and I'll help you figure it out (I give hints, not the finished answer 😉).";
+const STAFF_GREETING =
+  "Hi, I'm Dexter — your teaching assistant. 🧭 Ask me for worked solutions, lesson ideas, practice questions, marking help, or a concept explained a few ways.";
 
-// A floating "learning buddy" chat for learners. It talks to /api/assistant, which
-// is prompted to give hints — never the full answer — so it never just does a
-// learner's graded work for them. `context` (optional) lets a page pass the current
-// task/assignment so the hints are on-topic.
-export default function AssistantWidget({ context }: { context?: string }) {
+// A floating AI chat. In "learner" mode (default) it gives hints — never the full
+// answer — so it never does a learner's graded work for them. In "staff" mode
+// (tutors/admin) it's a teaching assistant that can give complete answers; the API
+// re-checks the caller's role before granting that. `context` (optional, or the
+// AssistantContext task) lets a page pass the current task so replies are on-topic.
+export default function AssistantWidget({ context, mode = "learner" }: { context?: string; mode?: "learner" | "staff" }) {
+  const staff = mode === "staff";
+  const greeting: Msg = { role: "assistant", content: staff ? STAFF_GREETING : LEARNER_GREETING };
+  const { task } = useAssistantTask();
   const [open, setOpen] = useState(false);
-  const [msgs, setMsgs] = useState<Msg[]>([GREETING]);
+  const [msgs, setMsgs] = useState<Msg[]>([greeting]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -40,8 +44,8 @@ export default function AssistantWidget({ context }: { context?: string }) {
       const res = await fetch("/api/assistant", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        // Drop the canned greeting from what we send to the model.
-        body: JSON.stringify({ messages: next.filter((m) => m !== GREETING), context }),
+        // Drop the canned greeting (always the first message) from what we send.
+        body: JSON.stringify({ messages: next.slice(1), context: context ?? task, mode }),
       });
       const json = await res.json().catch(() => ({}));
       const reply = res.ok
@@ -79,8 +83,8 @@ export default function AssistantWidget({ context }: { context?: string }) {
           <div className="flex items-center gap-3 bg-board px-4 py-3 text-white">
             <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gold text-lg">🧭</span>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-bold leading-tight">Dexter · Learning buddy</p>
-              <p className="text-[11px] text-white/55">Hints to help you — not the answers</p>
+              <p className="text-sm font-bold leading-tight">Dexter · {staff ? "Teaching assistant" : "Learning buddy"}</p>
+              <p className="text-[11px] text-white/55">{staff ? "Solutions, lesson ideas & marking help" : "Hints to help you — not the answers"}</p>
             </div>
             <button onClick={() => setOpen(false)} aria-label="Close" className="rounded-lg p-1.5 text-white/70 hover:bg-white/10 hover:text-white">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>

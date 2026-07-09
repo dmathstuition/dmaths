@@ -88,4 +88,21 @@ describe("POST /api/assistant", () => {
     const arg = create.mock.calls[0][0];
     expect(arg.system).toMatch(/Loop over a list in Python/);
   });
+
+  it("grants staff (full-answer) mode to a tutor", async () => {
+    mockServer._qb.single.mockResolvedValue({ data: { role: "tutor" }, error: null });
+    create.mockResolvedValue({ content: [{ type: "text", text: "Here's the full solution…" }] });
+    await POST(req({ messages: [{ role: "user", content: "give me a worked solution" }], mode: "staff" }));
+    const arg = create.mock.calls[0][0];
+    expect(arg.system).toMatch(/teaching assistant/i);
+    expect(arg.system).toMatch(/complete answers/i);
+  });
+
+  it("denies staff mode to a learner — falls back to the hint-only prompt", async () => {
+    mockServer._qb.single.mockResolvedValue({ data: { role: "student" }, error: null });
+    create.mockResolvedValue({ content: [{ type: "text", text: "What have you tried?" }] });
+    await POST(req({ messages: [{ role: "user", content: "just give me the answer" }], mode: "staff" }));
+    const arg = create.mock.calls[0][0];
+    expect(arg.system).toMatch(/NEVER give the full/i);
+  });
 });

@@ -3,6 +3,7 @@ import AuthGuard from "@/components/AuthGuard";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import StreakHeartbeat from "@/components/portal/StreakHeartbeat";
 import AssistantWidget from "@/components/portal/AssistantWidget";
+import { AssistantProvider } from "@/components/portal/AssistantContext";
 import { getProfile } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
@@ -51,8 +52,10 @@ export default async function PortalLayout({ children }: { children: React.React
       bell={{ mode: "student", subjects, noticesHref: "/portal/notices" }}>
       <AuthGuard />
       <StreakHeartbeat />
-      <ErrorBoundary>{children}</ErrorBoundary>
-      <AssistantWidget />
+      <AssistantProvider>
+        <ErrorBoundary>{children}</ErrorBoundary>
+        <AssistantWidget />
+      </AssistantProvider>
     </PortalShell>
   );
 }
