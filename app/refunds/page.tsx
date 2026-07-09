@@ -1,7 +1,7 @@
 import LegalPage, { H2 } from "@/components/LegalPage";
 import { campStartLabel } from "@/lib/summerCamp";
 
-export const metadata = { title: "Payment & Refund Policy — D-Maths Tuition Centre" };
+export const metadata = { title: "Payment & Refund Policy — D-Maths Tuition Centre", alternates: { canonical: "/refunds" } };
 
 export default function RefundsPage() {
   return (

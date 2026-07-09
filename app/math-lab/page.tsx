@@ -5,6 +5,7 @@ import MathLab from "@/components/math/MathLab";
 
 export const metadata: Metadata = {
   title: "Math Lab — D-Maths Online",
+  alternates: { canonical: "/math-lab" },
   description: "Type any formula and watch it render and solve live — powers, roots, trig, and even units and conversions. Free, right in your browser.",
 };
 

@@ -22,6 +22,7 @@ import {
 
 export const metadata: Metadata = {
   title: "Summer Camp — D-Maths Online",
+  alternates: { canonical: "/summer-camp" },
   description: `D-Maths Online Summer Camp (${campDateRange()}): hands-on Maths & Coding. Foundation maths, coding, game development, AI, web development and Python — with a personalized portal to track every learner's growth.`,
   openGraph: {
     title: "D-Maths Online Summer Camp",

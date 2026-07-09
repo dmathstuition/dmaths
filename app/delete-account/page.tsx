@@ -4,6 +4,7 @@ import Logo from "@/components/Logo";
 export const metadata = {
   title: "Delete your account · D-Maths Tuition",
   description: "How to permanently delete your D-Maths account and data.",
+  alternates: { canonical: "/delete-account" },
 };
 
 // Public page (no login required) explaining how to delete a D-Maths account.
