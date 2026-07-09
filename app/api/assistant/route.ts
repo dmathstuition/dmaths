@@ -75,8 +75,9 @@ export async function POST(req: Request) {
   }
   const base = staff ? STAFF_SYSTEM : LEARNER_SYSTEM;
 
-  // Optional context about the task being worked on, so answers/hints land.
-  const context = String(payload?.context ?? "").slice(0, 800).trim();
+  // Optional context about the task being worked on (task description + editor
+  // code), so answers/hints land.
+  const context = String(payload?.context ?? "").slice(0, 3000).trim();
   const system = context
     ? staff
       ? `${base}\n\nThe learner's current task (for your context):\n${context}`

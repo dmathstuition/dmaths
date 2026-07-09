@@ -17,8 +17,7 @@ const STAFF_GREETING =
 export default function AssistantWidget({ context, mode = "learner" }: { context?: string; mode?: "learner" | "staff" }) {
   const staff = mode === "staff";
   const greeting: Msg = { role: "assistant", content: staff ? STAFF_GREETING : LEARNER_GREETING };
-  const { task } = useAssistantTask();
-  const [open, setOpen] = useState(false);
+  const { task, draft, open, setOpen } = useAssistantTask();
   const [msgs, setMsgs] = useState<Msg[]>([greeting]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -40,12 +39,19 @@ export default function AssistantWidget({ context, mode = "learner" }: { context
     setMsgs(next);
     setInput("");
     setBusy(true);
+    // Assemble the context: the page's task, plus the editor code if they asked
+    // Dexter from inside the IDE.
+    const parts: string[] = [];
+    const base = context ?? task;
+    if (base) parts.push(base);
+    if (draft) parts.push(`The user's current code in the editor:\n${draft}`);
+    const ctx = parts.join("\n\n") || undefined;
     try {
       const res = await fetch("/api/assistant", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         // Drop the canned greeting (always the first message) from what we send.
-        body: JSON.stringify({ messages: next.slice(1), context: context ?? task, mode }),
+        body: JSON.stringify({ messages: next.slice(1), context: ctx, mode }),
       });
       const json = await res.json().catch(() => ({}));
       const reply = res.ok
