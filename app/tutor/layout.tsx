@@ -1,6 +1,7 @@
 import PortalShell, { type NavItem } from "@/components/PortalShell";
 import AuthGuard from "@/components/AuthGuard";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import AssistantWidget from "@/components/portal/AssistantWidget";
 import { getProfile } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
@@ -37,6 +38,7 @@ export default async function TutorLayout({ children }: { children: React.ReactN
       bell={{ mode: "student", noticesHref: "/tutor/messages" }} idleMinutes={60}>
       <AuthGuard />
       <ErrorBoundary>{children}</ErrorBoundary>
+      <AssistantWidget mode="staff" />
     </PortalShell>
   );
 }

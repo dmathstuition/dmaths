@@ -9,6 +9,7 @@ import { fmtWAT } from "@/lib/time";
 import PythonIde from "@/components/code/PythonIde";
 import WebIde from "@/components/code/WebIde";
 import { codeDisplay } from "@/lib/codeSubmission";
+import { useAssistantTask } from "@/components/portal/AssistantContext";
 
 type ConfirmState = {
   title: string; message: string; confirmLabel?: string; danger?: boolean; onConfirm: () => void;
@@ -33,6 +34,16 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
   const [confirmState, setConfirmState] = useState<ConfirmState | null>(null);
   const [filter, setFilter] = useState<FilterKey>("all");
   const [openCode, setOpenCode] = useState<string | null>(null); // submission id with the code editor open
+  const { setTask } = useAssistantTask();
+
+  // Tell the floating assistant which coding task the learner just opened, so its
+  // hints are about this exact question. Cleared when the editor closes/submits.
+  function openCodeEditor(sub: any) {
+    const a = sub.assignment;
+    const lang = a?.code_language === "web" ? "Web (HTML/CSS/JS)" : "Python";
+    setTask(`Coding assignment "${a?.title}" (${lang}${a?.subject ? `, ${a.subject}` : ""}).${a?.instructions ? ` Instructions: ${a.instructions}` : ""}`);
+    setOpenCode(sub.id);
+  }
 
   async function submitCode(submissionId: string, code: string) {
     const { error } = await supabase.from("assignment_submissions")
@@ -41,6 +52,7 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
     if (error) { push("Could not submit — try again.", "error"); return; }
     push("Answer submitted! 🎉", "success");
     setOpenCode(null);
+    setTask(undefined);
     reload();
   }
 
@@ -250,7 +262,7 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
                     ? <WebIde persist={false} initialCode={a.starter_code || undefined} onSubmit={(c) => submitCode(s.id, c)} />
                     : <PythonIde persist={false} initialCode={a.starter_code || undefined} onSubmit={(c) => submitCode(s.id, c)} />
                 ) : (
-                  <button className="btn-gold w-full" onClick={() => setOpenCode(s.id)}>
+                  <button className="btn-gold w-full" onClick={() => openCodeEditor(s)}>
                     {"</>"} Open the code editor
                   </button>
                 )}

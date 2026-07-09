@@ -2,13 +2,17 @@ import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { supabaseServer } from "@/lib/supabase/server";
 
-// The D-Maths learning buddy. A learner opens the chat when they're stuck; Claude
-// gives *hints and guiding questions*, never the finished answer — so the learner
-// still does the thinking (and so it never just solves their graded assignment).
+// The D-Maths AI assistant "Dexter". Two modes:
+//  • learner (default) — gives *hints and guiding questions*, never the finished
+//    answer, so the learner still does the thinking (and it never just solves
+//    their graded assignment).
+//  • staff — for tutors/admin: a teaching assistant that CAN give full worked
+//    solutions, lesson plans, marking help, etc. Only granted after the caller's
+//    role is verified server-side, so a learner can't unlock it by passing a flag.
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-const SYSTEM = `You are "Dexter", the friendly learning buddy for D-Maths — an online tuition service for primary and secondary school learners in Nigeria (ages ~8–18). Subjects: Mathematics, English, and beginner coding (Python and web / HTML-CSS-JavaScript).
+const LEARNER_SYSTEM = `You are "Dexter", the friendly learning buddy for D-Maths — an online tuition service for primary and secondary school learners in Nigeria (ages ~8–18). Subjects: Mathematics, English, and beginner coding (Python and web / HTML-CSS-JavaScript).
 
 Your job is to help a learner who is stuck, WITHOUT doing their work for them.
 
@@ -24,8 +28,19 @@ HARD RULES — follow these every time:
 
 You are talking to a young learner. Be patient, kind, and clear.`;
 
+const STAFF_SYSTEM = `You are "Dexter", the teaching assistant for D-Maths — an online tuition service for primary and secondary school learners in Nigeria (ages ~8–18). Subjects: Mathematics, English, and beginner coding (Python and web / HTML-CSS-JavaScript). You are talking to a tutor or the admin — a professional colleague, not a learner.
+
+Help them teach well. You CAN and SHOULD give complete answers here:
+- Full worked solutions and step-by-step explanations they can teach from.
+- Lesson plans, starter/plenary ideas, worked examples, and practice questions with answer keys.
+- Marking and feedback: model answers, mark schemes, and constructive comments for a learner.
+- Explaining a concept several ways, spotting a learner's likely misconception, differentiation for different levels, and adapting to the Nigerian curriculum (WAEC/JAMB/NECO/BECE) where relevant.
+- Reviewing or debugging code and writing correct example code.
+
+Style: clear and practical, use worked examples and short steps. Show your working for maths. It's fine to be thorough when the task needs it. Stay on teaching and schoolwork; never ask for or repeat passwords, payment details, or personal contact information.`;
+
 export async function POST(req: Request) {
-  // Learners only — the assistant lives inside the authenticated portal.
+  // Authenticated users only — the assistant lives inside the portal.
   const supa = supabaseServer();
   const { data: { user } } = await supa.auth.getUser();
   if (!user) return NextResponse.json({ error: "Please sign in first." }, { status: 401 });
@@ -51,11 +66,22 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Nothing to answer." }, { status: 400 });
   }
 
-  // Optional context about the assignment the learner is working on, so hints land.
+  // Staff mode (full worked answers) is only granted after verifying the caller is
+  // a tutor or admin — a learner passing mode:"staff" still gets the hint-only prompt.
+  let staff = false;
+  if (payload?.mode === "staff") {
+    const { data: me } = await supa.from("profiles").select("role").eq("id", user.id).single();
+    staff = me?.role === "admin" || me?.role === "tutor";
+  }
+  const base = staff ? STAFF_SYSTEM : LEARNER_SYSTEM;
+
+  // Optional context about the task being worked on, so answers/hints land.
   const context = String(payload?.context ?? "").slice(0, 800).trim();
   const system = context
-    ? `${SYSTEM}\n\nThe learner is currently working on this task (for your context only — still don't hand them the answer):\n${context}`
-    : SYSTEM;
+    ? staff
+      ? `${base}\n\nThe learner's current task (for your context):\n${context}`
+      : `${base}\n\nThe learner is currently working on this task (for your context only — still don't hand them the answer):\n${context}`
+    : base;
 
   try {
     const client = new Anthropic({ apiKey: key });
