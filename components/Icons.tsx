@@ -117,6 +117,9 @@ export const Icons = {
   compass: (p: IconProps) => (
     <Svg {...p}><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></Svg>
   ),
+  code: (p: IconProps) => (
+    <Svg {...p}><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></Svg>
+  ),
 };
 
 export type IconName = keyof typeof Icons;

@@ -441,3 +441,25 @@ html { scroll-behavior: smooth; }
 
 /* Avatar stack ring for social proof. */
 .avatar-ring { box-shadow: 0 0 0 2px #fff; }
+
+/* ── Python playground editor (dark IDE panel + token colours) ──── */
+.code-editor-wrap { position: relative; background: #0b2036; border-radius: 0 0 0.75rem 0.75rem; }
+.code-editor-pre, .code-editor-ta {
+  margin: 0;
+  font-family: var(--font-fira), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13.5px; line-height: 1.6;
+  padding: 16px; tab-size: 4;
+  white-space: pre-wrap; word-break: break-word; overflow-wrap: break-word;
+  border: 0;
+}
+.code-editor-pre { position: absolute; inset: 0; pointer-events: none; color: #e2e8f0; overflow: auto; }
+.code-editor-ta {
+  position: relative; width: 100%; min-height: 320px; resize: vertical;
+  background: transparent; color: transparent; caret-color: #EFAE56; outline: none;
+}
+.code-editor-ta::selection { background: rgba(239,174,86,.25); }
+.tok-k { color: #7cc0ff; font-weight: 600; }   /* keyword   */
+.tok-b { color: #c4b5fd; }                       /* builtin   */
+.tok-s { color: #7ee0b0; }                       /* string    */
+.tok-n { color: #fcd34d; }                       /* number    */
+.tok-c { color: #6b8299; font-style: italic; }   /* comment   */
