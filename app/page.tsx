@@ -219,9 +219,14 @@ export default function Landing() {
                 Real Python — and build a live web page with HTML, CSS &amp; JavaScript — right in your
                 browser. No install, no sign-up. Try the hands-on coding learners do at D-Maths.
               </p>
-              <Link href="/playground" className="btn-gold group mt-6 inline-flex !rounded-full !px-6">
-                Open the playground <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
-              </Link>
+              <div className="mt-6 flex flex-wrap items-center gap-3">
+                <Link href="/playground" className="btn-gold group inline-flex !rounded-full !px-6">
+                  Open the playground <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+                </Link>
+                <Link href="/math-lab" className="btn !rounded-full border border-gold/50 bg-white !px-6 text-gold-deep hover:bg-white/60">
+                  Try the Math Lab
+                </Link>
+              </div>
             </div>
             <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#0b2036] shadow-xl">
               <div className="flex items-center gap-1.5 border-b border-white/10 px-4 py-2.5">
