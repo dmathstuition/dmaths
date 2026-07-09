@@ -12,11 +12,20 @@ importScripts(`${BASE}pyodide.js`);
 
 let readyPromise = null;
 
-// input() can't block in a browser worker — give a friendly error instead of a hang.
-const SHIM = `
+// A browser worker has no blocking stdin, so input() reads from a per-run list
+// of lines the learner types into the Input box (fed via the _dmaths_inputs
+// global before each run). Prompts are echoed; running out of lines is a clear
+// EOFError rather than a hang.
+const INPUT_SETUP = `
 import builtins as _b
+_dmaths_it = iter(list(globals().get("_dmaths_inputs", [])))
 def _dmaths_input(prompt=""):
-    raise RuntimeError("input() isn't available in the browser playground yet — set values with variables instead.")
+    if prompt:
+        print(prompt, end="")
+    try:
+        return next(_dmaths_it)
+    except StopIteration:
+        raise EOFError("input() ran out of values — add more lines in the Input box below.")
 _b.input = _dmaths_input
 `;
 
@@ -26,7 +35,6 @@ async function getPyodide() {
       const py = await loadPyodide({ indexURL: BASE });
       py.setStdout({ batched: (s) => postMessage({ type: "out", text: s }) });
       py.setStderr({ batched: (s) => postMessage({ type: "err", text: s }) });
-      await py.runPythonAsync(SHIM);
       return py;
     })();
   }
@@ -50,6 +58,10 @@ self.onmessage = async (e) => {
 
     postMessage({ type: "running" });
     try {
+      // Feed this run's input() values, then (re)install input() fresh.
+      const lines = msg.stdin ? String(msg.stdin).replace(/\n$/, "").split("\n") : [];
+      py.globals.set("_dmaths_inputs", lines);
+      await py.runPythonAsync(INPUT_SETUP);
       // Auto-load packages the code imports (numpy, pandas, …) when available.
       try { await py.loadPackagesFromImports(msg.code); } catch (_) { /* offline / unknown pkg */ }
       await py.runPythonAsync(msg.code);

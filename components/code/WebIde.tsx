@@ -1,7 +1,9 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { useToast } from "@/components/Toast";
+import CodeArea from "@/components/code/CodeArea";
+import { html as hlHtml, css as hlCss, javascript as hlJs } from "@/components/code/highlighters";
 
 type Snippet = { id: string; title: string; code: string };
 type Doc = { html: string; css: string; js: string };
@@ -127,11 +129,10 @@ export default function WebIde({ persist = false, meId = "", initialSnippets = [
                   className="ml-auto w-32 min-w-0 rounded-md bg-white/10 px-2 py-1 text-xs font-semibold text-white placeholder-white/40 outline-none" placeholder="Title" />
               )}
             </div>
-            <textarea
-              value={doc[tab]} spellCheck={false} onKeyDown={onKeyDown}
-              onChange={(e) => setDoc({ ...doc, [tab]: e.target.value })}
-              className="code-editor-ta !min-h-[300px]" aria-label={`${tab} editor`}
-              style={{ color: "#e2e8f0", caretColor: "#EFAE56" }}
+            <CodeArea
+              value={doc[tab]} onChange={(v) => setDoc({ ...doc, [tab]: v })} onKeyDown={onKeyDown}
+              highlight={tab === "html" ? hlHtml : tab === "css" ? hlCss : hlJs}
+              minHeight={300} ariaLabel={`${tab} editor`}
             />
           </div>
           <div className="flex flex-wrap items-center gap-2">

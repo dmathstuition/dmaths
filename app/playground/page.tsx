@@ -43,8 +43,8 @@ export default function PlaygroundPage() {
         <Playground />
         <p className="mt-4 text-xs text-ink/40">
           Everything runs on your device — your code never leaves the browser. For Python, the first run
-          downloads the engine (a few seconds), then it's instant; <code>input()</code> and on-screen charts
-          aren't supported yet, so use <code>print()</code>.
+          downloads the engine (a few seconds), then it's instant. <code>input()</code> reads from the Input
+          box; on-screen charts (matplotlib) aren't supported yet.
         </p>
       </section>
 

@@ -2,6 +2,8 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { useToast } from "@/components/Toast";
+import CodeArea from "@/components/code/CodeArea";
+import { python } from "@/components/code/highlighters";
 
 type Snippet = { id: string; title: string; code: string };
 type Line = { stream: "out" | "err" | "sys"; text: string };
@@ -9,31 +11,12 @@ type Line = { stream: "out" | "err" | "sys"; text: string };
 const STARTER = `# Welcome to the D-Maths Python playground!
 # Write Python below, then press Run.
 
-name = "D-Maths"
+name = input("What's your name? ")
+print("Hello,", name + "!")
+
 for i in range(1, 6):
     print(i, "x", i, "=", i * i)
-
-print("Hello from", name + "!")
 `;
-
-// Single-pass Python tokenizer → highlighted HTML (escaped first).
-const KW = "and|as|assert|async|await|break|class|continue|def|del|elif|else|except|finally|for|from|global|if|import|in|is|lambda|nonlocal|not|or|pass|raise|return|try|while|with|yield|True|False|None";
-const BI = "print|len|range|int|str|float|list|dict|set|tuple|input|abs|sum|min|max|type|bool|enumerate|zip|map|filter|open|round|sorted|reversed|repr|format|isinstance";
-const TOKEN_RE = new RegExp(
-  `(#[^\\n]*)|('''[\\s\\S]*?'''|"""[\\s\\S]*?"""|'(?:\\\\.|[^'\\\\])*'|"(?:\\\\.|[^"\\\\])*")|\\b(\\d+\\.?\\d*)\\b|\\b(${KW})\\b|\\b(${BI})\\b`,
-  "g",
-);
-function highlight(src: string): string {
-  const esc = src.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  return esc.replace(TOKEN_RE, (m, c, s, n, k, b) => {
-    if (c) return `<span class="tok-c">${c}</span>`;
-    if (s) return `<span class="tok-s">${s}</span>`;
-    if (n) return `<span class="tok-n">${n}</span>`;
-    if (k) return `<span class="tok-k">${k}</span>`;
-    if (b) return `<span class="tok-b">${b}</span>`;
-    return m;
-  }) + "\n"; // trailing newline keeps the last line scrollable/visible
-}
 
 export default function PythonIde({ persist = false, meId = "", initialSnippets = [] }: {
   persist?: boolean; meId?: string; initialSnippets?: Snippet[];
@@ -44,15 +27,13 @@ export default function PythonIde({ persist = false, meId = "", initialSnippets 
   const [activeId, setActiveId] = useState<string | null>(initialSnippets[0]?.id ?? null);
   const [title, setTitle] = useState(initialSnippets[0]?.title ?? "Untitled");
   const [code, setCode] = useState(initialSnippets[0]?.code ?? STARTER);
+  const [stdin, setStdin] = useState("");
   const [output, setOutput] = useState<Line[]>([]);
   const [status, setStatus] = useState<"idle" | "loading" | "ready" | "running">("idle");
   const [saving, setSaving] = useState(false);
 
   const worker = useRef<Worker | null>(null);
-  const preRef = useRef<HTMLPreElement>(null);
-  const taRef = useRef<HTMLTextAreaElement>(null);
   const outRef = useRef<HTMLDivElement>(null);
-
   const append = useCallback((line: Line) => setOutput((p) => [...p, line]), []);
 
   // Create the Pyodide worker lazily — only on the first Run — so merely opening
@@ -73,14 +54,6 @@ export default function PythonIde({ persist = false, meId = "", initialSnippets 
   }, [append]);
 
   useEffect(() => () => worker.current?.terminate(), []);
-
-  // Keep the highlight layer scrolled in sync with the textarea.
-  const syncScroll = () => {
-    if (preRef.current && taRef.current) {
-      preRef.current.scrollTop = taRef.current.scrollTop;
-      preRef.current.scrollLeft = taRef.current.scrollLeft;
-    }
-  };
   useEffect(() => { outRef.current?.scrollTo({ top: outRef.current.scrollHeight }); }, [output]);
 
   function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
@@ -88,11 +61,9 @@ export default function PythonIde({ persist = false, meId = "", initialSnippets 
       e.preventDefault();
       const ta = e.currentTarget;
       const s = ta.selectionStart, en = ta.selectionEnd;
-      const next = code.slice(0, s) + "    " + code.slice(en);
-      setCode(next);
+      setCode(code.slice(0, s) + "    " + code.slice(en));
       requestAnimationFrame(() => { ta.selectionStart = ta.selectionEnd = s + 4; });
     }
-    // Ctrl/Cmd+Enter runs.
     if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); run(); }
   }
 
@@ -103,7 +74,7 @@ export default function PythonIde({ persist = false, meId = "", initialSnippets 
     const w = ensureWorker();
     setStatus("loading");
     if (first) append({ stream: "sys", text: "Loading Python… the first run downloads the engine (a few seconds)." });
-    w.postMessage({ type: "run", code });
+    w.postMessage({ type: "run", code, stdin });
   }
 
   function stop() {
@@ -168,14 +139,7 @@ export default function PythonIde({ persist = false, meId = "", initialSnippets 
               {statusLabel}
             </span>
           </div>
-          <div className="code-editor-wrap">
-            <pre ref={preRef} className="code-editor-pre" aria-hidden="true"><code dangerouslySetInnerHTML={{ __html: highlight(code) }} /></pre>
-            <textarea
-              ref={taRef} value={code} spellCheck={false}
-              onChange={(e) => setCode(e.target.value)} onScroll={syncScroll} onKeyDown={onKeyDown}
-              className="code-editor-ta" aria-label="Python code editor"
-            />
-          </div>
+          <CodeArea value={code} onChange={setCode} onKeyDown={onKeyDown} highlight={python} minHeight={320} ariaLabel="Python code editor" />
         </div>
 
         {/* Controls */}
@@ -192,8 +156,16 @@ export default function PythonIde({ persist = false, meId = "", initialSnippets 
           <span className="ml-auto hidden text-xs text-ink/40 sm:block">Tip: Ctrl/⌘ + Enter to run</span>
         </div>
 
+        {/* Input (stdin) — one value per line, consumed by input() */}
+        <div>
+          <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-ink/40">Input (for input()) — one value per line</label>
+          <textarea value={stdin} onChange={(e) => setStdin(e.target.value)} rows={2} spellCheck={false}
+            placeholder="Type here what your program should read with input(), one per line…"
+            className="field w-full resize-y font-mono text-[13px]" />
+        </div>
+
         {/* Output console */}
-        <div ref={outRef} className="h-56 overflow-auto rounded-xl border border-line bg-[#0b2036] p-4 font-mono text-[13px] leading-relaxed">
+        <div ref={outRef} className="h-52 overflow-auto rounded-xl border border-line bg-[#0b2036] p-4 font-mono text-[13px] leading-relaxed">
           {output.length === 0 ? (
             <p className="text-white/35">Output will appear here.</p>
           ) : (
