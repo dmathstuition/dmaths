@@ -105,4 +105,48 @@ describe("POST /api/messages/send", () => {
     expect(res.status).toBe(200);
     expect(notifyUser).toHaveBeenCalledWith(expect.anything(), "tut-1", expect.objectContaining({ link: "/tutor/messages" }));
   });
+
+  it("tutor messages a learner in their roster (learner↔tutor thread)", async () => {
+    mockServer.auth.getUser.mockResolvedValue({ data: { user: { id: "tut-1" } }, error: null });
+    mockServer._qb.single.mockResolvedValue({ data: { role: "tutor", first_name: "Mr T" }, error: null });
+    // staffCanAccessStudent → getRoster contains stu-1.
+    mockAdmin._qb._setDirectResolve({ data: [{ student_id: "stu-1", id: "c1" }] });
+
+    const res = await POST(req({ studentId: "stu-1", body: "Great work today" }));
+    expect(res.status).toBe(200);
+    expect(mockAdmin._qb.insert).toHaveBeenCalledWith(
+      expect.objectContaining({ student_id: "stu-1", tutor_id: "tut-1", sender_role: "tutor", body: "Great work today" }),
+    );
+    expect(notifyUser).toHaveBeenCalledWith(expect.anything(), "stu-1", expect.objectContaining({ link: "/portal/messages" }));
+  });
+
+  it("blocks a tutor messaging a learner outside their roster", async () => {
+    mockServer.auth.getUser.mockResolvedValue({ data: { user: { id: "tut-1" } }, error: null });
+    mockServer._qb.single.mockResolvedValue({ data: { role: "tutor", first_name: "Mr T" }, error: null });
+    // Empty roster → not allowed.
+    const res = await POST(req({ studentId: "outsider", body: "hi" }));
+    expect(res.status).toBe(403);
+  });
+
+  it("learner messages their tutor (learner↔tutor thread)", async () => {
+    mockServer.auth.getUser.mockResolvedValue({ data: { user: { id: "stu-1" } }, error: null });
+    mockServer._qb.single.mockResolvedValue({ data: { role: "student", first_name: "Ada" }, error: null });
+    // staffCanAccessStudent(tutor=tut-1, learner=stu-1): roster contains stu-1.
+    mockAdmin._qb._setDirectResolve({ data: [{ student_id: "stu-1", id: "c1" }] });
+
+    const res = await POST(req({ tutorId: "tut-1", body: "Thanks!" }));
+    expect(res.status).toBe(200);
+    expect(mockAdmin._qb.insert).toHaveBeenCalledWith(
+      expect.objectContaining({ student_id: "stu-1", tutor_id: "tut-1", sender_role: "student", body: "Thanks!" }),
+    );
+    expect(notifyUser).toHaveBeenCalledWith(expect.anything(), "tut-1", expect.objectContaining({ link: "/tutor/learners/stu-1" }));
+  });
+
+  it("blocks a learner messaging a tutor who isn't theirs", async () => {
+    mockServer.auth.getUser.mockResolvedValue({ data: { user: { id: "stu-1" } }, error: null });
+    mockServer._qb.single.mockResolvedValue({ data: { role: "student", first_name: "Ada" }, error: null });
+    // Empty roster for the target tutor → not one of the learner's tutors.
+    const res = await POST(req({ tutorId: "stranger", body: "hi" }));
+    expect(res.status).toBe(403);
+  });
 });

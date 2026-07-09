@@ -62,9 +62,11 @@ export default function MessagesClient({ meId, initialMessages }: { meId: string
     const i = setInterval(async () => {
       const { data } = await supabase.from("messages").select("*").order("created_at", { ascending: true });
       if (!data) return;
+      // This is the admin thread only — keep learner↔tutor messages out of it.
+      const adminThread = data.filter((m: any) => !m.tutor_id);
       setMessages(prev => {
-        if (prev.length === data.length && prev.every((m, idx) => m.id === data[idx].id)) return prev;
-        return data;
+        if (prev.length === adminThread.length && prev.every((m, idx) => m.id === adminThread[idx].id)) return prev;
+        return adminThread;
       });
     }, 45000);
     return () => clearInterval(i);

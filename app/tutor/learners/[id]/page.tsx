@@ -34,6 +34,8 @@ export default async function TutorLearnerDetail({ params }: { params: { id: str
       subs={subs ?? []}
       behaviorTypes={behaviorTypes ?? []}
       initialBehaviorLogs={behaviorLogs ?? []}
+      meId={staff.id}
+      canMessage={staff.role === "tutor"}
     />
   );
 }
