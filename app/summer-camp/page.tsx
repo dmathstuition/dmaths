@@ -4,6 +4,7 @@ import Image from "next/image";
 import Logo from "@/components/Logo";
 import Reveal from "@/components/landing/Reveal";
 import CountUp from "@/components/landing/CountUp";
+import SocialLinks from "@/components/landing/SocialLinks";
 import { DotsScatter } from "@/components/illustrations";
 import InstallPrompt from "@/components/InstallPrompt";
 import {
@@ -278,7 +279,11 @@ export default function SummerCamp() {
       </section>
 
       {/* FOOTER */}
-      <footer className="bg-white pt-4">
+      <footer className="bg-white pt-8">
+        <div className="mx-auto flex max-w-6xl flex-col items-center gap-3 px-5 pb-8">
+          <p className="text-sm font-semibold text-ink/50">Follow D-Maths</p>
+          <SocialLinks className="justify-center" />
+        </div>
         <div className="bg-gold py-4 text-center text-xs font-semibold text-white">
           © {new Date().getFullYear()} D-Maths Tuition Centre · dmathstuition@gmail.com · Asaba, Delta State
         </div>

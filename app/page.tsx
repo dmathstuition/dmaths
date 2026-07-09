@@ -6,6 +6,7 @@ import CountUp from "@/components/landing/CountUp";
 import LandingNav from "@/components/landing/LandingNav";
 import SummerCampBanner from "@/components/landing/SummerCampBanner";
 import FloatingMath from "@/components/landing/FloatingMath";
+import SocialLinks from "@/components/landing/SocialLinks";
 import InstallPrompt from "@/components/InstallPrompt";
 import AppLauncher from "@/components/AppLauncher";
 
@@ -471,6 +472,14 @@ export default function Landing() {
                 </a>
               </li>
             </ul>
+          </div>
+        </div>
+        {/* social row */}
+        <div className="mx-auto max-w-7xl px-5">
+          <div className="divider-fade" />
+          <div className="flex flex-col items-center gap-3 py-7 sm:flex-row sm:justify-between">
+            <p className="text-sm font-semibold text-ink/55">Follow D-Maths &amp; the founder</p>
+            <SocialLinks className="justify-center" />
           </div>
         </div>
         <div className="bg-gold py-4 text-center text-xs font-semibold text-white">
