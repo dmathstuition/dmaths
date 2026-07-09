@@ -90,7 +90,7 @@ export default function Login() {
     // arrival — an unbreakable "signed out after 30 minutes" loop.
     try { localStorage.setItem(IDLE_ACTIVITY_KEY, String(Date.now())); } catch {}
 
-    const dest = profile?.role === "admin" ? "/admin" : profile?.role === "parent" ? "/parent" : "/portal";
+    const dest = profile?.role === "admin" ? "/admin" : profile?.role === "tutor" ? "/tutor" : profile?.role === "parent" ? "/parent" : "/portal";
     router.replace(dest);
   }
 

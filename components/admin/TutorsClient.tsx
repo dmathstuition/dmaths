@@ -1,0 +1,171 @@
+"use client";
+import { useState } from "react";
+import { useToast } from "@/components/Toast";
+import AdminThread from "@/components/admin/AdminThread";
+
+type Tutor = { id: string; first_name: string; last_name: string; email: string };
+type Student = { id: string; first_name: string; last_name: string; level: string };
+
+export default function TutorsClient({ initialTutors, students, initialLinks, initialSelected }: {
+  initialTutors: Tutor[];
+  students: Student[];
+  initialLinks: Record<string, string[]>; // tutorId -> [studentId]
+  initialSelected?: string;
+}) {
+  const push = useToast();
+  const [tutors, setTutors] = useState<Tutor[]>(initialTutors);
+  const [links, setLinks] = useState<Record<string, string[]>>(initialLinks);
+  const [selected, setSelected] = useState<string | null>(
+    initialSelected && initialTutors.some(t => t.id === initialSelected)
+      ? initialSelected
+      : initialTutors[0]?.id ?? null,
+  );
+
+  // Create-tutor form
+  const [form, setForm] = useState({ email: "", firstName: "", lastName: "" });
+  const [creating, setCreating] = useState(false);
+  const [creds, setCreds] = useState<{ email: string; tempPassword: string; loginUrl: string } | null>(null);
+
+  const [addStudent, setAddStudent] = useState("");
+  const [assigning, setAssigning] = useState(false);
+
+  const selectedTutor = tutors.find(t => t.id === selected) || null;
+  const assignedIds = selected ? (links[selected] ?? []) : [];
+  const assigned = students.filter(s => assignedIds.includes(s.id));
+  const available = students.filter(s => !assignedIds.includes(s.id));
+
+  async function createTutor() {
+    if (!form.email.trim()) { push("Enter the tutor's email.", "error"); return; }
+    setCreating(true);
+    setCreds(null);
+    const res = await fetch("/api/tutors/create", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
+    const json = await res.json();
+    setCreating(false);
+    if (!res.ok) { push(json.error || "Could not create tutor.", "error"); return; }
+    if (json.alreadyTutor) { push("That tutor already exists.", "success"); return; }
+
+    // Add to the list and select them.
+    const newTutor: Tutor = {
+      id: json.tutorId, first_name: form.firstName || "Tutor", last_name: form.lastName || "", email: form.email.trim().toLowerCase(),
+    };
+    setTutors(prev => [...prev, newTutor]);
+    setLinks(prev => ({ ...prev, [newTutor.id]: [] }));
+    setSelected(newTutor.id);
+    setCreds(json.credentials);
+    setForm({ email: "", firstName: "", lastName: "" });
+    push(json.emailed ? "Tutor created and emailed their login." : "Tutor created — copy their login below.", "success");
+  }
+
+  async function assign(studentId: string, action: "add" | "remove") {
+    if (!selected) return;
+    setAssigning(true);
+    const res = await fetch("/api/tutors/assign", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tutorId: selected, studentId, action }),
+    });
+    setAssigning(false);
+    if (!res.ok) { const j = await res.json().catch(() => ({})); push(j.error || "Could not update.", "error"); return; }
+    setLinks(prev => {
+      const cur = prev[selected] ?? [];
+      return { ...prev, [selected]: action === "add" ? [...cur, studentId] : cur.filter(id => id !== studentId) };
+    });
+    setAddStudent("");
+  }
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="font-display text-2xl font-bold">Tutors</h1>
+        <p className="text-sm text-ink/50">Create tutor accounts, assign learners and classes, and message them directly.</p>
+      </div>
+
+      {/* Create a tutor */}
+      <div className="card p-6">
+        <h2 className="font-display text-lg font-semibold">Add a tutor</h2>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <input className="field max-w-xs" type="email" placeholder="tutor@example.com"
+            value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
+          <input className="field max-w-[160px]" placeholder="First name"
+            value={form.firstName} onChange={e => setForm({ ...form, firstName: e.target.value })} />
+          <input className="field max-w-[160px]" placeholder="Last name"
+            value={form.lastName} onChange={e => setForm({ ...form, lastName: e.target.value })} />
+          <button className="btn-gold !min-h-[42px]" onClick={createTutor} disabled={creating}>
+            {creating ? "Creating…" : "Create tutor"}
+          </button>
+        </div>
+        {creds && (
+          <div className="mt-3 space-y-1 rounded-xl border border-gold/40 bg-gold-pale/60 p-4 text-sm">
+            <p className="font-bold text-gold-deep">Share these login details with the tutor:</p>
+            <p><span className="text-ink/50">Email:</span> <span className="font-mono">{creds.email}</span></p>
+            <p><span className="text-ink/50">Temp password:</span> <span className="font-mono">{creds.tempPassword}</span></p>
+            <button className="btn-ghost !min-h-[34px] mt-1 text-xs"
+              onClick={() => { navigator.clipboard.writeText(`Login: ${creds.loginUrl}\nEmail: ${creds.email}\nPassword: ${creds.tempPassword}`); push("Copied!", "success"); }}>
+              Copy login details
+            </button>
+          </div>
+        )}
+      </div>
+
+      {tutors.length === 0 ? (
+        <div className="card p-8 text-center text-sm text-ink/45">No tutors yet. Add one above.</div>
+      ) : (
+        <div className="grid gap-5 lg:grid-cols-[220px_1fr]">
+          {/* Tutor list */}
+          <div className="space-y-1.5">
+            {tutors.map(t => (
+              <button key={t.id} onClick={() => { setSelected(t.id); setCreds(null); }}
+                className={`w-full rounded-xl px-4 py-2.5 text-left text-sm font-semibold transition ${
+                  selected === t.id ? "bg-gold text-board shadow" : "bg-chalk text-ink/70 hover:bg-chalk/70"}`}>
+                {t.first_name} {t.last_name}
+                <span className="block truncate text-[11px] font-normal opacity-60">{t.email}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Selected tutor detail */}
+          {selectedTutor && (
+            <div className="space-y-5">
+              {/* Assigned learners */}
+              <div className="card p-6">
+                <h2 className="font-display text-lg font-semibold">
+                  Learners for {selectedTutor.first_name}
+                </h2>
+                <p className="text-xs text-ink/45">
+                  Directly-assigned learners. Learners in classes you assign to this tutor also appear on their portal automatically.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <select className="field max-w-xs" value={addStudent} onChange={e => setAddStudent(e.target.value)}>
+                    <option value="">Add a learner…</option>
+                    {available.map(s => (
+                      <option key={s.id} value={s.id}>{s.first_name} {s.last_name} ({s.level})</option>
+                    ))}
+                  </select>
+                  <button className="btn-ghost !min-h-[42px]" disabled={!addStudent || assigning}
+                    onClick={() => addStudent && assign(addStudent, "add")}>Add</button>
+                </div>
+                <div className="mt-4 space-y-2 border-t border-line pt-4">
+                  {assigned.length === 0 && <p className="text-sm text-ink/35">No learners assigned directly yet.</p>}
+                  {assigned.map(s => (
+                    <div key={s.id} className="flex items-center justify-between rounded-xl bg-chalk px-4 py-2.5 text-sm">
+                      <span className="font-semibold text-ink">{s.first_name} {s.last_name} <span className="font-normal text-ink/45">· {s.level}</span></span>
+                      <button onClick={() => assign(s.id, "remove")} className="text-xs font-bold text-red-600 hover:underline">Remove</button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Message the tutor */}
+              <div className="card p-6">
+                <h2 className="mb-3 font-display text-lg font-semibold">Message {selectedTutor.first_name}</h2>
+                <AdminThread ownerId={selectedTutor.id} ownerName={selectedTutor.first_name} />
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}

@@ -79,7 +79,8 @@ Run in this order (skip `schema.sql` if the project already has data):
 19. `migration-assignment-deadline.sql` *(assignment deadline time)*
 20. `migration-subscriptions.sql` *(monthly subscriptions + payment reminders)*
 21. `migration-voice-messages.sql` *(voice notes in chat)*
-22. `migration-schema-fixes.sql` *(run last — patches any missing columns)*
+22. `migration-tutor-portal.sql` *(tutor role, class assignment, tutor roster + read-only RLS)*
+23. `migration-schema-fixes.sql` *(run last — patches any missing columns)*
 
 > **⚠️ Also run `storage-buckets.sql` once** — it creates the file-storage buckets
 > (materials, curricula, assignments, submissions, voice-notes). Without it, uploading

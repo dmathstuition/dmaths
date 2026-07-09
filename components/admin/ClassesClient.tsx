@@ -9,11 +9,12 @@ type ConfirmState = {
   title: string; message: string; confirmLabel?: string; danger?: boolean; onConfirm: () => void;
 };
 
-export default function ClassesClient({ initialClasses, initialStudents }: { initialClasses: any[]; initialStudents: any[] }) {
+export default function ClassesClient({ initialClasses, initialStudents, initialTutors = [] }: { initialClasses: any[]; initialStudents: any[]; initialTutors?: any[] }) {
   const supabase = supabaseBrowser();
   const push = useToast();
   const [classes, setClasses] = useState<any[]>(initialClasses);
   const [students] = useState<any[]>(initialStudents);
+  const [tutors] = useState<any[]>(initialTutors);
   const [showForm, setShowForm] = useState(false);
   const [f, setF] = useState<any>({ platform: "Zoom", duration_minutes: 60, roster: [] as string[] });
   const [editId, setEditId] = useState<string | null>(null);
@@ -57,7 +58,8 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
     try {
       const starts_at = watToUtcISO(f.date, f.time); // interpret the typed time as WAT
       const payload = { subject: f.subject, tutor: f.tutor, platform: f.platform, starts_at,
-        duration_minutes: Number(f.duration_minutes) || 60, link: f.link || "" };
+        duration_minutes: Number(f.duration_minutes) || 60, link: f.link || "",
+        tutor_id: f.tutor_id || null }; // link to a tutor account (optional; null = my own class)
 
       if (editId) {
         const { error } = await supabase.from("classes").update(payload).eq("id", editId);
@@ -96,6 +98,7 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
       subject: c.subject, tutor: c.tutor, platform: c.platform,
       date, time,
       duration_minutes: c.duration_minutes, link: c.link || "", roster: [],
+      tutor_id: c.tutor_id || undefined,
     });
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -198,6 +201,23 @@ export default function ClassesClient({ initialClasses, initialStudents }: { ini
             </select>
             <input className="field" type="number" min={15} step={15} placeholder="Duration (minutes)" value={f.duration_minutes} onChange={e => setF({ ...f, duration_minutes: e.target.value })} />
             <input className="field sm:col-span-2" placeholder="Class link (https://…)" value={f.link || ""} onChange={e => setF({ ...f, link: e.target.value })} />
+            {tutors.length > 0 && (
+              <div className="sm:col-span-2">
+                <label className="flabel">Assign to a tutor account (optional)</label>
+                <select className="field" value={f.tutor_id || ""} onChange={e => {
+                  const id = e.target.value;
+                  const t = tutors.find((x: any) => x.id === id);
+                  // Picking a tutor account also fills the display name; leave it as-is otherwise.
+                  setF({ ...f, tutor_id: id || undefined, tutor: t ? `${t.first_name} ${t.last_name}`.trim() : f.tutor });
+                }}>
+                  <option value="">— No tutor account (I'm teaching) —</option>
+                  {tutors.map((t: any) => (
+                    <option key={t.id} value={t.id}>{t.first_name} {t.last_name}</option>
+                  ))}
+                </select>
+                <p className="mt-1 text-xs text-ink/40">The class then shows on that tutor's portal. Leave unset for your own classes.</p>
+              </div>
+            )}
           </div>
 
           {/* Weekly recurrence (new classes only) */}
