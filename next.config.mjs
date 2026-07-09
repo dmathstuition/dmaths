@@ -9,14 +9,15 @@ import { withSentryConfig } from "@sentry/nextjs";
 // nonce setup; everything else is locked down.
 const csp = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.paystack.co https://www.googletagmanager.com",
+  // cdn.jsdelivr.net serves the Pyodide (in-browser Python) engine for the code playground.
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.paystack.co https://www.googletagmanager.com https://cdn.jsdelivr.net",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com data:",
   "img-src 'self' data: blob: https:",
   "media-src 'self' blob: https://*.supabase.co", // chat voice notes
   "worker-src 'self' blob:",
   "manifest-src 'self'",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.paystack.co https://script.google.com https://script.googleusercontent.com https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.sentry.io",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.paystack.co https://script.google.com https://script.googleusercontent.com https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.sentry.io https://cdn.jsdelivr.net",
   "frame-src https://checkout.paystack.com https://*.paystack.co",
   "object-src 'none'",
   "base-uri 'self'",

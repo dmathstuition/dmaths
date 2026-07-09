@@ -206,6 +206,38 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* TRY PYTHON — live in-browser playground teaser */}
+      <section className="mx-auto max-w-7xl px-5 py-8">
+        <Reveal>
+          <div className="grid items-center gap-8 overflow-hidden rounded-[2rem] border border-line bg-chalk/50 p-8 sm:p-10 md:grid-cols-2">
+            <div>
+              <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-white px-3.5 py-1 text-[11px] font-bold text-gold-deep">
+                <span className="badge-pulse h-1.5 w-1.5 rounded-full bg-gold-deep" /> New
+              </span>
+              <h2 className="mt-4 font-display text-3xl font-bold md:text-4xl">Write <span className="text-gold-deep">Python</span> right now</h2>
+              <p className="mt-3 max-w-md text-sm leading-relaxed text-ink/60">
+                Real code, running in your browser — no install, no sign-up. Try it for yourself and see
+                the kind of hands-on coding learners do at D-Maths.
+              </p>
+              <Link href="/playground" className="btn-gold group mt-6 inline-flex !rounded-full !px-6">
+                Open the playground <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+              </Link>
+            </div>
+            <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#0b2036] shadow-xl">
+              <div className="flex items-center gap-1.5 border-b border-white/10 px-4 py-2.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-red-400" /><span className="h-2.5 w-2.5 rounded-full bg-amber-400" /><span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
+                <span className="ml-2 font-mono text-[11px] text-white/40">main.py</span>
+              </div>
+              <pre className="overflow-x-auto p-4 font-mono text-[12.5px] leading-relaxed text-slate-100"><code>{`for i in range(1, 6):
+    print(i, "x", i, "=", i * i)
+
+print("Hello from D-Maths!")`}</code></pre>
+              <div className="border-t border-white/10 px-4 py-2.5 font-mono text-[11px] text-emerald-300/90">▶ 1 x 1 = 1 · 2 x 2 = 4 · 3 x 3 = 9 …</div>
+            </div>
+          </div>
+        </Reveal>
+      </section>
+
       {/* IMPACT BAND — dark, full-contrast premium moment */}
       <section className="relative my-10">
         <div className="mx-auto max-w-7xl px-5">
