@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Logo from "@/components/Logo";
-import PythonIde from "@/components/code/PythonIde";
+import Playground from "@/components/code/Playground";
 
 export const metadata: Metadata = {
-  title: "Python Playground — D-Maths Online",
-  description: "Write and run real Python right in your browser — no install, no sign-up. A free taste of coding at D-Maths.",
+  title: "Code Playground — D-Maths Online",
+  description: "Write and run real Python, or build a live web page with HTML, CSS & JavaScript — right in your browser, no install, no sign-up. A free taste of coding at D-Maths.",
 };
 
-export default function Playground() {
+export default function PlaygroundPage() {
   return (
     <main className="min-h-screen bg-white font-body text-ink">
       <header className="bg-board px-5 py-4">
@@ -28,22 +28,23 @@ export default function Playground() {
             Free · runs in your browser
           </span>
           <h1 className="mt-4 font-display text-3xl font-extrabold tracking-tight md:text-4xl">
-            Python <span className="text-gradient-gold">Playground</span>
+            Code <span className="text-gradient-gold">Playground</span>
           </h1>
           <p className="mt-2 max-w-xl text-[15px] leading-relaxed text-ink/55">
-            Write real Python and run it instantly — nothing to install, no account needed. This is a
-            taste of the coding learners do at D-Maths. Want to save your work and learn properly?{" "}
+            Write real Python, or build a live web page with HTML, CSS &amp; JavaScript — instantly, with
+            nothing to install and no account needed. A taste of the coding learners do at D-Maths. Want to
+            save your work and learn properly?{" "}
             <Link href="/apply" className="font-semibold text-gold-deep hover:underline">Enroll here</Link>.
           </p>
         </div>
       </section>
 
       <section className="mx-auto max-w-6xl px-5 py-8">
-        <PythonIde />
+        <Playground />
         <p className="mt-4 text-xs text-ink/40">
-          The first run downloads the Python engine (a few seconds), then it's instant. Your code never
-          leaves your device. Note: <code>input()</code> and on-screen charts aren't supported here yet —
-          use <code>print()</code> to see results.
+          Everything runs on your device — your code never leaves the browser. For Python, the first run
+          downloads the engine (a few seconds), then it's instant; <code>input()</code> and on-screen charts
+          aren't supported yet, so use <code>print()</code>.
         </p>
       </section>
 
