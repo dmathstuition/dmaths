@@ -1,6 +1,6 @@
 import { getUser } from "@/lib/auth";
-import { supabaseAdmin } from "@/lib/supabase/admin";
 import Playground from "@/components/code/Playground";
+import { loadCodeData } from "@/lib/notebookData";
 
 export const dynamic = "force-dynamic";
 
@@ -8,13 +8,7 @@ export const dynamic = "force-dynamic";
 // Web (HTML/CSS/JS) live editor. Saved snippets are owner-scoped via RLS.
 export default async function CodePage() {
   const user = await getUser();
-  let snippets: any[] = [];
-  if (user) {
-    const { data } = await supabaseAdmin()
-      .from("code_snippets").select("id, title, code, language")
-      .eq("user_id", user.id).order("updated_at", { ascending: false });
-    snippets = data ?? [];
-  }
+  const { snippets, sharedNotebooks } = await loadCodeData(user?.id);
 
   return (
     <div className="space-y-5">
@@ -24,7 +18,7 @@ export default async function CodePage() {
           Write and run real code right in your browser — Python, a Colab-style notebook with plots &amp; tables, or build a web page with HTML, CSS &amp; JavaScript. Save your work to come back to it.
         </p>
       </div>
-      <Playground persist meId={user?.id ?? ""} snippets={snippets} />
+      <Playground persist meId={user?.id ?? ""} snippets={snippets} sharedNotebooks={sharedNotebooks} />
     </div>
   );
 }
