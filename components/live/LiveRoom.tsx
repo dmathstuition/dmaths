@@ -6,11 +6,16 @@ import { useRouter } from "next/navigation";
 // screen sharing happen right here, no Zoom or Google Meet. The media runs on
 // Jitsi's servers (meet.jit.si by default; point JITSI_DOMAIN at your own
 // self-hosted instance or an 8x8 JaaS tenant for production branding/limits).
+//
+// When a host (tutor/admin) is in the room it:
+//  • flags the class "live" (+ heartbeat) so learners see a "LIVE now" badge,
+//  • optionally auto-records and files the recording into the class's recordings
+//    (only where a recording backend exists — self-hosted Jibri or JaaS).
 declare global { interface Window { JitsiMeetExternalAPI?: any } }
 
-export default function LiveRoom({ domain, roomName, displayName, email, isModerator, subject, backHref }: {
-  domain: string; roomName: string; displayName: string; email?: string;
-  isModerator: boolean; subject: string; backHref: string;
+export default function LiveRoom({ domain, roomName, displayName, email, jwt, isModerator, autoRecord = false, classId, subject, backHref }: {
+  domain: string; roomName: string; displayName: string; email?: string; jwt?: string | null;
+  isModerator: boolean; autoRecord?: boolean; classId: string; subject: string; backHref: string;
 }) {
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -20,6 +25,19 @@ export default function LiveRoom({ domain, roomName, displayName, email, isModer
 
   useEffect(() => {
     let cancelled = false;
+    let heartbeat: ReturnType<typeof setInterval> | null = null;
+
+    // Tell the server this class is (not) live. keepalive lets the final "off"
+    // ping survive the page unloading.
+    const setLive = (live: boolean) => {
+      if (!isModerator) return;
+      try {
+        fetch("/api/classes/live", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ classId, live }), keepalive: true,
+        }).catch(() => {});
+      } catch { /* best effort */ }
+    };
 
     function loadScript(): Promise<void> {
       if (window.JitsiMeetExternalAPI) return Promise.resolve();
@@ -37,6 +55,7 @@ export default function LiveRoom({ domain, roomName, displayName, email, isModer
       if (cancelled || !containerRef.current || !window.JitsiMeetExternalAPI) return;
       const api = new window.JitsiMeetExternalAPI(domain, {
         roomName,
+        jwt: jwt || undefined,
         parentNode: containerRef.current,
         userInfo: { displayName, email: email || undefined },
         configOverwrite: {
@@ -54,16 +73,44 @@ export default function LiveRoom({ domain, roomName, displayName, email, isModer
         },
       });
       apiRef.current = api;
-      api.addListener("videoConferenceJoined", () => { if (!cancelled) setLoading(false); });
-      api.addListener("readyToClose", () => router.push(backHref));
+
+      api.addListener("videoConferenceJoined", () => {
+        if (cancelled) return;
+        setLoading(false);
+        if (isModerator) {
+          setLive(true);
+          heartbeat = setInterval(() => setLive(true), 60_000);
+          // Kick off recording where a backend is configured (self-hosted Jibri /
+          // JaaS). No-op / harmless on the plain public server.
+          if (autoRecord) {
+            try { api.executeCommand("startRecording", { mode: "file" }); } catch { /* no backend */ }
+          }
+        }
+      });
+
+      // When a recording link is produced, file it as the class recording (which
+      // notifies the roster). Fires on JaaS / suitably configured self-host.
+      const onRecordingLink = (e: any) => {
+        const link = e?.link || e?.recordingLink;
+        if (!link) return;
+        fetch("/api/classes/recording", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ classId, url: link }),
+        }).catch(() => {});
+      };
+      api.addListener("recordingLinkAvailable", onRecordingLink);
+
+      api.addListener("readyToClose", () => { setLive(false); router.push(backHref); });
     }).catch((e) => { if (!cancelled) setError(e.message || "Could not start the class."); });
 
     return () => {
       cancelled = true;
+      if (heartbeat) clearInterval(heartbeat);
+      setLive(false);
       try { apiRef.current?.dispose(); } catch { /* already gone */ }
       apiRef.current = null;
     };
-  }, [domain, roomName, displayName, email, isModerator, backHref, router]);
+  }, [domain, roomName, displayName, email, jwt, isModerator, autoRecord, classId, backHref, router]);
 
   return (
     <div className="fixed inset-0 z-[80] flex flex-col bg-board">
