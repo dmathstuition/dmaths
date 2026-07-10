@@ -3,6 +3,7 @@ import { getProfile } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase/server";
 import LiveRoom from "@/components/live/LiveRoom";
 import { JITSI_DOMAIN, roomNameFor } from "@/lib/liveRoom";
+import { makeJitsiToken } from "@/lib/jitsiJwt";
 
 export const dynamic = "force-dynamic";
 
@@ -16,8 +17,10 @@ export default async function TutorLiveClassPage({ params }: { params: { id: str
   if (!cls) redirect("/tutor/classes");
 
   const name = `${me.first_name ?? ""} ${me.last_name ?? ""}`.trim() || "Tutor";
+  const room = roomNameFor(cls.id);
+  const jwt = makeJitsiToken({ domain: JITSI_DOMAIN, room, name, id: me.id, moderator: true });
   return (
-    <LiveRoom domain={JITSI_DOMAIN} roomName={roomNameFor(cls.id)} displayName={name}
-      isModerator subject={cls.subject} backHref="/tutor/classes" />
+    <LiveRoom domain={JITSI_DOMAIN} roomName={room} displayName={name} jwt={jwt} classId={cls.id}
+      isModerator autoRecord={process.env.JITSI_RECORDING === "true"} subject={cls.subject} backHref="/tutor/classes" />
   );
 }
