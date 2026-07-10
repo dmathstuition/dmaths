@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useState } from "react";
 import { useToast } from "@/components/Toast";
 import { fmtWATDate, fmtWATTime, utcToWatParts } from "@/lib/time";
@@ -87,6 +88,7 @@ export default function TutorClassesClient({ initialClasses }: { initialClasses:
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <button className="btn-ghost !min-h-[42px]" onClick={() => openAttendance(c)}>Take attendance</button>
+                  <Link href={`/tutor/class/${c.id}/live`} className="btn-ink !min-h-[42px] !px-5">🔴 Start live</Link>
                   {c.link && <a href={c.link} target="_blank" rel="noopener noreferrer" className="btn-gold !min-h-[42px] !px-6">Join →</a>}
                 </div>
               </div>

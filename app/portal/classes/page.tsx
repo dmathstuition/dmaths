@@ -1,3 +1,4 @@
+import Link from "next/link";
 import JoinClassButton from "@/components/portal/JoinClassButton";
 import { supabaseServer } from "@/lib/supabase/server";
 import { Icon } from "@/components/Icons";
@@ -81,6 +82,14 @@ export default async function MyClasses() {
               {!past && (c.link
                 ? <JoinClassButton classId={c.id} link={c.link} className="btn-gold mt-4 inline-block w-full text-center" />
                 : <p className="mt-4 rounded-xl bg-chalk px-4 py-2.5 text-center text-sm font-semibold text-ink/45">Class link coming soon</p>)}
+
+              {/* In-portal live classroom — video & screen share, no Zoom/Meet needed */}
+              {!past && (
+                <Link href={`/portal/class/${c.id}/live`}
+                  className="mt-2 flex items-center justify-center gap-2 rounded-xl border border-line px-4 py-2.5 text-sm font-bold text-ink/70 transition hover:border-gold hover:text-gold-deep">
+                  🔴 Join live in the app
+                </Link>
+              )}
 
               {/* Rewatch the lesson once the admin attaches a recording */}
               {past && c.recording_url && (

@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import ConfirmModal from "@/components/ConfirmModal";
@@ -303,6 +304,7 @@ export default function ClassesClient({ initialClasses, initialStudents, initial
                 <button className="btn-gold !min-h-[38px] flex-1 min-w-[130px]" onClick={() => openAttendance(c)}>Take attendance</button>
               )}
               {c.link && <a className="btn-ghost !min-h-[38px]" href={c.link} target="_blank" rel="noopener noreferrer">Open link</a>}
+              <Link className="btn-ink !min-h-[38px]" href={`/admin/class/${c.id}/live`}>🔴 Start live</Link>
               {!c.attendance_locked && (
                 <button className="btn-ghost !min-h-[38px]" onClick={() => startEditClass(c)}>Edit</button>
               )}
