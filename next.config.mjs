@@ -10,7 +10,8 @@ import { withSentryConfig } from "@sentry/nextjs";
 const csp = [
   "default-src 'self'",
   // cdn.jsdelivr.net serves the Pyodide (in-browser Python) engine for the code playground.
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.paystack.co https://www.googletagmanager.com https://cdn.jsdelivr.net",
+  // meet.jit.si serves the Jitsi external API for in-portal live classes.
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.paystack.co https://www.googletagmanager.com https://cdn.jsdelivr.net https://meet.jit.si",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com data:",
   "img-src 'self' data: blob: https:",
@@ -18,7 +19,7 @@ const csp = [
   "worker-src 'self' blob:",
   "manifest-src 'self'",
   "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.paystack.co https://script.google.com https://script.googleusercontent.com https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.sentry.io https://cdn.jsdelivr.net",
-  "frame-src https://checkout.paystack.com https://*.paystack.co",
+  "frame-src https://checkout.paystack.com https://*.paystack.co https://meet.jit.si https://*.jit.si",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
@@ -32,9 +33,9 @@ const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
-  // microphone=(self) lets the chat record voice notes; camera stays off
-  // (assignment photos use the native file picker, which needs no permission).
-  { key: "Permissions-Policy", value: "camera=(), microphone=(self), geolocation=()" },
+  // camera/microphone/display-capture are delegated to self + the Jitsi iframe
+  // for in-portal live classes (video, mic, screen share). geolocation stays off.
+  { key: "Permissions-Policy", value: 'camera=(self "https://meet.jit.si"), microphone=(self "https://meet.jit.si"), display-capture=(self "https://meet.jit.si"), geolocation=()' },
   { key: "X-XSS-Protection", value: "1; mode=block" },
 ];
 
