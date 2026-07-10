@@ -5,7 +5,7 @@ import { useToast } from "@/components/Toast";
 import CodeArea from "@/components/code/CodeArea";
 import { python } from "@/components/code/highlighters";
 
-type Snippet = { id: string; title: string; code: string };
+type Snippet = { id: string; title: string; code: string; shared?: boolean; shared_by_name?: string | null };
 type Output =
   | { kind: "stream"; name: "stdout" | "stderr"; text: string }
   | { kind: "text"; text: string }
@@ -49,8 +49,8 @@ function renderMarkdown(src: string): string {
   return html || "<p class='dmaths-nb-empty'>Empty markdown cell — double-click to edit.</p>";
 }
 
-export default function NotebookIde({ persist = false, meId = "", initialNotebooks = [] }: {
-  persist?: boolean; meId?: string; initialNotebooks?: Snippet[];
+export default function NotebookIde({ persist = false, meId = "", initialNotebooks = [], sharedNotebooks = [], canShare = false }: {
+  persist?: boolean; meId?: string; initialNotebooks?: Snippet[]; sharedNotebooks?: Snippet[]; canShare?: boolean;
 }) {
   const push = useToast();
   const [cells, setCells] = useState<Cell[]>(WELCOME);
@@ -59,6 +59,7 @@ export default function NotebookIde({ persist = false, meId = "", initialNoteboo
   const [activeId, setActiveId] = useState<string | null>(null);
   const [title, setTitle] = useState("Untitled notebook");
   const [saving, setSaving] = useState(false);
+  const fileInput = useRef<HTMLInputElement>(null);
 
   const worker = useRef<Worker | null>(null);
   const pending = useRef<{ id: string; resolve: () => void } | null>(null);
@@ -220,6 +221,71 @@ export default function NotebookIde({ persist = false, meId = "", initialNoteboo
     if (activeId === id) newNotebook();
   }
 
+  // Load someone else's shared notebook as a fresh copy (no activeId, so Save
+  // creates the learner's own).
+  function openShared(nb: Snippet) {
+    try {
+      const parsed = JSON.parse(nb.code);
+      const loaded: Cell[] = (Array.isArray(parsed) ? parsed : []).map((c: any) => ({
+        id: uid(), type: c.type === "markdown" ? "markdown" : "code", source: String(c.source ?? ""), outputs: [], count: null,
+      }));
+      setCells(loaded.length ? loaded : WELCOME.map((c) => ({ ...c, id: uid() })));
+      setActiveId(null); setTitle(`${nb.title || "Notebook"} (copy)`); restart();
+      push("Opened a copy — Save it to keep your own.", "success");
+    } catch { push("Could not open that notebook.", "error"); }
+  }
+
+  const activeShared = notebooks.find((n) => n.id === activeId)?.shared ?? false;
+  async function toggleShare() {
+    if (!activeId) { push("Save the notebook first, then share it.", "error"); return; }
+    const next = !activeShared;
+    const res = await fetch("/api/notebooks/share", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ snippetId: activeId, shared: next }),
+    });
+    const j = await res.json().catch(() => ({}));
+    if (!res.ok) { push(j.error || "Could not update sharing.", "error"); return; }
+    setNotebooks((p) => p.map((n) => (n.id === activeId ? { ...n, shared: next } : n)));
+    push(next ? "Shared — your learners can now open a copy. 📤" : "Sharing turned off.", "success");
+  }
+
+  // ── .ipynb (real Jupyter/Colab format) ───────────────────────────
+  function toLines(s: string): string[] {
+    return s ? (s.match(/[^\n]*\n|[^\n]+$/g) ?? [s]) : [];
+  }
+  function download(name: string, text: string) {
+    const url = URL.createObjectURL(new Blob([text], { type: "application/json" }));
+    const a = document.createElement("a");
+    a.href = url; a.download = name; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  function exportIpynb() {
+    const nb = {
+      cells: cells.map((c) => c.type === "markdown"
+        ? { cell_type: "markdown", metadata: {}, source: toLines(c.source) }
+        : { cell_type: "code", metadata: {}, execution_count: null, outputs: [], source: toLines(c.source) }),
+      metadata: { kernelspec: { name: "python3", display_name: "Python 3" }, language_info: { name: "python" } },
+      nbformat: 4, nbformat_minor: 5,
+    };
+    download(`${(title.trim() || "notebook").replace(/[^\w.-]+/g, "_")}.ipynb`, JSON.stringify(nb, null, 1));
+  }
+  function importIpynb(file: File) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const nb = JSON.parse(String(reader.result));
+        const cs: Cell[] = (Array.isArray(nb.cells) ? nb.cells : []).map((c: any) => ({
+          id: uid(), type: c.cell_type === "markdown" ? "markdown" : "code",
+          source: Array.isArray(c.source) ? c.source.join("") : String(c.source ?? ""), outputs: [], count: null,
+        }));
+        if (!cs.length) { push("That notebook has no cells.", "error"); return; }
+        setCells(cs); setActiveId(null); setTitle((file.name || "notebook").replace(/\.ipynb$/i, "")); restart();
+        push("Notebook imported — Save it to keep it.", "success");
+      } catch { push("That doesn't look like a valid .ipynb file.", "error"); }
+    };
+    reader.readAsText(file);
+  }
+
   const busy = status === "loading" || status === "running";
   const statusLabel = status === "loading" ? "Starting kernel…" : status === "running" ? "Running…" : status === "ready" ? "Kernel ready" : "Kernel idle";
 
@@ -250,6 +316,16 @@ export default function NotebookIde({ persist = false, meId = "", initialNoteboo
           <button onClick={restart} className="btn-ghost !min-h-[38px] !px-3 !text-sm">⟳ Restart</button>
           <button onClick={clearOutputs} className="btn-ghost !min-h-[38px] !px-3 !text-sm">Clear</button>
           {persist && <button onClick={save} disabled={saving} className="btn-ghost !min-h-[38px] !px-3 !text-sm">{saving ? "Saving…" : "Save"}</button>}
+          {persist && canShare && (
+            <button onClick={toggleShare} title="Share this notebook with your learners"
+              className={`!min-h-[38px] !px-3 !text-sm ${activeShared ? "btn-gold" : "btn-ghost"}`}>
+              {activeShared ? "✓ Shared" : "Share"}
+            </button>
+          )}
+          <button onClick={exportIpynb} title="Download as a Jupyter/Colab .ipynb file" className="btn-ghost !min-h-[38px] !px-3 !text-sm">⬇ .ipynb</button>
+          <button onClick={() => fileInput.current?.click()} title="Import a .ipynb file" className="btn-ghost !min-h-[38px] !px-3 !text-sm">⬆ Import</button>
+          <input ref={fileInput} type="file" accept=".ipynb,application/json" className="hidden"
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) importIpynb(f); e.currentTarget.value = ""; }} />
           <span className={`ml-auto flex items-center gap-1.5 text-[11px] font-semibold ${busy ? "text-gold-deep" : "text-ink/45"}`}>
             <span className={`h-1.5 w-1.5 rounded-full ${status === "ready" ? "bg-emerald-500" : busy ? "bg-gold badge-pulse" : "bg-ink/30"}`} />
             {statusLabel}
@@ -334,6 +410,18 @@ export default function NotebookIde({ persist = false, meId = "", initialNoteboo
               </div>
             ))}
           </div>
+          {sharedNotebooks.length > 0 && (
+            <div className="space-y-1.5 border-t border-line pt-3">
+              <h2 className="font-display text-sm font-bold">📤 Shared with you</h2>
+              {sharedNotebooks.map((s) => (
+                <button key={s.id} onClick={() => openShared(s)}
+                  className="block w-full rounded-xl bg-gold-pale px-3 py-2 text-left text-sm transition hover:bg-gold-pale/70">
+                  <span className="block truncate font-semibold text-gold-deep">{s.title}</span>
+                  {s.shared_by_name && <span className="block truncate text-[11px] text-ink/45">from {s.shared_by_name}</span>}
+                </button>
+              ))}
+            </div>
+          )}
           <p className="rounded-xl bg-chalk/60 p-3 text-[11px] leading-relaxed text-ink/45">
             A real Python kernel runs in your browser. Cells share state — define a variable once, use it anywhere. Try <code className="font-mono">numpy</code>, <code className="font-mono">pandas</code> and <code className="font-mono">matplotlib</code>.
           </p>
