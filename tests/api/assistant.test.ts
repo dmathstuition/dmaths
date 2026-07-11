@@ -35,14 +35,14 @@ function req(body: unknown) {
   });
 }
 
-const OLD_KEY = process.env.OPENAI_API_KEY;
+const OLD_KEY = process.env.DEEPSEEK_API_KEY;
 beforeEach(() => {
   mockServer = makeMockSupabaseClient();
   mockServer.auth.getUser.mockResolvedValue({ data: { user: { id: "stu-1" } }, error: null });
   create.mockReset();
-  process.env.OPENAI_API_KEY = "sk-test";
+  process.env.DEEPSEEK_API_KEY = "sk-test";
 });
-afterEach(() => { process.env.OPENAI_API_KEY = OLD_KEY; });
+afterEach(() => { process.env.DEEPSEEK_API_KEY = OLD_KEY; });
 
 // The system prompt is sent as the first message in the list.
 const systemOf = (arg: any) => arg.messages[0].content as string;
@@ -56,7 +56,7 @@ describe("POST /api/assistant", () => {
   });
 
   it("503 with a friendly message when the key is not configured", async () => {
-    delete process.env.OPENAI_API_KEY;
+    delete process.env.DEEPSEEK_API_KEY;
     const res = await POST(req({ messages: [{ role: "user", content: "help" }] }));
     expect(res.status).toBe(503);
     const json = await res.json();
@@ -72,7 +72,7 @@ describe("POST /api/assistant", () => {
     expect(json.reply).toContain("tried so far");
     // Default model, and a system prompt that forbids full answers.
     const arg = create.mock.calls[0][0];
-    expect(arg.model).toBe("gpt-4o");
+    expect(arg.model).toBe("deepseek-chat");
     expect(systemOf(arg)).toMatch(/NEVER give the full/i);
     expect(arg.messages[0].role).toBe("system");
   });
