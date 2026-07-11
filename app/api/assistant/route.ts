@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import { supabaseServer } from "@/lib/supabase/server";
 
-// The "D-Maths A.I" assistant. Two modes:
+// The "D-Maths A.I" assistant, powered by DeepSeek (OpenAI-compatible API, so we
+// use the openai SDK pointed at DeepSeek's endpoint). Two modes:
 //  • learner (default) — gives *hints and guiding questions*, never the finished
 //    answer, so the learner still does the thinking (and it never just solves
 //    their graded assignment).
@@ -12,8 +13,11 @@ import { supabaseServer } from "@/lib/supabase/server";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-// The chat model. Override with OPENAI_MODEL if you want a different one.
-const MODEL = process.env.OPENAI_MODEL || "gpt-4o";
+// DeepSeek is OpenAI-compatible. `deepseek-chat` (DeepSeek-V3) is fast and strong
+// for tutoring; set DEEPSEEK_MODEL=deepseek-reasoner for heavier step-by-step
+// reasoning. Base URL is overridable for self-host/proxy setups.
+const MODEL = process.env.DEEPSEEK_MODEL || "deepseek-chat";
+const BASE_URL = process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com";
 
 const LEARNER_SYSTEM = `You are "D-Maths A.I", the friendly learning buddy for D-Maths — an online tuition service for primary and secondary school learners in Nigeria (ages ~8–18). Subjects: Mathematics, English, and beginner coding (Python and web / HTML-CSS-JavaScript).
 
@@ -48,10 +52,10 @@ export async function POST(req: Request) {
   const { data: { user } } = await supa.auth.getUser();
   if (!user) return NextResponse.json({ error: "Please sign in first." }, { status: 401 });
 
-  const key = process.env.OPENAI_API_KEY;
+  const key = process.env.DEEPSEEK_API_KEY;
   if (!key) {
     return NextResponse.json(
-      { error: "The learning buddy isn't switched on yet. Please ask your tutor — or set OPENAI_API_KEY in the deployment." },
+      { error: "The learning buddy isn't switched on yet. Please ask your tutor — or set DEEPSEEK_API_KEY in the deployment." },
       { status: 503 },
     );
   }
@@ -88,11 +92,11 @@ export async function POST(req: Request) {
     : base;
 
   try {
-    const client = new OpenAI({ apiKey: key });
+    const client = new OpenAI({ apiKey: key, baseURL: BASE_URL });
     const res = await client.chat.completions.create({
       model: MODEL,
       max_tokens: 1024,
-      // OpenAI takes the system prompt as the first message in the list.
+      // DeepSeek (OpenAI-compatible) takes the system prompt as the first message.
       messages: [{ role: "system", content: system }, ...messages],
     });
     const reply = (res.choices[0]?.message?.content ?? "").trim();
