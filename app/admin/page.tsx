@@ -6,6 +6,7 @@ import Reveal from "@/components/landing/Reveal";
 import Tour from "@/components/tour/Tour";
 import { adminTour } from "@/components/tour/steps";
 import AdminCharts from "@/components/admin/AdminCharts";
+import AssistantHealthCheck from "@/components/admin/AssistantHealthCheck";
 
 export const dynamic = "force-dynamic";
 
@@ -179,6 +180,8 @@ export default async function AdminDashboard() {
           </div>
         </div>
       </Reveal>
+
+      <AssistantHealthCheck />
 
       <Tour tourId="admin" steps={adminTour} />
     </div>
