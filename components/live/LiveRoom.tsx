@@ -78,6 +78,14 @@ export default function LiveRoom({ domain, roomName, displayName, email, jwt, is
       api.addListener("videoConferenceJoined", () => {
         if (cancelled) return;
         setLoading(false);
+        // A learner joining the live room self-marks attendance (present, or late
+        // if >10 min after start) — the same as clicking an external join link.
+        if (!isModerator) {
+          fetch("/api/attendance/join", {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ classId }),
+          }).catch(() => {});
+        }
         if (isModerator) {
           setLive(true);
           heartbeat = setInterval(() => setLive(true), 60_000);

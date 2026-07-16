@@ -2,10 +2,15 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/Toast";
 
-interface ClassRow { id: string; name: string | null; subject?: string; level?: string; starts_at: string; }
+interface ClassRow { id: string; subject: string; tutor?: string; starts_at: string; mode?: string; location?: string | null; }
 interface ClassStudent { class_id: string; student_id: string; }
 interface Student { id: string; first_name: string; last_name: string; }
-interface AttendanceRecord { class_id: string; student_id: string; present: boolean; }
+interface AttendanceRecord { class_id: string; student_id: string; present: boolean; late?: boolean; }
+
+const classLabel = (c: ClassRow) => {
+  const d = new Date(c.starts_at).toLocaleDateString("en-NG", { timeZone: "Africa/Lagos", day: "numeric", month: "short" });
+  return `${c.subject} · ${d}${c.mode === "physical" ? " · In-person" : ""}`;
+};
 
 export default function AttendanceClient({
   classes, classStudents, students, initialDate, initialRecords,
@@ -24,6 +29,11 @@ export default function AttendanceClient({
     for (const r of initialRecords) if (r.class_id === classes[0]?.id) map[r.student_id] = r.present;
     return map;
   });
+  const [late, setLate] = useState<Record<string, boolean>>(() => {
+    const map: Record<string, boolean> = {};
+    for (const r of initialRecords) if (r.class_id === classes[0]?.id && r.late) map[r.student_id] = true;
+    return map;
+  });
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -36,8 +46,10 @@ export default function AttendanceClient({
     if (res.ok) {
       const { records } = await res.json();
       const map: Record<string, boolean> = {};
-      for (const r of records) map[r.student_id] = r.present;
+      const lateMap: Record<string, boolean> = {};
+      for (const r of records) { map[r.student_id] = r.present; if (r.late) lateMap[r.student_id] = true; }
       setAttendance(map);
+      setLate(lateMap);
     }
     setLoading(false);
   }
@@ -88,9 +100,7 @@ export default function AttendanceClient({
             <label className="text-xs font-bold uppercase tracking-wide text-ink/40">Class</label>
             <select className="field" value={selectedClass} onChange={e => setSelectedClass(e.target.value)}>
               {classes.map(c => (
-                <option key={c.id} value={c.id}>
-                  {c.name ?? c.subject ?? "Class"}{c.level ? ` · ${c.level}` : ""}
-                </option>
+                <option key={c.id} value={c.id}>{classLabel(c)}</option>
               ))}
             </select>
           </div>
@@ -126,7 +136,10 @@ export default function AttendanceClient({
                 const present = attendance[s.id];
                 return (
                   <div key={s.id} className="flex items-center gap-4 px-5 py-3">
-                    <span className="flex-1 font-semibold text-ink">{s.first_name} {s.last_name}</span>
+                    <span className="flex-1 font-semibold text-ink">
+                      {s.first_name} {s.last_name}
+                      {late[s.id] && present === true && <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-extrabold text-amber-700">Late</span>}
+                    </span>
                     <div className="flex rounded-xl border border-line bg-chalk p-0.5">
                       <button onClick={() => setAttendance(prev => ({ ...prev, [s.id]: true }))}
                         className={`rounded-lg px-3 py-1 text-sm font-semibold transition ${present === true ? "bg-emerald-500 text-white shadow" : "text-ink/45"}`}>

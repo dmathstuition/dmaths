@@ -82,15 +82,18 @@ export default function TutorClassesClient({ initialClasses }: { initialClasses:
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="pill-blue">{c.subject}</span>
-                    <span className="text-xs font-semibold text-ink/45">{c.platform}</span>
+                    <span className="text-xs font-semibold text-ink/45">{c.mode === "physical" ? "In-person" : c.platform}</span>
                   </div>
                   <p className="mt-1.5 font-display text-lg font-bold">{fmtWATDate(c.starts_at)} · {fmtWATTime(c.starts_at)}</p>
                   <p className="text-xs text-ink/45">{c.duration_minutes} min · {roster} learner{roster === 1 ? "" : "s"}</p>
+                  {c.mode === "physical" && c.location && (
+                    <p className="mt-1 inline-flex items-center gap-1.5 text-xs font-semibold text-gold-deep"><Icon name="mapPin" className="h-3.5 w-3.5" /> {c.location}</p>
+                  )}
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <button className="btn-ghost !min-h-[42px]" onClick={() => openAttendance(c)}>Take attendance</button>
-                  <Link href={`/tutor/class/${c.id}/live`} className="btn-ink inline-flex items-center gap-1.5 !min-h-[42px] !px-5"><Icon name="radio" className="h-4 w-4" /> Start live</Link>
-                  {c.link && <a href={c.link} target="_blank" rel="noopener noreferrer" className="btn-gold !min-h-[42px] !px-6">Join →</a>}
+                  {c.mode !== "physical" && <Link href={`/tutor/class/${c.id}/live`} className="btn-ink inline-flex items-center gap-1.5 !min-h-[42px] !px-5"><Icon name="radio" className="h-4 w-4" /> Start live</Link>}
+                  {c.mode !== "physical" && c.link && <a href={c.link} target="_blank" rel="noopener noreferrer" className="btn-gold !min-h-[42px] !px-6">Join →</a>}
                 </div>
               </div>
             );
