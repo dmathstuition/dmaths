@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/Toast";
+import { Icon } from "@/components/Icons";
 
 interface ClassRow { id: string; subject: string; tutor?: string; starts_at: string; mode?: string; location?: string | null; }
 interface ClassStudent { class_id: string; student_id: string; }
@@ -36,6 +37,7 @@ export default function AttendanceClient({
   });
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [exportRange, setExportRange] = useState<"session" | "week" | "month">("session");
 
   const rosterIds = new Set(classStudents.filter(cs => cs.class_id === selectedClass).map(cs => cs.student_id));
   const roster = students.filter(s => rosterIds.has(s.id));
@@ -87,6 +89,24 @@ export default function AttendanceClient({
   const presentCount = roster.filter(s => attendance[s.id] === true).length;
   const absentCount = roster.filter(s => attendance[s.id] === false).length;
 
+  // Download this class's register as CSV. "range" chooses how far back from the
+  // selected date to include (session / week / month).
+  async function exportCsv(range: "session" | "week" | "month") {
+    if (!selectedClass) return;
+    const to = sessionDate;
+    const back = range === "week" ? 6 : range === "month" ? 29 : 0;
+    const from = new Date(new Date(sessionDate).getTime() - back * 86_400_000).toISOString().slice(0, 10);
+    const res = await fetch(`/api/attendance/export?classId=${selectedClass}&from=${from}&to=${to}`);
+    if (!res.ok) { push("Could not export — try again.", "error"); return; }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = res.headers.get("Content-Disposition")?.match(/filename="(.+?)"/)?.[1] || "attendance.csv";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -111,6 +131,16 @@ export default function AttendanceClient({
           <div className="flex gap-2 pb-0.5">
             <button onClick={() => markAll(true)} className="btn-ghost !min-h-[38px] text-sm">All present</button>
             <button onClick={() => markAll(false)} className="btn-ghost !min-h-[38px] text-sm">All absent</button>
+          </div>
+          <div className="ml-auto flex items-end gap-2 pb-0.5">
+            <select className="field !min-h-[38px] w-auto py-1.5 text-sm" value={exportRange} onChange={e => setExportRange(e.target.value as any)}>
+              <option value="session">This session</option>
+              <option value="week">This week</option>
+              <option value="month">This month</option>
+            </select>
+            <button onClick={() => exportCsv(exportRange)} disabled={!roster.length} className="btn-ink inline-flex items-center gap-1.5 !min-h-[38px] text-sm">
+              <Icon name="reports" className="h-4 w-4" /> Export CSV
+            </button>
           </div>
         </div>
       </div>
