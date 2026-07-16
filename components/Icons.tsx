@@ -123,6 +123,30 @@ export const Icons = {
   sigma: (p: IconProps) => (
     <Svg {...p}><path d="M18 7V4H6l6 8-6 8h12v-3"/></Svg>
   ),
+  school: (p: IconProps) => (
+    <Svg {...p}><path d="M14 22v-4a2 2 0 0 0-4 0v4"/><path d="m18 10 3.4 1.8a1 1 0 0 1 .6.92V21a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-8.28a1 1 0 0 1 .6-.92L6 10"/><path d="M18 5v17"/><path d="M6 5v17"/><circle cx="12" cy="9" r="2"/><path d="M12 2 4 6l8 4 8-4-8-4Z"/></Svg>
+  ),
+  monitor: (p: IconProps) => (
+    <Svg {...p}><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></Svg>
+  ),
+  mapPin: (p: IconProps) => (
+    <Svg {...p}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></Svg>
+  ),
+  graduationCap: (p: IconProps) => (
+    <Svg {...p}><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c0 1 2 3 6 3s6-2 6-3v-5"/></Svg>
+  ),
+  mail: (p: IconProps) => (
+    <Svg {...p}><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></Svg>
+  ),
+  lock: (p: IconProps) => (
+    <Svg {...p}><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></Svg>
+  ),
+  clock: (p: IconProps) => (
+    <Svg {...p}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></Svg>
+  ),
+  radio: (p: IconProps) => (
+    <Svg {...p}><circle cx="12" cy="12" r="2"/><path d="M4.93 19.07a10 10 0 0 1 0-14.14"/><path d="M7.76 16.24a6 6 0 0 1 0-8.49"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></Svg>
+  ),
 };
 
 export type IconName = keyof typeof Icons;

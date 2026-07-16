@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { Icon } from "@/components/Icons";
 
 type Result = { ok: boolean; stage?: string; message?: string; model?: string; reply?: string; status?: number | null };
 
@@ -26,7 +27,7 @@ export default function AssistantHealthCheck() {
     <div className="card p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gold-pale text-lg">🧭</span>
+          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gold-pale text-gold-deep"><Icon name="compass" className="h-5 w-5" /></span>
           <div>
             <h2 className="font-display text-base font-bold">AI assistant (DeepSeek)</h2>
             <p className="text-xs text-ink/45">Check the connection without needing a learner login.</p>

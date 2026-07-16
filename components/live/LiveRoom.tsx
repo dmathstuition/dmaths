@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Icon } from "@/components/Icons";
 
 // In-portal live classroom powered by Jitsi's IFrame API — video, audio and
 // screen sharing happen right here, no Zoom or Google Meet. The media runs on
@@ -117,7 +118,7 @@ export default function LiveRoom({ domain, roomName, displayName, email, jwt, is
       {/* Slim header with a safe way out */}
       <div className="flex items-center justify-between gap-3 bg-board px-4 py-2 text-white">
         <div className="min-w-0">
-          <p className="truncate text-sm font-bold">🔴 Live · {subject}</p>
+          <p className="flex items-center gap-1.5 truncate text-sm font-bold"><Icon name="radio" className="h-4 w-4 text-red-400" /> Live · {subject}</p>
           <p className="text-[11px] text-white/50">{isModerator ? "You're the host" : "D-Maths live class"}</p>
         </div>
         <button onClick={() => { try { apiRef.current?.executeCommand("hangup"); } catch {} router.push(backHref); }}

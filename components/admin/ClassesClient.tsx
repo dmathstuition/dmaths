@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
+import { Icon } from "@/components/Icons";
 import ConfirmModal from "@/components/ConfirmModal";
 import { useToast } from "@/components/Toast";
 import { fmtWAT, watToUtcISO, utcToWatParts } from "@/lib/time";
@@ -209,8 +210,8 @@ export default function ClassesClient({ initialClasses, initialStudents, initial
             </select>
             <input className="field" type="number" min={15} step={15} placeholder="Duration (minutes)" value={f.duration_minutes} onChange={e => setF({ ...f, duration_minutes: e.target.value })} />
             <select className="field" value={f.mode || "online"} onChange={e => setF({ ...f, mode: e.target.value })} title="Online or in-person?">
-              <option value="online">💻 Online</option>
-              <option value="physical">🏫 In-person</option>
+              <option value="online">Online</option>
+              <option value="physical">In-person</option>
             </select>
             {f.mode === "physical"
               ? <input className="field sm:col-span-2" placeholder="Venue / address (e.g. Infant Jesus Academy, Old Anwai Road, Asaba)" value={f.location || ""} onChange={e => setF({ ...f, location: e.target.value })} />
@@ -317,7 +318,7 @@ export default function ClassesClient({ initialClasses, initialStudents, initial
                 <button className="btn-gold !min-h-[38px] flex-1 min-w-[130px]" onClick={() => openAttendance(c)}>Take attendance</button>
               )}
               {c.link && <a className="btn-ghost !min-h-[38px]" href={c.link} target="_blank" rel="noopener noreferrer">Open link</a>}
-              <Link className="btn-ink !min-h-[38px]" href={`/admin/class/${c.id}/live`}>🔴 Start live</Link>
+              <Link className="btn-ink inline-flex items-center gap-1.5 !min-h-[38px]" href={`/admin/class/${c.id}/live`}><Icon name="radio" className="h-4 w-4" /> Start live</Link>
               {!c.attendance_locked && (
                 <button className="btn-ghost !min-h-[38px]" onClick={() => startEditClass(c)}>Edit</button>
               )}
