@@ -436,14 +436,20 @@ export default function Apply() {
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <main className="min-h-screen bg-chalk pb-20">
-      <header className="bg-board px-5 py-4">
-        <div className="mx-auto flex max-w-4xl items-center justify-between">
+    <main className="min-h-screen pb-20" style={{ background: "linear-gradient(160deg, #FDF3E3 0%, #FBFAF6 42%, #FFFFFF 100%)" }}>
+      <header className="relative overflow-hidden px-5 pb-11 pt-4 text-white"
+        style={{ background: "linear-gradient(135deg, #F4C078 0%, #EFAE56 45%, #C8881F 100%)" }}>
+        <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/15 blur-2xl" />
+        <div className="relative mx-auto flex max-w-4xl items-center justify-between">
           <Link href="/"><Logo light /></Link>
-          <Link href="/login" className="text-sm font-semibold text-white/55 hover:text-white">Already enrolled? Sign in</Link>
+          <Link href="/login" className="text-sm font-semibold text-white/80 hover:text-white">Already enrolled? Sign in</Link>
         </div>
+        {/* white curved base — the Terra look */}
+        <svg className="absolute inset-x-0 bottom-[-1px] h-10 w-full" viewBox="0 0 500 40" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0,40 L0,14 C160,40 340,40 500,14 L500,40 Z" fill="#FDF3E3" />
+        </svg>
       </header>
-      <div className="px-5 pt-10">{children}</div>
+      <div className="relative px-5 pt-8">{children}</div>
     </main>
   );
 }
