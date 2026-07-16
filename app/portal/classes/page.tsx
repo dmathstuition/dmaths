@@ -28,7 +28,11 @@ export default async function MyClasses() {
     const status = mins < 0 ? "past" : mins <= 30 ? "soon" : "upcoming";
     // The tutor's live room heartbeats live_since; treat as live for ~3 minutes.
     const live = c.live_since ? new Date(c.live_since).getTime() > now - 3 * 60 * 1000 : false;
-    return { ...c, _status: status as "past" | "soon" | "upcoming", _start: start, _live: live };
+    // The join link stays available until the class actually ends (start + duration),
+    // so learners can still get in while it's on — not just before it starts.
+    const endMs = start + (Number(c.duration_minutes) || 60) * 60_000;
+    const joinable = now < endMs;
+    return { ...c, _status: status as "past" | "soon" | "upcoming", _start: start, _live: live, _joinable: joinable };
   });
   // Upcoming first (soonest first), past last (most recent first).
   withStatus.sort((a, b) => {
@@ -92,12 +96,12 @@ export default async function MyClasses() {
                 </p>
               )}
 
-              {!past && c.mode !== "physical" && (c.link
+              {c._joinable && c.mode !== "physical" && (c.link
                 ? <JoinClassButton classId={c.id} link={c.link} className="btn-gold mt-4 inline-block w-full text-center" />
                 : <p className="mt-4 rounded-xl bg-chalk px-4 py-2.5 text-center text-sm font-semibold text-ink/45">Class link coming soon</p>)}
 
               {/* In-portal live classroom — video & screen share, no Zoom/Meet needed */}
-              {!past && c.mode !== "physical" && (
+              {c._joinable && c.mode !== "physical" && (
                 <Link href={`/portal/class/${c.id}/live`}
                   className={c._live
                     ? "badge-pulse mt-2 flex items-center justify-center gap-2 rounded-xl bg-red-500 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-red-600"

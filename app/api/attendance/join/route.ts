@@ -16,7 +16,7 @@ export async function POST(req: Request) {
   const admin = supabaseAdmin();
 
   // Don't touch attendance that's already been finalised/locked by the admin.
-  const { data: cls } = await admin.from("classes").select("attendance_locked").eq("id", classId).single();
+  const { data: cls } = await admin.from("classes").select("attendance_locked, starts_at").eq("id", classId).single();
   if (cls?.attendance_locked) return NextResponse.json({ ok: true, locked: true });
 
   // Only allow if the student is on this class roster.
@@ -24,10 +24,20 @@ export async function POST(req: Request) {
     .select("student_id").eq("class_id", classId).eq("student_id", user.id).maybeSingle();
   if (!roster) return NextResponse.json({ error: "Not enrolled in this class" }, { status: 403 });
 
-  await admin.from("attendance_records").upsert({
-    class_id: classId, student_id: user.id, present: true,
-    self_marked: true, joined_at: new Date().toISOString(),
-  }, { onConflict: "class_id,student_id,session_date" });
+  // Joining more than 10 minutes after the class start counts as late (still present).
+  const startMs = cls?.starts_at ? new Date(cls.starts_at).getTime() : Date.now();
+  const late = Date.now() > startMs + 10 * 60 * 1000;
 
-  return NextResponse.json({ ok: true });
+  const row: Record<string, any> = {
+    class_id: classId, student_id: user.id, present: true, late,
+    self_marked: true, joined_at: new Date().toISOString(),
+  };
+  const { error } = await admin.from("attendance_records").upsert(row, { onConflict: "class_id,student_id,session_date" });
+  // Graceful fallback if migration-attendance-late.sql hasn't been run yet.
+  if (error && /late/i.test(error.message)) {
+    const { late: _late, ...rest } = row;
+    await admin.from("attendance_records").upsert(rest, { onConflict: "class_id,student_id,session_date" });
+  }
+
+  return NextResponse.json({ ok: true, late });
 }

@@ -17,11 +17,19 @@ export async function GET(req: Request) {
   if (!classId || !date) return NextResponse.json({ error: "classId and date required" }, { status: 400 });
 
   const admin = supabaseAdmin();
-  const { data: records } = await admin
+  const first = await admin
     .from("attendance_records")
-    .select("student_id, present")
+    .select("student_id, present, late")
     .eq("class_id", classId)
     .eq("session_date", date);
+  let records: any[] | null = first.data;
+  // Fallback if migration-attendance-late.sql hasn't been run yet.
+  if (first.error && /late/i.test(first.error.message)) {
+    const fb = await admin
+      .from("attendance_records").select("student_id, present")
+      .eq("class_id", classId).eq("session_date", date);
+    records = fb.data;
+  }
 
   return NextResponse.json({ records: records ?? [] });
 }

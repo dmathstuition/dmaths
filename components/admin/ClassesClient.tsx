@@ -205,9 +205,11 @@ export default function ClassesClient({ initialClasses, initialStudents, initial
             <input className="field" placeholder="Tutor name" value={f.tutor || ""} onChange={e => setF({ ...f, tutor: e.target.value })} />
             <input className="field" type="date" value={f.date || ""} onChange={e => setF({ ...f, date: e.target.value })} />
             <input className="field" type="time" value={f.time || ""} onChange={e => setF({ ...f, time: e.target.value })} />
-            <select className="field" value={f.platform} onChange={e => setF({ ...f, platform: e.target.value })}>
-              <option>Zoom</option><option>Google Meet</option><option>Microsoft Teams</option>
-            </select>
+            {f.mode !== "physical" && (
+              <select className="field" value={f.platform} onChange={e => setF({ ...f, platform: e.target.value })}>
+                <option>Zoom</option><option>Google Meet</option><option>Microsoft Teams</option>
+              </select>
+            )}
             <input className="field" type="number" min={15} step={15} placeholder="Duration (minutes)" value={f.duration_minutes} onChange={e => setF({ ...f, duration_minutes: e.target.value })} />
             <select className="field" value={f.mode || "online"} onChange={e => setF({ ...f, mode: e.target.value })} title="Online or in-person?">
               <option value="online">Online</option>
@@ -304,8 +306,10 @@ export default function ClassesClient({ initialClasses, initialStudents, initial
                 <p className="text-sm text-ink/50">with {c.tutor}</p>
               </div>
               <div className="flex flex-col items-end gap-1">
-                <span className="pill-blue">{c.platform}</span>
-                {c.series_id && <span className="pill bg-gold-pale text-gold-deep">🔁 Weekly</span>}
+                {c.mode === "physical"
+                  ? <span className="pill bg-gold-pale text-gold-deep">In-person</span>
+                  : <span className="pill-blue">{c.platform}</span>}
+                {c.series_id && <span className="pill bg-gold-pale text-gold-deep">Weekly</span>}
               </div>
             </div>
             <p className="mt-3 text-sm text-ink/65">
@@ -317,8 +321,9 @@ export default function ClassesClient({ initialClasses, initialStudents, initial
               ) : (
                 <button className="btn-gold !min-h-[38px] flex-1 min-w-[130px]" onClick={() => openAttendance(c)}>Take attendance</button>
               )}
-              {c.link && <a className="btn-ghost !min-h-[38px]" href={c.link} target="_blank" rel="noopener noreferrer">Open link</a>}
-              <Link className="btn-ink inline-flex items-center gap-1.5 !min-h-[38px]" href={`/admin/class/${c.id}/live`}><Icon name="radio" className="h-4 w-4" /> Start live</Link>
+              {c.mode !== "physical" && c.link && <a className="btn-ghost !min-h-[38px]" href={c.link} target="_blank" rel="noopener noreferrer">Open link</a>}
+              {c.mode !== "physical" && <Link className="btn-ink inline-flex items-center gap-1.5 !min-h-[38px]" href={`/admin/class/${c.id}/live`}><Icon name="radio" className="h-4 w-4" /> Start live</Link>}
+              {c.mode === "physical" && c.location && <span className="inline-flex items-center gap-1.5 rounded-xl bg-gold-pale px-3 py-2 text-[13px] font-semibold text-gold-deep"><Icon name="mapPin" className="h-4 w-4" /> {c.location}</span>}
               {!c.attendance_locked && (
                 <button className="btn-ghost !min-h-[38px]" onClick={() => startEditClass(c)}>Edit</button>
               )}
