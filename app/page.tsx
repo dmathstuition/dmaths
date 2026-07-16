@@ -6,6 +6,8 @@ import CountUp from "@/components/landing/CountUp";
 import LandingNav from "@/components/landing/LandingNav";
 import SummerCampBanner from "@/components/landing/SummerCampBanner";
 import FloatingMath from "@/components/landing/FloatingMath";
+import Tilt3D from "@/components/landing/Tilt3D";
+import Parallax from "@/components/landing/Parallax";
 import SocialLinks from "@/components/landing/SocialLinks";
 import InstallPrompt from "@/components/InstallPrompt";
 import AppLauncher from "@/components/AppLauncher";
@@ -68,8 +70,8 @@ export default function Landing() {
         <div className="mesh-premium pointer-events-none absolute inset-x-0 -top-24 h-[42rem]" />
         <div className="aurora pointer-events-none absolute inset-x-0 top-0 h-[30rem] opacity-40" />
         <FloatingMath />
-        <DotsScatter className="float pointer-events-none absolute left-6 top-28 h-24 w-24 opacity-70" />
-        <DotsScatter className="float pointer-events-none absolute right-10 bottom-10 h-20 w-20 opacity-50 [animation-delay:1.5s]" />
+        <Parallax speed={0.16} className="pointer-events-none absolute left-6 top-28"><DotsScatter className="float h-24 w-24 opacity-70" /></Parallax>
+        <Parallax speed={-0.12} className="pointer-events-none absolute right-10 bottom-10"><DotsScatter className="float h-20 w-20 opacity-50 [animation-delay:1.5s]" /></Parallax>
         <div className="relative mx-auto grid max-w-7xl items-center gap-8 px-5 md:grid-cols-2">
           <Reveal className="space-y-0">
             <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-white/70 px-4 py-1.5 text-xs font-bold text-gold-deep shadow-sm backdrop-blur">
@@ -125,26 +127,29 @@ export default function Landing() {
             {/* soft glow + slowly rotating dashed ring behind the cut-out figure */}
             <div className="hero-glow absolute inset-0 scale-110" />
             <div className="ring-spin pointer-events-none absolute inset-8 rounded-full border-2 border-dashed border-gold/25" />
-            <Image
-              src="/camp-hero.png"
-              alt="D-Maths student with the D-Maths robot"
-              width={900}
-              height={760}
-              quality={90}
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className="float relative z-10 mx-auto h-auto w-full object-contain drop-shadow-2xl transition-transform duration-500 group-hover:scale-[1.03]"
-              style={{ animationDuration: "7s" }}
-              priority
-            />
-            {/* floating stat badges */}
-            <div className="hovlift float absolute -left-3 top-8 z-20 rounded-2xl bg-white px-4 py-3 shadow-xl">
-              <p className="font-display text-xl font-extrabold text-ink">98%</p>
-              <p className="text-[11px] font-semibold text-ink/45">Pass rate</p>
-            </div>
-            <div className="hovlift float absolute -right-3 bottom-10 z-20 rounded-2xl bg-gold px-4 py-3 shadow-xl" style={{ animationDelay: "1.2s" }}>
-              <p className="font-display text-xl font-extrabold text-white">★ 4.9</p>
-              <p className="text-[11px] font-semibold text-white/70">Student rating</p>
-            </div>
+            {/* cinematic 3D tilt — follows the cursor on desktop, static on touch */}
+            <Tilt3D className="relative" max={10}>
+              <Image
+                src="/camp-hero.png"
+                alt="D-Maths student with the D-Maths robot"
+                width={900}
+                height={760}
+                quality={90}
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="float relative z-10 mx-auto h-auto w-full object-contain drop-shadow-2xl transition-transform duration-500 group-hover:scale-[1.03]"
+                style={{ animationDuration: "7s" }}
+                priority
+              />
+              {/* floating stat badges — lifted forward for depth */}
+              <div className="hovlift float absolute -left-3 top-8 z-20 rounded-2xl bg-white px-4 py-3 shadow-xl" style={{ transform: "translateZ(60px)" }}>
+                <p className="font-display text-xl font-extrabold text-ink">98%</p>
+                <p className="text-[11px] font-semibold text-ink/45">Pass rate</p>
+              </div>
+              <div className="hovlift float absolute -right-3 bottom-10 z-20 rounded-2xl bg-gold px-4 py-3 shadow-xl" style={{ animationDelay: "1.2s", transform: "translateZ(80px)" }}>
+                <p className="font-display text-xl font-extrabold text-white">★ 4.9</p>
+                <p className="text-[11px] font-semibold text-white/70">Student rating</p>
+              </div>
+            </Tilt3D>
           </Reveal>
         </div>
       </header>
