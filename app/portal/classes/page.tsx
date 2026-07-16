@@ -61,7 +61,7 @@ export default async function MyClasses() {
                   <div className="flex items-start justify-between gap-2">
                     <h2 className="font-display text-base font-bold leading-tight">{c.subject}</h2>
                     {c._live ? (
-                      <span className="badge-pulse pill bg-red-500 text-white">🔴 LIVE now</span>
+                      <span className="badge-pulse pill inline-flex items-center gap-1 bg-red-500 text-white"><Icon name="radio" className="h-3 w-3" /> LIVE now</span>
                     ) : c._status === "soon" ? (
                       <span className="badge-pulse pill bg-gold text-board">Starting soon</span>
                     ) : c._status === "upcoming" ? (
@@ -70,7 +70,7 @@ export default async function MyClasses() {
                       <span className="pill bg-ink/10 text-ink/50">Past</span>
                     )}
                   </div>
-                  <p className="mt-0.5 text-sm text-ink/50">with {c.tutor} · {c.mode === "physical" ? "🏫 In-person" : c.platform}</p>
+                  <p className="mt-0.5 flex items-center gap-1 text-sm text-ink/50">with {c.tutor} · {c.mode === "physical" ? <span className="inline-flex items-center gap-1"><Icon name="school" className="h-3.5 w-3.5" /> In-person</span> : c.platform}</p>
                 </div>
               </div>
 
@@ -88,7 +88,7 @@ export default async function MyClasses() {
               {/* In-person class — show the venue instead of an online link */}
               {c.mode === "physical" && c.location && (
                 <p className="mt-4 flex items-start gap-2 rounded-xl border border-gold/30 bg-gold-pale px-4 py-2.5 text-sm font-semibold text-ink/70">
-                  <span>📍</span><span>{c.location}</span>
+                  <Icon name="mapPin" className="h-4 w-4 flex-shrink-0 text-gold-deep" /><span>{c.location}</span>
                 </p>
               )}
 
@@ -102,7 +102,7 @@ export default async function MyClasses() {
                   className={c._live
                     ? "badge-pulse mt-2 flex items-center justify-center gap-2 rounded-xl bg-red-500 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-red-600"
                     : "mt-2 flex items-center justify-center gap-2 rounded-xl border border-line px-4 py-2.5 text-sm font-bold text-ink/70 transition hover:border-gold hover:text-gold-deep"}>
-                  {c._live ? "🔴 Join the live class now" : "🔴 Join live in the app"}
+                  <Icon name="radio" className="h-4 w-4" /> {c._live ? "Join the live class now" : "Join live in the app"}
                 </Link>
               )}
 

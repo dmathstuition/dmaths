@@ -6,6 +6,7 @@ import Reveal from "@/components/landing/Reveal";
 import CountUp from "@/components/landing/CountUp";
 import SocialLinks from "@/components/landing/SocialLinks";
 import { DotsScatter } from "@/components/illustrations";
+import { Icon, type IconName } from "@/components/Icons";
 import InstallPrompt from "@/components/InstallPrompt";
 import PhysicalCampPicker from "@/components/landing/PhysicalCampPicker";
 import {
@@ -67,10 +68,10 @@ export default function SummerCamp() {
                 Registration is open
               </span>
               <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/5 px-4 py-1.5 text-xs font-semibold text-white/80">
-                📅 {campDateRange()}
+                <Icon name="calendar" className="h-4 w-4" /> {campDateRange()}
               </span>
               <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/5 px-4 py-1.5 text-xs font-semibold text-white/80">
-                📍 {PHYSICAL_CAMP.address}
+                <Icon name="mapPin" className="h-4 w-4" /> {PHYSICAL_CAMP.address}
               </span>
             </div>
             <h1 className="mt-5 font-display text-4xl font-extrabold leading-[1.08] tracking-tight md:text-6xl">
@@ -83,11 +84,11 @@ export default function SummerCamp() {
               Real projects, expert tutors and a personalized portal to track every learner's growth.
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3 md:justify-start">
-              <a href="#in-person" className="btn-gold !min-h-[50px] !rounded-full !px-7 !text-base">
-                🏫 In-person (Asaba)
+              <a href="#in-person" className="btn-gold inline-flex items-center gap-2 !min-h-[50px] !rounded-full !px-7 !text-base">
+                <Icon name="school" className="h-5 w-5" /> In-person (Asaba)
               </a>
-              <a href="#packages" className="btn !min-h-[50px] !rounded-full border border-white/30 bg-white/5 !px-7 !text-base text-white hover:bg-white/10">
-                💻 Learn online
+              <a href="#packages" className="btn inline-flex items-center gap-2 !min-h-[50px] !rounded-full border border-white/30 bg-white/5 !px-7 !text-base text-white hover:bg-white/10">
+                <Icon name="monitor" className="h-5 w-5" /> Learn online
               </a>
             </div>
           </Reveal>
@@ -123,7 +124,7 @@ export default function SummerCamp() {
           <div className="grid items-center gap-10 md:grid-cols-2">
             <Reveal>
               <span className="inline-flex items-center gap-2 rounded-full bg-gold-pale px-4 py-1.5 text-xs font-extrabold uppercase tracking-wide text-gold-deep">
-                🏫 New — in-person classes
+                <Icon name="school" className="h-4 w-4" /> New — in-person classes
               </span>
               <h2 className="mt-4 font-display text-3xl font-extrabold leading-tight md:text-4xl">
                 Learn on-site at our <span className="text-gold-deep">Asaba centre</span>
@@ -134,12 +135,12 @@ export default function SummerCamp() {
               </p>
               <ul className="mt-6 space-y-3">
                 {[
-                  { icon: "📍", t: PHYSICAL_CAMP.venue, d: PHYSICAL_CAMP.address },
-                  { icon: "🗓️", t: PHYSICAL_CAMP.frequency, d: campDateRange() },
-                  { icon: "🧮", t: "Maths, Coding — or both", d: "Choose the class that fits your child." },
+                  { icon: "mapPin" as IconName, t: PHYSICAL_CAMP.venue, d: PHYSICAL_CAMP.address },
+                  { icon: "calendar" as IconName, t: PHYSICAL_CAMP.frequency, d: campDateRange() },
+                  { icon: "sigma" as IconName, t: "Maths, Coding — or both", d: "Choose the class that fits your child." },
                 ].map((r) => (
                   <li key={r.t} className="flex items-start gap-3">
-                    <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-gold-pale text-lg">{r.icon}</span>
+                    <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-gold-pale text-gold-deep"><Icon name={r.icon} className="h-5 w-5" /></span>
                     <div>
                       <p className="font-display text-sm font-bold text-ink">{r.t}</p>
                       <p className="text-[13px] text-ink/50">{r.d}</p>
@@ -188,7 +189,7 @@ export default function SummerCamp() {
         <div className="mx-auto max-w-6xl px-5">
           <Reveal className="mb-3 text-center">
             <span className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-1.5 text-xs font-extrabold uppercase tracking-wide text-ink/50 shadow-sm">
-              💻 Prefer to learn from home?
+              <Icon name="monitor" className="h-4 w-4" /> Prefer to learn from home?
             </span>
             <h2 className="mt-4 font-display text-3xl font-bold md:text-4xl">
               Online <span className="text-gold-deep">packages</span>
@@ -250,8 +251,8 @@ export default function SummerCamp() {
             ))}
           </div>
 
-          <p className="mx-auto mt-8 max-w-lg text-center text-sm font-semibold text-ink/60">
-            💳 Prefer to spread it out? <span className="text-gold-deep">Pay half now and the balance later.</span>
+          <p className="mx-auto mt-8 flex max-w-lg items-center justify-center gap-2 text-center text-sm font-semibold text-ink/60">
+            <Icon name="payments" className="h-4 w-4 text-gold-deep" /> Prefer to spread it out? <span className="text-gold-deep">Pay half now and the balance later.</span>
           </p>
           <p className="mx-auto mt-2 max-w-lg text-center text-xs text-ink/40">
             Payment is processed in naira (₦) at ₦{SUMMER_CAMP.ngnPerUsd.toLocaleString("en-NG")} to

@@ -125,8 +125,8 @@ export default function Login() {
           <div className="relative px-8 pt-9 pb-16 text-white"
             style={{ background: "linear-gradient(135deg, #F4C078 0%, #EFAE56 45%, #C8881F 100%)" }}>
             <div className="flex items-center gap-3">
-              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/25 text-2xl backdrop-blur-sm ring-1 ring-white/40">
-                <span className="font-display font-black">√</span>
+              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/25 backdrop-blur-sm ring-1 ring-white/40">
+                <Icon name="graduationCap" className="h-6 w-6 text-white" />
               </span>
             </div>
             <h1 className="mt-5 font-display text-[1.75rem] font-extrabold leading-tight">Welcome back</h1>
@@ -149,7 +149,7 @@ export default function Login() {
               <label className="mb-1.5 block text-[13px] font-bold text-ink/60" htmlFor="id">Student ID or email</label>
               <div className="relative">
                 <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gold-deep/60">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg>
+                  <Icon name="mail" />
                 </span>
                 <input id="id" className="terra-field pl-11 font-mono" placeholder="DM-2026-0001" autoComplete="username"
                   value={identifier} onChange={e => setIdentifier(e.target.value)} required />
@@ -160,7 +160,7 @@ export default function Login() {
               <label className="mb-1.5 block text-[13px] font-bold text-ink/60" htmlFor="pw">Password</label>
               <div className="relative">
                 <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gold-deep/60">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  <Icon name="lock" />
                 </span>
                 <input id="pw" type={showPw ? "text" : "password"} className="terra-field pl-11 pr-11" placeholder="••••••••" autoComplete="current-password"
                   value={password} onChange={e => setPassword(e.target.value)} required />

@@ -2,6 +2,7 @@
 import Logo from "@/components/Logo";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { Icon } from "@/components/Icons";
 import PaystackButton from "@/components/PaystackButton";
 import { SUMMER_CAMP_TIERS, PHYSICAL_TIERS, PHYSICAL_CAMP, findTier, fmtUsd, fmtNgn, DISCOUNT_PCT, discountedUsd, discountedNgn, depositNgn, balanceNgn, tierModules, type CampTier } from "@/lib/summerCamp";
 
@@ -154,7 +155,7 @@ export default function Apply() {
   if (done) return (
     <Shell>
       <div className="card mx-auto max-w-lg p-9 text-center">
-        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-3xl">⏳</div>
+        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-amber-700"><Icon name="clock" className="h-8 w-8" /></div>
         <h1 className="font-display text-2xl font-semibold">Application submitted</h1>
         <p className="mt-3 text-sm leading-relaxed text-ink/55">
           {isFreeApplication(f.subjects)
@@ -240,7 +241,7 @@ export default function Apply() {
 
                 {/* In-person (Asaba) — flat naira */}
                 <p className="mb-2 mt-1 flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-gold-deep">
-                  🏫 In-person · {PHYSICAL_CAMP.address} · {PHYSICAL_CAMP.frequency}
+                  <Icon name="school" className="h-4 w-4" /> In-person · {PHYSICAL_CAMP.address} · {PHYSICAL_CAMP.frequency}
                 </p>
                 <div className="grid gap-2.5 sm:grid-cols-3">
                   {PHYSICAL_TIERS.map(t => {
@@ -259,7 +260,7 @@ export default function Apply() {
 
                 {/* Online packages */}
                 <p className="mb-2 mt-5 flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-ink/45">
-                  💻 Online
+                  <Icon name="monitor" className="h-4 w-4" /> Online
                   {DISCOUNT_PCT > 0 && <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-extrabold text-emerald-700">{DISCOUNT_PCT}% off applied</span>}
                 </p>
                 <div className="grid gap-2.5 sm:grid-cols-2">
