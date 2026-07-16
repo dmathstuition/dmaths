@@ -278,15 +278,17 @@ print("Hello from D-Maths!")`}</code></pre>
             <div className="grid items-center gap-10 md:grid-cols-2">
               <Reveal className="sheen group relative overflow-hidden rounded-2xl shadow-lg">
                 <div className="hero-glow absolute -inset-4 z-0" />
-                <Image
-                  src="https://images.unsplash.com/photo-1509062522246-3755977927d7?w=1200&q=85"
-                  alt="Students in an online classroom"
-                  width={1200}
-                  height={820}
-                  quality={90}
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  className="relative z-10 h-auto w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
+                <Tilt3D max={7}>
+                  <Image
+                    src="https://images.unsplash.com/photo-1509062522246-3755977927d7?w=1200&q=85"
+                    alt="Students in an online classroom"
+                    width={1200}
+                    height={820}
+                    quality={90}
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    className="relative z-10 h-auto w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </Tilt3D>
               </Reveal>
               <Reveal delay={100}>
                 <h2 className="font-display text-3xl font-bold md:text-4xl">Simple <span className="text-gold-deep">Solutions!</span></h2>
@@ -448,6 +450,7 @@ print("Hello from D-Maths!")`}</code></pre>
           <div className="grid gap-5 md:grid-cols-3">
             {TESTIMONIALS.map((t, i) => (
               <Reveal key={t.n} delay={i * 80}>
+                <Tilt3D max={6} className="h-full">
                 <figure className="card-premium group relative h-full overflow-hidden rounded-3xl p-6">
                   <span className="pointer-events-none absolute -right-1 -top-3 font-display text-7xl font-extrabold text-gold/10 transition-colors duration-300 group-hover:text-gold/20" aria-hidden="true">&rdquo;</span>
                   <div className="relative flex items-center gap-3">
@@ -462,6 +465,7 @@ print("Hello from D-Maths!")`}</code></pre>
                   <blockquote className="relative mt-4 text-[13px] leading-relaxed text-ink/60">{t.t}</blockquote>
                   <div className="mt-4 inline-flex text-gold transition-transform duration-300 group-hover:scale-110">{"★".repeat(5)}</div>
                 </figure>
+                </Tilt3D>
               </Reveal>
             ))}
           </div>
