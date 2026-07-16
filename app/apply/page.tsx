@@ -3,7 +3,7 @@ import Logo from "@/components/Logo";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import PaystackButton from "@/components/PaystackButton";
-import { SUMMER_CAMP_TIERS, findTier, fmtUsd, fmtNgn, DISCOUNT_PCT, discountedUsd, discountedNgn, depositNgn, balanceNgn, tierModules, type CampTier } from "@/lib/summerCamp";
+import { SUMMER_CAMP_TIERS, PHYSICAL_TIERS, PHYSICAL_CAMP, findTier, fmtUsd, fmtNgn, DISCOUNT_PCT, discountedUsd, discountedNgn, depositNgn, balanceNgn, tierModules, type CampTier } from "@/lib/summerCamp";
 
 const SUBJECTS = ["Algebra","Calculus","Statistics","Geometry","Further Mathematics","Core Maths Revision","Physics","JavaScript","Python","Python Practice Challenge","External Examinations"];
 
@@ -236,8 +236,32 @@ export default function Apply() {
               <div>
                 <label className="flabel">
                   Summer camp package <Req />
-                  {DISCOUNT_PCT > 0 && <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-extrabold text-emerald-700">{DISCOUNT_PCT}% off applied</span>}
                 </label>
+
+                {/* In-person (Asaba) — flat naira */}
+                <p className="mb-2 mt-1 flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-gold-deep">
+                  🏫 In-person · {PHYSICAL_CAMP.address} · {PHYSICAL_CAMP.frequency}
+                </p>
+                <div className="grid gap-2.5 sm:grid-cols-3">
+                  {PHYSICAL_TIERS.map(t => {
+                    const on = f.plan === t.id;
+                    return (
+                      <button type="button" key={t.id} onClick={() => selectTier(t)}
+                        className={`rounded-2xl border p-3.5 text-left transition
+                          ${on ? "border-gold bg-gold-pale ring-1 ring-gold/40" : "border-line bg-white hover:border-gold/40"}`}>
+                        <span className="text-[13px] font-bold text-ink">{t.name}</span>
+                        <p className="mt-1 font-display text-lg font-extrabold text-gold-deep">{fmtNgn(t.ngn)}</p>
+                        <p className="text-[11px] font-semibold text-ink/40">in person · 4×/week</p>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Online packages */}
+                <p className="mb-2 mt-5 flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-ink/45">
+                  💻 Online
+                  {DISCOUNT_PCT > 0 && <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-extrabold text-emerald-700">{DISCOUNT_PCT}% off applied</span>}
+                </p>
                 <div className="grid gap-2.5 sm:grid-cols-2">
                   {SUMMER_CAMP_TIERS.map(t => {
                     const on = f.plan === t.id;
@@ -309,16 +333,18 @@ export default function Apply() {
               <div className="flex items-center justify-between gap-3 rounded-xl border border-gold bg-gold-pale px-4 py-3">
                 <div>
                   <p className="text-[11px] font-bold uppercase tracking-wide text-gold-deep">
-                    Summer camp package{DISCOUNT_PCT > 0 && ` · ${DISCOUNT_PCT}% off`}
+                    {selectedTier.physical ? "In-person · Asaba" : `Summer camp package${DISCOUNT_PCT > 0 ? ` · ${DISCOUNT_PCT}% off` : ""}`}
                   </p>
                   <p className="text-sm font-bold text-ink">{selectedTier.name}</p>
                 </div>
                 <div className="text-right">
                   <p className="font-display text-xl font-extrabold text-ink">
                     {fmtNgn(discountedNgn(selectedTier))}
-                    {DISCOUNT_PCT > 0 && <span className="ml-1.5 text-sm font-semibold text-ink/35 line-through">{fmtNgn(selectedTier.ngn)}</span>}
+                    {!selectedTier.physical && DISCOUNT_PCT > 0 && <span className="ml-1.5 text-sm font-semibold text-ink/35 line-through">{fmtNgn(selectedTier.ngn)}</span>}
                   </p>
-                  <p className="text-[11px] font-semibold text-ink/45">{fmtUsd(discountedUsd(selectedTier))} · whole summer</p>
+                  <p className="text-[11px] font-semibold text-ink/45">
+                    {selectedTier.physical ? `${PHYSICAL_CAMP.frequency} · whole camp` : `${fmtUsd(discountedUsd(selectedTier))} · whole summer`}
+                  </p>
                 </div>
               </div>
             )}

@@ -60,7 +60,10 @@ export default function ClassesClient({ initialClasses, initialStudents, initial
       const starts_at = watToUtcISO(f.date, f.time); // interpret the typed time as WAT
       const payload = { subject: f.subject, tutor: f.tutor, platform: f.platform, starts_at,
         duration_minutes: Number(f.duration_minutes) || 60, link: f.link || "",
-        tutor_id: f.tutor_id || null }; // link to a tutor account (optional; null = my own class)
+        tutor_id: f.tutor_id || null, // link to a tutor account (optional; null = my own class)
+        // Only reference the physical columns when actually in-person, so online
+        // class creation still works before migration-physical-classes.sql is run.
+        ...(f.mode === "physical" ? { mode: "physical", location: f.location || null } : {}) };
 
       if (editId) {
         const { error } = await supabase.from("classes").update(payload).eq("id", editId);
@@ -78,7 +81,10 @@ export default function ClassesClient({ initialClasses, initialStudents, initial
           ...(seriesId ? { series_id: seriesId } : {}),
         }));
         const { data: created, error } = await supabase.from("classes").insert(rows).select();
-        if (error || !created?.length) { setFormError("Could not create class."); return; }
+        if (error || !created?.length) {
+          setFormError(/mode|location/i.test(error?.message ?? "") ? "In-person classes need migration-physical-classes.sql — run it in Supabase first." : "Could not create class.");
+          return;
+        }
         if (f.roster.length) {
           const links = created.flatMap((cls: any) =>
             f.roster.map((sid: string) => ({ class_id: cls.id, student_id: sid })));
@@ -100,6 +106,7 @@ export default function ClassesClient({ initialClasses, initialStudents, initial
       date, time,
       duration_minutes: c.duration_minutes, link: c.link || "", roster: [],
       tutor_id: c.tutor_id || undefined,
+      mode: c.mode || "online", location: c.location || "",
     });
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -201,7 +208,13 @@ export default function ClassesClient({ initialClasses, initialStudents, initial
               <option>Zoom</option><option>Google Meet</option><option>Microsoft Teams</option>
             </select>
             <input className="field" type="number" min={15} step={15} placeholder="Duration (minutes)" value={f.duration_minutes} onChange={e => setF({ ...f, duration_minutes: e.target.value })} />
-            <input className="field sm:col-span-2" placeholder="Class link (https://…)" value={f.link || ""} onChange={e => setF({ ...f, link: e.target.value })} />
+            <select className="field" value={f.mode || "online"} onChange={e => setF({ ...f, mode: e.target.value })} title="Online or in-person?">
+              <option value="online">💻 Online</option>
+              <option value="physical">🏫 In-person</option>
+            </select>
+            {f.mode === "physical"
+              ? <input className="field sm:col-span-2" placeholder="Venue / address (e.g. Infant Jesus Academy, Old Anwai Road, Asaba)" value={f.location || ""} onChange={e => setF({ ...f, location: e.target.value })} />
+              : <input className="field sm:col-span-2" placeholder="Class link (https://…)" value={f.link || ""} onChange={e => setF({ ...f, link: e.target.value })} />}
             {tutors.length > 0 && (
               <div className="sm:col-span-2">
                 <label className="flabel">Assign to a tutor account (optional)</label>
