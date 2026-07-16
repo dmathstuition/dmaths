@@ -22,6 +22,8 @@ body { @apply bg-chalk text-ink font-body antialiased; }
   .btn-danger { @apply btn bg-red-600 text-white hover:bg-red-700; }
   .card       { @apply bg-white rounded-2xl shadow-card border border-line/60; }
   .field      { @apply w-full rounded-xl border border-line bg-white px-4 py-2.5 text-sm outline-none focus:border-gold focus:ring-2 focus:ring-gold/20; }
+  /* Soft, rounded "Terra"-style input used on the login screen. */
+  .terra-field { @apply w-full rounded-2xl border border-gold/20 bg-chalk/60 px-4 py-3.5 text-sm text-ink outline-none transition focus:border-gold focus:bg-white focus:ring-4 focus:ring-gold/15; }
   .flabel     { @apply block text-[13px] font-bold text-ink/70 mb-1.5; }
   .pill       { @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-extrabold tracking-wide; }
   .pill-amber { @apply pill bg-amber-100 text-amber-900; }
