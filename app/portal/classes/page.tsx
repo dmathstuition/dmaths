@@ -70,7 +70,7 @@ export default async function MyClasses() {
                       <span className="pill bg-ink/10 text-ink/50">Past</span>
                     )}
                   </div>
-                  <p className="mt-0.5 text-sm text-ink/50">with {c.tutor} · {c.platform}</p>
+                  <p className="mt-0.5 text-sm text-ink/50">with {c.tutor} · {c.mode === "physical" ? "🏫 In-person" : c.platform}</p>
                 </div>
               </div>
 
@@ -85,12 +85,19 @@ export default async function MyClasses() {
                 </p>
               </div>
 
-              {!past && (c.link
+              {/* In-person class — show the venue instead of an online link */}
+              {c.mode === "physical" && c.location && (
+                <p className="mt-4 flex items-start gap-2 rounded-xl border border-gold/30 bg-gold-pale px-4 py-2.5 text-sm font-semibold text-ink/70">
+                  <span>📍</span><span>{c.location}</span>
+                </p>
+              )}
+
+              {!past && c.mode !== "physical" && (c.link
                 ? <JoinClassButton classId={c.id} link={c.link} className="btn-gold mt-4 inline-block w-full text-center" />
                 : <p className="mt-4 rounded-xl bg-chalk px-4 py-2.5 text-center text-sm font-semibold text-ink/45">Class link coming soon</p>)}
 
               {/* In-portal live classroom — video & screen share, no Zoom/Meet needed */}
-              {!past && (
+              {!past && c.mode !== "physical" && (
                 <Link href={`/portal/class/${c.id}/live`}
                   className={c._live
                     ? "badge-pulse mt-2 flex items-center justify-center gap-2 rounded-xl bg-red-500 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-red-600"

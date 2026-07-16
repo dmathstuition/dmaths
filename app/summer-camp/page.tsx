@@ -7,9 +7,11 @@ import CountUp from "@/components/landing/CountUp";
 import SocialLinks from "@/components/landing/SocialLinks";
 import { DotsScatter } from "@/components/illustrations";
 import InstallPrompt from "@/components/InstallPrompt";
+import PhysicalCampPicker from "@/components/landing/PhysicalCampPicker";
 import {
   SUMMER_CAMP,
   SUMMER_CAMP_TIERS,
+  PHYSICAL_CAMP,
   CAMP_CURRICULUM,
   DISCOUNT_PCT,
   discountedUsd,
@@ -67,31 +69,26 @@ export default function SummerCamp() {
               <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/5 px-4 py-1.5 text-xs font-semibold text-white/80">
                 📅 {campDateRange()}
               </span>
-              {DISCOUNT_PCT > 0 && (
-                <span className="badge-pulse inline-flex items-center gap-1 rounded-full bg-gold px-4 py-1.5 text-xs font-extrabold uppercase tracking-wide text-board">
-                  🎉 {DISCOUNT_PCT}% off — limited time
-                </span>
-              )}
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/5 px-4 py-1.5 text-xs font-semibold text-white/80">
+                📍 {PHYSICAL_CAMP.address}
+              </span>
             </div>
             <h1 className="mt-5 font-display text-4xl font-extrabold leading-[1.08] tracking-tight md:text-6xl">
-              D-Maths Online <span className="text-gradient-gold">Summer Camp</span>
+              D-Maths <span className="text-gradient-gold">Summer Camp</span>
             </h1>
             <p className="mt-5 text-[15px] leading-relaxed text-white/70 md:text-base">
-              Hands-on <strong className="text-white">Maths &amp; Coding</strong> running{" "}
-              <strong className="text-white">{campDateRange()}</strong>. Live online
-              sessions, real projects, and a personalized portal so you can track every learner's
-              growth — all summer long.
+              Hands-on <strong className="text-white">Maths &amp; Coding</strong>, {campDateRange()}.
+              Join us <strong className="text-white">in person at our Asaba centre</strong> — four
+              sessions a week — or learn <strong className="text-white">online</strong> from home.
+              Real projects, expert tutors and a personalized portal to track every learner's growth.
             </p>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-4 md:justify-start">
-              <a href="#packages" className="btn-gold !min-h-[50px] !rounded-full !px-7 !text-base">
-                See packages
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3 md:justify-start">
+              <a href="#in-person" className="btn-gold !min-h-[50px] !rounded-full !px-7 !text-base">
+                🏫 In-person (Asaba)
               </a>
-              <Link
-                href={`/apply?camp=${SUMMER_CAMP.season}`}
-                className="btn !min-h-[50px] !rounded-full border border-white/30 bg-white/5 !px-7 !text-base text-white hover:bg-white/10"
-              >
-                Register now →
-              </Link>
+              <a href="#packages" className="btn !min-h-[50px] !rounded-full border border-white/30 bg-white/5 !px-7 !text-base text-white hover:bg-white/10">
+                💻 Learn online
+              </a>
             </div>
           </Reveal>
 
@@ -116,6 +113,45 @@ export default function SummerCamp() {
               <p className="text-[11px] font-semibold text-white/80">Summer 2026</p>
             </div>
           </Reveal>
+        </div>
+      </section>
+
+      {/* IN-PERSON (ASABA) — featured */}
+      <section id="in-person" className="relative overflow-hidden bg-white py-16">
+        <div className="pointer-events-none absolute -left-32 top-10 h-72 w-72 rounded-full bg-gold/10 blur-3xl" />
+        <div className="relative mx-auto max-w-6xl px-5">
+          <div className="grid items-center gap-10 md:grid-cols-2">
+            <Reveal>
+              <span className="inline-flex items-center gap-2 rounded-full bg-gold-pale px-4 py-1.5 text-xs font-extrabold uppercase tracking-wide text-gold-deep">
+                🏫 New — in-person classes
+              </span>
+              <h2 className="mt-4 font-display text-3xl font-extrabold leading-tight md:text-4xl">
+                Learn on-site at our <span className="text-gold-deep">Asaba centre</span>
+              </h2>
+              <p className="mt-3 max-w-md text-[15px] leading-relaxed text-ink/60">
+                Face-to-face teaching, hands-on projects and a focused classroom — four sessions
+                every week, all through the summer break.
+              </p>
+              <ul className="mt-6 space-y-3">
+                {[
+                  { icon: "📍", t: PHYSICAL_CAMP.venue, d: PHYSICAL_CAMP.address },
+                  { icon: "🗓️", t: PHYSICAL_CAMP.frequency, d: campDateRange() },
+                  { icon: "🧮", t: "Maths, Coding — or both", d: "Choose the class that fits your child." },
+                ].map((r) => (
+                  <li key={r.t} className="flex items-start gap-3">
+                    <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-gold-pale text-lg">{r.icon}</span>
+                    <div>
+                      <p className="font-display text-sm font-bold text-ink">{r.t}</p>
+                      <p className="text-[13px] text-ink/50">{r.d}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </Reveal>
+            <Reveal delay={120}>
+              <PhysicalCampPicker />
+            </Reveal>
+          </div>
         </div>
       </section>
 
@@ -151,12 +187,15 @@ export default function SummerCamp() {
       <section id="packages" className="bg-chalk py-16">
         <div className="mx-auto max-w-6xl px-5">
           <Reveal className="mb-3 text-center">
-            <h2 className="font-display text-3xl font-bold md:text-4xl">
-              Choose your <span className="text-gold-deep">package</span>
+            <span className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-1.5 text-xs font-extrabold uppercase tracking-wide text-ink/50 shadow-sm">
+              💻 Prefer to learn from home?
+            </span>
+            <h2 className="mt-4 font-display text-3xl font-bold md:text-4xl">
+              Online <span className="text-gold-deep">packages</span>
             </h2>
             <p className="mx-auto mt-3 max-w-lg text-sm text-ink/50">
-              One flat price for the whole camp ({campDateRange()}). Pick a track and reserve your
-              place — prices shown in USD with the naira amount you'll be charged.
+              Live online sessions for the whole camp ({campDateRange()}). Pick a track and reserve
+              your place — prices in USD with the naira amount you'll be charged.
             </p>
           </Reveal>
 
@@ -266,7 +305,7 @@ export default function SummerCamp() {
             <div className="relative text-center sm:text-left">
               <p className="font-display text-2xl font-bold text-white md:text-3xl">Ready for a summer of growth?</p>
               <p className="mt-1.5 text-sm text-white/60">
-                100% online — learn from home, anywhere. Limited places per group.
+                In person at Asaba or online from home. Limited places per group.
               </p>
             </div>
             <Link

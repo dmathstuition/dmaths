@@ -17,9 +17,18 @@ export const SUMMER_CAMP = {
   // │  edit the two lines below → "Commit changes". The site redeploys  │
   // │  on its own in about a minute. No coding or developer needed.     │
   // └──────────────────────────────────────────────────────────────────┘
-  startDate: "2026-08-01", // ← placeholder camp START date
-  endDate: "2026-09-30", //   ← placeholder camp END date
+  startDate: "2026-08-03", // ← camp START date
+  endDate: "2026-09-01", //   ← camp END date
   ngnPerUsd: 1500,
+} as const;
+
+// ── In-person (physical) camp — Asaba ────────────────────────────────
+// Held at a real venue, four sessions a week. Prices are flat naira (no USD,
+// no promo discount). Learners pick one of the three physical tiers below.
+export const PHYSICAL_CAMP = {
+  venue: "Infant Jesus Academy",
+  address: "Old Anwai Road, Asaba",
+  frequency: "4 sessions every week",
 } as const;
 
 // ── Date display helpers ─────────────────────────────────────────────
@@ -60,19 +69,21 @@ export const DISCOUNT_PCT = 20;
 const DISCOUNT_FACTOR = (100 - DISCOUNT_PCT) / 100;
 
 // 20% off the charm list prices lands cleanly (e.g. ₦104,999 → ₦83,999).
-export const discountedUsd = (tier: { usd: number }) =>
-  Math.round(tier.usd * DISCOUNT_FACTOR * 100) / 100;
-export const discountedNgn = (tier: { ngn: number }) =>
-  Math.round(tier.ngn * DISCOUNT_FACTOR);
+// Tiers flagged `discountable: false` (the in-person Asaba tiers) are flat-priced
+// and the promo never touches them.
+export const discountedUsd = (tier: { usd: number; discountable?: boolean }) =>
+  tier.discountable === false ? tier.usd : Math.round(tier.usd * DISCOUNT_FACTOR * 100) / 100;
+export const discountedNgn = (tier: { ngn: number; discountable?: boolean }) =>
+  tier.discountable === false ? tier.ngn : Math.round(tier.ngn * DISCOUNT_FACTOR);
 
 // ── Part payment ─────────────────────────────────────────────────────
 // Families may pay a deposit now and the balance later. The deposit is half
 // the discounted price; both the displayed amount and the server's minimum
 // accepted amount derive from here, so they can never diverge.
 export const DEPOSIT_FRACTION = 0.5;
-export const depositNgn = (tier: { ngn: number }) =>
+export const depositNgn = (tier: { ngn: number; discountable?: boolean }) =>
   Math.round(discountedNgn(tier) * DEPOSIT_FRACTION);
-export const balanceNgn = (tier: { ngn: number }) =>
+export const balanceNgn = (tier: { ngn: number; discountable?: boolean }) =>
   discountedNgn(tier) - depositNgn(tier);
 
 export type CampTrack = "maths" | "coding" | "both";
@@ -94,11 +105,13 @@ export const tierModules = (tier: { track: CampTrack }) => CAMP_CURRICULUM[tier.
 export interface CampTier {
   id: string;
   name: string;
-  usd: number;   // headline price, e.g. 49.99
+  usd: number;   // headline price, e.g. 49.99 (0 for in-person naira-only tiers)
   ngn: number;   // amount charged in naira
   track: CampTrack;
   blurb: string;
-  highlight?: boolean; // visually feature this card
+  highlight?: boolean;    // visually feature this card
+  physical?: boolean;     // in-person at Asaba (vs online)
+  discountable?: boolean; // false = flat price, promo never applies
 }
 
 export const SUMMER_CAMP_TIERS: CampTier[] = [
@@ -153,9 +166,44 @@ export const SUMMER_CAMP_TIERS: CampTier[] = [
   },
 ];
 
+// ── In-person (Asaba) tiers — flat naira, no promo, four sessions a week ──
+export const PHYSICAL_TIERS: CampTier[] = [
+  {
+    id: "phys-maths",
+    name: "Maths Class",
+    usd: 0,
+    ngn: 40000,
+    track: "maths",
+    blurb: "In-person maths at our Asaba centre — four focused sessions every week.",
+    physical: true,
+    discountable: false,
+  },
+  {
+    id: "phys-coding",
+    name: "Coding Class",
+    usd: 0,
+    ngn: 50000,
+    track: "coding",
+    blurb: "In-person coding at our Asaba centre — Python, web & game dev, four sessions a week.",
+    physical: true,
+    discountable: false,
+  },
+  {
+    id: "phys-both",
+    name: "Maths + Coding",
+    usd: 0,
+    ngn: 60000,
+    track: "both",
+    blurb: "Both classes in-person at Asaba — the complete package, best value.",
+    physical: true,
+    discountable: false,
+    highlight: true,
+  },
+];
+
 export function findTier(id: string | null | undefined): CampTier | undefined {
   if (!id) return undefined;
-  return SUMMER_CAMP_TIERS.find((t) => t.id === id);
+  return [...SUMMER_CAMP_TIERS, ...PHYSICAL_TIERS].find((t) => t.id === id);
 }
 
 // Display helpers
