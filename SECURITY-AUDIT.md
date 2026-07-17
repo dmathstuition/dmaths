@@ -68,12 +68,15 @@ password sign-in, an enrolled admin must enter the 6-digit code to reach `aal2`;
 the login flow and the `/admin` layout both refuse to load admin pages while the
 session is only `aal1`, so a stolen password alone can't reach the dashboard.
 
-> **Residual note:** enforcement is at the page/session level. For full coverage,
-> admin **API routes** should also require `aal2` (an attacker with the password
-> could otherwise script direct calls with an `aal1` session). Recommended
-> follow-up: add an `aal2` assertion to the admin/staff route guards.
+**API routes are enforced too.** `middleware.ts` gates **every `/api/*` request**: a
+session with a verified factor that is still `aal1` gets a `403` (and matched pages
+redirect to the code screen). The check is a local cookie-JWT decode — no network —
+and can't be spoofed (an attacker with the password holds a real `aal1` token, and
+can't forge `aal2` without Supabase's signing key; the route's own `getUser` rejects
+forgeries anyway). Requests with no session (public form, Paystack webhook, cron)
+pass straight through to each route's own auth. So a stolen admin password can reach
+neither the dashboard **nor** the admin APIs.
 
 ## Recommended next steps (optional)
-- Enforce `aal2` on admin API routes (see note above).
 - Move rate limiting to Upstash Redis for global enforcement.
 - Periodically run `npm audit` and Supabase's `get_advisors` (RLS/security linters).

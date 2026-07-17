@@ -19,11 +19,35 @@ export async function middleware(req: NextRequest) {
     }
   );
 
-  const { data: { user } } = await supabase.auth.getUser();
   const path = req.nextUrl.pathname;
+  const isApi = path.startsWith("/api");
+
+  // ── Two-factor step-up gate for API routes ───────────────────────────────
+  // An account with a verified TOTP factor (currently only the admin) must reach
+  // aal2 before it can call any API. The check is a LOCAL cookie-JWT decode — no
+  // network — and can't be spoofed: an attacker with the real password holds a
+  // real aal1 token (blocked here), and can't forge aal2 without Supabase's
+  // signing key (and the route's own getUser would reject a forged token anyway).
+  // Requests with no session (public form, Paystack webhook, cron) return null
+  // levels and pass straight through to the route's own auth.
+  if (isApi) {
+    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (aal?.currentLevel === "aal1" && aal?.nextLevel === "aal2") {
+      return NextResponse.json({ error: "Two-factor verification required. Please sign in again." }, { status: 403 });
+    }
+    return res;
+  }
+
+  const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
     return NextResponse.redirect(new URL("/login", req.url));
+  }
+
+  // Same 2FA step-up gate for pages: bounce back to the code screen.
+  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (aal?.currentLevel === "aal1" && aal?.nextLevel === "aal2") {
+    return NextResponse.redirect(new URL("/login?mfa=1", req.url));
   }
 
   // Admin role check — only on real navigations, not router prefetches.
@@ -66,4 +90,4 @@ export async function middleware(req: NextRequest) {
   return res;
 }
 
-export const config = { matcher: ["/portal/:path*", "/admin/:path*", "/tutor/:path*", "/parent/:path*"] };
+export const config = { matcher: ["/portal/:path*", "/admin/:path*", "/tutor/:path*", "/parent/:path*", "/api/:path*"] };
