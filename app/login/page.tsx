@@ -39,13 +39,42 @@ export default function Login() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [standalone, setStandalone] = useState(false);
+  // Two-factor step-up state.
+  const [mfaRequired, setMfaRequired] = useState(false);
+  const [mfaCode, setMfaCode] = useState("");
 
   useEffect(() => {
     setStandalone(
       window.matchMedia("(display-mode: standalone)").matches ||
       (navigator as unknown as { standalone?: boolean }).standalone === true,
     );
+    // If a session already exists but is only password-level (e.g. bounced back
+    // from /admin), jump straight to the 2FA code step.
+    supabase.auth.mfa.getAuthenticatorAssuranceLevel().then(({ data }) => {
+      if (data?.currentLevel === "aal1" && data?.nextLevel === "aal2") setMfaRequired(true);
+    }).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Runs once the session is fully authenticated (aal2 if 2FA is on): route the
+  // user to their portal.
+  async function finishLogin() {
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data: profile } = await supabase
+      .from("profiles").select("role, is_active").eq("id", user!.id).single();
+
+    if (profile && profile.role === "student" && !profile.is_active) {
+      await supabase.auth.signOut();
+      setError("Your account is deactivated. Contact dmathstuition@gmail.com.");
+      setBusy(false);
+      return;
+    }
+    fetch("/api/auth/touch", { method: "POST" }).catch(() => {});
+    try { localStorage.setItem(IDLE_ACTIVITY_KEY, String(Date.now())); } catch {}
+
+    const dest = profile?.role === "admin" ? "/admin" : profile?.role === "tutor" ? "/tutor" : profile?.role === "parent" ? "/parent" : "/portal";
+    router.replace(dest);
+  }
 
   async function signIn(e: React.FormEvent) {
     e.preventDefault();
@@ -71,26 +100,37 @@ export default function Login() {
       return;
     }
 
-    const { data: { user } } = await supabase.auth.getUser();
-    const { data: profile } = await supabase
-      .from("profiles").select("role, is_active").eq("id", user!.id).single();
-
-    if (profile && profile.role === "student" && !profile.is_active) {
-      await supabase.auth.signOut();
-      setError("Your account is deactivated. Contact dmathstuition@gmail.com.");
+    // Does this account require a second factor? (Password gives aal1; a verified
+    // TOTP factor means we must step up to aal2 before letting them in.)
+    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (aal?.currentLevel === "aal1" && aal?.nextLevel === "aal2") {
+      setMfaRequired(true);
       setBusy(false);
       return;
     }
-    // Record last sign-in (accountability) — fire-and-forget, never blocks login.
-    fetch("/api/auth/touch", { method: "POST" }).catch(() => {});
 
-    // Reset the idle clock on this fresh sign-in. Without this, a stale timestamp
-    // from a previous session makes IdleLogout sign the user straight back out on
-    // arrival — an unbreakable "signed out after 30 minutes" loop.
-    try { localStorage.setItem(IDLE_ACTIVITY_KEY, String(Date.now())); } catch {}
+    await finishLogin();
+  }
 
-    const dest = profile?.role === "admin" ? "/admin" : profile?.role === "tutor" ? "/tutor" : profile?.role === "parent" ? "/parent" : "/portal";
-    router.replace(dest);
+  async function verifyMfa(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setBusy(true);
+    const { data: factors } = await supabase.auth.mfa.listFactors();
+    const totp = (factors as any)?.totp?.[0];
+    if (!totp) { setError("No authenticator is set up. Contact support."); setBusy(false); return; }
+    const { data: ch, error: chErr } = await supabase.auth.mfa.challenge({ factorId: totp.id });
+    if (chErr || !ch) { setError("Could not verify — please try again."); setBusy(false); return; }
+    const { error: vErr } = await supabase.auth.mfa.verify({ factorId: totp.id, challengeId: ch.id, code: mfaCode.trim() });
+    if (vErr) { setError("That code isn't right. Check your authenticator and try again."); setBusy(false); return; }
+    await finishLogin();
+  }
+
+  async function cancelMfa() {
+    await supabase.auth.signOut();
+    setMfaRequired(false);
+    setMfaCode("");
+    setPassword("");
   }
 
   async function forgotPassword() {
@@ -129,14 +169,34 @@ export default function Login() {
                 <Icon name="graduationCap" className="h-6 w-6 text-white" />
               </span>
             </div>
-            <h1 className="mt-5 font-display text-[1.75rem] font-extrabold leading-tight">Welcome back</h1>
-            <p className="mt-1 text-sm text-white/80">Sign in to your D-Maths portal.</p>
+            <h1 className="mt-5 font-display text-[1.75rem] font-extrabold leading-tight">{mfaRequired ? "Two-step verification" : "Welcome back"}</h1>
+            <p className="mt-1 text-sm text-white/80">{mfaRequired ? "Enter the code from your authenticator app." : "Sign in to your D-Maths portal."}</p>
             {/* white curved base */}
             <svg className="absolute inset-x-0 bottom-[-1px] h-12 w-full" viewBox="0 0 500 48" preserveAspectRatio="none" aria-hidden="true">
               <path d="M0,48 L0,18 C160,46 340,46 500,18 L500,48 Z" fill="#fff" />
             </svg>
           </div>
 
+          {mfaRequired ? (
+            <form onSubmit={verifyMfa} className="space-y-4 px-8 pb-8 pt-2">
+              {error && <p role="alert" className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-800">{error}</p>}
+              <div>
+                <label className="mb-1.5 block text-[13px] font-bold text-ink/60" htmlFor="mfa">Authentication code</label>
+                <input id="mfa" inputMode="numeric" autoComplete="one-time-code" maxLength={6} autoFocus required
+                  value={mfaCode} onChange={e => setMfaCode(e.target.value.replace(/\D/g, ""))} placeholder="123456"
+                  className="terra-field text-center font-mono text-xl tracking-[0.4em]" />
+                <p className="mt-1.5 text-xs text-ink/45">Open your authenticator app and enter the current 6-digit code.</p>
+              </div>
+              <button disabled={busy || mfaCode.length !== 6}
+                className="w-full rounded-2xl py-4 text-base font-bold text-white shadow-lg shadow-gold/30 transition hover:brightness-[1.04] active:scale-[.99] disabled:opacity-60"
+                style={{ background: "linear-gradient(135deg, #EFAE56 0%, #C8881F 100%)" }}>
+                {busy ? "Verifying…" : "Verify & sign in"}
+              </button>
+              <button type="button" onClick={cancelMfa} className="block w-full text-center text-sm font-semibold text-ink/45 hover:text-ink">
+                Use a different account
+              </button>
+            </form>
+          ) : (
           <form onSubmit={signIn} className="space-y-4 px-8 pb-8 pt-2">
             {notice && (
               <p role="status" className={`rounded-2xl px-4 py-3 text-sm font-semibold ${notice.kind === "success" ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-800"}`}>
@@ -187,6 +247,7 @@ export default function Login() {
               <Link href="/apply" className="font-bold text-gold-deep hover:underline">Create account</Link>
             </p>
           </form>
+          )}
         </div>
 
         <p className="mt-5 text-center text-xs text-ink/40">Students use their Student ID · Parents &amp; staff use their email</p>
