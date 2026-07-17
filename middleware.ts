@@ -50,10 +50,20 @@ export async function middleware(req: NextRequest) {
     }
   }
 
+  // Parent portal — parents only. (The layout also guards; this adds an
+  // edge-level check for parity with the other portals.)
+  if (path.startsWith("/parent") && !isPrefetch) {
+    const { data: profile } = await supabase
+      .from("profiles").select("role").eq("id", user.id).single();
+    if (profile?.role !== "parent") {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
+  }
+
   // Never cache authenticated pages in shared caches
   res.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
   res.headers.set("Pragma", "no-cache");
   return res;
 }
 
-export const config = { matcher: ["/portal/:path*", "/admin/:path*", "/tutor/:path*"] };
+export const config = { matcher: ["/portal/:path*", "/admin/:path*", "/tutor/:path*", "/parent/:path*"] };

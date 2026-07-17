@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import { requireStaff } from "@/lib/authRole";
+import { rateLimit } from "@/lib/ratelimit";
 
 // Admin/tutor-only diagnostic: makes a tiny real call to DeepSeek and reports
 // exactly what happened, so you can verify the key from inside the app without
@@ -14,6 +15,9 @@ const BASE_URL = process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com";
 export async function POST() {
   const staff = await requireStaff();
   if (!staff) return NextResponse.json({ ok: false, stage: "forbidden", message: "Staff only." }, { status: 403 });
+  if (!rateLimit(`assistant-health:${staff.id}`, 6, 60_000)) {
+    return NextResponse.json({ ok: false, stage: "rate_limit", message: "Please wait a moment before testing again." }, { status: 429 });
+  }
 
   const key = process.env.DEEPSEEK_API_KEY;
   if (!key) {

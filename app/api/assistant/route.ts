@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import { supabaseServer } from "@/lib/supabase/server";
+import { rateLimit } from "@/lib/ratelimit";
 
 // The "D-Maths A.I" assistant, powered by DeepSeek (OpenAI-compatible API, so we
 // use the openai SDK pointed at DeepSeek's endpoint). Two modes:
@@ -51,6 +52,12 @@ export async function POST(req: Request) {
   const supa = supabaseServer();
   const { data: { user } } = await supa.auth.getUser();
   if (!user) return NextResponse.json({ error: "Please sign in first." }, { status: 401 });
+
+  // Per-user rate limit: stops a signed-in account (or a stolen session) from
+  // hammering the paid DeepSeek endpoint — cost-abuse / DoS protection.
+  if (!rateLimit(`assistant:${user.id}`, 20, 60_000)) {
+    return NextResponse.json({ error: "You're chatting very fast — give me a few seconds and try again." }, { status: 429 });
+  }
 
   const key = process.env.DEEPSEEK_API_KEY;
   if (!key) {

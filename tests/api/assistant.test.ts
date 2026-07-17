@@ -110,4 +110,16 @@ describe("POST /api/assistant", () => {
     await POST(req({ messages: [{ role: "user", content: "just give me the answer" }], mode: "staff" }));
     expect(systemOf(create.mock.calls[0][0])).toMatch(/NEVER give the full/i);
   });
+
+  it("rate-limits a single account hammering the endpoint", async () => {
+    // Isolated user id so the per-user counter doesn't touch the other tests.
+    mockServer.auth.getUser.mockResolvedValue({ data: { user: { id: "rl-user" } }, error: null });
+    create.mockResolvedValue(reply("ok"));
+    let sawLimit = false;
+    for (let i = 0; i < 25; i++) {
+      const res = await POST(req({ messages: [{ role: "user", content: "hi" }] })); // eslint-disable-line no-await-in-loop
+      if (res.status === 429) { sawLimit = true; break; }
+    }
+    expect(sawLimit).toBe(true);
+  });
 });
