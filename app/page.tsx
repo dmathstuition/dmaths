@@ -8,6 +8,7 @@ import SummerCampBanner from "@/components/landing/SummerCampBanner";
 import FloatingMath from "@/components/landing/FloatingMath";
 import Tilt3D from "@/components/landing/Tilt3D";
 import Parallax from "@/components/landing/Parallax";
+import FlyerPopup from "@/components/landing/FlyerPopup";
 import SocialLinks from "@/components/landing/SocialLinks";
 import InstallPrompt from "@/components/InstallPrompt";
 import AppLauncher from "@/components/AppLauncher";
@@ -60,6 +61,7 @@ const STATS = [
 export default function Landing() {
   return (
     <main className="overflow-hidden bg-white font-body text-ink">
+      <FlyerPopup />
       <AppLauncher />
       <SummerCampBanner />
       <LandingNav />
