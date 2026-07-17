@@ -62,7 +62,18 @@ and every `dangerouslySetInnerHTML` usage.
 - **IP-based rate-limit keys** trust `x-forwarded-for`. Authenticated routes that matter
   (assistant) key on the user id instead; the public/upload keys remain best-effort.
 
+## Admin two-factor auth (TOTP) — added
+Admins can enable **TOTP 2FA** (Supabase MFA) under **Admin → Security**. After
+password sign-in, an enrolled admin must enter the 6-digit code to reach `aal2`;
+the login flow and the `/admin` layout both refuse to load admin pages while the
+session is only `aal1`, so a stolen password alone can't reach the dashboard.
+
+> **Residual note:** enforcement is at the page/session level. For full coverage,
+> admin **API routes** should also require `aal2` (an attacker with the password
+> could otherwise script direct calls with an `aal1` session). Recommended
+> follow-up: add an `aal2` assertion to the admin/staff route guards.
+
 ## Recommended next steps (optional)
+- Enforce `aal2` on admin API routes (see note above).
 - Move rate limiting to Upstash Redis for global enforcement.
-- Add 2FA for the admin account.
 - Periodically run `npm audit` and Supabase's `get_advisors` (RLS/security linters).

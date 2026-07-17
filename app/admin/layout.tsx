@@ -4,6 +4,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import AssistantWidget from "@/components/portal/AssistantWidget";
 import { AssistantProvider } from "@/components/portal/AssistantContext";
 import { getProfile } from "@/lib/auth";
+import { supabaseServer } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
 const NAV: NavItem[] = [
@@ -25,6 +26,7 @@ const NAV: NavItem[] = [
   { href: "/admin/activity", label: "Activity", icon: "reports" },
   { href: "/admin/behavior", label: "Behaviour", icon: "checkCircle" },
   { href: "/admin/ratings", label: "Feedback", icon: "thumbsUp" },
+  { href: "/admin/security", label: "Security", icon: "lock" },
 ];
 
 // Primary mobile tabs (the rest live under "More").
@@ -39,6 +41,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const p = await getProfile();
   if (!p || p.role !== "admin") {
     redirect("/login?gone=1");
+  }
+  // If this admin has 2FA enrolled but the session is only password-level (aal1),
+  // force a step-up: no admin page loads until the code is verified (aal2).
+  const { data: aal } = await supabaseServer().auth.mfa.getAuthenticatorAssuranceLevel();
+  if (aal?.currentLevel === "aal1" && aal?.nextLevel === "aal2") {
+    redirect("/login?mfa=1");
   }
   return (
     <PortalShell nav={NAV} tabs={TABS} name={`${p?.first_name ?? ""} ${p?.last_name ?? ""}`} subtitle="Administrator"
