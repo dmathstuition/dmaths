@@ -232,7 +232,8 @@ so every Vercel deploy updates the "app" instantly with **no store re-submission
    with ≥12 testers for 14 days** before production; organisation accounts skip this.
 2. **Package the PWA** — use **PWABuilder.com** → enter `https://dmaths.academy` →
    download the Android package (`.aab`) + note the package id (e.g. `academy.dmaths.twa`)
-   and signing details.
+   and signing details. *(Full walkthrough + Bubblewrap alternative + listing draft:
+   **`docs/play-store-twa.md`**; build config is **`twa-manifest.json`** at the repo root.)*
 3. **Upload to Play Console** → create the app → upload the `.aab` to a testing track.
 4. **Digital Asset Links** (removes the browser bar): Play Console → **Setup → App
    signing** → copy the **SHA-256 certificate fingerprint**. In **Vercel → Environment
