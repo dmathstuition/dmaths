@@ -1,102 +1,120 @@
 "use client";
 import { useEffect, useState } from "react";
+import { Icon } from "@/components/Icons";
 
-// Session-only key: "Not now" hides it for THIS visit but it returns on the
-// next visit — it keeps prompting until the app is actually installed.
-const DISMISS_KEY = "dmaths-install-dismissed-session";
-
-// Captured beforeinstallprompt event (Chrome/Edge/Android). Not in TS lib types.
+// A PERSISTENT "Get the app" button. It stays on screen until the app is
+// actually installed — never permanently dismissible — and works on every
+// platform, not just when Chrome happens to fire beforeinstallprompt:
+//  • Android/Chrome/Edge/desktop → native one-tap install when available,
+//    otherwise clear browser-menu steps.
+//  • iPhone/iPad (Safari) → Share → "Add to Home Screen" steps (iOS has no
+//    programmatic install).
 type BIPEvent = Event & {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 };
+type Platform = "android" | "ios" | "desktop" | "other";
 
 export default function InstallPrompt() {
   const [deferred, setDeferred] = useState<BIPEvent | null>(null);
-  const [iosHint, setIosHint] = useState(false);
-  const [show, setShow] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [platform, setPlatform] = useState<Platform>("other");
 
   useEffect(() => {
-    // Already installed (standalone) → never show. Otherwise show, and only
-    // stay hidden if dismissed earlier in THIS browser session.
     const standalone =
       window.matchMedia("(display-mode: standalone)").matches ||
       (navigator as unknown as { standalone?: boolean }).standalone === true;
-    if (standalone) return;
-    const dismissedThisSession = sessionStorage.getItem(DISMISS_KEY) === "1";
+    if (standalone) return; // already installed → show nothing, ever
 
-    // Android / desktop Chrome: the browser fires this when installable.
-    const onBIP = (e: Event) => {
-      e.preventDefault();
-      setDeferred(e as BIPEvent);
-      if (!dismissedThisSession) setShow(true);
-    };
+    setVisible(true);
+
+    const ua = navigator.userAgent;
+    const isIOS = /iphone|ipad|ipod/i.test(ua) ||
+      ((navigator as any).platform === "MacIntel" && navigator.maxTouchPoints > 1); // iPadOS
+    const isAndroid = /android/i.test(ua);
+    setPlatform(isIOS ? "ios" : isAndroid ? "android" : window.matchMedia("(pointer: fine)").matches ? "desktop" : "other");
+
+    const onBIP = (e: Event) => { e.preventDefault(); setDeferred(e as BIPEvent); };
     window.addEventListener("beforeinstallprompt", onBIP);
-
-    // iOS Safari never fires beforeinstallprompt — show a manual hint instead.
-    const ua = window.navigator.userAgent;
-    const isIOS = /iphone|ipad|ipod/i.test(ua);
-    const isSafari = /safari/i.test(ua) && !/crios|fxios|chrome/i.test(ua);
-    if (isIOS && isSafari && !dismissedThisSession) {
-      setIosHint(true);
-      setShow(true);
-    }
-
-    const onInstalled = () => setShow(false);
+    const onInstalled = () => { setVisible(false); setOpen(false); };
     window.addEventListener("appinstalled", onInstalled);
-
     return () => {
       window.removeEventListener("beforeinstallprompt", onBIP);
       window.removeEventListener("appinstalled", onInstalled);
     };
   }, []);
 
-  function dismiss() {
-    sessionStorage.setItem(DISMISS_KEY, "1"); // returns next visit
-    setShow(false);
-  }
-
-  async function install() {
+  async function nativeInstall() {
     if (!deferred) return;
     await deferred.prompt();
     const { outcome } = await deferred.userChoice;
     setDeferred(null);
-    if (outcome === "accepted") setShow(false);
-    else dismiss(); // declined — rest this session, ask again next visit
+    if (outcome === "accepted") { setVisible(false); setOpen(false); }
   }
 
-  if (!show) return null;
+  if (!visible) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-[70] p-3 sm:inset-x-auto sm:left-6 sm:bottom-6 sm:max-w-sm">
-      <div className="glass-card flex items-start gap-3 p-4 shadow-2xl ring-1 ring-gold/30">
-        <span className="text-2xl" aria-hidden="true">📲</span>
-        <div className="min-w-0 flex-1">
-          <p className="font-display text-sm font-bold text-ink">Get the D-Maths app</p>
-          {iosHint ? (
-            <p className="mt-0.5 text-[13px] leading-relaxed text-ink/60">
-              Tap the <strong>Share</strong> icon, then <strong>"Add to Home Screen"</strong> to install.
-            </p>
-          ) : (
-            <p className="mt-0.5 text-[13px] leading-relaxed text-ink/60">
-              Install it for one-tap access, class reminders and notifications — works like a real app.
-            </p>
-          )}
-          <div className="mt-3 flex items-center gap-2">
-            {!iosHint && (
-              <button onClick={install} className="btn-gold !min-h-[40px] !rounded-full !px-5 !text-[13px]">
-                Install app
+    <>
+      {/* Persistent standby button — bottom-left, clear of the WhatsApp/assistant buttons */}
+      <button onClick={() => setOpen(true)} aria-label="Get the D-Maths app"
+        className="fixed bottom-24 left-4 z-[70] flex items-center gap-2 rounded-full bg-board px-4 py-2.5 text-sm font-bold text-white shadow-xl ring-1 ring-white/10 transition hover:scale-105 active:scale-95 lg:bottom-5">
+        <Icon name="download" className="h-4 w-4" />
+        <span>Get the app</span>
+      </button>
+
+      {open && (
+        <div className="fixed inset-0 z-[90] flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-label="Install the D-Maths app">
+          <button aria-label="Close" onClick={() => setOpen(false)} className="absolute inset-0 bg-board/50 backdrop-blur-sm" />
+          <div className="relative z-10 w-full max-w-md rounded-t-3xl bg-white p-6 shadow-2xl sm:rounded-3xl">
+            <div className="flex items-start gap-3">
+              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gold-pale text-gold-deep">
+                <Icon name="download" className="h-5 w-5" />
+              </span>
+              <div className="flex-1">
+                <h2 className="font-display text-lg font-bold">Install the D-Maths app</h2>
+                <p className="text-sm text-ink/55">One-tap access, class reminders &amp; notifications — installs straight from your browser, no app store needed.</p>
+              </div>
+              <button onClick={() => setOpen(false)} aria-label="Close" className="text-ink/35 hover:text-ink">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
               </button>
-            )}
-            <button onClick={dismiss} className="text-[13px] font-semibold text-ink/45 hover:text-ink/70">
-              Not now
-            </button>
+            </div>
+
+            <div className="mt-5">
+              {deferred ? (
+                <button onClick={nativeInstall} className="btn-gold w-full !min-h-[50px] !rounded-2xl !text-base">
+                  Install now
+                </button>
+              ) : platform === "ios" ? (
+                <ol className="space-y-3 text-sm text-ink/70">
+                  <li className="flex items-center gap-3"><Step n={1} /> <span>Tap the <Icon name="share" className="mx-0.5 inline h-4 w-4" /> <strong>Share</strong> button in Safari's toolbar.</span></li>
+                  <li className="flex items-center gap-3"><Step n={2} /> <span>Choose <Icon name="plusSquare" className="mx-0.5 inline h-4 w-4" /> <strong>Add to Home Screen</strong>.</span></li>
+                  <li className="flex items-center gap-3"><Step n={3} /> <span>Tap <strong>Add</strong> — the D-Maths icon appears on your home screen.</span></li>
+                </ol>
+              ) : platform === "android" ? (
+                <ol className="space-y-3 text-sm text-ink/70">
+                  <li className="flex items-center gap-3"><Step n={1} /> <span>Open your browser's <strong>⋮ menu</strong> (top right).</span></li>
+                  <li className="flex items-center gap-3"><Step n={2} /> <span>Tap <strong>Install app</strong> (or <strong>Add to Home screen</strong>).</span></li>
+                  <li className="flex items-center gap-3"><Step n={3} /> <span>Confirm — the app installs to your home screen.</span></li>
+                </ol>
+              ) : (
+                <ol className="space-y-3 text-sm text-ink/70">
+                  <li className="flex items-center gap-3"><Step n={1} /> <span>Look for the <strong>install icon</strong> in your browser's address bar.</span></li>
+                  <li className="flex items-center gap-3"><Step n={2} /> <span>Or open the <strong>⋮ menu</strong> → <strong>Install D-Maths…</strong></span></li>
+                  <li className="flex items-center gap-3"><Step n={3} /> <span>Confirm to add it as an app.</span></li>
+                </ol>
+              )}
+            </div>
+
+            <p className="mt-4 text-center text-[11px] text-ink/40">On iPhone this works in Safari; on Android in Chrome.</p>
           </div>
         </div>
-        <button onClick={dismiss} aria-label="Dismiss" className="flex-shrink-0 text-ink/35 transition hover:text-ink/70">
-          ✕
-        </button>
-      </div>
-    </div>
+      )}
+    </>
   );
+}
+
+function Step({ n }: { n: number }) {
+  return <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-gold font-display text-xs font-bold text-white">{n}</span>;
 }

@@ -10,7 +10,6 @@ import Tilt3D from "@/components/landing/Tilt3D";
 import Parallax from "@/components/landing/Parallax";
 import FlyerPopup from "@/components/landing/FlyerPopup";
 import SocialLinks from "@/components/landing/SocialLinks";
-import InstallPrompt from "@/components/InstallPrompt";
 import AppLauncher from "@/components/AppLauncher";
 
 const SERVICES = [
@@ -534,8 +533,6 @@ print("Hello from D-Maths!")`}</code></pre>
           © {new Date().getFullYear()} D-Maths Tuition Centre · dmathstuition@gmail.com · Asaba, Delta State
         </div>
       </footer>
-      {/* INSTALL-AS-APP PROMPT (dismissible) */}
-      <InstallPrompt />
 
       {/* FLOATING SUMMER CAMP CTA */}
       <Link
