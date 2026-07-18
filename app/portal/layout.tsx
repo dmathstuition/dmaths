@@ -24,6 +24,7 @@ const NAV: NavItem[] = [
   { href: "/portal/leaderboard", label: "Leaderboard", icon: "students" },
   { href: "/portal/attendance", label: "Attendance", icon: "calendar" },
   { href: "/portal/profile", label: "Profile", icon: "profile" },
+  { href: "/portal/help", label: "Help & support", icon: "helpCircle" },
 ];
 
 // The 5 primary tabs shown in the mobile bottom bar (the rest live under "More").

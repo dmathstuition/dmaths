@@ -1,38 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
+import { subscribeToPush as subscribe, VAPID_PUBLIC as VAPID } from "@/lib/push";
 
 const DISMISS_KEY = "dmaths-push-dismissed";
-const VAPID = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-
-// base64url → Uint8Array (applicationServerKey format the browser expects).
-function urlBase64ToUint8Array(base64: string): Uint8Array {
-  const padding = "=".repeat((4 - (base64.length % 4)) % 4);
-  const b64 = (base64 + padding).replace(/-/g, "+").replace(/_/g, "/");
-  const raw = atob(b64);
-  const out = new Uint8Array(raw.length);
-  for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
-  return out;
-}
-
-async function subscribe(): Promise<boolean> {
-  if (!VAPID) return false;
-  const reg = await navigator.serviceWorker.ready;
-  const existing = await reg.pushManager.getSubscription();
-  const sub =
-    existing ??
-    (await reg.pushManager.subscribe({
-      userVisibleOnly: true,
-      // Cast: lib.dom's BufferSource is generic over ArrayBuffer; our
-      // Uint8Array is structurally a valid application server key.
-      applicationServerKey: urlBase64ToUint8Array(VAPID) as unknown as BufferSource,
-    }));
-  const res = await fetch("/api/push/subscribe", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(sub),
-  });
-  return res.ok;
-}
 
 // Quietly keeps the user's push subscription registered, and shows a small
 // one-time prompt to turn notifications on. Safe to mount on every
