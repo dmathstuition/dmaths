@@ -91,7 +91,8 @@ Run in this order (skip `schema.sql` if the project already has data):
 29. `migration-attendance-late.sql` *(marks a learner late when they join >10 min after start)*
 30. `migration-notebook-share-guard.sql` *(security: only staff can publish a shared notebook)*
 31. `migration-certificates.sql` *(admin-issued certificates learners download from the portal)*
-32. `migration-schema-fixes.sql` *(run last — patches any missing columns)*
+32. `migration-scheduled-broadcasts.sql` *(admin broadcasts scheduled for a future time)*
+33. `migration-schema-fixes.sql` *(run last — patches any missing columns)*
 
 > **⚠️ Also run `storage-buckets.sql` once** — it creates the file-storage buckets
 > (materials, curricula, assignments, submissions, voice-notes). Without it, uploading
@@ -115,6 +116,11 @@ Run in this order (skip `schema.sql` if the project already has data):
       `https://dmaths.academy/api/reminders/subscriptions?key=<CRON_SECRET>` — nudges
       monthly subscribers (and their parents) from 3 days before their due date, then
       weekly while overdue. Requires `migration-subscriptions.sql`.
+- [ ] **Scheduled broadcasts (cron-job.org):** add a job every **~5–15 min** calling
+      `https://dmaths.academy/api/cron/broadcasts?key=<CRON_SECRET>` — sends any admin
+      broadcast that was scheduled for a future time once it's due. Requires
+      `migration-scheduled-broadcasts.sql`. (Without the job, "Send now" still works;
+      only the *scheduled* ones wait for it.)
 - [ ] **Paystack go-live** (when taking real money): switch to **live** API keys in
       Vercel, and in Paystack → Settings → **Webhooks** set the URL to
       `https://dmaths.vercel.app/api/paystack/webhook`. Enable 2FA + set a settlement bank.

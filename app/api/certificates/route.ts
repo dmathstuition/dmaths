@@ -25,22 +25,38 @@ export async function POST(req: Request) {
 
   const payload = await req.json().catch(() => null);
   const studentId = String(payload?.studentId ?? "");
+  const classId = String(payload?.classId ?? "");
   const title = String(payload?.title ?? "").trim().slice(0, 120);
   const subtitle = String(payload?.subtitle ?? "").trim().slice(0, 120);
   const note = String(payload?.note ?? "").trim().slice(0, 240);
-  if (!studentId || !title) {
-    return NextResponse.json({ error: "A student and a title are required." }, { status: 400 });
-  }
+  if (!title) return NextResponse.json({ error: "A title is required." }, { status: 400 });
+  if (!studentId && !classId) return NextResponse.json({ error: "Choose a student or a class." }, { status: 400 });
 
   const admin = supabaseAdmin();
-  const { data: student } = await admin.from("profiles").select("id, role, first_name").eq("id", studentId).maybeSingle();
-  if (!student || student.role !== "student") {
-    return NextResponse.json({ error: "That learner could not be found." }, { status: 404 });
+
+  // Resolve the recipient list — one student, or a whole class roster.
+  let recipientIds: string[] = [];
+  if (classId) {
+    const { data: roster } = await admin.from("class_students").select("student_id").eq("class_id", classId);
+    const ids = (roster ?? []).map((r: any) => r.student_id);
+    if (ids.length) {
+      const { data: active } = await admin.from("profiles").select("id")
+        .in("id", ids).eq("role", "student").eq("is_active", true);
+      recipientIds = (active ?? []).map((r: any) => r.id);
+    }
+    if (!recipientIds.length) return NextResponse.json({ error: "That class has no active students." }, { status: 400 });
+  } else {
+    const { data: student } = await admin.from("profiles").select("id, role").eq("id", studentId).maybeSingle();
+    if (!student || student.role !== "student") {
+      return NextResponse.json({ error: "That learner could not be found." }, { status: 404 });
+    }
+    recipientIds = [studentId];
   }
 
-  const { data: cert, error } = await admin.from("certificates")
-    .insert({ student_id: studentId, title, subtitle, note, serial: makeSerial(), issued_by: gate.user.id })
-    .select().single();
+  const rows = recipientIds.map((sid) => ({
+    student_id: sid, title, subtitle, note, serial: makeSerial(), issued_by: gate.user.id,
+  }));
+  const { data: certs, error } = await admin.from("certificates").insert(rows).select("id, student_id");
   if (error) {
     const msg = /relation .*certificates.* does not exist/i.test(error.message)
       ? "Certificates need migration-certificates.sql — run it in Supabase."
@@ -48,13 +64,16 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 
-  await notifyUser(admin, studentId, {
-    title: "🎓 You've earned a certificate!",
-    body: `${title}${subtitle ? ` — ${subtitle}` : ""}. Tap to view and download it.`,
-    link: `/certificate/${cert.id}`,
-  });
+  // Notify each recipient (bell + push), best-effort.
+  await Promise.allSettled((certs ?? []).map((c: any) =>
+    notifyUser(admin, c.student_id, {
+      title: "🎓 You've earned a certificate!",
+      body: `${title}${subtitle ? ` — ${subtitle}` : ""}. Tap to view and download it.`,
+      link: `/certificate/${c.id}`,
+    }),
+  ));
 
-  return NextResponse.json({ ok: true, certificate: cert });
+  return NextResponse.json({ ok: true, issued: certs?.length ?? 0 });
 }
 
 export async function DELETE(req: Request) {
