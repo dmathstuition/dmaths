@@ -90,7 +90,8 @@ Run in this order (skip `schema.sql` if the project already has data):
 28. `migration-physical-classes.sql` *(in-person classes — mode + venue for the Asaba summer camp)*
 29. `migration-attendance-late.sql` *(marks a learner late when they join >10 min after start)*
 30. `migration-notebook-share-guard.sql` *(security: only staff can publish a shared notebook)*
-31. `migration-schema-fixes.sql` *(run last — patches any missing columns)*
+31. `migration-certificates.sql` *(admin-issued certificates learners download from the portal)*
+32. `migration-schema-fixes.sql` *(run last — patches any missing columns)*
 
 > **⚠️ Also run `storage-buckets.sql` once** — it creates the file-storage buckets
 > (materials, curricula, assignments, submissions, voice-notes). Without it, uploading
