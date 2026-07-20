@@ -8,6 +8,7 @@ import SocialLinks from "@/components/landing/SocialLinks";
 import { DotsScatter } from "@/components/illustrations";
 import { Icon, type IconName } from "@/components/Icons";
 import PhysicalCampPicker from "@/components/landing/PhysicalCampPicker";
+import PortalShowcase from "@/components/landing/PortalShowcase";
 import {
   SUMMER_CAMP,
   SUMMER_CAMP_TIERS,
@@ -182,6 +183,9 @@ export default function SummerCamp() {
           ))}
         </div>
       </section>
+
+      {/* APP SHOWCASE — the portal in your pocket */}
+      <PortalShowcase variant="camp" />
 
       {/* PACKAGES */}
       <section id="packages" className="bg-chalk py-16">
