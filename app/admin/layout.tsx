@@ -23,8 +23,10 @@ const NAV: NavItem[] = [
   { href: "/admin/reports", label: "Reports", icon: "reports" },
   { href: "/admin/calendar", label: "Calendar", icon: "calendar" },
   { href: "/admin/notices", label: "Announcements", icon: "notices" },
+  { href: "/admin/broadcast", label: "Broadcast", icon: "messages" },
   { href: "/admin/activity", label: "Activity", icon: "reports" },
   { href: "/admin/behavior", label: "Behaviour", icon: "checkCircle" },
+  { href: "/admin/certificates", label: "Certificates", icon: "graduationCap" },
   { href: "/admin/ratings", label: "Feedback", icon: "thumbsUp" },
   { href: "/admin/security", label: "Security", icon: "lock" },
 ];

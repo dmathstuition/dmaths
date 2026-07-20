@@ -7,6 +7,7 @@ import Tour from "@/components/tour/Tour";
 import { adminTour } from "@/components/tour/steps";
 import AdminCharts from "@/components/admin/AdminCharts";
 import AssistantHealthCheck from "@/components/admin/AssistantHealthCheck";
+import FinanceOverview from "@/components/admin/FinanceOverview";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +17,7 @@ export default async function AdminDashboard() {
   const [
     { count: students }, { count: pending }, { count: classes },
     { count: activeStudents }, { data: recent }, { data: allStudents }, { count: assignments },
-    { data: payments },
+    { data: payments }, { data: subs },
   ] = await Promise.all([
     supa.from("profiles").select("*", { count: "exact", head: true }).eq("role", "student"),
     supa.from("applications").select("*", { count: "exact", head: true }).eq("status", "pending"),
@@ -27,6 +28,8 @@ export default async function AdminDashboard() {
     supa.from("profiles").select("avg_score,attendance,created_at,subjects").eq("role", "student"),
     supa.from("assignments").select("*", { count: "exact", head: true }),
     supa.from("payments").select("amount,status,paid_at,created_at").eq("status", "success"),
+    // Active monthly subscriptions (errors harmlessly to null before the migration runs).
+    supa.from("profiles").select("sub_amount,sub_due_date").eq("role", "student").eq("sub_active", true),
   ]);
 
   const avgScore = allStudents?.length ? Math.round(allStudents.reduce((a, s) => a + (s.avg_score || 0), 0) / allStudents.length) : 0;
@@ -41,6 +44,14 @@ export default async function AdminDashboard() {
     })
     .reduce((a: number, p: any) => a + Number(p.amount || 0), 0);
   const today = new Date().toLocaleDateString("en-NG", { timeZone: "Africa/Lagos", weekday: "long", day: "numeric", month: "long", year: "numeric" });
+
+  // Finance overview figures.
+  const totalCollected = (payments ?? []).reduce((a: number, p: any) => a + Number(p.amount || 0), 0);
+  const mrr = (subs ?? []).reduce((a: number, s: any) => a + Number(s.sub_amount || 0), 0);
+  const activeSubs = subs?.length ?? 0;
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const overdue = (subs ?? []).filter((s: any) => s.sub_due_date && s.sub_due_date < todayStr);
+  const overdueAmount = overdue.reduce((a: number, s: any) => a + Number(s.sub_amount || 0), 0);
 
   return (
     <div className="space-y-6">
@@ -116,6 +127,12 @@ export default async function AdminDashboard() {
         <QuickAction icon="assignments" label="Post assignment" href="/admin/assignments" />
         <QuickAction icon="notices" label="Make announcement" href="/admin/notices" />
       </div>
+
+      {/* Finance overview */}
+      <Reveal>
+        <FinanceOverview totalCollected={totalCollected} monthRevenue={monthRevenue} mrr={mrr}
+          activeSubs={activeSubs} overdueCount={overdue.length} overdueAmount={overdueAmount} />
+      </Reveal>
 
       {/* Analytics */}
       <Reveal>
