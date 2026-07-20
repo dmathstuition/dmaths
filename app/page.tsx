@@ -10,6 +10,7 @@ import Tilt3D from "@/components/landing/Tilt3D";
 import Parallax from "@/components/landing/Parallax";
 import FlyerPopup from "@/components/landing/FlyerPopup";
 import SocialLinks from "@/components/landing/SocialLinks";
+import PortalShowcase from "@/components/landing/PortalShowcase";
 import AppLauncher from "@/components/AppLauncher";
 
 const SERVICES = [
@@ -248,6 +249,9 @@ print("Hello from D-Maths!")`}</code></pre>
           </div>
         </Reveal>
       </section>
+
+      {/* APP SHOWCASE — the portal in your pocket */}
+      <PortalShowcase />
 
       {/* IMPACT BAND — dark, full-contrast premium moment */}
       <section className="relative my-10">

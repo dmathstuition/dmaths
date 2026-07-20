@@ -6,6 +6,7 @@ import CountUp from "@/components/landing/CountUp";
 import Reveal from "@/components/landing/Reveal";
 import { Icon, type IconName } from "@/components/Icons";
 import RateCard from "@/components/portal/RateCard";
+import MomentumCard from "@/components/portal/MomentumCard";
 import DashboardTip from "@/components/portal/DashboardTip";
 import Tour from "@/components/tour/Tour";
 import { studentTour } from "@/components/tour/steps";
@@ -129,6 +130,11 @@ export default async function StudentDashboard() {
           </div>
         </Reveal>
       )}
+
+      {/* Level & momentum — gamified progress centrepiece */}
+      <Reveal delay={40}>
+        <MomentumCard rewardPoints={rewardPts} streak={streak} avgScore={me?.avg_score ?? 0} />
+      </Reveal>
 
       {/* Stat grid */}
       <div data-tour="stats" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
