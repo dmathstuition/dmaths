@@ -10,6 +10,7 @@ import NotificationBell from "@/components/NotificationBell";
 import AdminSearch from "@/components/admin/AdminSearch";
 import PushManager from "@/components/PushManager";
 import PortalTabBar, { type Tab } from "@/components/PortalTabBar";
+import MoreSheet from "@/components/MoreSheet";
 import IdleLogout from "@/components/IdleLogout";
 import TourButton from "@/components/tour/TourButton";
 
@@ -33,6 +34,7 @@ export default function PortalShell({
   const path = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const firstName = name.trim().split(" ")[0] || "there";
 
   async function signOut() {
@@ -115,7 +117,13 @@ export default function PortalShell({
       <main className={`px-4 pt-4 sm:px-7 lg:ml-64 lg:px-10 lg:pb-10 ${tabs ? "pb-28" : "pb-10"}`}>{children}</main>
 
       {/* App-style bottom tab bar (mobile only) */}
-      {tabs && <PortalTabBar tabs={tabs} path={path} onMore={() => setOpen(true)} />}
+      {tabs && <PortalTabBar tabs={tabs} path={path} onMore={() => setMoreOpen(true)} />}
+
+      {/* "More" — full navigation as a grid of tiles (mobile only) */}
+      {tabs && (
+        <MoreSheet items={nav} path={path} open={moreOpen} onClose={() => setMoreOpen(false)}
+          name={name} onSignOut={signOut} />
+      )}
 
       <PushManager />
       <IdleLogout minutes={idleMinutes} />
