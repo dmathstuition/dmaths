@@ -59,6 +59,23 @@ export default function ApplicationsClient({ initial }: { initial: App[] }) {
     .filter(a => filter === "all" || a.status === filter)
     .filter(a => !q || `${a.first_name} ${a.last_name} ${a.email} ${a.payment_ref} ${a.camp || ""} ${findTier(a.plan)?.name ?? ""}`.toLowerCase().includes(q.toLowerCase()));
 
+  // Export the currently-visible applications to CSV (respects the filter).
+  function exportCSV() {
+    const esc = (v: any) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const headers = ["First name", "Last name", "Email", "Phone", "Level", "Subjects", "Plan", "Pay plan", "Payment ref", "Status", "Applied"];
+    const rows = visible.map(a => [
+      a.first_name, a.last_name, a.email, a.phone, a.level,
+      Array.isArray(a.subjects) ? a.subjects.join("; ") : (a.subjects ?? ""),
+      findTier(a.plan)?.name ?? a.plan ?? "", a.pay_plan ?? "", a.payment_ref ?? "", a.status,
+      a.created_at ? new Date(a.created_at).toISOString().slice(0, 10) : "",
+    ]);
+    const csv = [headers, ...rows].map(r => r.map(esc).join(",")).join("\n");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+    a.download = `dmaths-applications-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+  }
+
   async function doApprove(id: string) {
     setConfirmState(null);
     setBusyId(id);
@@ -120,9 +137,12 @@ export default function ApplicationsClient({ initial }: { initial: App[] }) {
           <h1 className="font-display text-3xl font-semibold">Enrolment applications</h1>
           <p className="text-sm text-ink/45">{counts.pending} pending · {counts.approved} approved · {counts.rejected} rejected</p>
         </div>
-        <button onClick={sendTestEmail} className="btn-ghost !min-h-[38px] text-xs" title="Send a test email to verify the email setup is working">
-          ✉️ Send test email
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={exportCSV} className="btn-ghost !min-h-[38px] text-xs">Export CSV</button>
+          <button onClick={sendTestEmail} className="btn-ghost !min-h-[38px] text-xs" title="Send a test email to verify the email setup is working">
+            ✉️ Send test email
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
