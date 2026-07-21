@@ -1,24 +1,24 @@
 import { NextResponse } from "next/server";
-import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { requireStaff, staffCanAccessClass } from "@/lib/authRole";
 
-// Admin-only: download a class's attendance register as CSV — a grid of learners ×
-// session dates, each cell Present / Late / Absent. Range defaults to the single
-// given date; pass from/to for a week or month.
+// Staff-only: download a class's attendance register as CSV — a grid of learners ×
+// session dates, each cell Present / Late / Absent. Admins export any class;
+// tutors only their own. Range defaults to the single given date; pass from/to.
 export const dynamic = "force-dynamic";
 
 const csvCell = (v: string) => `"${String(v).replace(/"/g, '""')}"`;
 
 export async function GET(req: Request) {
-  const supa = supabaseServer();
-  const { data: { user } } = await supa.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const { data: me } = await supa.from("profiles").select("role").eq("id", user.id).single();
-  if (me?.role !== "admin") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const staff = await requireStaff();
+  if (!staff) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const { searchParams } = new URL(req.url);
   const classId = searchParams.get("classId");
   if (!classId) return NextResponse.json({ error: "classId required" }, { status: 400 });
+  if (!(await staffCanAccessClass(staff, classId))) {
+    return NextResponse.json({ error: "That class isn't assigned to you." }, { status: 403 });
+  }
   const today = new Date().toISOString().slice(0, 10);
   const from = searchParams.get("from") || searchParams.get("date") || today;
   const to = searchParams.get("to") || searchParams.get("date") || from;
