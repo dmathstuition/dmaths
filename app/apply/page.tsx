@@ -40,6 +40,10 @@ export default function Apply() {
   const [ref, setRef] = useState("");
   // Part payment: pay the full discounted price, or a 50% deposit now.
   const [payHalf, setPayHalf] = useState(false);
+  // Bot protection (no CAPTCHA): a hidden honeypot field bots fill but humans
+  // don't, plus a mount timestamp so the server can reject instant submissions.
+  const [hp, setHp] = useState("");
+  const [loadedAt] = useState(() => Date.now());
 
   const set = (k: string, v: any) => setF(p => ({ ...p, [k]: v }));
   const toggleSubject = (s: string) =>
@@ -138,6 +142,7 @@ export default function Apply() {
         subjects: f.subjects, notes: f.notes || "",
         camp: camp || "", plan: f.plan || "",
         ref: ref || "",
+        website: hp, loadedAt,          // honeypot + time-trap (bot protection)
         pay_plan: selectedTier && payHalf ? "part" : "full",
         payment_ref: free ? "FREE-ENROLMENT" : f.payment_ref,
         payment_method: free ? "Free promotion" : f.payment_method,
@@ -197,6 +202,14 @@ export default function Apply() {
       </ol>
 
       <div className="card mx-auto max-w-2xl p-7">
+        {/* Honeypot — off-screen, not for humans. Bots that fill every field
+            trip it and the submission is silently dropped server-side. */}
+        <span aria-hidden style={{ position: "absolute", left: "-9999px", top: 0, width: 1, height: 1, overflow: "hidden", opacity: 0 }}>
+          <label htmlFor="company_url">Company website (leave blank)</label>
+          <input id="company_url" name="company_url" type="text" tabIndex={-1} autoComplete="off"
+            value={hp} onChange={e => setHp(e.target.value)} />
+        </span>
+
         {error && <p role="alert" className="mb-5 rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-800">{error}</p>}
 
         {step === 1 && (
