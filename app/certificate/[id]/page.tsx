@@ -29,7 +29,7 @@ export default async function CertificatePage({ params }: { params: { id: string
   const issued = new Date(cert.issued_at).toLocaleDateString("en-NG", { day: "numeric", month: "long", year: "numeric" });
 
   return (
-    <div className="min-h-screen bg-chalk py-8 print:bg-white print:py-0">
+    <div className="doc-light min-h-screen bg-chalk py-8 print:bg-white print:py-0">
       {/* The certificate — A4 landscape when printed */}
       <div className="cert-sheet mx-auto max-w-3xl bg-[#FDF9F0] px-6 py-8 shadow-2xl sm:px-12 sm:py-12 print:max-w-none print:shadow-none">
         <div className="relative border-[3px] border-gold-deep p-6 sm:p-10"

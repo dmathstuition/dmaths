@@ -56,7 +56,7 @@ export default async function ReportCardPage({ params }: { params: { id: string 
   ];
 
   return (
-    <div className="min-h-screen bg-chalk py-8 print:bg-white print:py-0">
+    <div className="doc-light min-h-screen bg-chalk py-8 print:bg-white print:py-0">
       <div className="cert-sheet mx-auto max-w-3xl bg-white px-6 py-8 shadow-2xl sm:px-12 sm:py-10 print:max-w-none print:shadow-none">
         {/* header */}
         <div className="flex items-center justify-between gap-4 border-b-2 border-board pb-5">
