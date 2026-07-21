@@ -131,6 +131,37 @@ html { scroll-behavior: smooth; }
 .dark .border-line { border-color: rgba(255,255,255,0.1) !important; }
 .dark .glass-dark { background: rgba(10, 42, 79, 0.9); }
 
+/* ── Dark-mode legibility inside the app shells (portal / admin / tutor /
+   parent all live under .portal-bg) ─────────────────────────────────────
+   The base dark rules only remapped a handful of text-ink opacities, so the
+   many others (55/60/35/30/65/25…) stayed dark-navy on dark cards and
+   vanished. Cover the full range, and darken white inner tiles so the
+   now-light text sits on a dark surface instead of glaring white. */
+.dark .portal-bg .text-ink\/80,
+.dark .portal-bg .text-ink\/75,
+.dark .portal-bg .text-ink\/70,
+.dark .portal-bg .text-ink\/65 { color: #E8EDF5 !important; }
+.dark .portal-bg .text-ink\/60,
+.dark .portal-bg .text-ink\/55,
+.dark .portal-bg .text-ink\/50 { color: rgba(232,237,245,0.72) !important; }
+.dark .portal-bg .text-ink\/45,
+.dark .portal-bg .text-ink\/40,
+.dark .portal-bg .text-ink\/35 { color: rgba(232,237,245,0.58) !important; }
+.dark .portal-bg .text-ink\/30,
+.dark .portal-bg .text-ink\/25,
+.dark .portal-bg .text-ink\/15 { color: rgba(232,237,245,0.44) !important; }
+.dark .portal-bg .bg-white { background: #123a5f; }
+
+/* ── "Paper" surfaces that must stay light in dark mode ──────────────────
+   Printable certificate / report-card documents and the marketing phone
+   mock. They opt out with the .doc-light class so their white sheets and
+   dark ink survive the global dark overrides. */
+.dark .doc-light .bg-white { background: #ffffff !important; }
+.dark .doc-light .bg-chalk { background: #F4F1EA !important; }
+.dark .doc-light .border-line { border-color: #E3E8EE !important; }
+.dark .doc-light [class*="text-ink"] { color: #1A2233 !important; }
+.dark .doc-light .text-board { color: #0F3A6B !important; }
+
 /* ── Landing page polish ────────────────────────────────── */
 @keyframes revealUp {
   from { opacity: 0; transform: translateY(24px); }

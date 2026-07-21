@@ -29,7 +29,7 @@ function Tab({ icon, label, active }: { icon: IconName; label: string; active?: 
 
 export default function PortalPhone({ className = "" }: { className?: string }) {
   return (
-    <div className={`relative mx-auto w-[250px] ${className}`}>
+    <div className={`doc-light relative mx-auto w-[250px] ${className}`}>
       {/* soft brand glow behind the device */}
       <div aria-hidden className="pointer-events-none absolute -inset-6 -z-10 rounded-[3rem] bg-gradient-to-b from-gold/25 via-ink/10 to-transparent blur-2xl" />
 
