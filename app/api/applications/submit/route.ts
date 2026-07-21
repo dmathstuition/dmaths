@@ -17,6 +17,18 @@ export async function POST(req: Request) {
   const body = await req.json().catch(() => null);
   if (!body) return NextResponse.json({ error: "Invalid request." }, { status: 400 });
 
+  // Bot protection (no CAPTCHA). Both checks respond with a fake success so a
+  // bot believes it worked and doesn't retry/learn — but nothing is inserted.
+  //  1) Honeypot: humans never see/fill the hidden `website` field.
+  //  2) Time-trap: the multi-step form always takes several seconds, so a
+  //     submission under 2.5s from page load is a script.
+  const honeypotTripped = String(body.website || "").trim() !== "";
+  const elapsed = Date.now() - Number(body.loadedAt || 0);
+  const tooFast = !body.loadedAt || elapsed < 2500;
+  if (honeypotTripped || tooFast) {
+    return NextResponse.json({ ok: true });
+  }
+
   for (const k of ["first_name", "last_name", "email", "phone"]) {
     if (!String(body[k] || "").trim()) {
       return NextResponse.json({ error: "Please fill in all required fields." }, { status: 400 });
