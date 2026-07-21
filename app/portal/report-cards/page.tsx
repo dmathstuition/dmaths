@@ -14,9 +14,14 @@ export default async function ReportCardsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="boardgrid relative overflow-hidden rounded-2xl bg-board p-7 text-white">
-        <h1 className="font-display text-2xl font-semibold sm:text-3xl">📄 My report cards</h1>
-        <p className="mt-1 text-sm text-white/50">Your termly progress reports — open one to download or print it.</p>
+      <div className="boardgrid relative flex items-center gap-4 overflow-hidden rounded-2xl bg-board p-7 text-white">
+        <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gold/15 text-gold ring-1 ring-gold/25">
+          <Icon name="reports" className="h-6 w-6" />
+        </span>
+        <div>
+          <h1 className="font-display text-2xl font-semibold sm:text-3xl">My report cards</h1>
+          <p className="mt-1 text-sm text-white/50">Your termly progress reports — open one to download or print it.</p>
+        </div>
       </div>
 
       {cards?.length ? (
