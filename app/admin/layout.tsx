@@ -21,6 +21,8 @@ const NAV: NavItem[] = [
   { href: "/admin/code", label: "Code playground", icon: "code" },
   { href: "/admin/math-lab", label: "Math Lab", icon: "sigma" },
   { href: "/admin/reports", label: "Reports", icon: "reports" },
+  { href: "/admin/assignment-analytics", label: "Assignment analytics", icon: "progress" },
+  { href: "/admin/lesson-log", label: "Lesson log", icon: "book" },
   { href: "/admin/calendar", label: "Calendar", icon: "calendar" },
   { href: "/admin/notices", label: "Announcements", icon: "notices" },
   { href: "/admin/broadcast", label: "Broadcast", icon: "messages" },
