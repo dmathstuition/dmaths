@@ -61,8 +61,15 @@ export default function LeaderboardClient({
       <div className="boardgrid relative overflow-hidden rounded-2xl bg-board p-7 text-white">
         <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full"
           style={{ background: "radial-gradient(circle, rgba(239,174,86,.4), transparent 70%)" }} />
-        <h1 className="relative font-display text-2xl font-semibold sm:text-3xl">🏆 Leaderboard</h1>
-        <p className="relative mt-1 text-sm text-white/50">Top students by reward points across {scopeName}.</p>
+        <div className="relative flex items-center gap-4">
+          <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gold/15 text-gold ring-1 ring-gold/25">
+            <Icon name="trophy" className="h-6 w-6" />
+          </span>
+          <div>
+            <h1 className="font-display text-2xl font-semibold sm:text-3xl">Leaderboard</h1>
+            <p className="mt-1 text-sm text-white/50">Top students by reward points across {scopeName}.</p>
+          </div>
+        </div>
       </div>
 
       {/* scope filter */}
