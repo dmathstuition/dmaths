@@ -27,6 +27,7 @@ const NAV: NavItem[] = [
   { href: "/admin/activity", label: "Activity", icon: "reports" },
   { href: "/admin/behavior", label: "Behaviour", icon: "checkCircle" },
   { href: "/admin/certificates", label: "Certificates", icon: "graduationCap" },
+  { href: "/admin/report-cards", label: "Report cards", icon: "reports" },
   { href: "/admin/ratings", label: "Feedback", icon: "thumbsUp" },
   { href: "/admin/security", label: "Security", icon: "lock" },
 ];

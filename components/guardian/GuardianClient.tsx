@@ -1,5 +1,8 @@
+import Link from "next/link";
 import ProgressRing from "@/components/ui/ProgressRing";
+import { Icon } from "@/components/Icons";
 
+interface ReportCard { id: string; term: string; issued_at: string; }
 interface Student {
   first_name: string; last_name: string; student_code: string; level: string;
   avg_score: number; attendance: number; reward_points: number; sanction_points: number;
@@ -15,9 +18,10 @@ interface GradedSub {
 }
 
 export default function GuardianClient({
-  student, behaviorLogs, gradedSubs, pendingCount,
+  student, behaviorLogs, gradedSubs, pendingCount, reportCards = [],
 }: {
   student: Student; behaviorLogs: BehaviorLog[]; gradedSubs: GradedSub[]; pendingCount: number;
+  reportCards?: ReportCard[];
 }) {
   return (
     <div className="space-y-6">
@@ -134,6 +138,27 @@ export default function GuardianClient({
           </div>
         )}
       </div>
+
+      {reportCards.length > 0 && (
+        <div className="card neu-card hovlift p-5">
+          <h2 className="mb-4 font-display text-lg font-semibold">Report cards</h2>
+          <div className="divide-y divide-line/60">
+            {reportCards.map((c) => (
+              <Link key={c.id} href={`/report-card/${c.id}`}
+                className="-mx-2 flex items-center gap-3 rounded-xl px-2 py-2.5 transition hover:bg-chalk/60">
+                <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-gold-pale text-gold-deep">
+                  <Icon name="reports" className="h-4 w-4" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-bold text-ink">{c.term}</p>
+                  <p className="text-xs text-ink/40">{new Date(c.issued_at).toLocaleDateString("en-NG", { dateStyle: "medium" })}</p>
+                </div>
+                <span className="flex-shrink-0 text-gold-deep"><Icon name="download" /></span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {pendingCount > 0 && (
         <div className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm font-semibold text-amber-800">

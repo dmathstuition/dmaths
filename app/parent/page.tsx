@@ -43,6 +43,7 @@ export default async function ParentPage() {
         { data: behaviorTypes },
         { data: gradedSubs },
         { data: pendingSubs },
+        { data: reportCards },
       ] = await Promise.all([
         admin
           .from("profiles")
@@ -68,6 +69,13 @@ export default async function ParentPage() {
           .select("id")
           .eq("student_id", student_id)
           .eq("status", "pending"),
+        // Report cards (errors harmlessly to null before the migration is run).
+        admin
+          .from("report_cards")
+          .select("id, term, issued_at")
+          .eq("student_id", student_id)
+          .order("issued_at", { ascending: false })
+          .limit(8),
       ]);
 
       const typeMap = new Map((behaviorTypes ?? []).map((t: any) => [t.id, t]));
@@ -81,13 +89,14 @@ export default async function ParentPage() {
         logs,
         gradedSubs: gradedSubs ?? [],
         pendingCount: pendingSubs?.length ?? 0,
+        reportCards: reportCards ?? [],
       };
     }),
   );
 
   return (
     <div className="space-y-10">
-      {students.map(({ student, logs, gradedSubs, pendingCount }, i) =>
+      {students.map(({ student, logs, gradedSubs, pendingCount, reportCards }, i) =>
         student ? (
           <GuardianClient
             key={i}
@@ -95,6 +104,7 @@ export default async function ParentPage() {
             behaviorLogs={logs}
             gradedSubs={gradedSubs}
             pendingCount={pendingCount}
+            reportCards={reportCards as any}
           />
         ) : null,
       )}

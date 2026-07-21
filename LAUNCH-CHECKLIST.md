@@ -92,7 +92,8 @@ Run in this order (skip `schema.sql` if the project already has data):
 30. `migration-notebook-share-guard.sql` *(security: only staff can publish a shared notebook)*
 31. `migration-certificates.sql` *(admin-issued certificates learners download from the portal)*
 32. `migration-scheduled-broadcasts.sql` *(admin broadcasts scheduled for a future time)*
-33. `migration-schema-fixes.sql` *(run last — patches any missing columns)*
+33. `migration-report-cards.sql` *(admin-issued termly report cards; students & parents download a PDF)*
+34. `migration-schema-fixes.sql` *(run last — patches any missing columns)*
 
 > **⚠️ Also run `storage-buckets.sql` once** — it creates the file-storage buckets
 > (materials, curricula, assignments, submissions, voice-notes). Without it, uploading
