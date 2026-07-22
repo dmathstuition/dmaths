@@ -2,8 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { useToast } from "@/components/Toast";
-import CodeArea from "@/components/code/CodeArea";
-import { python } from "@/components/code/highlighters";
+import Editor from "@/components/code/Editor";
 
 type Snippet = { id: string; title: string; code: string; shared?: boolean; shared_by_name?: string | null };
 type Output =
@@ -163,18 +162,6 @@ export default function NotebookIde({ persist = false, meId = "", initialNoteboo
     });
   }
 
-  function codeKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>, id: string) {
-    if (e.key === "Tab") {
-      e.preventDefault();
-      const ta = e.currentTarget; const s = ta.selectionStart, en = ta.selectionEnd;
-      const v = ta.value;
-      update(id, v.slice(0, s) + "    " + v.slice(en));
-      requestAnimationFrame(() => { ta.selectionStart = ta.selectionEnd = s + 4; });
-    } else if (e.key === "Enter" && (e.shiftKey || e.ctrlKey || e.metaKey)) {
-      e.preventDefault();
-      runCell(id);
-    }
-  }
 
   // ── Persistence (owner-scoped snippets, language "notebook") ──────
   const serialize = () => JSON.stringify(cells.map((c) => ({ type: c.type, source: c.source })));
@@ -349,8 +336,8 @@ export default function NotebookIde({ persist = false, meId = "", initialNoteboo
               <div className="min-w-0 flex-1 py-2 pr-2">
                 {cell.type === "code" ? (
                   <div className="overflow-hidden rounded-lg border border-line">
-                    <CodeArea value={cell.source} onChange={(v) => update(cell.id, v)}
-                      onKeyDown={(e) => codeKeyDown(e, cell.id)} highlight={python} minHeight={64} ariaLabel="Code cell" />
+                    <Editor value={cell.source} onChange={(v) => update(cell.id, v)}
+                      language="python" onRun={() => runCell(cell.id)} minHeight={64} ariaLabel="Code cell" statusBar={false} />
                   </div>
                 ) : cell.editing ? (
                   <textarea autoFocus value={cell.source} onChange={(e) => update(cell.id, e.target.value)}

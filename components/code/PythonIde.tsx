@@ -2,8 +2,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { useToast } from "@/components/Toast";
-import CodeArea from "@/components/code/CodeArea";
-import { python } from "@/components/code/highlighters";
+import Editor from "@/components/code/Editor";
 import { useAssistantTask } from "@/components/portal/AssistantContext";
 
 type Snippet = { id: string; title: string; code: string };
@@ -59,17 +58,6 @@ export default function PythonIde({ persist = false, meId = "", initialSnippets 
 
   useEffect(() => () => worker.current?.terminate(), []);
   useEffect(() => { outRef.current?.scrollTo({ top: outRef.current.scrollHeight }); }, [output]);
-
-  function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    if (e.key === "Tab") {
-      e.preventDefault();
-      const ta = e.currentTarget;
-      const s = ta.selectionStart, en = ta.selectionEnd;
-      setCode(code.slice(0, s) + "    " + code.slice(en));
-      requestAnimationFrame(() => { ta.selectionStart = ta.selectionEnd = s + 4; });
-    }
-    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); run(); }
-  }
 
   function run() {
     if (status === "loading" || status === "running") return;
@@ -143,7 +131,7 @@ export default function PythonIde({ persist = false, meId = "", initialSnippets 
               {statusLabel}
             </span>
           </div>
-          <CodeArea value={code} onChange={setCode} onKeyDown={onKeyDown} highlight={python} minHeight={320} ariaLabel="Python code editor" />
+          <Editor value={code} onChange={setCode} language="python" onRun={run} minHeight={320} ariaLabel="Python code editor" placeholder="Write Python here…" />
         </div>
 
         {/* Controls */}
