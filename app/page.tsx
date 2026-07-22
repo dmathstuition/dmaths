@@ -78,11 +78,7 @@ export default function Landing() {
         <Parallax speed={-0.12} className="pointer-events-none absolute right-10 bottom-10"><DotsScatter className="float h-20 w-20 opacity-50 [animation-delay:1.5s]" /></Parallax>
         <div className="relative mx-auto grid max-w-7xl items-center gap-8 px-5 md:grid-cols-2">
           <Reveal className="space-y-0">
-            <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-white/70 px-4 py-1.5 text-xs font-bold text-gold-deep shadow-sm backdrop-blur">
-              <span className="badge-pulse h-1.5 w-1.5 rounded-full bg-gold-deep" />
-              Trusted by 200+ students across Nigeria
-            </span>
-            <h1 className="mt-5 font-display text-5xl font-extrabold leading-[1.05] tracking-tight md:text-[4.2rem]">
+            <h1 className="font-display text-5xl font-extrabold leading-[1.05] tracking-tight md:text-[4.2rem]">
               We create <span className="text-gradient-gold">solutions</span> for your success
             </h1>
             <p className="mt-5 max-w-md text-[15px] leading-relaxed text-ink/55">
