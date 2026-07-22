@@ -12,6 +12,7 @@ import FlyerPopup from "@/components/landing/FlyerPopup";
 import SocialLinks from "@/components/landing/SocialLinks";
 import PortalShowcase from "@/components/landing/PortalShowcase";
 import AppLauncher from "@/components/AppLauncher";
+import InstallPrompt from "@/components/InstallPrompt";
 
 const SERVICES = [
   { t: "Maths & Calculus", d: "From algebra and geometry to derivatives and integrals, built step by step.", c: "#EFAE56", sym: "ƒ(x)" },
@@ -63,6 +64,7 @@ export default function Landing() {
     <main className="overflow-hidden bg-white font-body text-ink">
       <FlyerPopup />
       <AppLauncher />
+      <InstallPrompt />
       <SummerCampBanner />
       <LandingNav />
 
@@ -129,6 +131,20 @@ export default function Landing() {
             {/* soft glow + slowly rotating dashed ring behind the cut-out figure */}
             <div className="hero-glow absolute inset-0 scale-110" />
             <div className="ring-spin pointer-events-none absolute inset-8 rounded-full border-2 border-dashed border-gold/25" />
+            {/* decorative maths/coding chips orbiting 360° around the image */}
+            <div aria-hidden className="hero-orbit pointer-events-none absolute inset-0 z-20 hidden md:block">
+              {["π", "∑", "√", "ƒ(x)", "</>", "★"].map((s, i) => {
+                const a = (i / 6) * 2 * Math.PI, R = 47;
+                const left = 50 + R * Math.sin(a), top = 50 - R * Math.cos(a);
+                return (
+                  <span key={i} className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: `${left}%`, top: `${top}%` }}>
+                    <span className="hero-orbit__chip flex h-9 w-9 items-center justify-center rounded-xl bg-white/90 font-display text-[13px] font-bold text-ink shadow-lg ring-1 ring-line backdrop-blur">
+                      {s}
+                    </span>
+                  </span>
+                );
+              })}
+            </div>
             {/* cinematic 3D tilt — follows the cursor on desktop, static on touch */}
             <Tilt3D className="relative" max={10}>
               <Image
