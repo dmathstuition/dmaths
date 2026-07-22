@@ -9,6 +9,7 @@ import { DotsScatter } from "@/components/illustrations";
 import { Icon, type IconName } from "@/components/Icons";
 import PhysicalCampPicker from "@/components/landing/PhysicalCampPicker";
 import PortalShowcase from "@/components/landing/PortalShowcase";
+import InstallPrompt from "@/components/InstallPrompt";
 import {
   SUMMER_CAMP,
   SUMMER_CAMP_TIERS,
@@ -45,6 +46,7 @@ const TRACK_LABEL: Record<string, string> = {
 export default function SummerCamp() {
   return (
     <main className="overflow-hidden bg-white font-body text-ink">
+      <InstallPrompt />
       {/* Lightweight header */}
       <header className="bg-board px-5 py-4">
         <div className="mx-auto flex max-w-6xl items-center justify-between">

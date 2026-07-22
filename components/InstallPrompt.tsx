@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/Icons";
 
 // A PERSISTENT "Get the app" button. It stays on screen until the app is
@@ -9,23 +9,53 @@ import { Icon } from "@/components/Icons";
 //    otherwise clear browser-menu steps.
 //  • iPhone/iPad (Safari) → Share → "Add to Home Screen" steps (iOS has no
 //    programmatic install).
+// It is draggable (drag to reposition; the spot is remembered), and only ever
+// shows to people who have NOT installed the app.
 type BIPEvent = Event & {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 };
 type Platform = "android" | "ios" | "desktop" | "other";
 
+const INSTALLED_KEY = "dmaths-installed";
+const POS_KEY = "dmaths-app-btn-pos";
+
 export default function InstallPrompt() {
   const [deferred, setDeferred] = useState<BIPEvent | null>(null);
   const [visible, setVisible] = useState(false);
   const [open, setOpen] = useState(false);
   const [platform, setPlatform] = useState<Platform>("other");
+  // null = default corner (Tailwind classes); otherwise a dragged pixel position.
+  const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
+
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const drag = useRef<{ dx: number; dy: number; moved: boolean } | null>(null);
 
   useEffect(() => {
     const standalone =
       window.matchMedia("(display-mode: standalone)").matches ||
       (navigator as unknown as { standalone?: boolean }).standalone === true;
-    if (standalone) return; // already installed → show nothing, ever
+    if (standalone) return;                                   // running installed → never show
+    if (localStorage.getItem(INSTALLED_KEY) === "1") return;  // installed before, now in a tab
+
+    // Chromium: if a related PWA/TWA is already installed, stay hidden too.
+    const gira = (navigator as any).getInstalledRelatedApps;
+    if (typeof gira === "function") {
+      gira.call(navigator).then((apps: unknown[]) => {
+        if (apps && apps.length) { localStorage.setItem(INSTALLED_KEY, "1"); setVisible(false); }
+      }).catch(() => {});
+    }
+
+    // Restore a remembered drag position (clamped to the current viewport).
+    try {
+      const saved = JSON.parse(localStorage.getItem(POS_KEY) || "null");
+      if (saved && typeof saved.x === "number" && typeof saved.y === "number") {
+        setPos({
+          x: Math.min(Math.max(8, saved.x), window.innerWidth - 60),
+          y: Math.min(Math.max(8, saved.y), window.innerHeight - 60),
+        });
+      }
+    } catch { /* ignore */ }
 
     setVisible(true);
 
@@ -37,7 +67,7 @@ export default function InstallPrompt() {
 
     const onBIP = (e: Event) => { e.preventDefault(); setDeferred(e as BIPEvent); };
     window.addEventListener("beforeinstallprompt", onBIP);
-    const onInstalled = () => { setVisible(false); setOpen(false); };
+    const onInstalled = () => { localStorage.setItem(INSTALLED_KEY, "1"); setVisible(false); setOpen(false); };
     window.addEventListener("appinstalled", onInstalled);
     return () => {
       window.removeEventListener("beforeinstallprompt", onBIP);
@@ -45,21 +75,56 @@ export default function InstallPrompt() {
     };
   }, []);
 
+  // ── Drag to reposition (pointer events; a plain tap still opens the sheet) ──
+  function onPointerDown(e: React.PointerEvent<HTMLButtonElement>) {
+    const rect = btnRef.current!.getBoundingClientRect();
+    drag.current = { dx: e.clientX - rect.left, dy: e.clientY - rect.top, moved: false };
+    if (pos === null) setPos({ x: rect.left, y: rect.top }); // seed from current spot
+    btnRef.current!.setPointerCapture(e.pointerId);
+  }
+  function onPointerMove(e: React.PointerEvent<HTMLButtonElement>) {
+    const d = drag.current;
+    if (!d) return;
+    const w = btnRef.current!.offsetWidth, h = btnRef.current!.offsetHeight;
+    const x = Math.min(Math.max(8, e.clientX - d.dx), window.innerWidth - w - 8);
+    const y = Math.min(Math.max(8, e.clientY - d.dy), window.innerHeight - h - 8);
+    // Any real pointer travel turns this from a "tap" into a "drag".
+    if (Math.abs(e.movementX) + Math.abs(e.movementY) > 0) d.moved = true;
+    setPos({ x, y });
+  }
+  function onPointerUp(e: React.PointerEvent<HTMLButtonElement>) {
+    const d = drag.current;
+    drag.current = null;
+    try { btnRef.current!.releasePointerCapture(e.pointerId); } catch { /* ignore */ }
+    if (!d) return;
+    if (d.moved && pos) {
+      try { localStorage.setItem(POS_KEY, JSON.stringify(pos)); } catch { /* ignore */ }
+    } else {
+      setOpen(true); // it was a tap, not a drag
+    }
+  }
+
   async function nativeInstall() {
     if (!deferred) return;
     await deferred.prompt();
     const { outcome } = await deferred.userChoice;
     setDeferred(null);
-    if (outcome === "accepted") { setVisible(false); setOpen(false); }
+    if (outcome === "accepted") { localStorage.setItem(INSTALLED_KEY, "1"); setVisible(false); setOpen(false); }
   }
 
   if (!visible) return null;
 
   return (
     <>
-      {/* Persistent standby button — bottom-left, clear of the WhatsApp/assistant buttons */}
-      <button onClick={() => setOpen(true)} aria-label="Get the D-Maths app"
-        className="fixed bottom-24 left-4 z-[70] flex items-center gap-2 rounded-full bg-board px-4 py-2.5 text-sm font-bold text-white shadow-xl ring-1 ring-white/10 transition hover:scale-105 active:scale-95 lg:bottom-5">
+      {/* Persistent standby button — draggable; default sits bottom-left, clear
+          of the WhatsApp/assistant buttons. */}
+      <button ref={btnRef}
+        onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp}
+        aria-label="Get the D-Maths app — drag to move, tap to install"
+        style={pos ? { left: pos.x, top: pos.y, right: "auto", bottom: "auto", touchAction: "none" } : { touchAction: "none" }}
+        className={`fixed z-[70] flex touch-none cursor-grab select-none items-center gap-2 rounded-full bg-board px-4 py-2.5 text-sm font-bold text-white shadow-xl ring-1 ring-white/10 transition active:scale-95 active:cursor-grabbing ${
+          pos ? "" : "bottom-24 left-4 lg:bottom-5"
+        }`}>
         <Icon name="download" className="h-4 w-4" />
         <span>Get the app</span>
       </button>

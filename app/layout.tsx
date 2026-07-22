@@ -6,7 +6,6 @@ import { ToastProvider } from "@/components/Toast";
 import { Analytics } from "@vercel/analytics/react";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import StructuredData from "@/components/StructuredData";
-import InstallPrompt from "@/components/InstallPrompt";
 import { siteBaseUrl } from "@/lib/siteUrl";
 
 // Search-engine ownership verification (Google Search Console / Bing). Each is
@@ -76,7 +75,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${poppins.variable} ${fira.variable}`}>
       <body>
         <ToastProvider>{children}<CookieBanner /></ToastProvider>
-        <InstallPrompt />
         <StructuredData />
         <Analytics />
         <GoogleAnalytics />

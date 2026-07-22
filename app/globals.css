@@ -178,6 +178,16 @@ html { scroll-behavior: smooth; }
 .reveal-4 { animation-delay: .35s; }
 .float { animation: floatY 5s ease-in-out infinite; }
 
+/* ── Hero image orbit — decorative chips circling 360° around the image.
+   The layer spins; each chip counter-spins so its glyph stays upright. */
+@keyframes heroOrbit { to { transform: rotate(360deg); } }
+@keyframes heroOrbitCounter { to { transform: rotate(-360deg); } }
+.hero-orbit { animation: heroOrbit 28s linear infinite; }
+.hero-orbit__chip { animation: heroOrbitCounter 28s linear infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .hero-orbit, .hero-orbit__chip { animation: none; }
+}
+
 /* gold diagonal accent stroke (brand logo motif) */
 .accent-stroke { position: relative; }
 .accent-stroke::after {
