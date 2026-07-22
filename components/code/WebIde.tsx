@@ -2,8 +2,7 @@
 import { useEffect, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { useToast } from "@/components/Toast";
-import CodeArea from "@/components/code/CodeArea";
-import { html as hlHtml, css as hlCss, javascript as hlJs } from "@/components/code/highlighters";
+import Editor from "@/components/code/Editor";
 import { useAssistantTask } from "@/components/portal/AssistantContext";
 
 type Snippet = { id: string; title: string; code: string };
@@ -68,17 +67,6 @@ export default function WebIde({ persist = false, meId = "", initialSnippets = [
   function run() { setLogs([]); setSrcDoc(buildDoc(doc)); }
   useEffect(() => { run(); /* first paint */ /* eslint-disable-next-line */ }, []);
 
-  function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    if (e.key === "Tab") {
-      e.preventDefault();
-      const ta = e.currentTarget; const s = ta.selectionStart, en = ta.selectionEnd;
-      const v = doc[tab];
-      const next = v.slice(0, s) + "  " + v.slice(en);
-      setDoc({ ...doc, [tab]: next });
-      requestAnimationFrame(() => { ta.selectionStart = ta.selectionEnd = s + 2; });
-    }
-    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); run(); }
-  }
 
   async function save() {
     if (!persist || !meId) return;
@@ -133,10 +121,11 @@ export default function WebIde({ persist = false, meId = "", initialSnippets = [
                   className="ml-auto w-32 min-w-0 rounded-md bg-white/10 px-2 py-1 text-xs font-semibold text-white placeholder-white/40 outline-none" placeholder="Title" />
               )}
             </div>
-            <CodeArea
-              value={doc[tab]} onChange={(v) => setDoc({ ...doc, [tab]: v })} onKeyDown={onKeyDown}
-              highlight={tab === "html" ? hlHtml : tab === "css" ? hlCss : hlJs}
-              minHeight={300} ariaLabel={`${tab} editor`}
+            <Editor
+              key={tab}
+              value={doc[tab]} onChange={(v) => setDoc({ ...doc, [tab]: v })}
+              language={tab === "html" ? "html" : tab === "css" ? "css" : "javascript"}
+              onRun={run} minHeight={300} ariaLabel={`${tab} editor`}
             />
           </div>
           <div className="flex flex-wrap items-center gap-2">
