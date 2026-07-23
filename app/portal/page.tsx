@@ -6,6 +6,7 @@ import CountUp from "@/components/landing/CountUp";
 import Reveal from "@/components/landing/Reveal";
 import { Icon, type IconName } from "@/components/Icons";
 import RateCard from "@/components/portal/RateCard";
+import AddToCalendar from "@/components/portal/AddToCalendar";
 import MomentumCard from "@/components/portal/MomentumCard";
 import DashboardTip from "@/components/portal/DashboardTip";
 import Tour from "@/components/tour/Tour";
@@ -177,7 +178,10 @@ export default async function StudentDashboard() {
                     {fmtWAT(c.starts_at)} · {c.tutor}
                   </p>
                 </div>
-                {c.link && <JoinClassButton classId={c.id} link={c.link} label="Join" className="btn-gold !min-h-[34px] !px-3 !text-xs" />}
+                <div className="flex items-center gap-2">
+                  <AddToCalendar event={{ subject: c.subject, starts_at: c.starts_at, duration_minutes: c.duration_minutes, platform: c.platform, link: c.link, location: (c as any).location }} />
+                  {c.link && <JoinClassButton classId={c.id} link={c.link} label="Join" className="btn-gold !min-h-[34px] !px-3 !text-xs" />}
+                </div>
               </div>
             ))}
             {!classes?.length && (

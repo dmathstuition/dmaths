@@ -1,5 +1,6 @@
 import Link from "next/link";
 import JoinClassButton from "@/components/portal/JoinClassButton";
+import AddToCalendar from "@/components/portal/AddToCalendar";
 import PollRefresh from "@/components/portal/PollRefresh";
 import { supabaseServer } from "@/lib/supabase/server";
 import { Icon } from "@/components/Icons";
@@ -88,6 +89,12 @@ export default async function MyClasses() {
                   {c.duration_minutes} minutes
                 </p>
               </div>
+
+              {c._status !== "past" && (
+                <div className="mt-3">
+                  <AddToCalendar label event={{ subject: c.subject, starts_at: c.starts_at, duration_minutes: c.duration_minutes, platform: c.platform, link: c.link, location: c.location }} />
+                </div>
+              )}
 
               {/* In-person class — show the venue instead of an online link */}
               {c.mode === "physical" && c.location && (

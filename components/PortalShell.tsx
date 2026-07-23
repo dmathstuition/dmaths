@@ -10,6 +10,7 @@ import NotificationBell from "@/components/NotificationBell";
 import AdminSearch from "@/components/admin/AdminSearch";
 import PushManager from "@/components/PushManager";
 import PortalTabBar, { type Tab } from "@/components/PortalTabBar";
+import CommandPalette from "@/components/CommandPalette";
 import MoreSheet from "@/components/MoreSheet";
 import IdleLogout from "@/components/IdleLogout";
 import TourButton from "@/components/tour/TourButton";
@@ -96,6 +97,7 @@ export default function PortalShell({
         )}
 
         <div className="ml-auto flex items-center gap-3">
+          <CommandPalette nav={nav} />
           <TourButton light />
           {search && <span data-tour="search"><AdminSearch /></span>}
           {bell && <span data-tour="bell"><NotificationBell mode={bell.mode} subjects={bell.subjects} noticesHref={bell.noticesHref} /></span>}
