@@ -123,6 +123,11 @@ Run in this order (skip `schema.sql` if the project already has data):
       broadcast that was scheduled for a future time once it's due. Requires
       `migration-scheduled-broadcasts.sql`. (Without the job, "Send now" still works;
       only the *scheduled* ones wait for it.)
+- [ ] **Engagement nudges (cron-job.org):** add a **once-daily** job (evening WAT is ideal)
+      calling `https://dmaths.academy/api/reminders/nudges?key=<CRON_SECRET>` — pushes a
+      "keep your streak" reminder to learners whose streak is about to break and a
+      "we've missed you" nudge to learners idle 7 and 14 days. Self-dedupes by date
+      (no migration needed; uses the existing streak columns).
 - [ ] **Paystack go-live** (when taking real money): switch to **live** API keys in
       Vercel, and in Paystack → Settings → **Webhooks** set the URL to
       `https://dmaths.vercel.app/api/paystack/webhook`. Enable 2FA + set a settlement bank.
