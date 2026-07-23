@@ -92,11 +92,58 @@ export default function ProgressClient({
     });
   }, [attendanceRecords]);
 
+  // ── Predicted grade (recent form weighted over the running average) ──
+  const gradedScores = scoreTrend.map((s) => s.score);
+  const predicted = gradedScores.length
+    ? (() => {
+        const recent = gradedScores.slice(-3);
+        const recentAvg = recent.reduce((a, b) => a + b, 0) / recent.length;
+        const overall = scoreTrend[scoreTrend.length - 1].avg;
+        return Math.max(0, Math.min(100, Math.round(recentAvg * 0.6 + overall * 0.4)));
+      })()
+    : null;
+  const predBand = predicted === null ? ""
+    : predicted >= 80 ? "On track for an A" : predicted >= 65 ? "On track for a B"
+    : predicted >= 50 ? "On track for a C" : "Needs a push";
+  const ranked = [...subjectBreakdown].sort((a, b) => b.avg - a.avg);
+  const strongest = ranked[0] ?? null;
+  const focus = ranked.length >= 2 ? ranked[ranked.length - 1] : null;
+
   return (
     <div className="space-y-6">
       <div className="boardgrid relative overflow-hidden rounded-2xl bg-board p-7 text-white">
         <h1 className="font-display text-2xl font-semibold sm:text-3xl">My progress</h1>
         <p className="mt-1 text-sm text-white/50">{profile.first_name} {profile.last_name} · {profile.student_code}</p>
+      </div>
+
+      {/* Predicted grade + strengths/focus */}
+      <div className="card p-6">
+        {predicted === null ? (
+          <p className="text-sm text-ink/55">Submit and get some work graded and your predicted grade and subject insights will appear here. 📈</p>
+        ) : (
+          <div className="flex flex-wrap items-center gap-5">
+            <ProgressRing value={predicted} size={96} color="#059669">
+              <span className="font-display text-xl font-extrabold text-ink">{predicted}%</span>
+              <span className="text-[9px] font-bold uppercase tracking-wider text-ink/40">Predicted</span>
+            </ProgressRing>
+            <div className="min-w-0 flex-1">
+              <p className="font-display text-lg font-semibold">Predicted grade — <span className="text-emerald-600">{predBand}</span></p>
+              <p className="mt-0.5 text-[13px] text-ink/50">Based on your recent results and overall average.</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {strongest && (
+                  <span className="rounded-full bg-emerald-50 px-3 py-1 text-[12px] font-bold text-emerald-700">
+                    💪 Strength: {strongest.subject} · {strongest.avg}%
+                  </span>
+                )}
+                {focus && (
+                  <span className="rounded-full bg-amber-50 px-3 py-1 text-[12px] font-bold text-amber-700">
+                    🎯 Focus: {focus.subject} · {focus.avg}%
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Overall progress hero + subject performance (app-style) */}

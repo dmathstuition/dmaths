@@ -178,6 +178,18 @@ html { scroll-behavior: smooth; }
 .reveal-4 { animation-delay: .35s; }
 .float { animation: floatY 5s ease-in-out infinite; }
 
+/* ── Loading skeletons (route-level loading.tsx) ─────────── */
+.skeleton { position: relative; overflow: hidden; background: rgba(26,96,171,.08); }
+.skeleton::after {
+  content: ""; position: absolute; inset: 0; transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent);
+  animation: skeletonSweep 1.4s ease infinite;
+}
+@keyframes skeletonSweep { to { transform: translateX(100%); } }
+.dark .skeleton { background: rgba(255,255,255,.06); }
+.dark .skeleton::after { background: linear-gradient(90deg, transparent, rgba(255,255,255,.09), transparent); }
+@media (prefers-reduced-motion: reduce) { .skeleton::after { animation: none; } }
+
 /* ── Hero image orbit — decorative chips circling 360° around the image.
    The layer spins; each chip counter-spins so its glyph stays upright. */
 @keyframes heroOrbit { to { transform: rotate(360deg); } }
