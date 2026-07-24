@@ -31,6 +31,18 @@ export async function middleware(req: NextRequest) {
   // Requests with no session (public form, Paystack webhook, cron) return null
   // levels and pass straight through to the route's own auth.
   if (isApi) {
+    // Public endpoints authenticate themselves (a cron secret key, or Paystack's
+    // signature) and are called WITHOUT a login session — never gate them behind
+    // admin 2FA, or a logged-in aal1 admin opening the URL (and any stray cookie
+    // on the caller) would get a spurious 403. Each route still checks its own key.
+    const publicApi =
+      path.startsWith("/api/cron/") ||
+      path.startsWith("/api/reminders/") ||
+      path === "/api/paystack/webhook" ||
+      path === "/api/applications/submit" ||
+      path.startsWith("/api/og");
+    if (publicApi) return res;
+
     const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
     if (aal?.currentLevel === "aal1" && aal?.nextLevel === "aal2") {
       return NextResponse.json({ error: "Two-factor verification required. Please sign in again." }, { status: 403 });
