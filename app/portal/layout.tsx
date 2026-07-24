@@ -2,6 +2,7 @@ import PortalShell, { type NavItem } from "@/components/PortalShell";
 import AuthGuard from "@/components/AuthGuard";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import StreakHeartbeat from "@/components/portal/StreakHeartbeat";
+import DailyTaskGuard from "@/components/portal/DailyTaskGuard";
 import AssistantWidget from "@/components/portal/AssistantWidget";
 import { AssistantProvider } from "@/components/portal/AssistantContext";
 import { getProfile } from "@/lib/auth";
@@ -55,6 +56,7 @@ export default async function PortalLayout({ children }: { children: React.React
       bell={{ mode: "student", subjects, noticesHref: "/portal/notices" }}>
       <AuthGuard />
       <StreakHeartbeat />
+      <DailyTaskGuard />
       <AssistantProvider>
         <ErrorBoundary>{children}</ErrorBoundary>
         <AssistantWidget />

@@ -94,7 +94,8 @@ Run in this order (skip `schema.sql` if the project already has data):
 32. `migration-scheduled-broadcasts.sql` *(admin broadcasts scheduled for a future time)*
 33. `migration-report-cards.sql` *(admin-issued termly report cards; students & parents download a PDF)*
 34. `migration-lesson-notes.sql` *(staff lesson log / class notes)*
-35. `migration-schema-fixes.sql` *(run last — patches any missing columns)*
+35. `migration-daily-tasks.sql` *(Task of the day — staff-posted tasks that pop up for learners)*
+36. `migration-schema-fixes.sql` *(run last — patches any missing columns)*
 
 > **⚠️ Also run `storage-buckets.sql` once** — it creates the file-storage buckets
 > (materials, curricula, assignments, submissions, voice-notes). Without it, uploading
