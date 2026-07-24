@@ -113,19 +113,27 @@ Run in this order (skip `schema.sql` if the project already has data):
       (**receipt**, **camp welcome**, **balance reminder**): Apps Script editor →
       **Deploy → Manage deployments → Edit → New version → Deploy**. (Keep the same
       web-app URL so `EMAIL_RELAY_URL` stays valid.)
+> **⚠️ Cron URL gotcha — use the NON-redirecting host.** `dmaths.academy` is set up in
+> Vercel to **308-redirect** to the canonical domain (e.g. `www.dmaths.academy`), and
+> cron-job.org does **not** follow redirects — so a job pointed at `https://dmaths.academy/...`
+> fails with "308 Permanent Redirect" and gets auto-disabled. Point every cron job at a host
+> that serves **directly** (no redirect). Two safe choices: `https://dmaths.vercel.app/...`
+> (always works), or whichever of `dmaths.academy` / `www.dmaths.academy` loads in a browser
+> **without** the address changing. (Alternatively, turn on **"Follow redirects"** in each
+> cron-job.org job's advanced settings.) All the URLs below use the proven `dmaths.vercel.app`.
 - [ ] **Class reminders (cron-job.org)** — ✅ DONE. The job calls
       `https://dmaths.vercel.app/api/reminders/classes?key=<CRON_SECRET>` every 15 min.
 - [ ] **Subscription payment reminders (cron-job.org):** add a **daily** job calling
-      `https://dmaths.academy/api/reminders/subscriptions?key=<CRON_SECRET>` — nudges
+      `https://dmaths.vercel.app/api/reminders/subscriptions?key=<CRON_SECRET>` — nudges
       monthly subscribers (and their parents) from 3 days before their due date, then
       weekly while overdue. Requires `migration-subscriptions.sql`.
 - [ ] **Scheduled broadcasts (cron-job.org):** add a job every **~5–15 min** calling
-      `https://dmaths.academy/api/cron/broadcasts?key=<CRON_SECRET>` — sends any admin
+      `https://dmaths.vercel.app/api/cron/broadcasts?key=<CRON_SECRET>` — sends any admin
       broadcast that was scheduled for a future time once it's due. Requires
       `migration-scheduled-broadcasts.sql`. (Without the job, "Send now" still works;
       only the *scheduled* ones wait for it.)
 - [ ] **Engagement nudges (cron-job.org):** add a **once-daily** job (evening WAT is ideal)
-      calling `https://dmaths.academy/api/reminders/nudges?key=<CRON_SECRET>` — pushes a
+      calling `https://dmaths.vercel.app/api/reminders/nudges?key=<CRON_SECRET>` — pushes a
       "keep your streak" reminder to learners whose streak is about to break and a
       "we've missed you" nudge to learners idle 7 and 14 days. Self-dedupes by date
       (no migration needed; uses the existing streak columns).
