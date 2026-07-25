@@ -41,9 +41,16 @@ The most recently added ones — likely still outstanding:
 | 35 | `migration-daily-tasks.sql` | Task of the day |
 | 36 | `migration-study-sessions.sql` | Focus mode |
 | 37 | `migration-flashcards.sql` | Revision cards |
-| 38 | `migration-schema-fixes.sql` | **Run last** — patches anything missing |
+| 38 | `migration-email-log.sql` | Stops duplicate reminder emails — **required** before the assignment/guardian crons |
+| 39 | `migration-schema-fixes.sql` | **Run last** — patches anything missing |
 
-Then run **`storage-buckets.sql`** once (file uploads fail with "Bucket not found" without it).
+Then run **`storage-buckets.sql`** (file uploads fail with "Bucket not found" without it).
+
+> **Re-run `storage-buckets.sql` even if you ran it before.** It now makes
+> `submissions` (children's uploaded work) and `voice-notes` (private chat audio)
+> **private**. Those files are served through a signed link that expires in 5 minutes,
+> so a forwarded URL stops working instead of being readable by anyone, forever.
+> Old links people already copied will stop working — that is the fix, not a fault.
 
 **✅ Check:** Supabase → **Table Editor** — you can see `certificates`, `report_cards`,
 `lesson_notes`, `daily_tasks`, `study_sessions`, `flashcard_decks`.
@@ -91,15 +98,18 @@ On cron-job.org create/repair these. Every URL ends with `?key=<CRON_SECRET>`:
 | Engagement nudges | **daily** (evening WAT) | `<HOST>/api/reminders/nudges?key=…` |
 | Subscription reminders | daily | `<HOST>/api/reminders/subscriptions?key=…` |
 | Assignment reminders | daily | `<HOST>/api/reminders/assignments?key=…` |
+| Guardian digest *(optional)* | weekly | `<HOST>/api/reminders/guardian-digest?key=…` |
 
 > **⚠️ Check every job's schedule.** cron-job.org defaults to **every minute**. That's fine for
-> nothing here — set **nudges, subscriptions and assignments to once daily**, class reminders to
-> ~15 min, broadcasts to 5–15 min. (The nudges endpoint now refuses to notify the same learner
-> twice in a day even if it *is* called too often, but the schedule should still be right.)
+> nothing here — set **nudges, subscriptions, assignments and the guardian digest to once daily
+> or less**, class reminders to ~15 min, broadcasts to 5–15 min. (Nudges, assignment reminders
+> and the guardian digest now all refuse to contact the same person twice in a day even if they
+> *are* called too often — but the schedule should still be right.)
 
 **✅ Check:** hit **Test run** on each — you want **200**. A **308** = wrong host (see the
-warning). A **401** = the `key` doesn't match `CRON_SECRET` exactly. Re-enable any job
-cron-job.org previously auto-disabled.
+warning). A **401** = the `key` doesn't match `CRON_SECRET` exactly. A **503** on the assignment
+or guardian job = `migration-email-log.sql` hasn't been run (Step 1) — those two refuse to send
+without their duplicate guard. Re-enable any job cron-job.org previously auto-disabled.
 
 ---
 

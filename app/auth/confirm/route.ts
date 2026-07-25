@@ -11,7 +11,11 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const token_hash = url.searchParams.get("token_hash");
   const type = url.searchParams.get("type") as EmailOtpType | null;
-  const next = url.searchParams.get("next") || "/reset-password";
+  // Only ever bounce to a path on this site. A value like "//evil.com" or
+  // "https://evil.com" resolves to another origin when handed to new URL(),
+  // which would turn a genuine reset link into an open redirect.
+  const requested = url.searchParams.get("next") || "";
+  const next = /^\/(?!\/)/.test(requested) ? requested : "/reset-password";
 
   if (token_hash && type) {
     const supabase = supabaseServer();

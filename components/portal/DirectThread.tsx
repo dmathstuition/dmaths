@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { useToast } from "@/components/Toast";
+import { fileHref } from "@/lib/storageUrls";
 
 type Message = {
   id: string; student_id: string; sender_id: string; sender_role: string;
@@ -130,7 +131,7 @@ export default function DirectThread({ channel, studentId, tutorId, meRole, othe
               <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm ${mine ? "bg-gold text-board" : "bg-white text-ink border border-line"}`}>
                 <p className={`mb-0.5 text-[11px] font-bold ${mine ? "text-board/70" : "text-gold-deep"}`}>{mine ? "You" : otherName}</p>
                 {m.audio_url
-                  ? <audio controls preload="metadata" src={m.audio_url} className="max-w-full" style={{ height: 36 }} />
+                  ? <audio controls preload="metadata" src={fileHref(m.audio_url)} className="max-w-full" style={{ height: 36 }} />
                   : <p className="whitespace-pre-wrap leading-relaxed">{m.body}</p>}
                 <p className={`mt-1 text-[10px] ${mine ? "text-board/60" : "text-ink/35"}`}>
                   {new Date(m.created_at).toLocaleString("en-NG", { dateStyle: "medium", timeStyle: "short" })}

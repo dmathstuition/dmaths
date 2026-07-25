@@ -20,6 +20,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "cardId and a valid grade are required." }, { status: 400 });
   }
 
+  // The card must actually be one this learner can see. Without this any signed-in
+  // user could post arbitrary ids and litter the review table with rows for cards
+  // (and unpublished decks) that were never theirs to study.
+  const { data: card } = await supa
+    .from("flashcards").select("id").eq("id", cardId).maybeSingle();
+  if (!card) return NextResponse.json({ error: "That card isn't available to you." }, { status: 404 });
+
   const admin = supabaseAdmin();
   const { data: existing } = await admin.from("flashcard_reviews")
     .select("reps, interval_days, ease").eq("student_id", user.id).eq("card_id", cardId).maybeSingle();

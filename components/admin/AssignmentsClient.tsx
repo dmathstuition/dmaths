@@ -7,6 +7,7 @@ import GradeModal from "@/components/GradeModal";
 import { useToast } from "@/components/Toast";
 import { fmtWAT, watToUtcISO, utcToWatParts } from "@/lib/time";
 import { codeDisplay } from "@/lib/codeSubmission";
+import { fileHref } from "@/lib/storageUrls";
 
 const SUBJECTS = ["Algebra","Calculus","Statistics","Geometry","Further Mathematics","Core Maths Revision","Physics","JavaScript","Python","Python Practice Challenge","External Examinations"];
 
@@ -429,7 +430,7 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
                         className="text-xs font-semibold text-gold-deep hover:underline">View submitted link →</a>
                     )}
                     {r.file_url && (
-                      <a href={r.file_url} target="_blank" rel="noopener noreferrer"
+                      <a href={fileHref(r.file_url)} target="_blank" rel="noopener noreferrer"
                         className="text-xs font-semibold text-gold-deep hover:underline">View submitted photo / file →</a>
                     )}
                   </div>

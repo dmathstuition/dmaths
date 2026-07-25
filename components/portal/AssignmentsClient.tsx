@@ -10,6 +10,7 @@ import PythonIde from "@/components/code/PythonIde";
 import WebIde from "@/components/code/WebIde";
 import { codeDisplay } from "@/lib/codeSubmission";
 import { useAssistantTask } from "@/components/portal/AssistantContext";
+import { fileHref } from "@/lib/storageUrls";
 
 type ConfirmState = {
   title: string; message: string; confirmLabel?: string; danger?: boolean; onConfirm: () => void;
@@ -217,7 +218,7 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
               </a>
             )}
             {s.file_url && (
-              <a href={s.file_url} target="_blank" rel="noopener noreferrer"
+              <a href={fileHref(s.file_url)} target="_blank" rel="noopener noreferrer"
                 className="mt-3 block truncate rounded-xl border border-line px-4 py-2.5 text-sm font-semibold text-gold-deep hover:bg-chalk">
                 Your submitted photo / file →
               </a>

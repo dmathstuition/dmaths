@@ -3,15 +3,44 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { getProfile } from "@/lib/auth";
 import { sendEmail } from "@/lib/email";
 import { loginUrl } from "@/lib/siteUrl";
+import { claimEmailSend, emailLogReady, EMAIL_LOG_MISSING } from "@/lib/emailOnce";
+
+// Emails every learner who still hasn't submitted something due tomorrow.
+//
+// Two ways in:
+//   GET  — a cron job, authenticated with ?key=<CRON_SECRET> or an
+//          Authorization: Bearer header (same as the other reminder crons).
+//   POST — the "Send reminders" button in Admin → Assignments.
+//
+// Either way a learner is emailed at most ONCE per day: each send claims a row
+// in email_log first. Cron mode refuses to run at all until that table exists,
+// because an unguarded schedule set to "every minute" would email children's
+// families every minute.
+export const dynamic = "force-dynamic";
+
+export async function GET(req: Request) {
+  const secret = process.env.CRON_SECRET?.trim();
+  const header = req.headers.get("authorization")?.trim();
+  const keyParam = new URL(req.url).searchParams.get("key")?.trim();
+  const authorized = !!secret && (header === `Bearer ${secret}` || keyParam === secret);
+  if (!authorized) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const admin = supabaseAdmin();
+  if (!(await emailLogReady(admin))) {
+    return NextResponse.json({ error: EMAIL_LOG_MISSING }, { status: 503 });
+  }
+  return run(admin, true);
+}
 
 export async function POST() {
   const profile = await getProfile();
   if (!profile || profile.role !== "admin") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  return run(supabaseAdmin(), false);
+}
 
-  const supa = supabaseAdmin();
-
+async function run(supa: ReturnType<typeof supabaseAdmin>, guarded: boolean) {
   // Find assignments due tomorrow (date only comparison)
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -38,11 +67,17 @@ export async function POST() {
 
   const assignmentMap = Object.fromEntries(assignments.map(a => [a.id, a]));
 
-  let sent = 0;
+  let sent = 0, skipped = 0;
   for (const sub of subs) {
     const student = sub.student as any;
     const assignment = assignmentMap[sub.assignment_id];
     if (!student?.email || !assignment) continue;
+
+    // One reminder per learner per assignment per day.
+    const claim = await claimEmailSend(supa, "assignment_reminder", student.email, String(assignment.id));
+    if (claim === "already") { skipped++; continue; }
+    if (claim === "unavailable" && guarded) { skipped++; continue; }
+
     const ok = await sendEmail("assignment_reminder", student.email, {
       firstName: student.first_name,
       assignmentTitle: assignment.title,
@@ -53,5 +88,5 @@ export async function POST() {
     if (ok) sent++;
   }
 
-  return NextResponse.json({ sent, total: subs.length });
+  return NextResponse.json({ sent, skipped, total: subs.length });
 }
