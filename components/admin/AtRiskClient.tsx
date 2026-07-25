@@ -11,7 +11,7 @@ const BADGE: Record<RiskLevel, string> = {
   high: "bg-red-100 text-red-700", medium: "bg-amber-100 text-amber-700", low: "bg-sky-100 text-sky-800", none: "",
 };
 
-export default function AtRiskClient({ flagged, totalActive }: { flagged: any[]; totalActive: number }) {
+export default function AtRiskClient({ flagged, totalActive, basePath = "/admin/students" }: { flagged: any[]; totalActive: number; basePath?: string }) {
   const [filter, setFilter] = useState<RiskLevel | "all">("all");
   const rows = useMemo(() => (filter === "all" ? flagged : flagged.filter((r) => r.level === filter)), [filter, flagged]);
   const counts = {
@@ -55,7 +55,7 @@ export default function AtRiskClient({ flagged, totalActive }: { flagged: any[];
         {rows.length ? (
           <div className="divide-y divide-line/60">
             {rows.map((r) => (
-              <Link key={r.id} href={`/admin/students/${r.id}`}
+              <Link key={r.id} href={`${basePath}/${r.id}`}
                 className="flex items-start gap-3 px-5 py-3.5 transition hover:bg-chalk/50">
                 <span className={`mt-0.5 flex-shrink-0 rounded-full px-2 py-0.5 text-[10px] font-extrabold uppercase ${BADGE[r.level as RiskLevel]}`}>
                   {r.level}

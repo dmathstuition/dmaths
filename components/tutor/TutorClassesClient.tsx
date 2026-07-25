@@ -4,9 +4,25 @@ import { useState } from "react";
 import { useToast } from "@/components/Toast";
 import { Icon } from "@/components/Icons";
 import { fmtWATDate, fmtWATTime, utcToWatParts } from "@/lib/time";
+import TutorClassForm from "@/components/tutor/TutorClassForm";
+import { useRouter } from "next/navigation";
 
-export default function TutorClassesClient({ initialClasses }: { initialClasses: any[] }) {
+export default function TutorClassesClient({ initialClasses, roster = [] }: { initialClasses: any[]; roster?: { id: string; name: string }[] }) {
   const push = useToast();
+  const router = useRouter();
+  const [editing, setEditing] = useState<any | null>(null);
+
+  async function cancelClass(c: any) {
+    if (!window.confirm(`Cancel "${c.subject}"? Learners will no longer see it.`)) return;
+    const res = await fetch("/api/classes/delete", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ classId: c.id }),
+    });
+    if (!res.ok) { push("Could not cancel that class.", "error"); return; }
+    setClasses((p) => p.filter((x) => x.id !== c.id));
+    push("Class cancelled.", "success");
+    router.refresh();
+  }
   const [classes, setClasses] = useState<any[]>(initialClasses);
   const [attendanceFor, setAttendanceFor] = useState<any>(null);
   const [present, setPresent] = useState<Record<string, boolean>>({});
@@ -68,8 +84,12 @@ export default function TutorClassesClient({ initialClasses }: { initialClasses:
         <p className="text-sm text-ink/50">Join your classes, take attendance, and share recordings.</p>
       </div>
 
+      <TutorClassForm roster={roster} editing={editing} onDone={() => setEditing(null)} key={editing?.id ?? "new"} />
+
       {classes.length === 0 && (
-        <div className="card p-8 text-center text-sm text-ink/45">No classes assigned to you yet.</div>
+        <div className="card p-8 text-center text-sm text-ink/45">
+          No classes yet — use “Schedule a class” above to create your first.
+        </div>
       )}
 
       {upcoming.length > 0 && (
@@ -92,6 +112,8 @@ export default function TutorClassesClient({ initialClasses }: { initialClasses:
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <button className="btn-ghost !min-h-[42px]" onClick={() => openAttendance(c)}>Take attendance</button>
+                  <button className="btn-ghost !min-h-[42px]" onClick={() => setEditing(c)}>Edit</button>
+                  <button className="!min-h-[42px] rounded-xl px-3 text-sm font-bold text-red-500 transition hover:bg-red-50" onClick={() => cancelClass(c)}>Cancel</button>
                   {c.mode !== "physical" && <Link href={`/tutor/class/${c.id}/live`} className="btn-ink inline-flex items-center gap-1.5 !min-h-[42px] !px-5"><Icon name="radio" className="h-4 w-4" /> Start live</Link>}
                   {c.mode !== "physical" && c.link && <a href={c.link} target="_blank" rel="noopener noreferrer" className="btn-gold !min-h-[42px] !px-6">Join →</a>}
                 </div>

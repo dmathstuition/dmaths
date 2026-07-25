@@ -15,6 +15,13 @@ export async function POST(req: Request) {
   const explain = (m: string) =>
     /relation .*flashcard/i.test(m) ? "Flashcards need migration-flashcards.sql — run it in Supabase." : m;
 
+  // Admins manage every deck; a tutor may only touch decks they created.
+  const ownsDeck = async (deckId: string) => {
+    if (staff.role === "admin") return true;
+    const { data } = await admin.from("flashcard_decks").select("owner_id").eq("id", deckId).maybeSingle();
+    return data?.owner_id === staff.id;
+  };
+
   if (action === "deck") {
     const title = String(payload?.title ?? "").trim().slice(0, 120);
     const subject = String(payload?.subject ?? "").trim().slice(0, 60);
@@ -32,6 +39,7 @@ export async function POST(req: Request) {
     if (!deckId || !front || !back) {
       return NextResponse.json({ error: "A deck, a question and an answer are required." }, { status: 400 });
     }
+    if (!(await ownsDeck(deckId))) return NextResponse.json({ error: "That deck isn't yours." }, { status: 403 });
     const { error } = await admin.from("flashcards").insert({ deck_id: deckId, front, back });
     if (error) return NextResponse.json({ error: explain(error.message) }, { status: 500 });
     return NextResponse.json({ ok: true });
@@ -40,6 +48,7 @@ export async function POST(req: Request) {
   if (action === "publish") {
     const deckId = String(payload?.deckId ?? "");
     if (!deckId) return NextResponse.json({ error: "deckId required" }, { status: 400 });
+    if (!(await ownsDeck(deckId))) return NextResponse.json({ error: "That deck isn't yours." }, { status: 403 });
     const { error } = await admin.from("flashcard_decks").update({ published: !!payload?.published }).eq("id", deckId);
     if (error) return NextResponse.json({ error: explain(error.message) }, { status: 500 });
     return NextResponse.json({ ok: true });
@@ -55,12 +64,22 @@ export async function DELETE(req: Request) {
   const deckId = url.searchParams.get("deckId");
   const cardId = url.searchParams.get("cardId");
   const admin = supabaseAdmin();
+  const ownsDeck = async (deckId: string) => {
+    if (staff.role === "admin") return true;
+    const { data } = await admin.from("flashcard_decks").select("owner_id").eq("id", deckId).maybeSingle();
+    return data?.owner_id === staff.id;
+  };
   if (cardId) {
+    const { data: card } = await admin.from("flashcards").select("deck_id").eq("id", cardId).maybeSingle();
+    if (card && !(await ownsDeck(card.deck_id))) {
+      return NextResponse.json({ error: "That card isn't yours." }, { status: 403 });
+    }
     const { error } = await admin.from("flashcards").delete().eq("id", cardId);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ ok: true });
   }
   if (deckId) {
+    if (!(await ownsDeck(deckId))) return NextResponse.json({ error: "That deck isn't yours." }, { status: 403 });
     const { error } = await admin.from("flashcard_decks").delete().eq("id", deckId);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ ok: true });
