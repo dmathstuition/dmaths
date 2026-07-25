@@ -178,6 +178,14 @@ html { scroll-behavior: smooth; }
 .reveal-4 { animation-delay: .35s; }
 .float { animation: floatY 5s ease-in-out infinite; }
 
+/* ── Celebration confetti (components/ui/Confetti) ───────── */
+@keyframes confettiFall {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(105vh) rotate(720deg); opacity: 0; }
+}
+.confetti-piece { animation: confettiFall linear forwards; }
+@media (prefers-reduced-motion: reduce) { .confetti-piece { display: none; } }
+
 /* ── Loading skeletons (route-level loading.tsx) ─────────── */
 .skeleton { position: relative; overflow: hidden; background: rgba(26,96,171,.08); }
 .skeleton::after {
