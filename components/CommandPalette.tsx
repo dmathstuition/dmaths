@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Icon, type IconName } from "@/components/Icons";
+import { useDialog } from "@/lib/useDialog";
 import type { NavItem } from "@/components/PortalShell";
 
 // A ⌘/Ctrl+K command palette: type to jump to any section instantly, with
@@ -14,6 +15,12 @@ export default function CommandPalette({ nav }: { nav: NavItem[] }) {
   const [q, setQ] = useState("");
   const [active, setActive] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  // Traps Tab inside the palette and returns focus to whatever was focused
+  // before it opened. Esc is handled here too; the search input takes focus
+  // itself, so no autoFocus.
+  useDialog(open, () => setOpen(false), panelRef, { autoFocus: false });
 
   // Global ⌘/Ctrl+K to toggle.
   useEffect(() => {
@@ -21,8 +28,6 @@ export default function CommandPalette({ nav }: { nav: NavItem[] }) {
       if ((e.key === "k" || e.key === "K") && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         setOpen((o) => !o);
-      } else if (e.key === "Escape") {
-        setOpen(false);
       }
     };
     window.addEventListener("keydown", onKey);
@@ -62,20 +67,24 @@ export default function CommandPalette({ nav }: { nav: NavItem[] }) {
 
       {open && (
         <div className="fixed inset-0 z-[100] flex items-start justify-center p-4 pt-[12vh]" role="dialog" aria-modal="true" aria-label="Command palette">
-          <button aria-label="Close" onClick={() => setOpen(false)} className="absolute inset-0 bg-board/60 backdrop-blur-sm" />
-          <div className="relative z-10 w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-board">
+          <button aria-label="Close command palette" tabIndex={-1} onClick={() => setOpen(false)}
+            className="absolute inset-0 bg-board/60 backdrop-blur-sm" />
+          <div ref={panelRef} className="relative z-10 w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-board">
             <div className="flex items-center gap-3 border-b border-line px-4 py-3 dark:border-white/10">
               <Icon name="search" className="h-4 w-4 text-ink/40" />
               <input ref={inputRef} value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={onKeyDown}
                 placeholder="Jump to a section…" aria-label="Search sections"
+                role="combobox" aria-expanded aria-controls="cmdk-results"
+                aria-activedescendant={results[active] ? `cmdk-opt-${active}` : undefined}
                 className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-ink outline-none placeholder:text-ink/35 dark:text-white" />
               <kbd className="rounded bg-chalk px-1.5 py-0.5 font-mono text-[10px] text-ink/45 dark:bg-white/10 dark:text-white/50">Esc</kbd>
             </div>
-            <ul className="max-h-[52vh] overflow-y-auto p-2">
+            <ul id="cmdk-results" role="listbox" aria-label="Sections" className="max-h-[52vh] overflow-y-auto p-2">
               {results.length === 0 && <li className="px-3 py-6 text-center text-sm text-ink/40">No matches.</li>}
               {results.map((n, i) => (
                 <li key={n.href}>
-                  <button onMouseEnter={() => setActive(i)} onClick={() => go(n)}
+                  <button id={`cmdk-opt-${i}`} role="option" aria-selected={i === active}
+                    onMouseEnter={() => setActive(i)} onClick={() => go(n)}
                     className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition ${
                       i === active ? "bg-gold-pale text-gold-deep dark:bg-gold/15 dark:text-gold" : "text-ink/70 dark:text-white/70"}`}>
                     <Icon name={n.icon as IconName} className="h-4 w-4 opacity-70" />

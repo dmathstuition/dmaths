@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
+import { useDialog } from "@/lib/useDialog";
 
 export default function PromptModal({
   title, message = "", placeholder = "", onConfirm, onCancel,
@@ -8,22 +9,19 @@ export default function PromptModal({
   onConfirm: (value: string) => void; onCancel: () => void;
 }) {
   const [value, setValue] = useState("");
-  const areaRef = useRef<HTMLTextAreaElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
 
-  useEffect(() => {
-    areaRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onCancel(); };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [onCancel]);
+  // Focuses the textarea (first control), traps Tab, Esc cancels.
+  useDialog(true, onCancel, panelRef);
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
-      role="dialog" aria-modal="true">
-      <div className="card w-full max-w-sm p-6">
-        <h2 className="font-display text-lg font-semibold">{title}</h2>
+      role="dialog" aria-modal="true" aria-labelledby={titleId}>
+      <div ref={panelRef} className="card w-full max-w-sm p-6">
+        <h2 id={titleId} className="font-display text-lg font-semibold">{title}</h2>
         {message && <p className="mt-2 text-sm text-ink/60">{message}</p>}
-        <textarea ref={areaRef} className="field mt-3 min-h-[80px]" placeholder={placeholder}
+        <textarea className="field mt-3 min-h-[80px]" placeholder={placeholder} aria-label={title}
           value={value} onChange={e => setValue(e.target.value)} />
         <div className="mt-4 flex gap-3">
           <button className="btn-ghost flex-1" onClick={onCancel}>Cancel</button>

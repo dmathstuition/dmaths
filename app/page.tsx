@@ -62,6 +62,8 @@ const STATS = [
 export default function Landing() {
   return (
     <main className="overflow-hidden bg-white font-body text-ink">
+      {/* First stop for a keyboard user: jump past the nav to the hero. */}
+      <a href="#main" className="skip-link">Skip to main content</a>
       <FlyerPopup />
       <AppLauncher />
       <InstallPrompt />
@@ -69,7 +71,7 @@ export default function Landing() {
       <LandingNav />
 
       {/* HERO */}
-      <header className="relative pt-28 pb-16">
+      <header id="main" tabIndex={-1} className="relative pt-28 pb-16">
         {/* premium gradient mesh + soft animated colour wash behind the hero */}
         <div className="mesh-premium pointer-events-none absolute inset-x-0 -top-24 h-[42rem]" />
         <div className="aurora pointer-events-none absolute inset-x-0 top-0 h-[30rem] opacity-40" />

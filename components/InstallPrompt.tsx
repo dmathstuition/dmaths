@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/Icons";
+import { useDialog } from "@/lib/useDialog";
 
 // A PERSISTENT "Get the app" button. It stays on screen until the app is
 // actually installed — never permanently dismissible — and works on every
@@ -29,7 +30,12 @@ export default function InstallPrompt() {
   const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
 
   const btnRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const drag = useRef<{ dx: number; dy: number; moved: boolean } | null>(null);
+
+  // Esc closes the instructions, Tab stays inside, focus returns to the
+  // "Get the app" button.
+  useDialog(open, () => setOpen(false), panelRef);
 
   useEffect(() => {
     const standalone =
@@ -131,8 +137,9 @@ export default function InstallPrompt() {
 
       {open && (
         <div className="fixed inset-0 z-[90] flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-label="Install the D-Maths app">
-          <button aria-label="Close" onClick={() => setOpen(false)} className="absolute inset-0 bg-board/50 backdrop-blur-sm" />
-          <div className="relative z-10 w-full max-w-md rounded-t-3xl bg-white p-6 shadow-2xl sm:rounded-3xl">
+          <button aria-label="Close install instructions" tabIndex={-1} onClick={() => setOpen(false)}
+            className="absolute inset-0 bg-board/50 backdrop-blur-sm" />
+          <div ref={panelRef} className="relative z-10 w-full max-w-md rounded-t-3xl bg-white p-6 shadow-2xl sm:rounded-3xl">
             <div className="flex items-start gap-3">
               <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gold-pale text-gold-deep">
                 <Icon name="download" className="h-5 w-5" />
@@ -141,7 +148,8 @@ export default function InstallPrompt() {
                 <h2 className="font-display text-lg font-bold">Install the D-Maths app</h2>
                 <p className="text-sm text-ink/55">One-tap access, class reminders &amp; notifications — installs straight from your browser, no app store needed.</p>
               </div>
-              <button onClick={() => setOpen(false)} aria-label="Close" className="text-ink/35 hover:text-ink">
+              <button onClick={() => setOpen(false)} aria-label="Close install instructions"
+                className="flex h-11 w-11 flex-shrink-0 items-center justify-center text-ink/45 hover:text-ink">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
               </button>
             </div>

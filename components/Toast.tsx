@@ -18,13 +18,17 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastCtx.Provider value={push}>
       {children}
+      {/* Announced to screen readers as it appears — errors interrupt, the rest
+          wait for a pause. The glyph is decorative; the message carries it. */}
       <div className="pointer-events-none fixed bottom-4 right-4 z-[200] flex flex-col gap-2">
         {toasts.map(t => (
           <div key={t.id}
+            role={t.kind === "error" ? "alert" : "status"}
+            aria-live={t.kind === "error" ? "assertive" : "polite"}
             className={`pointer-events-auto flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-white shadow-2xl
               ${t.kind === "success" ? "bg-emerald-600" : t.kind === "error" ? "bg-red-600" : "bg-board"}`}
             style={{ animation: "revealUp .25s ease-out" }}>
-            {t.kind === "success" ? "✓" : t.kind === "error" ? "✕" : "•"} {t.msg}
+            <span aria-hidden="true">{t.kind === "success" ? "✓" : t.kind === "error" ? "✕" : "•"}</span> {t.msg}
           </div>
         ))}
       </div>

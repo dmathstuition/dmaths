@@ -1,9 +1,10 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { Icon } from "@/components/Icons";
 import { useToast } from "@/components/Toast";
 import Confetti from "@/components/ui/Confetti";
+import { useDialog } from "@/lib/useDialog";
 
 type Task = { id: string; title: string; details: string | null };
 
@@ -17,6 +18,13 @@ export default function DailyTaskGuard() {
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
   const [celebrate, setCelebrate] = useState(0);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
+  const noteId = useId();
+
+  // Esc closes, Tab stays inside, the page behind can't scroll, and focus
+  // returns to the docked pill afterwards.
+  useDialog(open, () => setOpen(false), panelRef);
 
   useEffect(() => {
     let alive = true;
@@ -30,15 +38,6 @@ export default function DailyTaskGuard() {
     })();
     return () => { alive = false; };
   }, []);
-
-  useEffect(() => {
-    if (!open) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
-    window.addEventListener("keydown", onKey);
-    return () => { document.body.style.overflow = prev; window.removeEventListener("keydown", onKey); };
-  }, [open]);
 
   const active = tasks[0];
 
@@ -71,17 +70,18 @@ export default function DailyTaskGuard() {
       )}
 
       {open && (
-        <div role="dialog" aria-modal="true" aria-label="Task of the day" className="fixed inset-0 z-[95] flex items-center justify-center p-4">
-          <button aria-label="Close" onClick={() => setOpen(false)} className="absolute inset-0 bg-board/60 backdrop-blur-md" />
-          <div className="relative z-10 w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl">
+        <div role="dialog" aria-modal="true" aria-labelledby={titleId} className="fixed inset-0 z-[95] flex items-center justify-center p-4">
+          <button aria-label="Close task of the day" tabIndex={-1} onClick={() => setOpen(false)}
+            className="absolute inset-0 bg-board/60 backdrop-blur-md" />
+          <div ref={panelRef} className="relative z-10 w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl">
             <div className="bg-board px-6 py-5 text-white">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-gold px-2.5 py-0.5 text-[11px] font-extrabold uppercase text-board">📌 Task of the day</span>
-              <h2 className="mt-2 font-display text-xl font-bold">{active.title}</h2>
+              <h2 id={titleId} className="mt-2 font-display text-xl font-bold">{active.title}</h2>
             </div>
             <div className="p-6">
               {active.details && <p className="whitespace-pre-wrap text-sm leading-relaxed text-ink/70">{active.details}</p>}
-              <label className="mt-4 block text-xs font-bold uppercase tracking-wide text-ink/40">Your note (optional)</label>
-              <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} maxLength={2000}
+              <label htmlFor={noteId} className="mt-4 block text-xs font-bold uppercase tracking-wide text-ink/40">Your note (optional)</label>
+              <textarea id={noteId} value={note} onChange={(e) => setNote(e.target.value)} rows={3} maxLength={2000}
                 placeholder="Add a response or how you got on…" className="field mt-1 w-full resize-y text-sm" />
               <div className="mt-4 flex items-center gap-2">
                 <button onClick={complete} disabled={busy} className="btn-gold flex-1">{busy ? "Submitting…" : "Mark as done"}</button>

@@ -46,6 +46,7 @@ const TRACK_LABEL: Record<string, string> = {
 export default function SummerCamp() {
   return (
     <main className="overflow-hidden bg-white font-body text-ink">
+      <a href="#main" className="skip-link">Skip to main content</a>
       <InstallPrompt />
       {/* Lightweight header */}
       <header className="bg-board px-5 py-4">
@@ -58,7 +59,7 @@ export default function SummerCamp() {
       </header>
 
       {/* HERO */}
-      <section className="boardgrid relative overflow-hidden bg-board pb-20 pt-16 text-white">
+      <section id="main" tabIndex={-1} className="boardgrid relative overflow-hidden bg-board pb-20 pt-16 text-white">
         <div className="mesh-dark pointer-events-none absolute inset-0 opacity-80" />
         <DotsScatter className="float pointer-events-none absolute left-6 top-20 h-24 w-24 opacity-30" />
         <DotsScatter className="float pointer-events-none absolute right-10 bottom-10 h-20 w-20 opacity-20 [animation-delay:1.5s]" />
