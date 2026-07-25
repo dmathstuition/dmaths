@@ -101,11 +101,20 @@ Run in this order (skip `schema.sql` if the project already has data):
 35. `migration-daily-tasks.sql` *(Task of the day — staff-posted tasks that pop up for learners)*
 36. `migration-study-sessions.sql` *(Focus mode — tracks learners' focused study minutes)*
 37. `migration-flashcards.sql` *(revision cards + per-learner spaced repetition)*
-38. `migration-schema-fixes.sql` *(run last — patches any missing columns)*
+38. `migration-email-log.sql` *(records which reminder emails have gone out, so a
+    misconfigured cron can't email the same parent repeatedly)*
+39. `migration-schema-fixes.sql` *(run last — patches any missing columns)*
 
-> **⚠️ Also run `storage-buckets.sql` once** — it creates the file-storage buckets
+> **⚠️ Also run `storage-buckets.sql`** — it creates the file-storage buckets
 > (materials, curricula, assignments, submissions, voice-notes). Without it, uploading
 > an assignment photo / material fails with **"Bucket not found"**.
+>
+> **Run it again even if you ran it before.** It now marks `submissions` (a child's own
+> uploaded work) and `voice-notes` (private chat audio) as **private**. Those files are
+> read through `/api/files/download`, which checks the caller and then issues a link that
+> expires in 5 minutes — so a forwarded URL, or one left in a shared computer's history,
+> stops working instead of granting access to a child's work forever. Teaching content
+> (materials, curricula, assignment sheets) stays public, as it's handed out anyway.
 
 ---
 

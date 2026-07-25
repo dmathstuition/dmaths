@@ -35,6 +35,10 @@ export function makeMockSupabaseClient() {
   const storageBuilder = {
     upload: vi.fn().mockResolvedValue({ data: { path: "uploads/file.pdf" }, error: null }),
     getPublicUrl: vi.fn().mockReturnValue({ data: { publicUrl: "https://cdn.test/uploads/file.pdf" } }),
+    createSignedUrl: vi.fn().mockResolvedValue({
+      data: { signedUrl: "https://cdn.test/storage/v1/object/sign/submissions/a/b.png?token=sig" },
+      error: null,
+    }),
   };
 
   const client = {
@@ -45,6 +49,7 @@ export function makeMockSupabaseClient() {
     },
     auth: {
       getUser: vi.fn().mockResolvedValue({ data: { user: { id: "user-1" } }, error: null }),
+      verifyOtp: vi.fn().mockResolvedValue({ data: {}, error: null }),
       admin: {
         createUser: vi.fn().mockResolvedValue({
           data: { user: { id: "new-user-1" } },

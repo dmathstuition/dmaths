@@ -5,6 +5,7 @@ import { supabaseBrowser } from "@/lib/supabase/client";
 import { useToast } from "@/components/Toast";
 import { Icon, type IconName } from "@/components/Icons";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
+import { fileHref } from "@/lib/storageUrls";
 
 export default function StudentDetailClient({ student, initialNotes, initialRewards, subs, behaviorTypes, initialBehaviorLogs, referredByName }: {
   student: any; initialNotes: any[]; initialRewards: any[]; subs: any[];
@@ -685,7 +686,7 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
                     {mine ? "You" : student.first_name}
                   </p>
                   {m.audio_url
-                    ? <audio controls preload="metadata" src={m.audio_url} className="max-w-full" style={{ height: 36 }} />
+                    ? <audio controls preload="metadata" src={fileHref(m.audio_url)} className="max-w-full" style={{ height: 36 }} />
                     : <p className="whitespace-pre-wrap leading-relaxed">{m.body}</p>}
                   <p className={`mt-1 text-[10px] ${mine ? "text-board/60" : "text-ink/35"}`}>
                     {new Date(m.created_at).toLocaleString("en-NG", { dateStyle: "medium", timeStyle: "short" })}
