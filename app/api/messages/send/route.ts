@@ -15,7 +15,7 @@ export async function POST(req: Request) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { data: me } = await supa.from("profiles").select("role, first_name, last_name").eq("id", user.id).single();
-  if (!me || (me.role !== "admin" && me.role !== "student" && me.role !== "tutor")) {
+  if (!me || !["admin", "student", "tutor", "parent"].includes(me.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -75,6 +75,21 @@ export async function POST(req: Request) {
     const { data: message, error } = await insert({ student_id: user.id, tutor_id: tutorId, sender_role: "student" });
     if (error) return NextResponse.json({ error: explain(error.message) }, { status: 500 });
     await notifyUser(admin, tutorId, { title: `New message from ${me.first_name ?? "a learner"}`, body: preview, link: `/tutor/learners/${user.id}` });
+    return NextResponse.json({ ok: true, message });
+  }
+
+  // ── Parent → admins (the parent's OWN thread) ─────────────────────
+  // Keyed by the parent's id, mirroring how a tutor's admin thread is keyed by
+  // theirs. Deliberately separate from the child's thread so a parent's messages
+  // never surface in their child's inbox.
+  if (me.role === "parent") {
+    const { data: message, error } = await insert({ student_id: user.id, sender_role: "parent" });
+    if (error) return NextResponse.json({ error: explain(error.message) }, { status: 500 });
+    await notifyAdmins(admin, {
+      title: `New message from ${me.first_name ?? "a parent"} (parent)`,
+      body: preview,
+      link: `/admin/students`,
+    });
     return NextResponse.json({ ok: true, message });
   }
 

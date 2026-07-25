@@ -8,7 +8,7 @@ type Message = {
   id: string;
   student_id: string;
   sender_id: string;
-  sender_role: "admin" | "student";
+  sender_role: string;
   body: string;
   audio_url?: string | null;
   read: boolean;
@@ -20,7 +20,9 @@ type Message = {
 // Extras: live "typing…" indicator (Supabase realtime broadcast, shared with
 // the admin panel on channel chat-<studentId>) and voice notes (MediaRecorder
 // → /api/messages/voice → message with audio_url).
-export default function MessagesClient({ meId, initialMessages }: { meId: string; initialMessages: Message[] }) {
+// `myRole` is the sender_role this user's own messages carry — "student" for a
+// learner, "parent" for a guardian. Used to tell my bubbles from the school's.
+export default function MessagesClient({ meId, initialMessages, myRole = "student" }: { meId: string; initialMessages: Message[]; myRole?: string }) {
   const supabase = supabaseBrowser();
   const push = useToast();
   const [messages, setMessages] = useState<Message[]>(initialMessages);
@@ -84,7 +86,7 @@ export default function MessagesClient({ meId, initialMessages }: { meId: string
       typingTimeout.current = setTimeout(() => setPeerTyping(false), 3000);
     }).on("broadcast", { event: "message" }, ({ payload }: any) => {
       const msg = payload?.message as Message | undefined;
-      if (!msg || msg.sender_role === "student") return; // ignore our own echo
+      if (!msg || msg.sender_role === myRole) return; // ignore our own echo
       upsertMessage(msg);
       // A team message just arrived while we're looking at the thread → mark read.
       supabase.from("messages").update({ read: true }).eq("id", msg.id).then(() => {});
@@ -97,7 +99,7 @@ export default function MessagesClient({ meId, initialMessages }: { meId: string
       supabase.removeChannel(ch);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [meId]);
+  }, [meId, myRole]);
 
   function broadcastTyping() {
     const now = Date.now();
@@ -192,7 +194,7 @@ export default function MessagesClient({ meId, initialMessages }: { meId: string
           <p className="py-12 text-center text-sm text-ink/40">No messages yet. Say hello 👋</p>
         )}
         {messages.map(m => {
-          const mine = m.sender_role === "student";
+          const mine = m.sender_role === myRole;
           return (
             <div key={m.id} className={`page-enter group flex items-center gap-1.5 ${mine ? "justify-end" : "justify-start"}`}>
               {mine && (
