@@ -1,12 +1,27 @@
 import { redirect } from "next/navigation";
+import PortalShell, { type NavItem } from "@/components/PortalShell";
 import { supabaseServer } from "@/lib/supabase/server";
-import ParentSignOutButton from "@/components/ParentSignOutButton";
-import Logo from "@/components/Logo";
-import IdleLogout from "@/components/IdleLogout";
-import TourButton from "@/components/tour/TourButton";
 
 export const metadata = { title: "Parent Portal · D-Maths Tuition" };
 
+const NAV: NavItem[] = [
+  { href: "/parent", label: "Overview", icon: "dashboard" },
+  { href: "/parent/calendar", label: "Class calendar", icon: "calendar" },
+  { href: "/parent/attendance", label: "Attendance", icon: "checkCircle" },
+  { href: "/parent/payments", label: "Payments", icon: "payments" },
+  { href: "/parent/messages", label: "Messages", icon: "messages" },
+];
+
+// The 4 primary tabs for the mobile bottom bar (the rest live under "More").
+const TABS = [
+  { href: "/parent", label: "Home", icon: "home" as const },
+  { href: "/parent/calendar", label: "Classes", icon: "calendar" as const },
+  { href: "/parent/payments", label: "Payments", icon: "payments" as const },
+  { href: "/parent/messages", label: "Messages", icon: "messages" as const },
+];
+
+// Parents now use the same shell as every other portal, so they inherit the
+// nav, ⌘K palette, mobile tab bar, notification bell and idle logout.
 export default async function ParentLayout({ children }: { children: React.ReactNode }) {
   const supa = supabaseServer();
   const { data: { user } } = await supa.auth.getUser();
@@ -14,29 +29,21 @@ export default async function ParentLayout({ children }: { children: React.React
 
   const { data: profile } = await supa
     .from("profiles")
-    .select("role, first_name")
+    .select("role, first_name, last_name")
     .eq("id", user.id)
     .single();
 
   if (profile?.role !== "parent") redirect("/login");
 
   return (
-    <div className="portal-bg min-h-screen">
-      <header className="glass-dark sticky top-0 z-40 px-5 py-3.5">
-        <div className="mx-auto flex max-w-3xl items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Logo light />
-            <span className="hidden rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] font-bold text-white/60 sm:inline">Parent Portal</span>
-          </div>
-          <div className="flex items-center gap-3 text-sm">
-            <span className="hidden font-semibold text-white/70 sm:block">Hi, {profile.first_name} 👋</span>
-            <TourButton light />
-            <ParentSignOutButton />
-          </div>
-        </div>
-      </header>
-      <main className="mx-auto max-w-3xl px-4 py-8">{children}</main>
-      <IdleLogout />
-    </div>
+    <PortalShell
+      nav={NAV}
+      tabs={TABS}
+      name={`${profile.first_name ?? ""} ${profile.last_name ?? ""}`.trim() || "Parent"}
+      subtitle="Parent Portal"
+      bell={{ mode: "student", noticesHref: "/parent" }}
+    >
+      {children}
+    </PortalShell>
   );
 }
