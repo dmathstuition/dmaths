@@ -1,10 +1,19 @@
 // Decides which (if any) engagement nudge a learner should get today, from their
-// streak state. Pure + deterministic (unit-tested). The date-based conditions
-// self-dedupe: each nudge only fires on a specific day, so a once-daily cron
-// never spams the same learner.
+// streak state. Pure + deterministic (unit-tested).
+//
+// NOTE: these conditions are true for the WHOLE day, so this function alone does
+// NOT stop repeats — the caller must check whether the learner was already
+// nudged today (see app/api/reminders/nudges/route.ts). Getting that wrong once
+// sent a learner a push on every cron run.
 
 export type NudgeKind = "streak" | "inactive";
 export type Nudge = { kind: NudgeKind; title: string; body: string };
+
+// Titles are STABLE (the streak count lives in the body) so the sender can look
+// them up to check whether a learner has already been nudged today. Changing
+// these strings breaks that dedupe — update the cleanup SQL too if you do.
+export const STREAK_TITLE = "🔥 Keep your streak going!";
+export const INACTIVE_TITLE = "We've missed you 👋";
 
 // Whole days between a YYYY-MM-DD date and "today" (UTC date math on date-only
 // values — no time component, so DST/timezone drift can't skew the day count).
@@ -24,15 +33,15 @@ export function nudgeFor(streakCount: number, streakLastDate: string | null, tod
   if (streakCount >= 2 && days === 1) {
     return {
       kind: "streak",
-      title: `🔥 Keep your ${streakCount}-day streak!`,
-      body: "Open D-Maths today so your streak doesn't reset tonight.",
+      title: STREAK_TITLE,
+      body: `You're on a ${streakCount}-day streak — open D-Maths today so it doesn't reset tonight.`,
     };
   }
   // "We've missed you": exactly 7 and 14 days idle (so at most two nudges).
   if (days === 7 || days === 14) {
     return {
       kind: "inactive",
-      title: "We've missed you 👋",
+      title: INACTIVE_TITLE,
       body: "Jump back in — new lessons and challenges are waiting for you.",
     };
   }
