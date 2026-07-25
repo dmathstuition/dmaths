@@ -2,6 +2,7 @@
 import { useMemo } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, CartesianGrid, PieChart, Pie, Cell, Legend, ReferenceLine } from "recharts";
 import ProgressRing from "@/components/ui/ProgressRing";
+import ActivityHeatmap from "@/components/portal/ActivityHeatmap";
 
 const COLORS = ["#1A60AB", "#EFAE56", "#059669", "#dc2626", "#8b5cf6", "#ec4899"];
 
@@ -13,13 +14,14 @@ function encouragement(score: number) {
 }
 
 export default function ProgressClient({
-  profile, submissions, history = [], attendanceRecords, gradeTarget = null,
+  profile, submissions, history = [], attendanceRecords, gradeTarget = null, activityDates = [],
 }: {
   profile: any;
   submissions: any[];
   history?: any[];
   attendanceRecords: any[];
   gradeTarget?: number | null;
+  activityDates?: string[];
 }) {
   // ── Score trend over time ──
   const scoreTrend = useMemo(() => {
@@ -145,6 +147,8 @@ export default function ProgressClient({
           </div>
         )}
       </div>
+
+      <ActivityHeatmap dates={activityDates} />
 
       {/* Overall progress hero + subject performance (app-style) */}
       <div className="grid gap-5 lg:grid-cols-2">

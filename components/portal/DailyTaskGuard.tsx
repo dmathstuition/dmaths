@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { Icon } from "@/components/Icons";
 import { useToast } from "@/components/Toast";
+import Confetti from "@/components/ui/Confetti";
 
 type Task = { id: string; title: string; details: string | null };
 
@@ -15,6 +16,7 @@ export default function DailyTaskGuard() {
   const [open, setOpen] = useState(false);
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
+  const [celebrate, setCelebrate] = useState(0);
 
   useEffect(() => {
     let alive = true;
@@ -49,6 +51,7 @@ export default function DailyTaskGuard() {
     });
     setBusy(false);
     if (!res.ok) { push("Could not submit — try again.", "error"); return; }
+    setCelebrate((c) => c + 1);
     push("Task completed! 🎉", "success");
     setTasks((t) => t.slice(1));
     setNote("");
@@ -59,6 +62,7 @@ export default function DailyTaskGuard() {
 
   return (
     <>
+      <Confetti fire={celebrate > 0} key={celebrate} />
       {!open && (
         <button onClick={() => setOpen(true)} aria-label="Open your task of the day"
           className="fixed bottom-24 right-4 z-[65] flex items-center gap-2 rounded-full bg-gold px-4 py-2.5 text-sm font-bold text-board shadow-xl ring-1 ring-black/5 transition hover:scale-105 lg:bottom-5">
