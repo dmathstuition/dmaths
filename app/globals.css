@@ -93,6 +93,34 @@ body { @apply bg-chalk text-ink font-body antialiased; }
   outline-offset: 2px;
   border-radius: 4px;
 }
+/* The gold ring disappears against gold buttons and chips — outline those in
+   board navy instead so keyboard focus is never invisible. */
+.btn-gold:focus-visible,
+.bg-gold:focus-visible,
+.bg-gold-soft:focus-visible { outline-color: #0F3A6B; }
+/* A programmatic focus target (the skip link's landing spot) draws no ring —
+   the ring belongs on the control the user actually moved to. */
+#main:focus, #main:focus-visible { outline: none; }
+
+/* ── Skip to content ─────────────────────────────────────
+   Off-screen until it is focused, then it drops in as the first stop for a
+   keyboard user so they can jump past the whole navigation. */
+.skip-link {
+  position: fixed;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 200;
+  transform: translateY(-150%);
+  padding: 0.6rem 1rem;
+  border-radius: 0.75rem;
+  background: #EFAE56;
+  color: #0F3A6B;
+  font-size: 0.85rem;
+  font-weight: 800;
+  box-shadow: 0 8px 24px rgba(10, 31, 61, 0.25);
+  transition: transform 0.15s ease-out;
+}
+.skip-link:focus { transform: translateY(0); }
 
 /* ── Smooth scrolling ───────────────────────────────────── */
 html { scroll-behavior: smooth; }
@@ -507,3 +535,18 @@ html { scroll-behavior: smooth; }
 
 /* Code playground editor is CodeMirror 6 (see components/code/Editor.tsx);
    it ships its own theme, so no editor token CSS is needed here. */
+
+/* ── Muted-text contrast (light mode) ────────────────────
+   The brand ink (#1A60AB) only reaches 5.1:1 on white at full strength, so the
+   faint tiers — the 10–13px hints, captions and timestamps — were landing
+   around 2:1 and were genuinely hard to read for anyone with less than perfect
+   sight, on a phone, or outdoors. Remap the four faintest tiers to a neutral
+   slate that keeps the "quiet" look but clears WCAG AA (4.5:1) for small text.
+   Dark mode is untouched: those rules are more specific and use !important. */
+.text-ink\/45 { color: #566B85; }  /* ≈5.3:1 on white */
+.text-ink\/40 { color: #5C6E88; }
+.text-ink\/35 { color: #64758C; }  /* ≈4.7:1 on white */
+.text-ink\/30 { color: #6B7B92; }  /* ≈4.5:1 — the faintest we allow for text */
+/* Placeholders follow the same floor. */
+.placeholder\:text-ink\/35::placeholder { color: #64758C; }
+.placeholder\:text-ink\/40::placeholder { color: #5C6E88; }

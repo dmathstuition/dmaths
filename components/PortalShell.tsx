@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { Icon, type IconName } from "@/components/Icons";
 import Logo from "@/components/Logo";
@@ -14,6 +14,7 @@ import CommandPalette from "@/components/CommandPalette";
 import MoreSheet from "@/components/MoreSheet";
 import IdleLogout from "@/components/IdleLogout";
 import TourButton from "@/components/tour/TourButton";
+import { useDialog } from "@/lib/useDialog";
 
 export type NavItem = { href: string; label: string; icon: IconName };
 
@@ -36,7 +37,12 @@ export default function PortalShell({
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
+  const drawerRef = useRef<HTMLDivElement>(null);
   const firstName = name.trim().split(" ")[0] || "there";
+
+  // The mobile drawer is a dialog: Esc closes it, Tab stays inside, focus goes
+  // back to the hamburger.
+  useDialog(open, () => setOpen(false), drawerRef);
 
   async function signOut() {
     await supabaseBrowser().auth.signOut();
@@ -75,6 +81,9 @@ export default function PortalShell({
 
   return (
     <div className="portal-bg min-h-screen">
+      {/* First stop for a keyboard user: jump past the nav straight to the page. */}
+      <a href="#main" className="skip-link">Skip to main content</a>
+
       {/* Desktop sidebar */}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 lg:block">{sidebar}</aside>
 
@@ -105,18 +114,19 @@ export default function PortalShell({
       </header>
 
       {/* Mobile drawer */}
-      <div className={`fixed inset-0 z-50 lg:hidden transition-opacity duration-200 ${open ? "opacity-100" : "pointer-events-none opacity-0"}`}>
+      <div className={`fixed inset-0 z-50 transition-[opacity,visibility] duration-200 lg:hidden ${open ? "visible opacity-100" : "invisible pointer-events-none opacity-0"}`}>
         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setOpen(false)} />
-        <div className={`absolute inset-y-0 left-0 w-72 transition-transform duration-300 ease-out ${open ? "translate-x-0" : "-translate-x-full"}`}>
+        <div ref={drawerRef} role="dialog" aria-modal="true" aria-label="Menu"
+          className={`absolute inset-y-0 left-0 w-72 transition-transform duration-300 ease-out ${open ? "translate-x-0" : "-translate-x-full"}`}>
           {sidebar}
           <button onClick={() => setOpen(false)} aria-label="Close menu"
-            className="absolute right-3 top-4 rounded-lg bg-white/10 p-2 text-white">
+            className="absolute right-3 top-3 flex h-11 w-11 items-center justify-center rounded-lg bg-white/10 text-white">
             <Icon name="close" />
           </button>
         </div>
       </div>
 
-      <main className={`px-4 pt-4 sm:px-7 lg:ml-64 lg:px-10 lg:pb-10 ${tabs ? "pb-28" : "pb-10"}`}>{children}</main>
+      <main id="main" tabIndex={-1} className={`px-4 pt-4 sm:px-7 lg:ml-64 lg:px-10 lg:pb-10 ${tabs ? "pb-28" : "pb-10"}`}>{children}</main>
 
       {/* App-style bottom tab bar (mobile only) */}
       {tabs && <PortalTabBar tabs={tabs} path={path} onMore={() => setMoreOpen(true)} />}

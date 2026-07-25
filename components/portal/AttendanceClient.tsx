@@ -63,9 +63,9 @@ export default function AttendanceClient({
       {/* Calendar */}
       <div className="card p-6">
         <div className="mb-4 flex items-center justify-between">
-          <button onClick={prevMonth} className="btn-ghost !min-h-[32px] !px-3 text-sm">‹</button>
-          <h2 className="font-display text-lg font-semibold">{monthName}</h2>
-          <button onClick={nextMonth} className="btn-ghost !min-h-[32px] !px-3 text-sm">›</button>
+          <button onClick={prevMonth} aria-label="Previous month" className="btn-ghost !px-4 text-sm" aria-controls="attendance-grid">‹</button>
+          <h2 className="font-display text-lg font-semibold" aria-live="polite">{monthName}</h2>
+          <button onClick={nextMonth} aria-label="Next month" className="btn-ghost !px-4 text-sm" aria-controls="attendance-grid">›</button>
         </div>
 
         {/* Day headers */}
@@ -76,7 +76,7 @@ export default function AttendanceClient({
         </div>
 
         {/* Day cells */}
-        <div className="grid grid-cols-7 gap-1">
+        <div id="attendance-grid" className="grid grid-cols-7 gap-1">
           {Array.from({ length: firstDay }).map((_, i) => <div key={`empty-${i}`} />)}
           {Array.from({ length: daysInMonth }).map((_, i) => {
             const day = i + 1;
@@ -88,8 +88,10 @@ export default function AttendanceClient({
                   ${status === "present" ? "bg-emerald-100 text-emerald-700" :
                     status === "absent" ? "bg-red-100 text-red-600" : "text-ink/35"}`}>
                 <span>{day}</span>
+                {/* Colour alone can't carry the result — say it out loud too. */}
+                {status !== "none" && <span className="sr-only">{status === "present" ? "Present" : "Absent"}</span>}
                 {status !== "none" && (
-                  <span className={`mt-0.5 h-1.5 w-1.5 rounded-full ${status === "present" ? "bg-emerald-500" : "bg-red-400"}`} />
+                  <span aria-hidden="true" className={`mt-0.5 h-1.5 w-1.5 rounded-full ${status === "present" ? "bg-emerald-500" : "bg-red-400"}`} />
                 )}
               </div>
             );

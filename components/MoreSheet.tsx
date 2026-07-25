@@ -1,7 +1,9 @@
 "use client";
 import Link from "next/link";
+import { useRef } from "react";
 import { Icon, type IconName } from "@/components/Icons";
 import ThemeToggle from "@/components/ThemeToggle";
+import { useDialog } from "@/lib/useDialog";
 
 export type MoreItem = { href: string; label: string; icon: IconName };
 
@@ -18,8 +20,16 @@ export default function MoreSheet({
   name: string;
   onSignOut: () => void;
 }) {
+  const sheetRef = useRef<HTMLDivElement>(null);
   const isActive = (href: string) =>
     path === href || (href.length > 1 && path.startsWith(href + "/"));
+
+  // Esc closes it, Tab stays inside, and focus goes back to the "More" tab.
+  useDialog(open, onClose, sheetRef);
+
+  // The sheet stays mounted so it can slide; while it's down, its controls must
+  // not be reachable by Tab.
+  const tab = open ? undefined : -1;
 
   return (
     <div
@@ -36,7 +46,9 @@ export default function MoreSheet({
 
       {/* sheet */}
       <div
+        ref={sheetRef}
         role="dialog"
+        aria-modal="true"
         aria-label="More menu"
         className={`absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-3xl bg-white shadow-2xl transition-transform duration-300 ease-out dark:bg-board ${
           open ? "translate-y-0" : "translate-y-full"
@@ -54,7 +66,8 @@ export default function MoreSheet({
             <button
               onClick={onClose}
               aria-label="Close menu"
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-chalk text-ink/60 dark:bg-white/10 dark:text-white/70"
+              tabIndex={tab}
+              className="flex h-11 w-11 items-center justify-center rounded-full bg-chalk text-ink/60 dark:bg-white/10 dark:text-white/70"
             >
               <Icon name="close" />
             </button>
@@ -70,6 +83,7 @@ export default function MoreSheet({
                 key={n.href}
                 href={n.href}
                 onClick={onClose}
+                tabIndex={tab}
                 className={`flex flex-col items-center gap-1.5 rounded-2xl px-1 py-3 text-center transition ${
                   active
                     ? "bg-gold-pale dark:bg-gold/15"
@@ -99,9 +113,10 @@ export default function MoreSheet({
 
         {/* footer actions */}
         <div className="mt-3 flex items-center gap-2 border-t border-line px-4 pt-3 dark:border-white/10">
-          <div className="flex-1"><ThemeToggle /></div>
+          <div className="flex-1"><ThemeToggle tabIndex={tab} /></div>
           <button
             onClick={() => { onClose(); onSignOut(); }}
+            tabIndex={tab}
             className="flex items-center gap-2 rounded-xl bg-chalk px-4 py-2.5 text-sm font-bold text-ink/70 transition hover:bg-red-50 hover:text-red-600 dark:bg-white/10 dark:text-white/70"
           >
             <Icon name="signout" className="h-4 w-4" /> Sign out

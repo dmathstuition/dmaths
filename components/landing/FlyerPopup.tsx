@@ -1,6 +1,7 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useDialog } from "@/lib/useDialog";
 
 // First-visit promo: the summer-camp flyer pops over a blurred landing page.
 // Click it (or "Register") → /summer-camp; dismiss (✕ / "Maybe later" / backdrop /
@@ -17,6 +18,7 @@ const SEEN_KEY = `dmaths-flyer-${VERSION}`;
 export default function FlyerPopup() {
   const [open, setOpen] = useState(false);
   const [enter, setEnter] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const today = new Date().toISOString().slice(0, 10);
@@ -31,15 +33,11 @@ export default function FlyerPopup() {
     img.src = FLYER_SRC;
   }, []);
 
+  // Esc dismisses, Tab stays on the flyer, and the page behind can't scroll.
+  useDialog(open, () => dismiss(), panelRef);
+
   useEffect(() => {
-    if (!open) return;
-    requestAnimationFrame(() => setEnter(true));
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") dismiss(); };
-    window.addEventListener("keydown", onKey);
-    return () => { document.body.style.overflow = prev; window.removeEventListener("keydown", onKey); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (open) requestAnimationFrame(() => setEnter(true));
   }, [open]);
 
   function dismiss() {
@@ -54,13 +52,13 @@ export default function FlyerPopup() {
     <div role="dialog" aria-modal="true" aria-label="D-Maths Summer Camp"
       className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       {/* Blurred, dark backdrop — clicking it dismisses. */}
-      <button aria-label="Close" onClick={dismiss}
+      <button aria-label="Close this offer" tabIndex={-1} onClick={dismiss}
         className={`absolute inset-0 bg-board/50 backdrop-blur-md transition-opacity duration-300 ${enter ? "opacity-100" : "opacity-0"}`} />
 
       {/* Flyer card */}
-      <div className={`relative z-10 w-full max-w-md transition-all duration-300 ${enter ? "scale-100 opacity-100" : "scale-95 opacity-0"}`}>
-        <button onClick={dismiss} aria-label="Close"
-          className="absolute -right-2 -top-2 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-white text-lg font-bold text-ink shadow-lg transition hover:bg-chalk">
+      <div ref={panelRef} className={`relative z-10 w-full max-w-md transition-all duration-300 ${enter ? "scale-100 opacity-100" : "scale-95 opacity-0"}`}>
+        <button onClick={dismiss} aria-label="Close this offer"
+          className="absolute -right-2 -top-2 z-20 flex h-11 w-11 items-center justify-center rounded-full bg-white text-lg font-bold text-ink shadow-lg transition hover:bg-chalk">
           ✕
         </button>
 

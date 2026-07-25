@@ -31,8 +31,18 @@ export default function NotificationBell({ mode, noticesHref }: { mode?: string;
 
   useEffect(() => {
     function onClick(e: MouseEvent) { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); }
+    // Esc closes it and hands focus back to the bell, so a keyboard user is
+    // never left inside a panel they can't dismiss.
+    function onKey(e: KeyboardEvent) {
+      if (e.key !== "Escape") return;
+      setOpen((o) => {
+        if (o) ref.current?.querySelector("button")?.focus();
+        return false;
+      });
+    }
     document.addEventListener("mousedown", onClick);
-    return () => document.removeEventListener("mousedown", onClick);
+    document.addEventListener("keydown", onKey);
+    return () => { document.removeEventListener("mousedown", onClick); document.removeEventListener("keydown", onKey); };
   }, []);
 
   const unread = items.filter(n => !n.read).length;
@@ -56,8 +66,9 @@ export default function NotificationBell({ mode, noticesHref }: { mode?: string;
 
   return (
     <div ref={ref} className="relative">
-      <button onClick={toggle} aria-label="Notifications"
-        className="relative rounded-lg bg-ink/5 p-2.5 text-ink/70 transition hover:bg-ink/10 active:scale-95 dark:bg-white/10 dark:text-white">
+      <button onClick={toggle} aria-expanded={open} aria-haspopup="menu"
+        aria-label={unread > 0 ? `Notifications, ${unread} unread` : "Notifications"}
+        className="relative flex h-11 w-11 items-center justify-center rounded-lg bg-ink/5 text-ink/70 transition hover:bg-ink/10 active:scale-95 dark:bg-white/10 dark:text-white">
         <Icon name="notices" />
         {unread > 0 && (
           <span className="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-gold px-1 text-[10px] font-bold text-board">
@@ -67,7 +78,8 @@ export default function NotificationBell({ mode, noticesHref }: { mode?: string;
       </button>
 
       {open && (
-        <div className="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/5 dark:bg-board dark:ring-white/10">
+        <div role="menu" aria-label="Notifications"
+          className="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/5 dark:bg-board dark:ring-white/10">
           <div className="flex items-center justify-between border-b border-line px-4 py-3 dark:border-white/10">
             <p className="font-display font-semibold text-ink dark:text-white">Notifications</p>
             {unread > 0 && <span className="rounded-full bg-gold-pale px-2 py-0.5 text-[10px] font-bold text-gold-deep">{unread} new</span>}
