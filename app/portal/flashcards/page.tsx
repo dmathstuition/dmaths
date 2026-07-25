@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Icon } from "@/components/Icons";
 import Reveal from "@/components/landing/Reveal";
+import OfflineChip from "@/components/portal/OfflineChip";
 import { supabaseServer } from "@/lib/supabase/server";
 import { isDue } from "@/lib/srs";
 
@@ -52,7 +53,10 @@ export default async function FlashcardsPage() {
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="font-display text-base font-bold text-ink">{d.title}</p>
-                  <p className="text-[13px] text-ink/50">{d.subject || "General"} · {d.total} card{d.total === 1 ? "" : "s"}</p>
+                  <p className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[13px] text-ink/50">
+                    <span>{d.subject || "General"} · {d.total} card{d.total === 1 ? "" : "s"}</span>
+                    <OfflineChip deckId={d.id} />
+                  </p>
                 </div>
                 {d.due > 0 ? (
                   <span className="flex-shrink-0 rounded-full bg-gold px-2.5 py-1 text-[11px] font-extrabold text-board">{d.due} due</span>

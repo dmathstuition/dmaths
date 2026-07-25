@@ -1,11 +1,12 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/Icons";
 import { useToast } from "@/components/Toast";
 import Confetti from "@/components/ui/Confetti";
 import type { Grade } from "@/lib/srs";
+import { saveDeck, getDeck, queueReview, drainQueue, type QueuedReview } from "@/lib/offlineDecks";
 
 type Card = { id: string; front: string; back: string };
 
@@ -29,6 +30,51 @@ export default function StudyDeck({ deck, cards, totalCards }: {
   const [done, setDone] = useState(0);
   const [busy, setBusy] = useState(false);
   const [celebrate, setCelebrate] = useState(0);
+  const [offline, setOffline] = useState(false);
+  const [pending, setPending] = useState(0);
+
+  // Keep this deck usable without a connection, and flush anything graded
+  // offline as soon as we're back.
+  useEffect(() => {
+    if (cards.length) saveDeck(deck.id, cards);
+
+    const sync = async () => {
+      const { synced } = await drainQueue(async (r: QueuedReview) => {
+        const res = await fetch("/api/flashcards/review", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ cardId: r.cardId, grade: r.grade }),
+        });
+        return res.ok;
+      });
+      if (synced > 0) {
+        setPending((p) => Math.max(0, p - synced));
+        push(`${synced} offline review${synced === 1 ? "" : "s"} synced.`, "success");
+        router.refresh();
+      }
+    };
+
+    const goOnline = () => { setOffline(false); sync(); };
+    const goOffline = () => setOffline(true);
+    setOffline(!navigator.onLine);
+    if (navigator.onLine) sync();
+
+    window.addEventListener("online", goOnline);
+    window.addEventListener("offline", goOffline);
+    return () => {
+      window.removeEventListener("online", goOnline);
+      window.removeEventListener("offline", goOffline);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deck.id]);
+
+  // If we opened with no connection and no server cards, fall back to the copy
+  // saved on this device.
+  useEffect(() => {
+    if (queue.length === 0 && cards.length === 0) {
+      getDeck(deck.id).then((saved) => { if (saved?.length) setQueue(saved); });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deck.id]);
 
   const card = queue[i];
   const finished = !card;
@@ -36,15 +82,23 @@ export default function StudyDeck({ deck, cards, totalCards }: {
   async function grade(g: Grade) {
     if (!card || busy) return;
     setBusy(true);
-    const res = await fetch("/api/flashcards/review", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ cardId: card.id, grade: g }),
-    });
-    setBusy(false);
-    if (!res.ok) {
-      const j = await res.json().catch(() => ({}));
-      push(j.error || "Could not save that review.", "error");
-      return;
+
+    if (!navigator.onLine) {
+      // No connection — remember the grade and carry on studying.
+      await queueReview(card.id, g);
+      setPending((p) => p + 1);
+      setBusy(false);
+    } else {
+      const res = await fetch("/api/flashcards/review", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cardId: card.id, grade: g }),
+      });
+      setBusy(false);
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        push(j.error || "Could not save that review.", "error");
+        return;
+      }
     }
 
     setDone((d) => d + 1);
@@ -67,6 +121,15 @@ export default function StudyDeck({ deck, cards, totalCards }: {
   return (
     <div className="space-y-6">
       <Confetti fire={celebrate > 0} key={celebrate} />
+
+      {(offline || pending > 0) && (
+        <div className="flex items-center gap-2.5 rounded-xl border border-gold/40 bg-gold-pale px-4 py-2.5 text-[13px] font-semibold text-ink/70">
+          <Icon name="download" className="h-4 w-4 flex-shrink-0 text-gold-deep" />
+          {offline
+            ? <span>You&apos;re offline — keep studying, your reviews will sync when you&apos;re back.</span>
+            : <span>{pending} review{pending === 1 ? "" : "s"} waiting to sync…</span>}
+        </div>
+      )}
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
