@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { nudgeFor, daysSince } from "@/lib/nudges";
+import { nudgeFor, daysSince, STREAK_TITLE, INACTIVE_TITLE } from "@/lib/nudges";
 
 const TODAY = new Date("2026-02-15T09:00:00Z");
 const daysAgo = (n: number) => {
@@ -24,7 +24,9 @@ describe("nudgeFor", () => {
   it("nudges a streak that's about to break (active yesterday)", () => {
     const n = nudgeFor(4, daysAgo(1), TODAY);
     expect(n?.kind).toBe("streak");
-    expect(n?.title).toContain("4-day");
+    // Title must stay STABLE (it's the dedupe key); the count lives in the body.
+    expect(n?.title).toBe(STREAK_TITLE);
+    expect(n?.body).toContain("4-day");
   });
 
   it("does not nudge a streak of 1", () => {
@@ -37,7 +39,7 @@ describe("nudgeFor", () => {
 
   it("sends a we-missed-you at 7 and 14 days idle", () => {
     expect(nudgeFor(0, daysAgo(7), TODAY)?.kind).toBe("inactive");
-    expect(nudgeFor(0, daysAgo(14), TODAY)?.kind).toBe("inactive");
+    expect(nudgeFor(0, daysAgo(14), TODAY)?.title).toBe(INACTIVE_TITLE);
   });
 
   it("stays quiet on other idle days (no spam)", () => {

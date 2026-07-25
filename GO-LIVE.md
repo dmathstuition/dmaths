@@ -88,9 +88,14 @@ On cron-job.org create/repair these. Every URL ends with `?key=<CRON_SECRET>`:
 |---|---|---|
 | Class reminders | every 15 min | `<HOST>/api/reminders/classes?key=…` |
 | Scheduled broadcasts | every 5–15 min | `<HOST>/api/cron/broadcasts?key=…` |
-| Engagement nudges | daily (evening WAT) | `<HOST>/api/reminders/nudges?key=…` |
+| Engagement nudges | **daily** (evening WAT) | `<HOST>/api/reminders/nudges?key=…` |
 | Subscription reminders | daily | `<HOST>/api/reminders/subscriptions?key=…` |
 | Assignment reminders | daily | `<HOST>/api/reminders/assignments?key=…` |
+
+> **⚠️ Check every job's schedule.** cron-job.org defaults to **every minute**. That's fine for
+> nothing here — set **nudges, subscriptions and assignments to once daily**, class reminders to
+> ~15 min, broadcasts to 5–15 min. (The nudges endpoint now refuses to notify the same learner
+> twice in a day even if it *is* called too often, but the schedule should still be right.)
 
 **✅ Check:** hit **Test run** on each — you want **200**. A **308** = wrong host (see the
 warning). A **401** = the `key` doesn't match `CRON_SECRET` exactly. Re-enable any job
