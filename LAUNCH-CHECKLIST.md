@@ -8,6 +8,10 @@ redeploys automatically in ~1 minute.
 > **Golden rule:** whenever you change an **environment variable** in Vercel, you must
 > **Redeploy** (Deployments → ⋯ → Redeploy) before it takes effect.
 
+> 🏁 **Going live for the first time?** Follow **[`GO-LIVE.md`](GO-LIVE.md)** instead — it's the
+> same material as an ordered, one-sitting recipe with a check after every step. This file is
+> the full reference to come back to.
+
 ---
 
 ## ✅ Already built & live
