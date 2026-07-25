@@ -7,7 +7,7 @@ import { Icon } from "@/components/Icons";
 // Reads each user's OWN notifications from the notifications table (per-user,
 // enforced by RLS). Works the same for students and admins — each only ever
 // sees rows where user_id = their own id.
-export default function NotificationBell({ noticesHref }: { mode?: string; subjects?: string[]; noticesHref: string }) {
+export default function NotificationBell({ mode, noticesHref }: { mode?: string; subjects?: string[]; noticesHref: string }) {
   const supabase = supabaseBrowser();
   const [items, setItems] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
@@ -87,7 +87,7 @@ export default function NotificationBell({ noticesHref }: { mode?: string; subje
                 : <div key={n.id}>{inner}</div>;
             })}
           </div>
-          <Link href={noticesHref} onClick={() => setOpen(false)}
+          <Link href={mode === "student" ? "/portal/notifications" : noticesHref} onClick={() => setOpen(false)}
             className="block border-t border-line px-4 py-3 text-center text-sm font-semibold text-gold-deep hover:bg-chalk dark:border-white/10 dark:hover:bg-white/5">
             View all
           </Link>

@@ -96,7 +96,8 @@ Run in this order (skip `schema.sql` if the project already has data):
 34. `migration-lesson-notes.sql` *(staff lesson log / class notes)*
 35. `migration-daily-tasks.sql` *(Task of the day — staff-posted tasks that pop up for learners)*
 36. `migration-study-sessions.sql` *(Focus mode — tracks learners' focused study minutes)*
-37. `migration-schema-fixes.sql` *(run last — patches any missing columns)*
+37. `migration-flashcards.sql` *(revision cards + per-learner spaced repetition)*
+38. `migration-schema-fixes.sql` *(run last — patches any missing columns)*
 
 > **⚠️ Also run `storage-buckets.sql` once** — it creates the file-storage buckets
 > (materials, curricula, assignments, submissions, voice-notes). Without it, uploading
