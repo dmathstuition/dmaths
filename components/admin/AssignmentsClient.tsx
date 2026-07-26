@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
+import { Icon } from "@/components/Icons";
 import CBTPreview from "@/components/admin/CBTPreview";
 import ConfirmModal from "@/components/ConfirmModal";
 import GradeModal from "@/components/GradeModal";
@@ -8,6 +9,8 @@ import { useToast } from "@/components/Toast";
 import { fmtWAT, watToUtcISO, utcToWatParts } from "@/lib/time";
 import { codeDisplay } from "@/lib/codeSubmission";
 import { fileHref } from "@/lib/storageUrls";
+import BankPicker from "@/components/admin/BankPicker";
+import { toCbtQuestions, validateQuestion, type BankRow } from "@/lib/questionBank";
 
 const SUBJECTS = ["Algebra","Calculus","Statistics","Geometry","Further Mathematics","Core Maths Revision","Physics","JavaScript","Python","Python Practice Challenge","External Examinations"];
 
@@ -45,6 +48,32 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
   const [confirmState, setConfirmState] = useState<ConfirmState | null>(null);
   const [gradeTarget, setGradeTarget] = useState<any | null>(null);
   const [sendingReminders, setSendingReminders] = useState(false);
+  const [bankOpen, setBankOpen] = useState(false);
+  const [savingToBank, setSavingToBank] = useState(false);
+
+  // Questions picked from the bank join whatever is already in the builder, and
+  // are re-numbered 1..n so the test reads in order however it was assembled.
+  function addFromBank(rows: BankRow[]) {
+    if (!rows.length) return;
+    setQuestions(prev => toCbtQuestions([...prev, ...rows]));
+    push(`${rows.length} question${rows.length === 1 ? "" : "s"} added.`, "success");
+  }
+
+  // The other direction: keep the questions just written for next term.
+  async function saveToBank() {
+    const usable = questions.filter(q => !validateQuestion(q));
+    if (!usable.length) { push("Finish a question first — each needs text, options and a correct answer.", "error"); return; }
+    setSavingToBank(true);
+    const res = await fetch("/api/question-bank", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ subject: f.subject, questions: usable }),
+    });
+    setSavingToBank(false);
+    const j = await res.json().catch(() => ({}));
+    if (!res.ok) { push(j.error || "Could not save to the bank.", "error"); return; }
+    const skipped = questions.length - usable.length;
+    push(`${j.saved} saved to the bank${skipped ? ` (${skipped} incomplete, skipped)` : ""}.`, "success");
+  }
 
   async function sendReminders() {
     setSendingReminders(true);
@@ -344,6 +373,14 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
 
                   <div className="flex flex-wrap gap-2">
                     <button className="btn-ghost" onClick={addQuestion}>+ Add question</button>
+                    <button className="btn-ghost inline-flex items-center gap-1.5" onClick={() => setBankOpen(true)}>
+                      <Icon name="book" className="h-4 w-4" /> Add from bank
+                    </button>
+                    {questions.length > 0 && (
+                      <button className="btn-ghost" onClick={saveToBank} disabled={savingToBank}>
+                        {savingToBank ? "Saving…" : "Save these to the bank"}
+                      </button>
+                    )}
                     <details className="flex-1">
                       <summary className="cursor-pointer text-sm font-bold text-gold-deep hover:underline">Import JSON</summary>
                       <div className="mt-2 space-y-2">
@@ -480,6 +517,8 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
       {confirmState && (
         <ConfirmModal {...confirmState} onCancel={() => setConfirmState(null)} />
       )}
+
+      <BankPicker open={bankOpen} subject={f.subject} onClose={() => setBankOpen(false)} onAdd={addFromBank} />
     </div>
   );
 }
