@@ -45,7 +45,8 @@ The most recently added ones — likely still outstanding:
 | 39 | `migration-cron-runs.sql` | Scheduled-job heartbeat behind **Admin → System health** |
 | 40 | `migration-question-bank.sql` | Reusable CBT questions (**Admin → Question bank**) |
 | 41 | `migration-receipts.sql` | Printable payment receipts for parents |
-| 42 | `migration-schema-fixes.sql` | **Run last** — patches anything missing |
+| 42 | `migration-payment-links.sql` | Links a payment to a learner (student & parent see their records + what's owed) |
+| 43 | `migration-schema-fixes.sql` | **Run last** — patches anything missing |
 
 Then run **`storage-buckets.sql`** (file uploads fail with "Bucket not found" without it).
 

@@ -1,41 +1,60 @@
 import Link from "next/link";
 import { Icon } from "@/components/Icons";
 import NoChildren from "@/components/parent/NoChildren";
-import { getParentChildren } from "@/lib/parentAccess";
+import PaymentsSummary from "@/components/PaymentsSummary";
+import { getParentChildren, childName } from "@/lib/parentAccess";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { owingSummary, fmtNaira } from "@/lib/payments";
+import { fmtWATDate } from "@/lib/time";
 
 export const dynamic = "force-dynamic";
-
-const naira = (n: number) => `₦${Math.round(n).toLocaleString("en-NG")}`;
 
 export default async function ParentPaymentsPage() {
   const ctx = await getParentChildren();
   if (!ctx) return null;
   if (!ctx.children.length) return <NoChildren />;
 
-  // The ledger is keyed by payer email — match the child's or the guardian's.
+  const admin = supabaseAdmin();
+  const childIds = ctx.children.map((c) => c.id);
+
+  // Each child's monthly-fee fields, for the owing summary.
+  const { data: subRows } = await admin
+    .from("profiles").select("id, sub_active, sub_amount, sub_due_date").in("id", childIds);
+  const subById = new Map((subRows ?? []).map((s: any) => [s.id, s]));
+
+  // Match payments by the student link (reliable) OR by the child/guardian email
+  // (covers older rows recorded before the link column existed).
   const emails = Array.from(new Set(
     ctx.children.flatMap((c) => [c.email, c.guardian_email]).filter(Boolean).map((e) => String(e).toLowerCase()),
   ));
+  const filters = [
+    childIds.length ? `student_id.in.(${childIds.join(",")})` : "",
+    emails.length ? `email.in.(${emails.map((e) => `"${e}"`).join(",")})` : "",
+  ].filter(Boolean).join(",");
 
-  const admin = supabaseAdmin();
-  const { data: payments } = emails.length
+  const { data: payments } = filters
     ? await admin.from("payments")
-        .select("reference, amount, currency, channel, status, paid_at, created_at")
-        .in("email", emails).eq("status", "success")
-        .order("created_at", { ascending: false }).limit(100)
+        .select("reference, amount, channel, status, paid_at, created_at, student_id, email")
+        .or(filters).eq("status", "success")
+        .order("paid_at", { ascending: false }).limit(200)
     : { data: [] as any[] };
 
   const rows = payments ?? [];
   const total = rows.reduce((a: number, p: any) => a + Number(p.amount || 0), 0);
 
-  // Receipts the school has issued for those payments (empty before
-  // migration-receipts.sql, which just means no receipt links show).
   const { data: receipts } = rows.length
-    ? await admin.from("receipts").select("id, serial, payment_reference")
-        .in("payment_reference", rows.map((p: any) => p.reference))
+    ? await admin.from("receipts").select("id, payment_reference").in("payment_reference", rows.map((p: any) => p.reference))
     : { data: [] as any[] };
   const receiptFor = new Map((receipts ?? []).map((r: any) => [r.payment_reference, r]));
+
+  // Per-child owing: a payment counts for a child if it's linked to them, or its
+  // email is that child's / their guardian's.
+  const summaries = ctx.children.map((c) => {
+    const childEmails = [c.email, c.guardian_email].filter(Boolean).map((e) => String(e).toLowerCase());
+    const mine = rows.filter((p: any) =>
+      p.student_id === c.id || (p.email && childEmails.includes(String(p.email).toLowerCase())));
+    return { child: c, summary: owingSummary(subById.get(c.id) ?? {}, mine) };
+  }).filter((s) => s.summary.hasPlan);
 
   return (
     <div className="space-y-6">
@@ -46,10 +65,16 @@ export default async function ParentPaymentsPage() {
         <div>
           <h1 className="font-display text-2xl font-semibold sm:text-3xl">Payments</h1>
           <p className="mt-1 text-sm text-white/50">
-            {rows.length ? `${rows.length} payment${rows.length === 1 ? "" : "s"} · ${naira(total)} total` : "No payments recorded yet."}
+            {rows.length ? `${rows.length} payment${rows.length === 1 ? "" : "s"} · ${fmtNaira(total)} total` : "No payments recorded yet."}
           </p>
         </div>
       </div>
+
+      {summaries.map(({ child, summary }) => (
+        <PaymentsSummary key={child.id} summary={summary}
+          name={`${childName(child).split(" ")[0]}'s`}
+          dueLabel={summary.dueDate ? fmtWATDate(summary.dueDate) : undefined} />
+      ))}
 
       <div className="card neu-card overflow-hidden">
         {rows.length ? (
@@ -60,10 +85,9 @@ export default async function ParentPaymentsPage() {
                   <Icon name="checkCircle" className="h-4 w-4" />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-bold text-ink">{naira(Number(p.amount || 0))}</p>
+                  <p className="text-sm font-bold text-ink">{fmtNaira(Number(p.amount || 0))}</p>
                   <p className="text-xs text-ink/50">
-                    {new Date(p.paid_at || p.created_at).toLocaleDateString("en-NG", { dateStyle: "medium" })}
-                    {p.channel ? ` · ${p.channel}` : ""}
+                    {fmtWATDate(p.paid_at || p.created_at)}{p.channel ? ` · ${p.channel}` : ""}
                   </p>
                 </div>
                 {receiptFor.has(p.reference) ? (
