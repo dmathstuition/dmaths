@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { requireStaff, getRoster, staffCanAccessClass } from "@/lib/authRole";
+import { detectClashes } from "@/lib/clashLookup";
 
 // Staff create/update a class. Tutors may only schedule their OWN classes and
 // may only add learners already in their roster — the admin still decides who a
@@ -56,6 +57,30 @@ export async function POST(req: Request) {
   const explain = (m: string) =>
     /tutor_id|mode|location/i.test(m) ? "This needs the tutor/physical-class migrations — run them in Supabase." : m;
 
+  // How many occurrences we're about to book (1, or a weekly series).
+  const weeks = classId ? 1 : (b?.repeatWeekly ? Math.min(26, Math.max(2, Math.round(Number(b?.repeatWeeks) || 8))) : 1);
+  const slots = Array.from({ length: weeks }).map((_, i) => ({
+    startsAt: new Date(start.getTime() + i * 7 * 24 * 60 * 60 * 1000).toISOString(),
+    durationMinutes: duration,
+    tutorId,
+    studentIds,
+  }));
+
+  // ── Double-booking check ──────────────────────────────────────────
+  // A warning, not a veto: the scheduler may know something we don't, so they
+  // can re-send with confirm:true. Every occurrence of a series is checked, not
+  // just the first.
+  if (!b?.confirm) {
+    const clashes = await detectClashes(admin, slots, classId ? [classId] : []);
+    if (clashes.length) {
+      return NextResponse.json({
+        error: "That time is already booked.",
+        clashes,
+        needsConfirm: true,
+      }, { status: 409 });
+    }
+  }
+
   // ── Update an existing class ──────────────────────────────────────
   if (classId) {
     if (!(await staffCanAccessClass(staff, classId))) {
@@ -72,11 +97,10 @@ export async function POST(req: Request) {
   }
 
   // ── Create (optionally a weekly series) ───────────────────────────
-  const weeks = b?.repeatWeekly ? Math.min(26, Math.max(2, Math.round(Number(b?.repeatWeeks) || 8))) : 1;
   const seriesId = weeks > 1 ? crypto.randomUUID() : null;
-  const rows = Array.from({ length: weeks }).map((_, i) => ({
+  const rows = slots.map((s) => ({
     ...base,
-    starts_at: new Date(start.getTime() + i * 7 * 24 * 60 * 60 * 1000).toISOString(),
+    starts_at: s.startsAt,
     ...(seriesId ? { series_id: seriesId } : {}),
   }));
 

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { Icon } from "@/components/Icons";
 import ConfirmModal from "@/components/ConfirmModal";
+import ClashWarning, { type ClashItem } from "@/components/ClashWarning";
 import { useToast } from "@/components/Toast";
 import { fmtWAT, watToUtcISO, utcToWatParts } from "@/lib/time";
 
@@ -25,6 +26,7 @@ export default function ClassesClient({ initialClasses, initialStudents, initial
   const [joined, setJoined] = useState<Record<string, boolean>>({});
   const [busy, setBusy] = useState(false);
   const [formError, setFormError] = useState("");
+  const [clashes, setClashes] = useState<ClashItem[]>([]);
   const [confirmState, setConfirmState] = useState<ConfirmState | null>(null);
   // Recording link editor (past classes)
   const [recFor, setRecFor] = useState<string | null>(null);
@@ -53,12 +55,33 @@ export default function ClassesClient({ initialClasses, initialStudents, initial
     setClasses(c ?? []);
   }
 
-  async function createClass() {
+  // `confirm` is the "Schedule anyway" path — the clash was shown and accepted.
+  async function createClass(confirm = false) {
     if (!(f.subject && f.tutor && f.date && f.time)) return setFormError("Fill in subject, tutor, date and time.");
     setFormError("");
     setBusy(true);
     try {
       const starts_at = watToUtcISO(f.date, f.time); // interpret the typed time as WAT
+
+      // Would this double-book the tutor, or a learner on the roster? A warning
+      // the admin can override, never a refusal.
+      if (!confirm) {
+        const check = await fetch("/api/classes/clashes", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            startsAt: starts_at,
+            durationMinutes: Number(f.duration_minutes) || 60,
+            weeks: !editId && f.repeat_weekly ? Math.max(2, Math.min(26, Number(f.repeat_weeks) || 8)) : 1,
+            tutorId: f.tutor_id || null,
+            studentIds: f.roster ?? [],
+            classId: editId || undefined,
+          }),
+        });
+        const found = (await check.json().catch(() => ({}))).clashes ?? [];
+        if (found.length) { setClashes(found); return; }
+      }
+      setClashes([]);
+
       const payload = { subject: f.subject, tutor: f.tutor, platform: f.platform, starts_at,
         duration_minutes: Number(f.duration_minutes) || 60, link: f.link || "",
         tutor_id: f.tutor_id || null, // link to a tutor account (optional; null = my own class)
@@ -289,7 +312,11 @@ export default function ClassesClient({ initialClasses, initialStudents, initial
             </div>
           </div>}
           {formError && <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-800">{formError}</p>}
-          <button className="btn-gold" onClick={createClass} disabled={busy}>
+          {clashes.length > 0 && (
+            <ClashWarning clashes={clashes} busy={busy}
+              onConfirm={() => createClass(true)} onCancel={() => setClashes([])} />
+          )}
+          <button className="btn-gold" onClick={() => createClass()} disabled={busy}>
             {busy
               ? <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
               : editId ? "Save changes" : "Create class"}
