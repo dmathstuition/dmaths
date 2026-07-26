@@ -4,6 +4,7 @@ import { getProfile } from "@/lib/auth";
 import { sendEmail } from "@/lib/email";
 import { loginUrl } from "@/lib/siteUrl";
 import { claimEmailSend, emailLogReady, EMAIL_LOG_MISSING } from "@/lib/emailOnce";
+import { cronOk } from "@/lib/cronRun";
 
 // Emails every learner who still hasn't submitted something due tomorrow.
 //
@@ -29,7 +30,7 @@ export async function GET(req: Request) {
   if (!(await emailLogReady(admin))) {
     return NextResponse.json({ error: EMAIL_LOG_MISSING }, { status: 503 });
   }
-  return run(admin, true);
+  return run(admin, true, "assignments");
 }
 
 export async function POST() {
@@ -37,10 +38,10 @@ export async function POST() {
   if (!profile || profile.role !== "admin") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  return run(supabaseAdmin(), false);
+  return run(supabaseAdmin(), false, null);
 }
 
-async function run(supa: ReturnType<typeof supabaseAdmin>, guarded: boolean) {
+async function run(supa: ReturnType<typeof supabaseAdmin>, guarded: boolean, job: string | null) {
   // Find assignments due tomorrow (date only comparison)
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -52,7 +53,7 @@ async function run(supa: ReturnType<typeof supabaseAdmin>, guarded: boolean) {
     .eq("due_date", dateStr);
 
   if (!assignments?.length) {
-    return NextResponse.json({ sent: 0, message: "No assignments due tomorrow." });
+    return reply(supa, job, { sent: 0, message: "No assignments due tomorrow." });
   }
 
   const { data: subs } = await supa
@@ -62,7 +63,7 @@ async function run(supa: ReturnType<typeof supabaseAdmin>, guarded: boolean) {
     .in("assignment_id", assignments.map(a => a.id));
 
   if (!subs?.length) {
-    return NextResponse.json({ sent: 0, message: "All students have already submitted." });
+    return reply(supa, job, { sent: 0, message: "All students have already submitted." });
   }
 
   const assignmentMap = Object.fromEntries(assignments.map(a => [a.id, a]));
@@ -88,5 +89,11 @@ async function run(supa: ReturnType<typeof supabaseAdmin>, guarded: boolean) {
     if (ok) sent++;
   }
 
-  return NextResponse.json({ sent, skipped, total: subs.length });
+  return reply(supa, job, { sent, skipped, total: subs.length });
+}
+
+// Only a cron run is a heartbeat; the admin button pressing this is not a
+// scheduled job and shouldn't make a dead cron look alive.
+function reply(supa: ReturnType<typeof supabaseAdmin>, job: string | null, payload: Record<string, unknown>) {
+  return job ? cronOk(supa, job, payload) : NextResponse.json(payload);
 }

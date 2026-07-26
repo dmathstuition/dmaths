@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { notifyUser } from "@/lib/notify";
+import { cronOk } from "@/lib/cronRun";
 
 // Monthly-subscription payment reminders. Call daily from cron-job.org with
 // ?key=<CRON_SECRET> (or Authorization: Bearer) — same auth as the class
@@ -61,5 +62,5 @@ export async function GET(req: Request) {
     reminded++;
   }
 
-  return NextResponse.json({ ok: true, due: subs?.length ?? 0, reminded });
+  return cronOk(admin, "subscriptions", { ok: true, due: subs?.length ?? 0, reminded });
 }

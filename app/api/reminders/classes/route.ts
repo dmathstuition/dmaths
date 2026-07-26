@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { notifyUser } from "@/lib/notify";
+import { cronOk } from "@/lib/cronRun";
 
 // Class reminders. Called on a schedule (e.g. a free cron-job.org job every
 // ~15 min) with `Authorization: Bearer ${CRON_SECRET}` — same pattern as the
@@ -36,7 +37,7 @@ export async function GET(req: Request) {
     .lte("starts_at", soon.toISOString());
 
   if (!classes?.length) {
-    return NextResponse.json({ reminded: 0, classes: 0 });
+    return cronOk(admin, "classes", { reminded: 0, classes: 0 });
   }
 
   let reminded = 0;
@@ -75,5 +76,5 @@ export async function GET(req: Request) {
     await admin.from("classes").update({ reminded_at: new Date().toISOString() }).eq("id", cls.id);
   }
 
-  return NextResponse.json({ reminded, classes: classes.length });
+  return cronOk(admin, "classes", { reminded, classes: classes.length });
 }

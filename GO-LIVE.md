@@ -42,7 +42,8 @@ The most recently added ones — likely still outstanding:
 | 36 | `migration-study-sessions.sql` | Focus mode |
 | 37 | `migration-flashcards.sql` | Revision cards |
 | 38 | `migration-email-log.sql` | Stops duplicate reminder emails — **required** before the assignment/guardian crons |
-| 39 | `migration-schema-fixes.sql` | **Run last** — patches anything missing |
+| 39 | `migration-cron-runs.sql` | Scheduled-job heartbeat behind **Admin → System health** |
+| 40 | `migration-schema-fixes.sql` | **Run last** — patches anything missing |
 
 Then run **`storage-buckets.sql`** (file uploads fail with "Bucket not found" without it).
 
@@ -111,6 +112,10 @@ warning). A **401** = the `key` doesn't match `CRON_SECRET` exactly. A **503** o
 or guardian job = `migration-email-log.sql` hasn't been run (Step 1) — those two refuse to send
 without their duplicate guard. Re-enable any job cron-job.org previously auto-disabled.
 
+**Then open `<HOST>/admin/health`.** Every job you just wired should be **green**; anything
+still amber ("Never run") has not reached the server, so its URL or key is wrong. Come back to
+this page any time — it is the one place that tells you a scheduled job has quietly died.
+
 ---
 
 ## Step 5 — Make "Forgot password" work (10 min)
@@ -178,6 +183,8 @@ On your phone, as a **real student account**:
 
 ## Day 2 and beyond
 
+- **Check Admin → System health** — one page tells you whether every scheduled job is still
+  running, which migrations are outstanding, and which reminder emails actually went out.
 - **Watch Sentry** for the first week — real users surface things testing never does.
 - **Admin → Students to watch** flags learners slipping early.
 - **Google Play** — the TWA is store-ready; follow `docs/play-store-twa.md` when you want it.
