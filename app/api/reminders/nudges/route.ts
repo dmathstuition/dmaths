@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { notifyUser } from "@/lib/notify";
 import { nudgeFor, STREAK_TITLE, INACTIVE_TITLE } from "@/lib/nudges";
+import { cronOk } from "@/lib/cronRun";
 
 // Engagement nudges: a "keep your streak" push to learners about to lose one,
 // and a "we've missed you" push to learners idle 7 or 14 days. Call on a DAILY
@@ -59,5 +60,5 @@ export async function GET(req: Request) {
     if (c.nudge.kind === "streak") streak++; else inactive++;
   }));
 
-  return NextResponse.json({ sent: streak + inactive, streak, inactive, skipped: done.size });
+  return cronOk(admin, "nudges", { sent: streak + inactive, streak, inactive, skipped: done.size });
 }

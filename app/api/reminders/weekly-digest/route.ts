@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { sendEmail } from "@/lib/email";
 import { notifyUser } from "@/lib/notify";
 import { loginUrl } from "@/lib/siteUrl";
+import { cronOk } from "@/lib/cronRun";
 
 // Automated weekly progress digest. Call on a weekly schedule (a free
 // cron-job.org job) with ?key=<CRON_SECRET> or an Authorization: Bearer header
@@ -84,5 +85,5 @@ export async function GET(req: Request) {
     await admin.from("profiles").update({ last_digest_at: new Date().toISOString() }).eq("id", st.id);
   }
 
-  return NextResponse.json({ ok: true, pushed, emailed, students: students?.length ?? 0 });
+  return cronOk(admin, "weekly-digest", { ok: true, pushed, emailed, students: students?.length ?? 0 });
 }

@@ -35,6 +35,7 @@ const NAV: NavItem[] = [
   { href: "/admin/report-cards", label: "Report cards", icon: "reports" },
   { href: "/admin/ratings", label: "Feedback", icon: "thumbsUp" },
   { href: "/admin/security", label: "Security", icon: "lock" },
+  { href: "/admin/health", label: "System health", icon: "monitor" },
 ];
 
 // Primary mobile tabs (the rest live under "More").

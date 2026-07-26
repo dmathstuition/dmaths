@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { resolveRecipientIds, deliverBroadcast, type Audience } from "@/lib/broadcast";
+import { cronOk } from "@/lib/cronRun";
 
 // Sends any scheduled broadcasts that are now due. Call on a schedule (e.g. a
 // free cron-job.org job every ~5–15 min) with `Authorization: Bearer
@@ -26,8 +27,8 @@ export async function GET(req: Request) {
     .limit(25);
 
   // Table may not exist yet (migration not run) — treat as "nothing to do".
-  if (error) return NextResponse.json({ sent: 0, broadcasts: 0, note: "scheduled_broadcasts not available" });
-  if (!due?.length) return NextResponse.json({ sent: 0, broadcasts: 0 });
+  if (error) return cronOk(admin, "broadcasts", { sent: 0, broadcasts: 0, note: "scheduled_broadcasts not available" });
+  if (!due?.length) return cronOk(admin, "broadcasts", { sent: 0, broadcasts: 0 });
 
   // Fallback sender if the original admin was removed (messages.sender_id is a FK).
   const { data: anyAdmin } = await admin.from("profiles").select("id").eq("role", "admin").limit(1).maybeSingle();
@@ -52,5 +53,5 @@ export async function GET(req: Request) {
     await admin.from("scheduled_broadcasts").update({ recipients: sent }).eq("id", b.id);
   }
 
-  return NextResponse.json({ sent: totalSent, broadcasts: due.length });
+  return cronOk(admin, "broadcasts", { sent: totalSent, broadcasts: due.length });
 }

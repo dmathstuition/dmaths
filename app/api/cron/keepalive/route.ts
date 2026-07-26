@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { cronOk } from "@/lib/cronRun";
 
 // Daily keep-alive: a trivial authenticated query registers activity so the
 // free-tier Supabase project never idles long enough to auto-pause (~7 days).
@@ -18,5 +19,5 @@ export async function GET(req: Request) {
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ ok: true, ts: new Date().toISOString() });
+  return cronOk(supabaseAdmin(), "keepalive", { ok: true, ts: new Date().toISOString() });
 }

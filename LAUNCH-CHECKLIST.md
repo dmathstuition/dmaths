@@ -103,7 +103,9 @@ Run in this order (skip `schema.sql` if the project already has data):
 37. `migration-flashcards.sql` *(revision cards + per-learner spaced repetition)*
 38. `migration-email-log.sql` *(records which reminder emails have gone out, so a
     misconfigured cron can't email the same parent repeatedly)*
-39. `migration-schema-fixes.sql` *(run last — patches any missing columns)*
+39. `migration-cron-runs.sql` *(scheduled-job heartbeat — powers Admin → System health,
+    which shows you when a cron has quietly stopped running)*
+40. `migration-schema-fixes.sql` *(run last — patches any missing columns)*
 
 > **⚠️ Also run `storage-buckets.sql`** — it creates the file-storage buckets
 > (materials, curricula, assignments, submissions, voice-notes). Without it, uploading

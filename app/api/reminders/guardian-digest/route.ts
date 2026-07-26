@@ -4,6 +4,7 @@ import { getProfile } from "@/lib/auth";
 import { sendEmail } from "@/lib/email";
 import { loginUrl } from "@/lib/siteUrl";
 import { claimEmailSend, emailLogReady, EMAIL_LOG_MISSING } from "@/lib/emailOnce";
+import { cronOk } from "@/lib/cronRun";
 
 // Emails each guardian a short progress digest for their child.
 //
@@ -29,7 +30,7 @@ export async function GET(req: Request) {
   if (!(await emailLogReady(admin))) {
     return NextResponse.json({ error: EMAIL_LOG_MISSING }, { status: 503 });
   }
-  return run(admin, true);
+  return run(admin, true, "guardian-digest");
 }
 
 export async function POST() {
@@ -37,10 +38,10 @@ export async function POST() {
   if (!profile || profile.role !== "admin") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  return run(supabaseAdmin(), false);
+  return run(supabaseAdmin(), false, null);
 }
 
-async function run(supa: ReturnType<typeof supabaseAdmin>, guarded: boolean) {
+async function run(supa: ReturnType<typeof supabaseAdmin>, guarded: boolean, job: string | null) {
   const { data: students } = await supa
     .from("profiles")
     .select("id, first_name, last_name, student_code, level, avg_score, attendance, stars, guardian_email")
@@ -50,7 +51,7 @@ async function run(supa: ReturnType<typeof supabaseAdmin>, guarded: boolean) {
     .not("guardian_email", "is", null);
 
   if (!students?.length) {
-    return NextResponse.json({ sent: 0, message: "No students have a guardian email set." });
+    return reply(supa, job, { sent: 0, message: "No students have a guardian email set." });
   }
 
   // Fetch pending submissions for upcoming due dates (next 7 days)
@@ -97,5 +98,11 @@ async function run(supa: ReturnType<typeof supabaseAdmin>, guarded: boolean) {
     if (ok) sent++;
   }
 
-  return NextResponse.json({ sent, skipped, total: students.length });
+  return reply(supa, job, { sent, skipped, total: students.length });
+}
+
+// Only a cron run is a heartbeat; the admin button pressing this is not a
+// scheduled job and shouldn't make a dead cron look alive.
+function reply(supa: ReturnType<typeof supabaseAdmin>, job: string | null, payload: Record<string, unknown>) {
+  return job ? cronOk(supa, job, payload) : NextResponse.json(payload);
 }
