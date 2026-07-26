@@ -1,4 +1,5 @@
 import Logo from "@/components/Logo";
+import OfflineAutoRetry from "@/components/OfflineAutoRetry";
 
 export const metadata = { title: "You're offline — D-Maths Tuition Centre" };
 
@@ -20,6 +21,7 @@ export default function Offline() {
       >
         Try again
       </a>
+      <OfflineAutoRetry />
     </main>
   );
 }
