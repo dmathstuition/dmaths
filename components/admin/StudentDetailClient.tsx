@@ -7,9 +7,10 @@ import { Icon, type IconName } from "@/components/Icons";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { fileHref } from "@/lib/storageUrls";
 
-export default function StudentDetailClient({ student, initialNotes, initialRewards, subs, behaviorTypes, initialBehaviorLogs, referredByName }: {
+export default function StudentDetailClient({ student, initialNotes, initialRewards, subs, behaviorTypes, initialBehaviorLogs, referredByName, initialParents = [] }: {
   student: any; initialNotes: any[]; initialRewards: any[]; subs: any[];
   behaviorTypes: any[]; initialBehaviorLogs: any[]; referredByName?: string | null;
+  initialParents?: any[];
 }) {
   const supabase = supabaseBrowser();
   const push = useToast();
@@ -63,8 +64,9 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
   const [rewardPoints, setRewardPoints] = useState(student.reward_points ?? 0);
   const [sanctionPoints, setSanctionPoints] = useState(student.sanction_points ?? 0);
 
-  // Parent linking
-  const [linkedParents, setLinkedParents] = useState<any[]>([]);
+  // Parent linking — the initial list is resolved server-side (see the page),
+  // so it's correct on first paint.
+  const [linkedParents, setLinkedParents] = useState<any[]>(initialParents);
   const [parentEmail, setParentEmail] = useState("");
   const [parentName, setParentName] = useState("");
   const [linkingParent, setLinkingParent] = useState(false);
@@ -261,12 +263,15 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
     push("Entry deleted.", "success");
   }
 
-  useEffect(() => {
-    supabase.from("parent_student_links")
-      .select("parent:profiles(id,email,first_name,last_name)")
-      .eq("student_id", student.id)
-      .then(({ data }) => setLinkedParents((data ?? []).map((r: any) => r.parent)));
-  }, [student.id]);
+  // Re-read the links after a change. The FK is named explicitly
+  // (profiles!parent_id) because parent_student_links references profiles twice
+  // — without the hint PostgREST can't tell parent_id from student_id.
+  async function refreshParents() {
+    const { data } = await supabase.from("parent_student_links")
+      .select("parent:profiles!parent_id(id,email,first_name,last_name)")
+      .eq("student_id", student.id);
+    setLinkedParents((data ?? []).map((r: any) => r.parent).filter(Boolean));
+  }
 
   async function linkParent() {
     if (!parentEmail.trim()) return;
@@ -280,9 +285,7 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
     if (!res.ok) { push(json.error || "Failed to link parent.", "error"); return; }
     push(json.created ? "Parent account created and login email sent." : "Existing parent account linked.", "success");
     setParentEmail(""); setParentName("");
-    const { data } = await supabase.from("parent_student_links")
-      .select("parent:profiles(id,email,first_name,last_name)").eq("student_id", student.id);
-    setLinkedParents((data ?? []).map((r: any) => r.parent));
+    await refreshParents();
   }
 
   async function unlinkParent(parentId: string) {

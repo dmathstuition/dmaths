@@ -1,4 +1,5 @@
 import { supabaseServer } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import StudentDetailClient from "@/components/admin/StudentDetailClient";
 
@@ -23,6 +24,19 @@ export default async function StudentDetail({ params }: { params: { id: string }
   ]);
   if (!student) redirect("/admin/students");
 
+  // Linked parents, resolved server-side with the admin client. Doing this in
+  // two steps avoids the ambiguous PostgREST embed (parent_student_links has two
+  // foreign keys to profiles — parent_id AND student_id — so `parent:profiles`
+  // can't be resolved and silently returned nothing, which is why the parent
+  // never showed here).
+  const admin = supabaseAdmin();
+  const { data: links } = await admin
+    .from("parent_student_links").select("parent_id").eq("student_id", params.id);
+  const parentIds = (links ?? []).map((l: any) => l.parent_id);
+  const { data: parents } = parentIds.length
+    ? await admin.from("profiles").select("id, email, first_name, last_name").in("id", parentIds)
+    : { data: [] as any[] };
+
   // Who referred this learner (for the header badge), if anyone.
   let referredByName: string | null = null;
   if (student.referred_by) {
@@ -40,6 +54,7 @@ export default async function StudentDetail({ params }: { params: { id: string }
       behaviorTypes={behaviorTypes ?? []}
       initialBehaviorLogs={behaviorLogs ?? []}
       referredByName={referredByName}
+      initialParents={parents ?? []}
     />
   );
 }
