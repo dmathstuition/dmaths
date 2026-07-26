@@ -153,13 +153,28 @@ Run in this order (skip `schema.sql` if the project already has data):
       broadcast that was scheduled for a future time once it's due. Requires
       `migration-scheduled-broadcasts.sql`. (Without the job, "Send now" still works;
       only the *scheduled* ones wait for it.)
-- [ ] **Engagement nudges (cron-job.org):** add a **once-daily** job (evening WAT is ideal).
+- [ ] **Engagement nudges (cron-job.org):** add a **once-daily** job (evening WAT is ideal)
+      calling `https://dmaths.vercel.app/api/reminders/nudges?key=<CRON_SECRET>`. It pushes
+      "keep your streak" to learners about to lose one, and "we've missed you" to learners
+      idle 7 and 14 days (no migration needed; uses the existing streak columns).
       ⚠️ cron-job.org defaults to **every minute** — make sure you change it. (The endpoint also
       refuses to nudge the same learner twice in one day, so a wrong schedule can't spam.)
-      calling `https://dmaths.vercel.app/api/reminders/nudges?key=<CRON_SECRET>` — pushes a
-      "keep your streak" reminder to learners whose streak is about to break and a
-      It pushes "keep your streak" to learners about to lose one and "we've missed you" to
-      learners idle 7 and 14 days (no migration needed; uses the existing streak columns).
+- [ ] **Assignment reminders (cron-job.org):** add a **daily** job calling
+      `https://dmaths.vercel.app/api/reminders/assignments?key=<CRON_SECRET>` — emails every
+      learner who still hasn't submitted something due tomorrow. Needs
+      `migration-email-log.sql`, or it answers **503** rather than risk repeat emails.
+- [ ] *(Optional)* **Guardian digest (cron-job.org):** a **weekly** job calling
+      `https://dmaths.vercel.app/api/reminders/guardian-digest?key=<CRON_SECRET>` — a short
+      progress summary emailed to each guardian. Also needs `migration-email-log.sql`.
+- [ ] *(Optional)* **Weekly digest (cron-job.org):** a **weekly** job calling
+      `https://dmaths.vercel.app/api/reminders/weekly-digest?key=<CRON_SECRET>` — the
+      learner's own week in review.
+- [ ] **Database keep-alive — nothing to do.** 🚫 Do *not* create a cron-job.org job for
+      `/api/cron/keepalive`. Vercel already schedules it (`vercel.json`, daily 06:00 UTC) and
+      it authenticates by **header**, not `?key=` — an external job would return **401**
+      forever. It begins running once a build is promoted to Production.
+- [ ] **Check them all on `/admin/health`** — one page showing when each job last reported,
+      red when one is overdue. Needs `migration-cron-runs.sql`.
 - [ ] **Paystack go-live** (when taking real money): switch to **live** API keys in
       Vercel, and in Paystack → Settings → **Webhooks** set the URL to
       `https://dmaths.vercel.app/api/paystack/webhook`. Enable 2FA + set a settlement bank.

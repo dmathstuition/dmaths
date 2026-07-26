@@ -83,7 +83,7 @@ the portal. **Nothing built in the last sessions is live until this step is done
 
 ---
 
-## Step 4 — Wire the 5 cron jobs (15 min)
+## Step 4 — Wire the cron jobs (15 min)
 
 > **⚠️ The host matters.** `dmaths.academy` **308-redirects** to its canonical domain and
 > cron-job.org does **not** follow redirects — jobs pointed there fail and get auto-disabled.
@@ -102,6 +102,13 @@ On cron-job.org create/repair these. Every URL ends with `?key=<CRON_SECRET>`:
 | Subscription reminders | daily | `<HOST>/api/reminders/subscriptions?key=…` |
 | Assignment reminders | daily | `<HOST>/api/reminders/assignments?key=…` |
 | Guardian digest *(optional)* | weekly | `<HOST>/api/reminders/guardian-digest?key=…` |
+| Weekly digest *(optional)* | weekly | `<HOST>/api/reminders/weekly-digest?key=…` |
+
+> **🚫 Do NOT add the database keep-alive here.** `/api/cron/keepalive` is already scheduled
+> by Vercel itself (declared in `vercel.json`, daily at 06:00 UTC) and authenticates by
+> **header**, not by `?key=`. A cron-job.org job pointed at it returns **401** forever, on a
+> job that was working fine. It starts running on its own once Step 3 promotes a build to
+> Production.
 
 > **⚠️ Check every job's schedule.** cron-job.org defaults to **every minute**. That's fine for
 > nothing here — set **nudges, subscriptions, assignments and the guardian digest to once daily
@@ -114,9 +121,15 @@ warning). A **401** = the `key` doesn't match `CRON_SECRET` exactly. A **503** o
 or guardian job = `migration-email-log.sql` hasn't been run (Step 1) — those two refuse to send
 without their duplicate guard. Re-enable any job cron-job.org previously auto-disabled.
 
-**Then open `<HOST>/admin/health`.** Every job you just wired should be **green**; anything
-still amber ("Never run") has not reached the server, so its URL or key is wrong. Come back to
-this page any time — it is the one place that tells you a scheduled job has quietly died.
+**Then open `<HOST>/admin/health`.** Every job you just wired should be **green** within a few
+minutes. Read the two failure states differently:
+
+- **Still "Never run" after a test run** → the request never reached the server at all. Wrong
+  host (the 308 above), or a typo in the path.
+- **A 401 on cron-job.org** → it *did* reach the server, with the wrong `key`.
+
+Come back to this page any time — it is the one place that tells you a scheduled job has
+quietly died.
 
 ---
 

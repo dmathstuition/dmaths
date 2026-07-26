@@ -8,15 +8,25 @@
 // has been heard from it for more than `graceFactor` × that — long enough that
 // one missed tick isn't an alarm, short enough that a broken job surfaces the
 // same day.
+//
+// `via` matters: most jobs are external (cron-job.org, authenticated with
+// `?key=<CRON_SECRET>`), but the keep-alive is declared in vercel.json and
+// authenticates by header only. Telling someone to wire that one on
+// cron-job.org gives them a permanent 401 on a job that was already working.
+
+export type CronTrigger = "cron-job.org" | "vercel";
 
 export type CronJob = {
   key: string;          // matches the `job` column in cron_runs
   label: string;
-  path: string;         // the endpoint cron-job.org should call
+  path: string;         // the endpoint that gets called
   everyMinutes: number;
   what: string;         // plain English, shown in the admin table
   optional?: boolean;   // not scheduling it is a choice, not a fault
+  via?: CronTrigger;    // defaults to "cron-job.org"
 };
+
+export const triggerOf = (job: CronJob): CronTrigger => job.via ?? "cron-job.org";
 
 export const GRACE_FACTOR = 2.5;
 
@@ -58,7 +68,7 @@ export const CRON_JOBS: CronJob[] = [
   },
   {
     key: "keepalive", label: "Database keep-alive", path: "/api/cron/keepalive",
-    everyMinutes: 4320, optional: true,
+    everyMinutes: 1440, optional: true, via: "vercel",
     what: "Touches Supabase so a free-tier project isn't paused for inactivity.",
   },
 ];
