@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useToast } from "@/components/Toast";
+import ConfirmModal from "@/components/ConfirmModal";
 import { findTier, fmtNgn } from "@/lib/summerCamp";
 
 type Payment = Record<string, any>;
@@ -38,17 +39,48 @@ export default function PaymentsClient({ initial, subscribers = [], receipts = [
     push(j.alreadyIssued ? "That payment already has a receipt." : `Receipt ${j.receipt.serial} issued.`, "success");
   }
 
-  // "Record manual payment" form (bank transfer / cash / balance payments)
+  // "Record manual payment" form — also reused, in edit mode, to correct one.
   const [showRecord, setShowRecord] = useState(false);
+  const [editing, setEditing] = useState(false);
   const [rec, setRec] = useState<any>({ method: MANUAL_METHODS[0] });
   const [recBusy, setRecBusy] = useState(false);
   const [recError, setRecError] = useState("");
+  const [confirmDel, setConfirmDel] = useState<Payment | null>(null);
+
+  // Only payments this form created may be corrected or removed. Paystack money
+  // and application-approval rows stay locked.
+  const isManual = (p: Payment) => p?.raw?.source === "manual-entry";
+
+  function newRecord() {
+    setEditing(false);
+    setRec({ method: MANUAL_METHODS[0] });
+    setRecError("");
+    setShowRecord(v => !v);
+  }
+
+  function startEdit(p: Payment) {
+    setEditing(true);
+    setRecError("");
+    setRec({
+      reference: p.reference,
+      email: p.email || "",
+      amount: p.amount ?? "",
+      method: String(p.channel || "").replace(/^Manual · /, "") || MANUAL_METHODS[0],
+      paidAt: p.paid_at ? new Date(p.paid_at).toISOString().slice(0, 10) : "",
+      note: p.raw?.note || "",
+      studentId: p.student_id || "",
+      _hasReceipt: !!issued[p.reference],
+    });
+    setShowRecord(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 
   async function recordPayment() {
     setRecError("");
     setRecBusy(true);
     const res = await fetch("/api/payments/manual", {
-      method: "POST", headers: { "Content-Type": "application/json" },
+      method: editing ? "PATCH" : "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         studentId: rec.studentId || "", email: rec.email, amount: Number(rec.amount), method: rec.method,
         reference: rec.reference || "", paidAt: rec.paidAt || "", note: rec.note || "",
@@ -57,10 +89,19 @@ export default function PaymentsClient({ initial, subscribers = [], receipts = [
     setRecBusy(false);
     if (!res.ok) {
       const j = await res.json().catch(() => ({}));
-      setRecError(j.error || "Could not record the payment.");
+      setRecError(j.error || (editing ? "Could not save the changes." : "Could not record the payment."));
       return;
     }
-    window.location.reload(); // pick up the fresh ledger row
+    window.location.reload(); // pick up the fresh ledger
+  }
+
+  async function deletePayment(p: Payment) {
+    setConfirmDel(null);
+    const res = await fetch(`/api/payments/manual?reference=${encodeURIComponent(p.reference)}`, { method: "DELETE" });
+    const j = await res.json().catch(() => ({}));
+    if (!res.ok) { push(j.error || "Could not delete that payment.", "error"); return; }
+    push("Payment deleted.", "success");
+    window.location.reload();
   }
 
   const planName = (p: Payment) => findTier(p.plan)?.name ?? (p.plan || "—");
@@ -115,8 +156,8 @@ export default function PaymentsClient({ initial, subscribers = [], receipts = [
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button onClick={() => setShowRecord(v => !v)} className="btn-gold !min-h-[40px] text-sm">
-            {showRecord ? "Cancel" : "+ Record manual payment"}
+          <button onClick={newRecord} className="btn-gold !min-h-[40px] text-sm">
+            {showRecord && !editing ? "Cancel" : "+ Record manual payment"}
           </button>
           {visible.length > 0 && (
             <button onClick={exportCsv} data-tour="payments-export" className="btn-ghost !min-h-[40px] text-sm">Export CSV</button>
@@ -128,10 +169,11 @@ export default function PaymentsClient({ initial, subscribers = [], receipts = [
       {showRecord && (
         <div className="card neu-card space-y-4 p-6">
           <div>
-            <h2 className="font-display text-lg font-semibold">Record a manual payment</h2>
+            <h2 className="font-display text-lg font-semibold">{editing ? "Edit manual payment" : "Record a manual payment"}</h2>
             <p className="text-sm text-ink/45">
-              Bank transfer, Opay or cash — including part-payment balances. It lands in this
-              ledger and counts in the revenue analytics.
+              {editing
+                ? "Correct a mistake in this entry. The reference stays the same; everything else can change."
+                : "Bank transfer, Opay or cash — including part-payment balances. It lands in this ledger and counts in the revenue analytics."}
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -174,8 +216,11 @@ export default function PaymentsClient({ initial, subscribers = [], receipts = [
               <input id="paymen-payment-date-optional-to" className="field" type="date" value={rec.paidAt || ""} onChange={e => setRec({ ...rec, paidAt: e.target.value })} />
             </div>
             <div>
-              <label htmlFor="paymen-reference-optional-auto-" className="flabel">Reference <span className="font-normal text-ink/40">(optional — auto-generated if blank)</span></label>
-              <input id="paymen-reference-optional-auto-" className="field font-mono" placeholder="e.g. bank narration"
+              <label htmlFor="paymen-reference-optional-auto-" className="flabel">
+                Reference <span className="font-normal text-ink/40">{editing ? "(fixed)" : "(optional — auto-generated if blank)"}</span>
+              </label>
+              <input id="paymen-reference-optional-auto-" className="field font-mono disabled:opacity-60" placeholder="e.g. bank narration"
+                readOnly={editing} disabled={editing}
                 value={rec.reference || ""} onChange={e => setRec({ ...rec, reference: e.target.value })} />
             </div>
             <div>
@@ -184,12 +229,31 @@ export default function PaymentsClient({ initial, subscribers = [], receipts = [
                 value={rec.note || ""} onChange={e => setRec({ ...rec, note: e.target.value })} />
             </div>
           </div>
+          {editing && (
+            <div className="rounded-xl bg-chalk px-4 py-3 text-[13px] text-ink/60">
+              {rec._hasReceipt && (
+                <p className="font-semibold text-amber-700">
+                  ⚠️ A receipt has already been issued for this payment — if you change the amount, re-issue the receipt so it matches.
+                </p>
+              )}
+              <p className={rec._hasReceipt ? "mt-1" : ""}>
+                Editing won&apos;t change the learner&apos;s next subscription due date. Adjust it on their profile if this correction affects it.
+              </p>
+            </div>
+          )}
           {recError && <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-800">{recError}</p>}
-          <button className="btn-gold" onClick={recordPayment} disabled={recBusy}>
-            {recBusy
-              ? <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-              : "Record payment"}
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button className="btn-gold" onClick={recordPayment} disabled={recBusy}>
+              {recBusy
+                ? <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                : editing ? "Save changes" : "Record payment"}
+            </button>
+            {editing && (
+              <button className="btn-ghost" onClick={() => { setShowRecord(false); setEditing(false); setRec({ method: MANUAL_METHODS[0] }); }}>
+                Cancel
+              </button>
+            )}
+          </div>
         </div>
       )}
 
@@ -285,6 +349,7 @@ export default function PaymentsClient({ initial, subscribers = [], receipts = [
                   <th className="px-5 py-3 text-right">Amount</th>
                   <th className="px-5 py-3">Status</th>
                   <th className="px-5 py-3">Receipt</th>
+                  <th className="px-5 py-3"><span className="sr-only">Actions</span></th>
                 </tr>
               </thead>
               <tbody>
@@ -308,11 +373,21 @@ export default function PaymentsClient({ initial, subscribers = [], receipts = [
                       <ReceiptCell payment={p} receipt={issued[p.reference]}
                         busy={issuing === p.reference} onIssue={() => issueReceipt(p.reference)} />
                     </td>
+                    <td className="px-5 py-3 whitespace-nowrap text-right">
+                      {isManual(p) && (
+                        <span className="inline-flex gap-1">
+                          <button onClick={() => startEdit(p)} aria-label="Edit this payment"
+                            className="rounded-lg px-2.5 py-1.5 text-xs font-bold text-ink/55 transition hover:bg-chalk hover:text-ink">Edit</button>
+                          <button onClick={() => setConfirmDel(p)} aria-label="Delete this payment"
+                            className="rounded-lg px-2.5 py-1.5 text-xs font-bold text-red-600 transition hover:bg-red-50">Delete</button>
+                        </span>
+                      )}
+                    </td>
                   </tr>
                 ))}
                 {!visible.length && (
                   <tr>
-                    <td colSpan={8} className="px-5 py-10 text-center text-ink/40">No payments match your search.</td>
+                    <td colSpan={9} className="px-5 py-10 text-center text-ink/40">No payments match your search.</td>
                   </tr>
                 )}
               </tbody>
@@ -337,15 +412,37 @@ export default function PaymentsClient({ initial, subscribers = [], receipts = [
                   <span className="ml-auto">{new Date(p.paid_at || p.created_at).toLocaleDateString("en-NG", { dateStyle: "medium" })}</span>
                 </div>
                 <p className="mt-2 truncate font-mono text-[11px] text-ink/35">{p.reference}</p>
-                <div className="mt-2">
+                <div className="mt-2 flex flex-wrap items-center gap-2">
                   <ReceiptCell payment={p} receipt={issued[p.reference]}
                     busy={issuing === p.reference} onIssue={() => issueReceipt(p.reference)} />
+                  {isManual(p) && (
+                    <span className="ml-auto inline-flex gap-1">
+                      <button onClick={() => startEdit(p)}
+                        className="rounded-lg border border-line px-3 py-1.5 text-xs font-bold text-ink/60">Edit</button>
+                      <button onClick={() => setConfirmDel(p)}
+                        className="rounded-lg border border-line px-3 py-1.5 text-xs font-bold text-red-600">Delete</button>
+                    </span>
+                  )}
                 </div>
               </div>
             ))}
             {!visible.length && <div className="card p-10 text-center text-ink/40">No payments match your search.</div>}
           </div>
         </>
+      )}
+
+      {confirmDel && (
+        <ConfirmModal
+          title="Delete this payment?"
+          message={
+            `${fmtNgn(Number(confirmDel.amount || 0))} from ${confirmDel.email || "—"} will be removed from the ledger.` +
+            (issued[confirmDel.reference] ? ` Its receipt (${issued[confirmDel.reference].serial}) will be removed too.` : "") +
+            " This won't change the learner's subscription due date."
+          }
+          confirmLabel="Delete payment" danger
+          onConfirm={() => deletePayment(confirmDel)}
+          onCancel={() => setConfirmDel(null)}
+        />
       )}
     </div>
   );
