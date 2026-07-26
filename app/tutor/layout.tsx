@@ -45,7 +45,7 @@ export default async function TutorLayout({ children }: { children: React.ReactN
       bell={{ mode: "student", noticesHref: "/tutor/messages" }} idleMinutes={60}>
       <AuthGuard />
       <AssistantProvider>
-        <ErrorBoundary>{children}</ErrorBoundary>
+        <ErrorBoundary home="/tutor">{children}</ErrorBoundary>
         <AssistantWidget mode="staff" />
       </AssistantProvider>
     </PortalShell>

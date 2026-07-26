@@ -63,7 +63,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       bell={{ mode: "admin", noticesHref: "/admin/applications" }} search idleMinutes={120}>
       <AuthGuard />
       <AssistantProvider>
-        <ErrorBoundary>{children}</ErrorBoundary>
+        <ErrorBoundary home="/admin">{children}</ErrorBoundary>
         <AssistantWidget mode="staff" />
       </AssistantProvider>
     </PortalShell>

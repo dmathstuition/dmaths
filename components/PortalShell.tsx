@@ -14,6 +14,7 @@ import CommandPalette from "@/components/CommandPalette";
 import MoreSheet from "@/components/MoreSheet";
 import IdleLogout from "@/components/IdleLogout";
 import TourButton from "@/components/tour/TourButton";
+import ConnectionStatus from "@/components/ConnectionStatus";
 import { useDialog } from "@/lib/useDialog";
 
 export type NavItem = { href: string; label: string; icon: IconName };
@@ -139,6 +140,7 @@ export default function PortalShell({
 
       <PushManager />
       <IdleLogout minutes={idleMinutes} />
+      <ConnectionStatus />
     </div>
   );
 }

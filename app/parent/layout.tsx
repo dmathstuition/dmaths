@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import PortalShell, { type NavItem } from "@/components/PortalShell";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import { supabaseServer } from "@/lib/supabase/server";
 
 export const metadata = { title: "Parent Portal · D-Maths Tuition" };
@@ -43,7 +44,7 @@ export default async function ParentLayout({ children }: { children: React.React
       subtitle="Parent Portal"
       bell={{ mode: "student", noticesHref: "/parent" }}
     >
-      {children}
+      <ErrorBoundary home="/parent">{children}</ErrorBoundary>
     </PortalShell>
   );
 }
