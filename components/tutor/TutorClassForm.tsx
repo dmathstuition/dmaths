@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/Icons";
 import { useToast } from "@/components/Toast";
+import ClashWarning, { type ClashItem } from "@/components/ClashWarning";
 
 type Learner = { id: string; name: string };
 
@@ -24,6 +25,7 @@ export default function TutorClassForm({ roster, editing, onDone }: {
   const [open, setOpen] = useState(false);
   const [f, setF] = useState({ ...BLANK });
   const [busy, setBusy] = useState(false);
+  const [clashes, setClashes] = useState<ClashItem[]>([]);
 
   function start(existing?: any) {
     if (existing) {
@@ -55,17 +57,21 @@ export default function TutorClassForm({ roster, editing, onDone }: {
     }));
   }
 
-  async function save() {
+  // `confirm` is the "Schedule anyway" path: the server answered 409 with the
+  // clashes and we're re-sending having shown them.
+  async function save(confirm = false) {
     if (!f.subject.trim()) { push("Enter a subject.", "error"); return; }
     if (!f.date || !f.time) { push("Pick a date and time.", "error"); return; }
     setBusy(true);
     const res = await fetch("/api/classes/manage", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...f, startsAt: new Date(`${f.date}T${f.time}`).toISOString() }),
+      body: JSON.stringify({ ...f, confirm, startsAt: new Date(`${f.date}T${f.time}`).toISOString() }),
     });
     setBusy(false);
     const j = await res.json().catch(() => ({}));
+    if (res.status === 409 && j.clashes?.length) { setClashes(j.clashes); return; }
     if (!res.ok) { push(j.error || "Could not save the class.", "error"); return; }
+    setClashes([]);
     push(f.classId ? "Class updated." : j.created > 1 ? `${j.created} weekly classes scheduled.` : "Class scheduled.", "success");
     setOpen(false);
     setF({ ...BLANK });
@@ -164,9 +170,16 @@ export default function TutorClassForm({ roster, editing, onDone }: {
         </p>
       )}
 
+      {clashes.length > 0 && (
+        <div className="mt-5">
+          <ClashWarning clashes={clashes} busy={busy}
+            onConfirm={() => save(true)} onCancel={() => setClashes([])} />
+        </div>
+      )}
+
       <div className="mt-5 flex flex-wrap gap-2">
-        <button onClick={save} disabled={busy} className="btn-gold">{busy ? "Saving…" : f.classId ? "Save changes" : "Schedule"}</button>
-        <button onClick={() => { setOpen(false); onDone?.(); }} className="btn-ghost">Cancel</button>
+        <button onClick={() => save()} disabled={busy} className="btn-gold">{busy ? "Saving…" : f.classId ? "Save changes" : "Schedule"}</button>
+        <button onClick={() => { setOpen(false); setClashes([]); onDone?.(); }} className="btn-ghost">Cancel</button>
       </div>
     </div>
   );
