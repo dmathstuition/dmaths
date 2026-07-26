@@ -10,8 +10,10 @@ const MANUAL_METHODS = ["Access Bank Transfer", "Opay Bank Transfer", "Cash", "O
 
 type Receipt = { id: string; serial: string; payment_reference: string };
 
-export default function PaymentsClient({ initial, subscribers = [], receipts = [] }: {
-  initial: Payment[]; subscribers?: any[]; receipts?: Receipt[];
+type Student = { id: string; first_name: string | null; last_name: string | null; email: string | null; student_code: string | null };
+
+export default function PaymentsClient({ initial, subscribers = [], receipts = [], students = [] }: {
+  initial: Payment[]; subscribers?: any[]; receipts?: Receipt[]; students?: Student[];
 }) {
   const push = useToast();
   const [q, setQ] = useState("");
@@ -48,7 +50,7 @@ export default function PaymentsClient({ initial, subscribers = [], receipts = [
     const res = await fetch("/api/payments/manual", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        email: rec.email, amount: Number(rec.amount), method: rec.method,
+        studentId: rec.studentId || "", email: rec.email, amount: Number(rec.amount), method: rec.method,
         reference: rec.reference || "", paidAt: rec.paidAt || "", note: rec.note || "",
       }),
     });
@@ -133,6 +135,24 @@ export default function PaymentsClient({ initial, subscribers = [], receipts = [
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <label htmlFor="paymen-student" className="flabel">
+                Learner <span className="font-normal text-ink/40">— links the payment to their portal &amp; their parent&apos;s</span>
+              </label>
+              <select id="paymen-student" className="field"
+                value={rec.studentId || ""}
+                onChange={e => {
+                  const s = students.find(st => st.id === e.target.value);
+                  setRec({ ...rec, studentId: e.target.value, email: s?.email || rec.email || "" });
+                }}>
+                <option value="">Not a specific learner (record by email only)</option>
+                {students.map(s => (
+                  <option key={s.id} value={s.id}>
+                    {`${s.first_name ?? ""} ${s.last_name ?? ""}`.trim() || s.email}{s.student_code ? ` · ${s.student_code}` : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
             <div>
               <label htmlFor="paymen-payer-apos-s-email" className="flabel">Payer&apos;s email</label>
               <input id="paymen-payer-apos-s-email" className="field" type="email" placeholder="learner or parent email"

@@ -58,11 +58,45 @@ describe("POST /api/payments/manual", () => {
     expect(inserted.reference).toMatch(/^MANUAL-/);
   });
 
-  it("rejects a missing email or bad amount", async () => {
+  it("rejects with neither a learner nor an email, or a bad amount", async () => {
     asAdmin();
     expect((await POST(req({ amount: 5000 }))).status).toBe(400);
     expect((await POST(req({ email: "a@b.com", amount: 0 }))).status).toBe(400);
     expect((await POST(req({ email: "a@b.com", amount: -5 }))).status).toBe(400);
+  });
+
+  it("links the payment to a chosen learner and inherits their email", async () => {
+    asAdmin();
+    // Both the student lookup and the (no-op) subscriber lookup read maybeSingle.
+    mockAdmin._qb.maybeSingle.mockResolvedValue({
+      data: { id: "stu-7", email: "Ada@Example.com", role: "student", sub_active: false }, error: null,
+    });
+    mockAdmin._qb.single.mockResolvedValue({ data: { id: "pay-1", reference: "REF-9" }, error: null });
+
+    // No email supplied — it should come from the learner's own record.
+    const res = await POST(req({ studentId: "stu-7", amount: 30000, method: "Cash", reference: "REF-9" }));
+    expect(res.status).toBe(200);
+
+    const inserted = mockAdmin._qb.insert.mock.calls.find((c: any[]) => c[0]?.reference === "REF-9")?.[0];
+    expect(inserted.student_id).toBe("stu-7");
+    expect(inserted.email).toBe("ada@example.com"); // normalised from the learner
+  });
+
+  it("refuses a studentId that isn't a real learner", async () => {
+    asAdmin();
+    mockAdmin._qb.maybeSingle.mockResolvedValue({ data: null, error: null });
+    const res = await POST(req({ studentId: "ghost", amount: 5000 }));
+    expect(res.status).toBe(400);
+    expect(mockAdmin._qb.insert).not.toHaveBeenCalled();
+  });
+
+  it("still records against a bare email with no learner chosen", async () => {
+    asAdmin();
+    mockAdmin._qb.single.mockResolvedValue({ data: { id: "pay-2", reference: "REF-2" }, error: null });
+    const res = await POST(req({ email: "grandma@example.com", amount: 12000, reference: "REF-2" }));
+    expect(res.status).toBe(200);
+    const inserted = mockAdmin._qb.insert.mock.calls.find((c: any[]) => c[0]?.reference === "REF-2")?.[0];
+    expect(inserted).not.toHaveProperty("student_id");
   });
 
   it("403 for non-admins", async () => {

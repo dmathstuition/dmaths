@@ -10,7 +10,7 @@ export default async function PaymentsPage() {
   // The `payments` ledger is admin-readable via RLS. If the migration hasn't
   // been run yet the query errors — fall back to an empty list so the page
   // still renders with guidance instead of crashing.
-  const [{ data }, { data: subscribers }, { data: receipts }] = await Promise.all([
+  const [{ data }, { data: subscribers }, { data: receipts }, { data: students }] = await Promise.all([
     supa.from("payments").select("*").order("created_at", { ascending: false }).limit(1000),
     // Monthly subscribers (errors harmlessly to null before the migration runs).
     supa.from("profiles")
@@ -19,11 +19,17 @@ export default async function PaymentsPage() {
       .order("sub_due_date", { ascending: true }),
     // Which payments already have a receipt (null before migration-receipts.sql).
     supa.from("receipts").select("id, serial, payment_reference"),
+    // Every learner, to attach a manual payment to one by name.
+    supa.from("profiles")
+      .select("id, first_name, last_name, email, student_code")
+      .eq("role", "student").eq("is_active", true)
+      .order("first_name", { ascending: true }),
   ]);
 
   return (
     <>
-      <PaymentsClient initial={data ?? []} subscribers={subscribers ?? []} receipts={receipts ?? []} />
+      <PaymentsClient initial={data ?? []} subscribers={subscribers ?? []}
+        receipts={receipts ?? []} students={students ?? []} />
       <Tour tourId="admin-payments" steps={paymentsTour} />
     </>
   );
