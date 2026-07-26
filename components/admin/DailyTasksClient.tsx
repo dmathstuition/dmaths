@@ -67,7 +67,7 @@ export default function DailyTasksClient({ students, levels, subjects, classes, 
       </div>
 
       <div className="card p-6">
-        <label className="flabel">Send to</label>
+        <p className="flabel">Send to</p>
         <div className="mt-1 grid grid-cols-2 gap-2 sm:grid-cols-5">
           {options.map(o => (
             <button key={o.id} type="button" onClick={() => { setType(o.id); setValue(""); }}
@@ -101,10 +101,10 @@ export default function DailyTasksClient({ students, levels, subjects, classes, 
         )}
         {type === "all" && <p className="mt-3 text-[13px] text-ink/50">Goes to every active learner.</p>}
 
-        <label className="flabel mt-5 block">Task title</label>
-        <input className="field" value={title} maxLength={160} onChange={e => setTitle(e.target.value)} placeholder="e.g. Complete Exercise 4B, questions 1–10" />
-        <label className="flabel mt-4 block">Details <span className="text-ink/40">(optional)</span></label>
-        <textarea className="field min-h-[90px]" value={details} maxLength={2000} onChange={e => setDetails(e.target.value)} placeholder="Any instructions or context for the task…" />
+        <label htmlFor="dailyt-task-title" className="flabel mt-5 block">Task title</label>
+        <input id="dailyt-task-title" className="field" value={title} maxLength={160} onChange={e => setTitle(e.target.value)} placeholder="e.g. Complete Exercise 4B, questions 1–10" />
+        <label htmlFor="dailyt-details-optional" className="flabel mt-4 block">Details <span className="text-ink/40">(optional)</span></label>
+        <textarea id="dailyt-details-optional" className="field min-h-[90px]" value={details} maxLength={2000} onChange={e => setDetails(e.target.value)} placeholder="Any instructions or context for the task…" />
 
         <button className="btn-gold mt-4 inline-flex items-center gap-2" onClick={post} disabled={busy}>
           <Icon name="checkCircle" className="h-4 w-4" /> {busy ? "Posting…" : "Post task"}

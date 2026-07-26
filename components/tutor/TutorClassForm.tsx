@@ -87,25 +87,25 @@ export default function TutorClassForm({ roster, editing, onDone }: {
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label className="flabel">Subject</label>
-          <input className="field" value={f.subject} onChange={(e) => setF({ ...f, subject: e.target.value })} placeholder="e.g. Further Maths" />
+          <label htmlFor="tutorc-subject" className="flabel">Subject</label>
+          <input id="tutorc-subject" className="field" value={f.subject} onChange={(e) => setF({ ...f, subject: e.target.value })} placeholder="e.g. Further Maths" />
         </div>
         <div>
-          <label className="flabel">Duration (minutes)</label>
-          <input type="number" min={15} max={300} step={15} className="field"
+          <label htmlFor="tutorc-duration-minutes" className="flabel">Duration (minutes)</label>
+          <input id="tutorc-duration-minutes" type="number" min={15} max={300} step={15} className="field"
             value={f.durationMinutes} onChange={(e) => setF({ ...f, durationMinutes: Number(e.target.value) })} />
         </div>
         <div>
-          <label className="flabel">Date</label>
-          <input type="date" className="field" value={f.date} onChange={(e) => setF({ ...f, date: e.target.value })} />
+          <label htmlFor="tutorc-date" className="flabel">Date</label>
+          <input id="tutorc-date" type="date" className="field" value={f.date} onChange={(e) => setF({ ...f, date: e.target.value })} />
         </div>
         <div>
-          <label className="flabel">Start time</label>
-          <input type="time" className="field" value={f.time} onChange={(e) => setF({ ...f, time: e.target.value })} />
+          <label htmlFor="tutorc-start-time" className="flabel">Start time</label>
+          <input id="tutorc-start-time" type="time" className="field" value={f.time} onChange={(e) => setF({ ...f, time: e.target.value })} />
         </div>
       </div>
 
-      <label className="flabel mt-4 block">Where</label>
+      <p className="flabel mt-4 block">Where</p>
       <div className="flex flex-wrap gap-2">
         {([["online", "Online"], ["physical", "In-person"]] as const).map(([m, label]) => (
           <button key={m} type="button" onClick={() => setF({ ...f, mode: m })}
@@ -119,18 +119,18 @@ export default function TutorClassForm({ roster, editing, onDone }: {
       {f.mode === "online" ? (
         <div className="mt-3 grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="flabel">Platform</label>
-            <input className="field" value={f.platform} onChange={(e) => setF({ ...f, platform: e.target.value })} placeholder="Zoom" />
+            <label htmlFor="tutorc-platform" className="flabel">Platform</label>
+            <input id="tutorc-platform" className="field" value={f.platform} onChange={(e) => setF({ ...f, platform: e.target.value })} placeholder="Zoom" />
           </div>
           <div>
-            <label className="flabel">Join link <span className="text-ink/40">(optional)</span></label>
-            <input className="field" value={f.link} onChange={(e) => setF({ ...f, link: e.target.value })} placeholder="https://…" />
+            <label htmlFor="tutorc-join-link-optional" className="flabel">Join link <span className="text-ink/40">(optional)</span></label>
+            <input id="tutorc-join-link-optional" className="field" value={f.link} onChange={(e) => setF({ ...f, link: e.target.value })} placeholder="https://…" />
           </div>
         </div>
       ) : (
         <div className="mt-3">
-          <label className="flabel">Venue</label>
-          <input className="field" value={f.location} onChange={(e) => setF({ ...f, location: e.target.value })} placeholder="Infant Jesus Academy, Old Anwai Road, Asaba" />
+          <label htmlFor="tutorc-venue" className="flabel">Venue</label>
+          <input id="tutorc-venue" className="field" value={f.location} onChange={(e) => setF({ ...f, location: e.target.value })} placeholder="Infant Jesus Academy, Old Anwai Road, Asaba" />
         </div>
       )}
 
@@ -148,7 +148,7 @@ export default function TutorClassForm({ roster, editing, onDone }: {
         </div>
       )}
 
-      <label className="flabel mt-5 block">Learners <span className="text-ink/40">({f.studentIds.length} selected)</span></label>
+      <p className="flabel mt-5 block">Learners <span className="text-ink/40">({f.studentIds.length} selected)</span></p>
       {roster.length ? (
         <div className="max-h-52 space-y-1 overflow-y-auto rounded-xl border border-line p-3">
           {roster.map((s) => (

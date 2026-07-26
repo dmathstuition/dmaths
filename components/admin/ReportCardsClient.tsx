@@ -78,16 +78,16 @@ export default function ReportCardsClient({ students, classes, issued }: { stude
           <div>
             {mode === "student" ? (
               <>
-                <label className="flabel">Student</label>
-                <select className="field" value={f.studentId} onChange={e => setF({ ...f, studentId: e.target.value })}>
+                <label htmlFor="report-student" className="flabel">Student</label>
+                <select id="report-student" className="field" value={f.studentId} onChange={e => setF({ ...f, studentId: e.target.value })}>
                   <option value="">Choose a student…</option>
                   {students.map(s => <option key={s.id} value={s.id}>{name(s)}{s.student_code ? ` · ${s.student_code}` : ""}</option>)}
                 </select>
               </>
             ) : (
               <>
-                <label className="flabel">Class</label>
-                <select className="field" value={f.classId} onChange={e => setF({ ...f, classId: e.target.value })}>
+                <label htmlFor="report-class" className="flabel">Class</label>
+                <select id="report-class" className="field" value={f.classId} onChange={e => setF({ ...f, classId: e.target.value })}>
                   <option value="">Choose a class…</option>
                   {classes.map(c => <option key={c.id} value={c.id}>{c.subject} · {fmtWAT(c.starts_at)}</option>)}
                 </select>
@@ -96,8 +96,8 @@ export default function ReportCardsClient({ students, classes, issued }: { stude
             )}
           </div>
           <div>
-            <label className="flabel">Term / period</label>
-            <input className="field" list="rc-terms" value={f.term}
+            <label htmlFor="report-term-period" className="flabel">Term / period</label>
+            <input id="report-term-period" className="field" list="rc-terms" value={f.term}
               onChange={e => setF({ ...f, term: e.target.value })} placeholder="First Term 2025/26" />
             <datalist id="rc-terms">
               <option value="First Term 2025/26" /><option value="Second Term 2025/26" />
@@ -105,8 +105,8 @@ export default function ReportCardsClient({ students, classes, issued }: { stude
             </datalist>
           </div>
           <div className="sm:col-span-2">
-            <label className="flabel">Remark <span className="text-ink/40">(optional)</span></label>
-            <textarea className="field min-h-[80px]" value={f.remark} maxLength={600}
+            <label htmlFor="report-remark-optional" className="flabel">Remark <span className="text-ink/40">(optional)</span></label>
+            <textarea id="report-remark-optional" className="field min-h-[80px]" value={f.remark} maxLength={600}
               onChange={e => setF({ ...f, remark: e.target.value })}
               placeholder="A strong term — excellent progress in algebra; keep working on timed practice." />
             <p className="mt-1 text-[11px] text-ink/40">Score, attendance, points &amp; conduct are captured automatically from the student&apos;s current record.</p>

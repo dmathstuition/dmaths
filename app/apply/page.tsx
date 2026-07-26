@@ -235,8 +235,8 @@ export default function Apply() {
             <h2 className="font-display text-xl font-semibold">Academic details</h2>
             <Row>
               <div>
-                <label className="flabel">Current level <Req /></label>
-                <select className="field" value={f.level || "JSS 1"} onChange={e => set("level", e.target.value)}>
+                <label htmlFor="page-current-level" className="flabel">Current level <Req /></label>
+                <select id="page-current-level" className="field" value={f.level || "JSS 1"} onChange={e => set("level", e.target.value)}>
                   {LEVELS.map(l => <option key={l}>{l}</option>)}
                 </select>
               </div>
@@ -248,9 +248,9 @@ export default function Apply() {
             </Row>
             {camp ? (
               <div>
-                <label className="flabel">
+                <p className="flabel">
                   Summer camp package <Req />
-                </label>
+                </p>
 
                 {/* In-person (Asaba) — flat naira */}
                 <p className="mb-2 mt-1 flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-gold-deep">
@@ -316,7 +316,7 @@ export default function Apply() {
               </div>
             ) : (
               <div>
-                <label className="flabel">Subjects needed <Req /></label>
+                <p className="flabel">Subjects needed <Req /></p>
                 <div className="flex flex-wrap gap-2">
                   {SUBJECTS.map(s => {
                     const on = f.subjects.includes(s);
@@ -332,8 +332,8 @@ export default function Apply() {
               </div>
             )}
             <div>
-              <label className="flabel">Notes / goals</label>
-              <textarea className="field min-h-24" placeholder="e.g. Preparing for BECE, weak in integration…"
+              <label htmlFor="page-notes-goals" className="flabel">Notes / goals</label>
+              <textarea id="page-notes-goals" className="field min-h-24" placeholder="e.g. Preparing for BECE, weak in integration…"
                 value={f.notes || ""} onChange={e => set("notes", e.target.value)} />
             </div>
           </div>
@@ -366,7 +366,7 @@ export default function Apply() {
             {/* Part payment option (camp only) */}
             {selectedTier && (
               <div>
-                <label className="flabel">Payment option</label>
+                <p className="flabel">Payment option</p>
                 <div className="grid gap-2.5 sm:grid-cols-2">
                   <button type="button" onClick={() => setPayOption(false, selectedTier)}
                     className={`rounded-2xl border p-3.5 text-left transition ${!payHalf ? "border-gold bg-gold-pale ring-1 ring-gold/40" : "border-line bg-white hover:border-gold/40"}`}>
@@ -423,8 +423,8 @@ export default function Apply() {
             <Row>
               <Field label="Payment reference" required placeholder="e.g. PAY-8821" value={f.payment_ref} onChange={v => set("payment_ref", v)} />
               <div>
-                <label className="flabel">Payment method <Req /></label>
-                <select className="field" value={f.payment_method || ""} onChange={e => set("payment_method", e.target.value)}>
+                <label htmlFor="page-payment-method" className="flabel">Payment method <Req /></label>
+                <select id="page-payment-method" className="field" value={f.payment_method || ""} onChange={e => set("payment_method", e.target.value)}>
                   <option value="" disabled>Select method</option>
                   {METHODS.map(m => <option key={m}>{m}</option>)}
                 </select>
@@ -433,8 +433,8 @@ export default function Apply() {
             <Row>
               {selectedTier ? (
                 <div>
-                  <label className="flabel">Amount due now (₦){payHalf ? " · half" : DISCOUNT_PCT > 0 ? ` · ${DISCOUNT_PCT}% off` : ""}</label>
-                  <input className="field bg-chalk/60 font-bold" value={fmtNgn(payHalf ? depositNgn(selectedTier) : discountedNgn(selectedTier))} readOnly />
+                  <label htmlFor="page-amount-due-now-payhalf-h" className="flabel">Amount due now (₦){payHalf ? " · half" : DISCOUNT_PCT > 0 ? ` · ${DISCOUNT_PCT}% off` : ""}</label>
+                  <input id="page-amount-due-now-payhalf-h" className="field bg-chalk/60 font-bold" value={fmtNgn(payHalf ? depositNgn(selectedTier) : discountedNgn(selectedTier))} readOnly />
                 </div>
               ) : (
                 <Field label="Amount paid (₦)" type="number" required value={f.payment_amount} onChange={v => set("payment_amount", v)} />
@@ -501,8 +501,8 @@ function Field({ label, required, type = "text", placeholder, value, onChange }:
   { label: string; required?: boolean; type?: string; placeholder?: string; value: any; onChange: (v: string) => void }) {
   return (
     <div>
-      <label className="flabel">{label} {required && <Req />}</label>
-      <input className="field" type={type} placeholder={placeholder} value={value || ""}
+      <label htmlFor="page-field" className="flabel">{label} {required && <Req />}</label>
+      <input id="page-field" className="field" type={type} placeholder={placeholder} value={value || ""}
         onChange={e => onChange(e.target.value)} required={required} />
     </div>
   );

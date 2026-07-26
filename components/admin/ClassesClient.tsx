@@ -220,8 +220,8 @@ export default function ClassesClient({ initialClasses, initialStudents, initial
               : <input className="field sm:col-span-2" placeholder="Class link (https://…)" value={f.link || ""} onChange={e => setF({ ...f, link: e.target.value })} />}
             {tutors.length > 0 && (
               <div className="sm:col-span-2">
-                <label className="flabel">Assign to a tutor account (optional)</label>
-                <select className="field" value={f.tutor_id || ""} onChange={e => {
+                <label htmlFor="classe-assign-to-a-tutor-accoun" className="flabel">Assign to a tutor account (optional)</label>
+                <select id="classe-assign-to-a-tutor-accoun" className="field" value={f.tutor_id || ""} onChange={e => {
                   const id = e.target.value;
                   const t = tutors.find((x: any) => x.id === id);
                   // Picking a tutor account also fills the display name; leave it as-is otherwise.
