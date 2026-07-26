@@ -107,7 +107,9 @@ Run in this order (skip `schema.sql` if the project already has data):
     which shows you when a cron has quietly stopped running)*
 40. `migration-question-bank.sql` *(reusable CBT questions — write a question once and
     build any future test from the bank)*
-41. `migration-schema-fixes.sql` *(run last — patches any missing columns)*
+41. `migration-receipts.sql` *(numbered payment receipts — parents can open and print
+    their own proof of payment instead of asking for one)*
+42. `migration-schema-fixes.sql` *(run last — patches any missing columns)*
 
 > **⚠️ Also run `storage-buckets.sql`** — it creates the file-storage buckets
 > (materials, curricula, assignments, submissions, voice-notes). Without it, uploading
