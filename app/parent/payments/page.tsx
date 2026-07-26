@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Icon } from "@/components/Icons";
 import NoChildren from "@/components/parent/NoChildren";
 import { getParentChildren } from "@/lib/parentAccess";
@@ -28,6 +29,14 @@ export default async function ParentPaymentsPage() {
   const rows = payments ?? [];
   const total = rows.reduce((a: number, p: any) => a + Number(p.amount || 0), 0);
 
+  // Receipts the school has issued for those payments (empty before
+  // migration-receipts.sql, which just means no receipt links show).
+  const { data: receipts } = rows.length
+    ? await admin.from("receipts").select("id, serial, payment_reference")
+        .in("payment_reference", rows.map((p: any) => p.reference))
+    : { data: [] as any[] };
+  const receiptFor = new Map((receipts ?? []).map((r: any) => [r.payment_reference, r]));
+
   return (
     <div className="space-y-6">
       <div className="boardgrid relative flex items-center gap-4 overflow-hidden rounded-2xl bg-board p-7 text-white">
@@ -57,7 +66,14 @@ export default async function ParentPaymentsPage() {
                     {p.channel ? ` · ${p.channel}` : ""}
                   </p>
                 </div>
-                <span className="flex-shrink-0 font-mono text-[11px] text-ink/40">{p.reference}</span>
+                {receiptFor.has(p.reference) ? (
+                  <Link href={`/receipt/${receiptFor.get(p.reference).id}`}
+                    className="flex-shrink-0 rounded-lg border border-line px-3 py-1.5 text-xs font-bold text-gold-deep transition hover:bg-chalk">
+                    Receipt →
+                  </Link>
+                ) : (
+                  <span className="flex-shrink-0 font-mono text-[11px] text-ink/40">{p.reference}</span>
+                )}
               </div>
             ))}
           </div>
@@ -69,7 +85,8 @@ export default async function ParentPaymentsPage() {
       </div>
 
       <p className="px-1 text-[12px] text-ink/45">
-        Need a formal receipt? Reply to your enrolment email or message us from the Messages tab with the reference above.
+        Tap <strong>Receipt</strong> to open a printable copy. If a payment has no receipt yet,
+        message us from the Messages tab with its reference and we&apos;ll issue one.
       </p>
     </div>
   );

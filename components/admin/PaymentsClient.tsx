@@ -1,13 +1,41 @@
 "use client";
+import Link from "next/link";
 import { useState } from "react";
+import { useToast } from "@/components/Toast";
 import { findTier, fmtNgn } from "@/lib/summerCamp";
 
 type Payment = Record<string, any>;
 
 const MANUAL_METHODS = ["Access Bank Transfer", "Opay Bank Transfer", "Cash", "Other"];
 
-export default function PaymentsClient({ initial, subscribers = [] }: { initial: Payment[]; subscribers?: any[] }) {
+type Receipt = { id: string; serial: string; payment_reference: string };
+
+export default function PaymentsClient({ initial, subscribers = [], receipts = [] }: {
+  initial: Payment[]; subscribers?: any[]; receipts?: Receipt[];
+}) {
+  const push = useToast();
   const [q, setQ] = useState("");
+  // reference → receipt, so each row knows whether one has been issued.
+  const [issued, setIssued] = useState<Record<string, Receipt>>(
+    () => Object.fromEntries(receipts.map((r) => [r.payment_reference, r])),
+  );
+  const [issuing, setIssuing] = useState("");
+
+  // Issue a numbered receipt for this payment. Idempotent server-side: asking
+  // twice returns the receipt that already exists rather than a second number.
+  async function issueReceipt(reference: string) {
+    setIssuing(reference);
+    const res = await fetch("/api/receipts", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reference }),
+    });
+    setIssuing("");
+    const j = await res.json().catch(() => ({}));
+    if (!res.ok) { push(j.error || "Could not issue that receipt.", "error"); return; }
+    setIssued((m) => ({ ...m, [reference]: { ...j.receipt, payment_reference: reference } }));
+    push(j.alreadyIssued ? "That payment already has a receipt." : `Receipt ${j.receipt.serial} issued.`, "success");
+  }
+
   // "Record manual payment" form (bank transfer / cash / balance payments)
   const [showRecord, setShowRecord] = useState(false);
   const [rec, setRec] = useState<any>({ method: MANUAL_METHODS[0] });
@@ -236,6 +264,7 @@ export default function PaymentsClient({ initial, subscribers = [] }: { initial:
                   <th className="px-5 py-3">Channel</th>
                   <th className="px-5 py-3 text-right">Amount</th>
                   <th className="px-5 py-3">Status</th>
+                  <th className="px-5 py-3">Receipt</th>
                 </tr>
               </thead>
               <tbody>
@@ -255,11 +284,15 @@ export default function PaymentsClient({ initial, subscribers = [] }: { initial:
                     <td className="px-5 py-3">
                       <span className={p.status === "success" ? "pill-green" : "pill-amber"}>{p.status}</span>
                     </td>
+                    <td className="px-5 py-3 whitespace-nowrap">
+                      <ReceiptCell payment={p} receipt={issued[p.reference]}
+                        busy={issuing === p.reference} onIssue={() => issueReceipt(p.reference)} />
+                    </td>
                   </tr>
                 ))}
                 {!visible.length && (
                   <tr>
-                    <td colSpan={7} className="px-5 py-10 text-center text-ink/40">No payments match your search.</td>
+                    <td colSpan={8} className="px-5 py-10 text-center text-ink/40">No payments match your search.</td>
                   </tr>
                 )}
               </tbody>
@@ -284,6 +317,10 @@ export default function PaymentsClient({ initial, subscribers = [] }: { initial:
                   <span className="ml-auto">{new Date(p.paid_at || p.created_at).toLocaleDateString("en-NG", { dateStyle: "medium" })}</span>
                 </div>
                 <p className="mt-2 truncate font-mono text-[11px] text-ink/35">{p.reference}</p>
+                <div className="mt-2">
+                  <ReceiptCell payment={p} receipt={issued[p.reference]}
+                    busy={issuing === p.reference} onIssue={() => issueReceipt(p.reference)} />
+                </div>
               </div>
             ))}
             {!visible.length && <div className="card p-10 text-center text-ink/40">No payments match your search.</div>}
@@ -306,5 +343,27 @@ function SummaryCard({ label, value, tint }: { label: string; value: string; tin
       <p className={`font-display text-2xl font-extrabold ${TINTS[tint]}`}>{value}</p>
       <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-ink/40">{label}</p>
     </div>
+  );
+}
+
+
+// One payment's receipt state: a link once issued, a button when it can be, and
+// nothing at all for a payment that never succeeded.
+function ReceiptCell({ payment, receipt, busy, onIssue }: {
+  payment: Payment; receipt?: Receipt; busy: boolean; onIssue: () => void;
+}) {
+  if (receipt) {
+    return (
+      <Link href={`/receipt/${receipt.id}`} className="text-xs font-bold text-gold-deep hover:underline">
+        {receipt.serial} →
+      </Link>
+    );
+  }
+  if (payment.status !== "success") return <span className="text-xs text-ink/35">—</span>;
+  return (
+    <button onClick={onIssue} disabled={busy}
+      className="rounded-lg border border-line px-3 py-1.5 text-xs font-bold text-ink/60 transition hover:border-gold/50 hover:text-ink disabled:opacity-50">
+      {busy ? "Issuing…" : "Issue receipt"}
+    </button>
   );
 }
