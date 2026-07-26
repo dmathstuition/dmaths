@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { CRON_JOBS, GRACE_FACTOR, jobState, cadenceLabel } from "@/lib/cronJobs";
+import { CRON_JOBS, GRACE_FACTOR, jobState, cadenceLabel, triggerOf } from "@/lib/cronJobs";
 
 const NOW = new Date("2026-03-10T12:00:00Z");
 const minutesAgo = (n: number) => new Date(NOW.getTime() - n * 60_000).toISOString();
@@ -47,5 +47,19 @@ describe("CRON_JOBS", () => {
       expect(j.path).toMatch(/^\/api\//);
       expect(j.everyMinutes).toBeGreaterThan(0);
     }
+  });
+
+  // The keep-alive is declared in vercel.json and authenticates by header, so
+  // it must never be presented as something to wire up on cron-job.org — doing
+  // that returns 401 forever on a job that was already working.
+  it("marks the keep-alive as Vercel-triggered, and nothing else", () => {
+    const vercel = CRON_JOBS.filter((j) => triggerOf(j) === "vercel").map((j) => j.key);
+    expect(vercel).toEqual(["keepalive"]);
+  });
+
+  it("defaults every other job to cron-job.org", () => {
+    const external = CRON_JOBS.filter((j) => j.key !== "keepalive");
+    expect(external).not.toHaveLength(0);
+    for (const j of external) expect(triggerOf(j)).toBe("cron-job.org");
   });
 });

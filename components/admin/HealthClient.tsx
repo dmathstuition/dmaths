@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Icon } from "@/components/Icons";
-import { cadenceLabel, jobState, type CronJob, type JobState } from "@/lib/cronJobs";
+import { cadenceLabel, jobState, triggerOf, type CronJob, type JobState } from "@/lib/cronJobs";
 import { fmtWAT } from "@/lib/time";
 
 type Run = { job: string; last_run_at: string; last_status: string; last_detail: any; runs: number } | null;
@@ -26,6 +26,16 @@ const STATE_PILL: Record<JobState, { cls: string; label: string }> = {
   late:  { cls: "pill-red",   label: "Overdue" },
   never: { cls: "pill-amber", label: "Never run" },
 };
+
+// "Never run" means different things depending on the job. A Vercel Cron is
+// already scheduled and simply hasn't fired yet (it only runs on Production);
+// an optional cron-job.org job just hasn't been created. Saying "Not scheduled"
+// for the Vercel one would send someone off to create a job that must not exist.
+function neverLabel(job: CronJob, state: JobState): string | null {
+  if (state !== "never") return null;
+  if (triggerOf(job) === "vercel") return "Awaiting first run";
+  return job.optional ? "Not scheduled" : null;
+}
 
 // Admin → System health. Answers one question: is everything that runs on a
 // schedule actually running? An assignment-reminder job once sat broken for
@@ -97,7 +107,9 @@ export default function HealthClient({
                     </td>
                     <td className="py-3 pr-3 text-ink/60">
                       {cadenceLabel(job.everyMinutes)}
-                      {job.optional && <span className="block text-[11px] text-ink/45">optional</span>}
+                      {triggerOf(job) === "vercel"
+                        ? <span className="block text-[11px] font-semibold text-ink/45">Vercel Cron — nothing to set up</span>
+                        : job.optional && <span className="block text-[11px] text-ink/45">optional</span>}
                     </td>
                     <td className="py-3 pr-3 text-ink/60">
                       {run?.last_run_at ? (
@@ -111,7 +123,7 @@ export default function HealthClient({
                       )}
                     </td>
                     <td className="py-3">
-                      <span className={pill.cls}>{state === "never" && job.optional ? "Not scheduled" : pill.label}</span>
+                      <span className={pill.cls}>{neverLabel(job, state) ?? pill.label}</span>
                       {run?.last_detail && Object.keys(run.last_detail).length > 0 && (
                         <p className="mt-1 max-w-[220px] break-words text-[11px] text-ink/45">
                           {Object.entries(run.last_detail)
@@ -129,8 +141,11 @@ export default function HealthClient({
         </div>
 
         <p className="mt-4 rounded-xl bg-chalk px-4 py-3 text-[13px] text-ink/60">
-          Set these up on cron-job.org, each URL ending <code>?key=&lt;CRON_SECRET&gt;</code>.
-          The full walkthrough is Step 4 of <strong>GO-LIVE.md</strong>.
+          Every job above <em>except</em> the ones marked <strong>Vercel Cron</strong> is set up on
+          cron-job.org, each URL ending <code>?key=&lt;CRON_SECRET&gt;</code>. The Vercel ones are
+          declared in <code>vercel.json</code>, authenticate by header rather than by key, and run
+          on their own once a build is promoted to Production — adding them to cron-job.org would
+          only ever return 401. The full walkthrough is Step 4 of <strong>GO-LIVE.md</strong>.
         </p>
       </section>
 
