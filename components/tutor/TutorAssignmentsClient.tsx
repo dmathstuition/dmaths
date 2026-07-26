@@ -111,8 +111,8 @@ export default function TutorAssignmentsClient({ students, initialSubs }: { stud
           </div>
           {f.type === "code" && (
             <div>
-              <label className="flabel">Starter code (optional — what the learner sees to begin)</label>
-              <textarea className="field min-h-[120px] font-mono text-[13px]" spellCheck={false}
+              <label htmlFor="tutora-starter-code-optional-wh" className="flabel">Starter code (optional — what the learner sees to begin)</label>
+              <textarea id="tutora-starter-code-optional-wh" className="field min-h-[120px] font-mono text-[13px]" spellCheck={false}
                 placeholder={f.code_language === "web" ? '{"html":"…","css":"…","js":"…"} or just leave blank' : "# starter code…"}
                 value={f.starter_code || ""} onChange={(e) => setF({ ...f, starter_code: e.target.value })} />
             </div>
@@ -120,8 +120,8 @@ export default function TutorAssignmentsClient({ students, initialSubs }: { stud
           <textarea className="field min-h-[80px]" placeholder="Instructions (optional)"
             value={f.instructions || ""} onChange={(e) => setF({ ...f, instructions: e.target.value })} />
           <div>
-            <label className="flabel">Attachment (optional)</label>
-            <input type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            <label htmlFor="tutora-attachment-optional" className="flabel">Attachment (optional)</label>
+            <input id="tutora-attachment-optional" type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)}
               className="block w-full text-sm text-ink/60 file:mr-3 file:rounded-lg file:border-0 file:bg-chalk file:px-3 file:py-2 file:text-sm file:font-semibold" />
           </div>
           <div>

@@ -59,29 +59,29 @@ export default function LessonLogClient({ classes, entries }: { classes: ClassRo
         <h2 className="mb-4 font-display text-lg font-semibold">Log a lesson</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="flabel">Class</label>
-            <select className="field" value={f.classId} onChange={e => setF({ ...f, classId: e.target.value })}>
+            <label htmlFor="lesson-class" className="flabel">Class</label>
+            <select id="lesson-class" className="field" value={f.classId} onChange={e => setF({ ...f, classId: e.target.value })}>
               <option value="">Choose a class…</option>
               {classes.map(c => <option key={c.id} value={c.id}>{c.subject} · {fmtWAT(c.starts_at)}</option>)}
             </select>
           </div>
           <div>
-            <label className="flabel">Date taught</label>
-            <input type="date" className="field" value={f.taughtOn} onChange={e => setF({ ...f, taughtOn: e.target.value })} />
+            <label htmlFor="lesson-date-taught" className="flabel">Date taught</label>
+            <input id="lesson-date-taught" type="date" className="field" value={f.taughtOn} onChange={e => setF({ ...f, taughtOn: e.target.value })} />
           </div>
           <div className="sm:col-span-2">
-            <label className="flabel">Topic</label>
-            <input className="field" value={f.topic} onChange={e => setF({ ...f, topic: e.target.value })}
+            <label htmlFor="lesson-topic" className="flabel">Topic</label>
+            <input id="lesson-topic" className="field" value={f.topic} onChange={e => setF({ ...f, topic: e.target.value })}
               placeholder="e.g. Quadratic equations — completing the square" />
           </div>
           <div>
-            <label className="flabel">Notes <span className="text-ink/40">(optional)</span></label>
-            <textarea className="field min-h-[70px]" value={f.notes} onChange={e => setF({ ...f, notes: e.target.value })}
+            <label htmlFor="lesson-notes-optional" className="flabel">Notes <span className="text-ink/40">(optional)</span></label>
+            <textarea id="lesson-notes-optional" className="field min-h-[70px]" value={f.notes} onChange={e => setF({ ...f, notes: e.target.value })}
               placeholder="What went well, who needs support, next steps…" />
           </div>
           <div>
-            <label className="flabel">Homework set <span className="text-ink/40">(optional)</span></label>
-            <textarea className="field min-h-[70px]" value={f.homework} onChange={e => setF({ ...f, homework: e.target.value })}
+            <label htmlFor="lesson-homework-set-optional" className="flabel">Homework set <span className="text-ink/40">(optional)</span></label>
+            <textarea id="lesson-homework-set-optional" className="field min-h-[70px]" value={f.homework} onChange={e => setF({ ...f, homework: e.target.value })}
               placeholder="e.g. Exercise 4B, questions 1–10" />
           </div>
         </div>

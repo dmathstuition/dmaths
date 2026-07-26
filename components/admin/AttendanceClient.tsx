@@ -117,16 +117,16 @@ export default function AttendanceClient({
       <div className="card p-5">
         <div className="flex flex-wrap items-end gap-4">
           <div className="space-y-1">
-            <label className="text-xs font-bold uppercase tracking-wide text-ink/40">Class</label>
-            <select className="field" value={selectedClass} onChange={e => setSelectedClass(e.target.value)}>
+            <label htmlFor="attend-class" className="text-xs font-bold uppercase tracking-wide text-ink/40">Class</label>
+            <select id="attend-class" className="field" value={selectedClass} onChange={e => setSelectedClass(e.target.value)}>
               {classes.map(c => (
                 <option key={c.id} value={c.id}>{classLabel(c)}</option>
               ))}
             </select>
           </div>
           <div className="space-y-1">
-            <label className="text-xs font-bold uppercase tracking-wide text-ink/40">Date</label>
-            <input type="date" className="field" value={sessionDate} onChange={e => setSessionDate(e.target.value)} />
+            <label htmlFor="attend-date" className="text-xs font-bold uppercase tracking-wide text-ink/40">Date</label>
+            <input id="attend-date" type="date" className="field" value={sessionDate} onChange={e => setSessionDate(e.target.value)} />
           </div>
           <div className="flex gap-2 pb-0.5">
             <button onClick={() => markAll(true)} className="btn-ghost !min-h-[38px] text-sm">All present</button>

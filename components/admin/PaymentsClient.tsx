@@ -106,33 +106,33 @@ export default function PaymentsClient({ initial, subscribers = [] }: { initial:
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="flabel">Payer&apos;s email</label>
-              <input className="field" type="email" placeholder="learner or parent email"
+              <label htmlFor="paymen-payer-apos-s-email" className="flabel">Payer&apos;s email</label>
+              <input id="paymen-payer-apos-s-email" className="field" type="email" placeholder="learner or parent email"
                 value={rec.email || ""} onChange={e => setRec({ ...rec, email: e.target.value })} />
             </div>
             <div>
-              <label className="flabel">Amount (₦)</label>
-              <input className="field" type="number" min={1} placeholder="e.g. 25000"
+              <label htmlFor="paymen-amount" className="flabel">Amount (₦)</label>
+              <input id="paymen-amount" className="field" type="number" min={1} placeholder="e.g. 25000"
                 value={rec.amount || ""} onChange={e => setRec({ ...rec, amount: e.target.value })} />
             </div>
             <div>
-              <label className="flabel">Method</label>
-              <select className="field" value={rec.method} onChange={e => setRec({ ...rec, method: e.target.value })}>
+              <label htmlFor="paymen-method" className="flabel">Method</label>
+              <select id="paymen-method" className="field" value={rec.method} onChange={e => setRec({ ...rec, method: e.target.value })}>
                 {MANUAL_METHODS.map(m => <option key={m}>{m}</option>)}
               </select>
             </div>
             <div>
-              <label className="flabel">Payment date <span className="font-normal text-ink/40">(optional — today if blank)</span></label>
-              <input className="field" type="date" value={rec.paidAt || ""} onChange={e => setRec({ ...rec, paidAt: e.target.value })} />
+              <label htmlFor="paymen-payment-date-optional-to" className="flabel">Payment date <span className="font-normal text-ink/40">(optional — today if blank)</span></label>
+              <input id="paymen-payment-date-optional-to" className="field" type="date" value={rec.paidAt || ""} onChange={e => setRec({ ...rec, paidAt: e.target.value })} />
             </div>
             <div>
-              <label className="flabel">Reference <span className="font-normal text-ink/40">(optional — auto-generated if blank)</span></label>
-              <input className="field font-mono" placeholder="e.g. bank narration"
+              <label htmlFor="paymen-reference-optional-auto-" className="flabel">Reference <span className="font-normal text-ink/40">(optional — auto-generated if blank)</span></label>
+              <input id="paymen-reference-optional-auto-" className="field font-mono" placeholder="e.g. bank narration"
                 value={rec.reference || ""} onChange={e => setRec({ ...rec, reference: e.target.value })} />
             </div>
             <div>
-              <label className="flabel">Note <span className="font-normal text-ink/40">(optional)</span></label>
-              <input className="field" placeholder="e.g. camp balance — second instalment"
+              <label htmlFor="paymen-note-optional" className="flabel">Note <span className="font-normal text-ink/40">(optional)</span></label>
+              <input id="paymen-note-optional" className="field" placeholder="e.g. camp balance — second instalment"
                 value={rec.note || ""} onChange={e => setRec({ ...rec, note: e.target.value })} />
             </div>
           </div>

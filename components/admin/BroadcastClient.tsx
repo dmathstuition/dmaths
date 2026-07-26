@@ -87,7 +87,7 @@ export default function BroadcastClient({ levels, subjects, classes, totalActive
 
       <div className="card p-6">
         {/* audience */}
-        <label className="flabel">Send to</label>
+        <p className="flabel">Send to</p>
         <div className="mt-1 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {options.map(o => (
             <button key={o.id} type="button"
@@ -122,14 +122,14 @@ export default function BroadcastClient({ levels, subjects, classes, totalActive
         )}
 
         {/* message */}
-        <label className="flabel mt-5 block">Message</label>
-        <textarea className="field min-h-[120px]" value={body} maxLength={2000}
+        <label htmlFor="broadc-message" className="flabel mt-5 block">Message</label>
+        <textarea id="broadc-message" className="field min-h-[120px]" value={body} maxLength={2000}
           onChange={e => setBody(e.target.value)}
           placeholder="e.g. Reminder: tomorrow's 4pm class has moved to 5pm. See you there!" />
         <p className="mt-1 text-right text-[11px] text-ink/40">{body.length}/2000</p>
 
         {/* when */}
-        <label className="flabel mt-4 block">When</label>
+        <p className="flabel mt-4 block">When</p>
         <div className="mt-1 flex flex-wrap items-center gap-2">
           {(["now", "later"] as const).map(w => (
             <button key={w} type="button" onClick={() => setWhen(w)}

@@ -77,12 +77,12 @@ export default function FlashcardsClient({ decks, cards }: { decks: Deck[]; card
         <h2 className="mb-4 font-display text-lg font-semibold">New deck</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="flabel">Title</label>
-            <input className="field" value={deckForm.title} onChange={(e) => setDeckForm({ ...deckForm, title: e.target.value })} placeholder="e.g. Quadratic equations" />
+            <label htmlFor="flashc-title" className="flabel">Title</label>
+            <input id="flashc-title" className="field" value={deckForm.title} onChange={(e) => setDeckForm({ ...deckForm, title: e.target.value })} placeholder="e.g. Quadratic equations" />
           </div>
           <div>
-            <label className="flabel">Subject</label>
-            <input className="field" value={deckForm.subject} onChange={(e) => setDeckForm({ ...deckForm, subject: e.target.value })} placeholder="Maths" />
+            <label htmlFor="flashc-subject" className="flabel">Subject</label>
+            <input id="flashc-subject" className="field" value={deckForm.subject} onChange={(e) => setDeckForm({ ...deckForm, subject: e.target.value })} placeholder="Maths" />
           </div>
         </div>
         <label className="mt-3 flex items-center gap-2 text-sm font-semibold text-ink/70">
@@ -125,12 +125,12 @@ export default function FlashcardsClient({ decks, cards }: { decks: Deck[]; card
 
                   <div className="grid gap-3 border-t border-line pt-4 sm:grid-cols-2">
                     <div>
-                      <label className="flabel">Question (front)</label>
-                      <textarea className="field min-h-[70px]" value={cardForm.front} onChange={(e) => setCardForm({ ...cardForm, front: e.target.value })} placeholder="What is the quadratic formula?" />
+                      <label htmlFor="flashc-question-front" className="flabel">Question (front)</label>
+                      <textarea id="flashc-question-front" className="field min-h-[70px]" value={cardForm.front} onChange={(e) => setCardForm({ ...cardForm, front: e.target.value })} placeholder="What is the quadratic formula?" />
                     </div>
                     <div>
-                      <label className="flabel">Answer (back)</label>
-                      <textarea className="field min-h-[70px]" value={cardForm.back} onChange={(e) => setCardForm({ ...cardForm, back: e.target.value })} placeholder="x = (−b ± √(b²−4ac)) / 2a" />
+                      <label htmlFor="flashc-answer-back" className="flabel">Answer (back)</label>
+                      <textarea id="flashc-answer-back" className="field min-h-[70px]" value={cardForm.back} onChange={(e) => setCardForm({ ...cardForm, back: e.target.value })} placeholder="x = (−b ± √(b²−4ac)) / 2a" />
                     </div>
                   </div>
                   <button className="btn-ink" onClick={() => addCard(d.id)} disabled={busy}>Add card</button>

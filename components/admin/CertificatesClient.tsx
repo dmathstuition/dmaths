@@ -87,16 +87,16 @@ export default function CertificatesClient({ students, classes, issued }: { stud
           <div>
             {mode === "student" ? (
               <>
-                <label className="flabel">Student</label>
-                <select className="field" value={f.studentId} onChange={e => setF({ ...f, studentId: e.target.value })}>
+                <label htmlFor="certif-student" className="flabel">Student</label>
+                <select id="certif-student" className="field" value={f.studentId} onChange={e => setF({ ...f, studentId: e.target.value })}>
                   <option value="">Choose a student…</option>
                   {students.map(s => <option key={s.id} value={s.id}>{name(s)}{s.student_code ? ` · ${s.student_code}` : ""}</option>)}
                 </select>
               </>
             ) : (
               <>
-                <label className="flabel">Class</label>
-                <select className="field" value={f.classId} onChange={e => setF({ ...f, classId: e.target.value })}>
+                <label htmlFor="certif-class" className="flabel">Class</label>
+                <select id="certif-class" className="field" value={f.classId} onChange={e => setF({ ...f, classId: e.target.value })}>
                   <option value="">Choose a class…</option>
                   {classes.map(c => <option key={c.id} value={c.id}>{c.subject} · {fmtWAT(c.starts_at)}</option>)}
                 </select>
@@ -105,19 +105,19 @@ export default function CertificatesClient({ students, classes, issued }: { stud
             )}
           </div>
           <div>
-            <label className="flabel">Title</label>
-            <input className="field" list="cert-titles" value={f.title}
+            <label htmlFor="certif-title" className="flabel">Title</label>
+            <input id="certif-title" className="field" list="cert-titles" value={f.title}
               onChange={e => setF({ ...f, title: e.target.value })} placeholder="Certificate of Completion" />
             <datalist id="cert-titles">{TITLE_PRESETS.map(t => <option key={t} value={t} />)}</datalist>
           </div>
           <div>
-            <label className="flabel">Subtitle <span className="text-ink/40">(optional)</span></label>
-            <input className="field" value={f.subtitle}
+            <label htmlFor="certif-subtitle-optional" className="flabel">Subtitle <span className="text-ink/40">(optional)</span></label>
+            <input id="certif-subtitle-optional" className="field" value={f.subtitle}
               onChange={e => setF({ ...f, subtitle: e.target.value })} placeholder="Summer Coding Camp 2026" />
           </div>
           <div>
-            <label className="flabel">Note <span className="text-ink/40">(optional)</span></label>
-            <input className="field" value={f.note}
+            <label htmlFor="certif-note-optional" className="flabel">Note <span className="text-ink/40">(optional)</span></label>
+            <input id="certif-note-optional" className="field" value={f.note}
               onChange={e => setF({ ...f, note: e.target.value })} placeholder="For outstanding progress in Python and problem-solving." />
           </div>
         </div>

@@ -226,26 +226,26 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
           {editId && <p className="rounded-xl bg-blue-50 px-4 py-2.5 text-sm font-semibold text-blue-900">Editing details only. Questions, files and roster can't be changed after creation — delete and recreate if those need to change.</p>}
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="sm:col-span-2">
-              <label className="flabel">Assignment title</label>
-              <input className="field" placeholder="e.g. Week 3 — Loops & Lists practice" value={f.title || ""} onChange={e => setF({ ...f, title: e.target.value })} />
+              <label htmlFor="assign-assignment-title" className="flabel">Assignment title</label>
+              <input id="assign-assignment-title" className="field" placeholder="e.g. Week 3 — Loops & Lists practice" value={f.title || ""} onChange={e => setF({ ...f, title: e.target.value })} />
             </div>
             <div>
-              <label className="flabel">Subject</label>
-              <select className="field" value={f.subject} onChange={e => setF({ ...f, subject: e.target.value })}>
+              <label htmlFor="assign-subject" className="flabel">Subject</label>
+              <select id="assign-subject" className="field" value={f.subject} onChange={e => setF({ ...f, subject: e.target.value })}>
                 {SUBJECTS.map(s => <option key={s}>{s}</option>)}
               </select>
             </div>
             <div>
-              <label className="flabel">Due date <span className="font-normal text-ink/40">(when students must submit by)</span></label>
-              <input className="field" type="date" value={f.due_date || ""} onChange={e => setF({ ...f, due_date: e.target.value })} />
+              <label htmlFor="assign-due-date-when-students-m" className="flabel">Due date <span className="font-normal text-ink/40">(when students must submit by)</span></label>
+              <input id="assign-due-date-when-students-m" className="field" type="date" value={f.due_date || ""} onChange={e => setF({ ...f, due_date: e.target.value })} />
             </div>
             <div>
-              <label className="flabel">Deadline time <span className="font-normal text-ink/40">(WAT — submissions close then)</span></label>
-              <input className="field" type="time" value={f.due_time || "23:59"} onChange={e => setF({ ...f, due_time: e.target.value })} />
+              <label htmlFor="assign-deadline-time-wat-submis" className="flabel">Deadline time <span className="font-normal text-ink/40">(WAT — submissions close then)</span></label>
+              <input id="assign-deadline-time-wat-submis" className="field" type="time" value={f.due_time || "23:59"} onChange={e => setF({ ...f, due_time: e.target.value })} />
             </div>
             <div>
-              <label className="flabel">Type</label>
-              <select className="field" value={f.type} onChange={e => setF({ ...f, type: e.target.value })}>
+              <label htmlFor="assign-type" className="flabel">Type</label>
+              <select id="assign-type" className="field" value={f.type} onChange={e => setF({ ...f, type: e.target.value })}>
                 <option value="written">Written (photo / link submission)</option>
                 <option value="cbt">CBT test (multiple choice)</option>
                 <option value="code">Code (in-browser IDE)</option>
@@ -253,23 +253,23 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
             </div>
             {f.type === "code" && (
               <div>
-                <label className="flabel">Language</label>
-                <select className="field" value={f.code_language || "python"} onChange={e => setF({ ...f, code_language: e.target.value })}>
+                <label htmlFor="assign-language" className="flabel">Language</label>
+                <select id="assign-language" className="field" value={f.code_language || "python"} onChange={e => setF({ ...f, code_language: e.target.value })}>
                   <option value="python">Python</option>
                   <option value="web">Web (HTML/CSS/JS)</option>
                 </select>
               </div>
             )}
             <div>
-              <label className="flabel">Attach question sheet <span className="font-normal text-ink/40">(optional)</span></label>
-              <input className="field" type="file" accept=".pdf,.doc,.docx,.jpg,.png" onChange={e => setFile(e.target.files?.[0] || null)} />
+              <label htmlFor="assign-attach-question-sheet-op" className="flabel">Attach question sheet <span className="font-normal text-ink/40">(optional)</span></label>
+              <input id="assign-attach-question-sheet-op" className="field" type="file" accept=".pdf,.doc,.docx,.jpg,.png" onChange={e => setFile(e.target.files?.[0] || null)} />
             </div>
           </div>
 
           {f.type === "code" && (
             <div>
-              <label className="flabel">Starter code <span className="font-normal text-ink/40">(optional — what the learner opens with)</span></label>
-              <textarea className="field min-h-[120px] font-mono text-[13px]" spellCheck={false}
+              <label htmlFor="assign-starter-code-optional-wh" className="flabel">Starter code <span className="font-normal text-ink/40">(optional — what the learner opens with)</span></label>
+              <textarea id="assign-starter-code-optional-wh" className="field min-h-[120px] font-mono text-[13px]" spellCheck={false}
                 value={f.starter_code || ""} onChange={e => setF({ ...f, starter_code: e.target.value })}
                 placeholder={f.code_language === "web" ? 'Leave blank, or paste {"html":"…","css":"…","js":"…"}' : "# starter code the learner sees…"} />
             </div>
@@ -291,16 +291,16 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
               {f.cbt_mode === "link" && (
                 <div className="grid gap-4 sm:grid-cols-3">
                   <div className="sm:col-span-3">
-                    <label className="flabel">CBT test link</label>
-                    <input className="field" placeholder="https://… (where the test is hosted)" value={f.cbt_link || ""} onChange={e => setF({ ...f, cbt_link: e.target.value })} />
+                    <label htmlFor="assign-cbt-test-link" className="flabel">CBT test link</label>
+                    <input id="assign-cbt-test-link" className="field" placeholder="https://… (where the test is hosted)" value={f.cbt_link || ""} onChange={e => setF({ ...f, cbt_link: e.target.value })} />
                   </div>
                   <div>
-                    <label className="flabel">Test opens <span className="font-normal text-ink/40">(date & time)</span></label>
-                    <input className="field" type="datetime-local" value={f.cbt_open || ""} onChange={e => setF({ ...f, cbt_open: e.target.value })} />
+                    <label htmlFor="assign-test-opens-date-time" className="flabel">Test opens <span className="font-normal text-ink/40">(date & time)</span></label>
+                    <input id="assign-test-opens-date-time" className="field" type="datetime-local" value={f.cbt_open || ""} onChange={e => setF({ ...f, cbt_open: e.target.value })} />
                   </div>
                   <div>
-                    <label className="flabel">Test closes <span className="font-normal text-ink/40">(date & time)</span></label>
-                    <input className="field" type="datetime-local" value={f.cbt_close || ""} onChange={e => setF({ ...f, cbt_close: e.target.value })} />
+                    <label htmlFor="assign-test-closes-date-time" className="flabel">Test closes <span className="font-normal text-ink/40">(date & time)</span></label>
+                    <input id="assign-test-closes-date-time" className="field" type="datetime-local" value={f.cbt_close || ""} onChange={e => setF({ ...f, cbt_close: e.target.value })} />
                   </div>
                 </div>
               )}
@@ -309,12 +309,12 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
                 <div className="space-y-3">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
-                      <label className="flabel">Test opens <span className="font-normal text-ink/40">(date & time)</span></label>
-                      <input className="field" type="datetime-local" value={f.cbt_open || ""} onChange={e => setF({ ...f, cbt_open: e.target.value })} />
+                      <label htmlFor="assign-test-opens-date-time-2" className="flabel">Test opens <span className="font-normal text-ink/40">(date & time)</span></label>
+                      <input id="assign-test-opens-date-time-2" className="field" type="datetime-local" value={f.cbt_open || ""} onChange={e => setF({ ...f, cbt_open: e.target.value })} />
                     </div>
                     <div>
-                      <label className="flabel">Test closes <span className="font-normal text-ink/40">(date & time)</span></label>
-                      <input className="field" type="datetime-local" value={f.cbt_close || ""} onChange={e => setF({ ...f, cbt_close: e.target.value })} />
+                      <label htmlFor="assign-test-closes-date-time-2" className="flabel">Test closes <span className="font-normal text-ink/40">(date & time)</span></label>
+                      <input id="assign-test-closes-date-time-2" className="field" type="datetime-local" value={f.cbt_close || ""} onChange={e => setF({ ...f, cbt_close: e.target.value })} />
                     </div>
                   </div>
 

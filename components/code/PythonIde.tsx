@@ -159,8 +159,8 @@ export default function PythonIde({ persist = false, meId = "", initialSnippets 
 
         {/* Input (stdin) — one value per line, consumed by input() */}
         <div>
-          <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-ink/40">Input (for input()) — one value per line</label>
-          <textarea value={stdin} onChange={(e) => setStdin(e.target.value)} rows={2} spellCheck={false}
+          <label htmlFor="python-input-for-input-one-valu" className="mb-1 block text-xs font-bold uppercase tracking-wide text-ink/40">Input (for input()) — one value per line</label>
+          <textarea id="python-input-for-input-one-valu" value={stdin} onChange={(e) => setStdin(e.target.value)} rows={2} spellCheck={false}
             placeholder="Type here what your program should read with input(), one per line…"
             className="field w-full resize-y font-mono text-[13px]" />
         </div>

@@ -421,8 +421,8 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
         </p>
         <div className="mt-3 space-y-2 border-t border-line pt-3">
           <div className="flex flex-wrap items-center gap-2">
-            <label className="text-xs font-bold uppercase tracking-wide text-ink/35 shrink-0">Guardian email</label>
-            <input className="field max-w-xs" type="email" placeholder="parent@example.com"
+            <label htmlFor="studen-guardian-email" className="text-xs font-bold uppercase tracking-wide text-ink/35 shrink-0">Guardian email</label>
+            <input id="studen-guardian-email" className="field max-w-xs" type="email" placeholder="parent@example.com"
               value={guardianEmail} onChange={e => setGuardianEmail(e.target.value)} />
             <button className="btn-ghost !min-h-[36px]" onClick={saveGuardianEmail} disabled={savingGuardian}>
               {savingGuardian ? "Saving…" : "Save"}
@@ -438,8 +438,8 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
             </div>
           )}
           <div className="flex flex-wrap items-center gap-2">
-            <label className="text-xs font-bold uppercase tracking-wide text-ink/35 shrink-0">Grade target</label>
-            <input className="field w-24" type="number" min="0" max="100" placeholder="e.g. 80"
+            <label htmlFor="studen-grade-target" className="text-xs font-bold uppercase tracking-wide text-ink/35 shrink-0">Grade target</label>
+            <input id="studen-grade-target" className="field w-24" type="number" min="0" max="100" placeholder="e.g. 80"
               value={gradeTarget} onChange={e => setGradeTarget(e.target.value)} />
             <button className="btn-ghost !min-h-[36px]" onClick={saveGradeTarget} disabled={savingTarget}>
               {savingTarget ? "Saving…" : "Save"}
@@ -447,7 +447,7 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
             <span className="text-xs text-ink/35">Shown as a target line on the student's progress chart</span>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <label className="text-xs font-bold uppercase tracking-wide text-ink/35 shrink-0">Monthly subscription</label>
+            <p className="text-xs font-bold uppercase tracking-wide text-ink/35 shrink-0">Monthly subscription</p>
             <button type="button" onClick={() => setSub((s: any) => ({ ...s, active: !s.active }))}
               className={`pill !py-1 ${sub.active ? "pill-green" : "bg-ink/10 text-ink/50"}`}>
               {sub.active ? "Active" : "Off"}
