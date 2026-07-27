@@ -7,7 +7,7 @@ export default function HelpPage() {
     <LegalPage title="Help & FAQ" updated="June 2026">
       <p>
         Quick answers to the most common questions. Can't find what you need?
-        Email <a href="mailto:dmathstuition@gmail.com" className="font-semibold text-gold-deep underline">dmathstuition@gmail.com</a>{" "}
+        Email <a href="mailto:support@dmaths.academy" className="font-semibold text-gold-deep underline">support@dmaths.academy</a>{" "}
         or message us on WhatsApp at +234 70 2567 4894.
       </p>
 
@@ -58,7 +58,7 @@ export default function HelpPage() {
 
       <H2>Still need help?</H2>
       <p>
-        Email <a href="mailto:dmathstuition@gmail.com" className="font-semibold text-gold-deep underline">dmathstuition@gmail.com</a>{" "}
+        Email <a href="mailto:support@dmaths.academy" className="font-semibold text-gold-deep underline">support@dmaths.academy</a>{" "}
         and we'll get back to you within 24 hours.
       </p>
     </LegalPage>
