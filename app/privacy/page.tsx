@@ -75,7 +75,7 @@ export default function PrivacyPage() {
         Under the NDPA, students and guardians have the right to access the personal data we hold,
         correct inaccurate data, request deletion, withdraw consent, and lodge a complaint with
         the Nigeria Data Protection Commission. To exercise any of these rights, email us at
-        dmathstuition@gmail.com — we will respond within 30 days.
+        support@dmaths.academy — we will respond within 30 days.
       </p>
 
       <H2>Cookies</H2>
@@ -92,7 +92,7 @@ export default function PrivacyPage() {
 
       <H2>Contact</H2>
       <p>
-        Questions or requests: dmathstuition@gmail.com.
+        Questions or requests: support@dmaths.academy.
       </p>
     </LegalPage>
   );
