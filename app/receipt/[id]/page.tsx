@@ -84,7 +84,7 @@ export default async function ReceiptPage({ params }: { params: { id: string } }
         <div className="mt-8 flex flex-wrap items-end justify-between gap-4 border-t border-line pt-5">
           <div>
             <p className="font-display text-base font-bold text-board">D-Maths Tuition</p>
-            <p className="text-[12px] text-ink/50">dmathstuition@gmail.com</p>
+            <p className="text-[12px] text-ink/50">support@dmaths.academy</p>
           </div>
           <p className="text-[11px] text-ink/45">Issued {date(receipt.issued_at)}</p>
         </div>
