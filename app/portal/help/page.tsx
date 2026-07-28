@@ -119,8 +119,8 @@ export default function PortalHelpPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Channel icon="phone" title="WhatsApp us" detail="+234 70 2567 4894"
             href="https://wa.me/2347025674894" external />
-          <Channel icon="mail" title="Email support" detail="dmathstuition@gmail.com"
-            href="mailto:dmathstuition@gmail.com" external />
+          <Channel icon="mail" title="Email support" detail="support@dmaths.academy"
+            href="mailto:support@dmaths.academy" external />
           <Channel icon="messages" title="Message your tutor" detail="Chat inside the portal"
             href="/portal/messages" />
         </div>
