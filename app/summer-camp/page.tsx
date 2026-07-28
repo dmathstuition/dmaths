@@ -332,7 +332,7 @@ export default function SummerCamp() {
           <SocialLinks className="justify-center" />
         </div>
         <div className="bg-gold py-4 text-center text-xs font-semibold text-white">
-          © {new Date().getFullYear()} D-Maths Tuition Centre · dmathstuition@gmail.com · Asaba, Delta State
+          © {new Date().getFullYear()} D-Maths Tuition Centre · support@dmaths.academy · Asaba, Delta State
         </div>
       </footer>
 
