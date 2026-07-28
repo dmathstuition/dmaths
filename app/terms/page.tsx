@@ -95,7 +95,7 @@ export default function TermsPage() {
       </p>
 
       <H2>Contact</H2>
-      <p>dmathstuition@gmail.com</p>
+      <p>support@dmaths.academy</p>
     </LegalPage>
   );
 }
