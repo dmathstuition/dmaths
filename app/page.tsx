@@ -525,8 +525,8 @@ print("Hello from D-Maths!")`}</code></pre>
             <h4 className="font-display text-sm font-bold text-ink">Contact</h4>
             <ul className="mt-3 space-y-2 text-[13px] text-ink/55">
               <li>
-                <a href="mailto:dmathstuition@gmail.com" className="hover:text-gold-deep">
-                  dmathstuition@gmail.com
+                <a href="mailto:support@dmaths.academy" className="hover:text-gold-deep">
+                  support@dmaths.academy
                 </a>
               </li>
               <li>
@@ -548,7 +548,7 @@ print("Hello from D-Maths!")`}</code></pre>
           </div>
         </div>
         <div className="bg-gold py-4 text-center text-xs font-semibold text-white">
-          © {new Date().getFullYear()} D-Maths Tuition Centre · dmathstuition@gmail.com · Asaba, Delta State
+          © {new Date().getFullYear()} D-Maths Tuition Centre · support@dmaths.academy · Asaba, Delta State
         </div>
       </footer>
 
