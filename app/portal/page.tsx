@@ -85,8 +85,7 @@ export default async function StudentDashboard() {
       <div className="grid gap-5 lg:grid-cols-3">
         {/* Today's focus hero */}
         <Reveal className="lg:col-span-2">
-          <div data-tour="hero" className="relative flex h-full items-center overflow-hidden rounded-3xl p-7 sm:p-9"
-            style={{ background: "linear-gradient(135deg, #EEF2FE 0%, #E2ECFB 55%, #DCE7F6 100%)" }}>
+          <div data-tour="hero" className="relative flex h-full items-center overflow-hidden rounded-3xl bg-gradient-to-br from-[#EEF2FE] via-[#E2ECFB] to-[#DCE7F6] p-7 dark:from-[#10406F] dark:via-[#0A2A4F] dark:to-[#071C36] sm:p-9">
             <div className="relative z-10 max-w-md">
               <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-ink/45">
                 <span aria-hidden>✦</span> Today&apos;s focus
@@ -102,7 +101,7 @@ export default async function StudentDashboard() {
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 <span className="pill-gold">🎓 {me?.level || "Student"}</span>
                 {streak > 0 && (
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-white/70 px-3 py-1 text-sm font-bold text-gold-deep ring-1 ring-gold/30">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-white/70 px-3 py-1 text-sm font-bold text-gold-deep ring-1 ring-gold/30 dark:bg-white/10 dark:text-gold">
                     🔥 {streak}-day streak
                   </span>
                 )}
@@ -110,12 +109,12 @@ export default async function StudentDashboard() {
               </div>
               <div className="mt-5 flex flex-wrap items-center gap-3">
                 <Link href="/portal/assignments"
-                  className="group inline-flex items-center gap-2 rounded-full bg-board px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:shadow-lift">
+                  className="group inline-flex items-center gap-2 rounded-full bg-board px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:shadow-lift dark:bg-gold dark:text-board">
                   View my tasks
                   <span className="transition-transform duration-200 group-hover:translate-x-0.5">→</span>
                 </Link>
                 <Link href="/portal/refer" data-tour="refer"
-                  className="inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-2.5 text-sm font-bold text-ink ring-1 ring-ink/10 transition hover:bg-white">
+                  className="inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-2.5 text-sm font-bold text-ink ring-1 ring-ink/10 transition hover:bg-white dark:bg-white/10 dark:text-white dark:ring-white/15 dark:hover:bg-white/20">
                   🎁 Refer a friend
                 </Link>
               </div>
@@ -322,7 +321,7 @@ function Progress({ icon, label, value, text, unit, suffix = "", accent = "blue"
 }) {
   const a = ACCENTS[accent] ?? ACCENTS.blue;
   return (
-    <div className="rounded-2xl border border-line bg-white/60 p-3.5">
+    <div className="rounded-2xl border border-line bg-white/60 p-3.5 dark:bg-white/[0.04]">
       <div className="flex items-center justify-between">
         <span className={`flex h-8 w-8 items-center justify-center rounded-lg ${a.icon}`}>
           <Icon name={icon} className="h-4 w-4" />
