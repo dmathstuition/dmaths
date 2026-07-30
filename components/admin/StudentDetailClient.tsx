@@ -392,6 +392,10 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
           <div>
             <h1 className="font-display text-2xl font-semibold">{student.first_name} {student.last_name}</h1>
             <p className="font-mono text-sm text-ink/45">{student.student_code} · {student.level}</p>
+            <Link href={`/statement/${student.id}`}
+              className="mt-1 inline-flex items-center gap-1.5 text-xs font-bold text-gold-deep hover:underline">
+              <Icon name="reports" className="h-3.5 w-3.5" /> Account statement (PDF)
+            </Link>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {(student.subjects ?? []).map((s: string) => <span key={s} className="pill-blue">{s}</span>)}
             </div>

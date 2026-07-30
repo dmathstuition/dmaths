@@ -92,6 +92,13 @@ export default async function PortalPaymentsPage() {
         )}
       </div>
 
+      {rows.length > 0 && (
+        <Link href={`/statement/${user.id}`}
+          className="flex items-center justify-center gap-2 rounded-xl border border-line bg-white px-4 py-3 text-sm font-bold text-gold-deep transition hover:bg-chalk">
+          <Icon name="reports" className="h-4 w-4" /> Download account statement (PDF)
+        </Link>
+      )}
+
       <p className="px-1 text-[12px] text-ink/45">
         Something look wrong? Message your tutor from the Messages tab with the reference and we&apos;ll check it.
       </p>
