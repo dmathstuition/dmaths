@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { autoIssueReceipt } from "@/lib/receipts";
 
 // Manual payments (bank transfer / Opay / cash) that an admin types in — money
 // received outside Paystack. The ledger has no write RLS; only this service-role
@@ -101,6 +102,8 @@ export async function POST(req: Request) {
   });
 
   await rollSubscription(admin, student, email);
+  // Give every recorded payment a receipt without the admin lifting a finger.
+  await autoIssueReceipt(admin, ref, user.id);
 
   return NextResponse.json({ ok: true, payment: row });
 }
