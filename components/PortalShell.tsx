@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { Icon, type IconName } from "@/components/Icons";
+import Avatar from "@/components/Avatar";
 import Logo from "@/components/Logo";
 import ThemeToggle from "@/components/ThemeToggle";
 import NotificationBell from "@/components/NotificationBell";
@@ -70,7 +71,13 @@ export default function PortalShell({
         })}
       </nav>
       <div className="border-t border-white/10 p-4">
-        <p className="mb-2 truncate px-2 text-sm font-bold text-white/80">{name}</p>
+        <div className="mb-2 flex items-center gap-3 rounded-xl px-2 py-2">
+          <Avatar name={name} size="md" ring />
+          <div className="min-w-0">
+            <p className="truncate text-sm font-bold text-white">{name.trim() || "there"}</p>
+            <p className="truncate text-[11px] font-semibold text-white/40">{subtitle}</p>
+          </div>
+        </div>
         <ThemeToggle />
         <button onClick={signOut}
           className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-left text-sm font-semibold text-white/40 transition hover:bg-white/10 hover:text-white">
@@ -111,6 +118,7 @@ export default function PortalShell({
           <TourButton light />
           {search && <span data-tour="search"><AdminSearch /></span>}
           {bell && <span data-tour="bell"><NotificationBell mode={bell.mode} subjects={bell.subjects} noticesHref={bell.noticesHref} /></span>}
+          <Avatar name={name} size="sm" ring className="hidden lg:inline-flex" />
         </div>
       </header>
 
