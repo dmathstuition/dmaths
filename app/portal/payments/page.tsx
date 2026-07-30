@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Icon } from "@/components/Icons";
 import PaymentsSummary from "@/components/PaymentsSummary";
+import PayBalanceButton from "@/components/PayBalanceButton";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { owingSummary, fmtNaira } from "@/lib/payments";
@@ -56,7 +57,8 @@ export default async function PortalPaymentsPage() {
         </div>
       </div>
 
-      <PaymentsSummary summary={summary} dueLabel={summary.dueDate ? fmtWATDate(summary.dueDate) : undefined} />
+      <PaymentsSummary summary={summary} dueLabel={summary.dueDate ? fmtWATDate(summary.dueDate) : undefined}
+        action={<PayBalanceButton email={me?.email ?? ""} amount={summary.owing} studentId={user.id} />} />
 
       <div className="card neu-card overflow-hidden">
         {rows.length ? (

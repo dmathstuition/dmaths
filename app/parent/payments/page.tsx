@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Icon } from "@/components/Icons";
 import NoChildren from "@/components/parent/NoChildren";
 import PaymentsSummary from "@/components/PaymentsSummary";
+import PayBalanceButton from "@/components/PayBalanceButton";
 import { getParentChildren, childName } from "@/lib/parentAccess";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { owingSummary, fmtNaira } from "@/lib/payments";
@@ -16,6 +17,10 @@ export default async function ParentPaymentsPage() {
 
   const admin = supabaseAdmin();
   const childIds = ctx.children.map((c) => c.id);
+
+  // The parent's own email, to bill a card payment to.
+  const { data: parent } = await admin.from("profiles").select("email").eq("id", ctx.parentId).maybeSingle();
+  const parentEmail = parent?.email ?? "";
 
   // Each child's monthly-fee fields, for the owing summary.
   const { data: subRows } = await admin
@@ -73,7 +78,8 @@ export default async function ParentPaymentsPage() {
       {summaries.map(({ child, summary }) => (
         <PaymentsSummary key={child.id} summary={summary}
           name={`${childName(child).split(" ")[0]}'s`}
-          dueLabel={summary.dueDate ? fmtWATDate(summary.dueDate) : undefined} />
+          dueLabel={summary.dueDate ? fmtWATDate(summary.dueDate) : undefined}
+          action={<PayBalanceButton email={parentEmail} amount={summary.owing} studentId={child.id} />} />
       ))}
 
       <div className="card neu-card overflow-hidden">

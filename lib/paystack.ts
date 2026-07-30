@@ -56,21 +56,38 @@ export async function verifyTransaction(
 }
 
 // Idempotent upsert into the authoritative ledger. Pass a service-role client.
-export async function recordPayment(admin: any, data: PaystackTxn): Promise<void> {
+// `studentId` links the payment to a learner (a portal fee payment) — pass it
+// only after validating it's a real student, since it comes from client-set
+// Paystack metadata.
+export async function recordPayment(admin: any, data: PaystackTxn, studentId?: string | null): Promise<void> {
   const meta = data.metadata || {};
-  await admin.from("payments").upsert(
-    {
-      reference: data.reference,
-      email: (data.customer?.email ?? "").toLowerCase(),
-      amount: (data.amount ?? 0) / 100,
-      currency: data.currency ?? "NGN",
-      channel: data.channel ?? "",
-      plan: meta.plan ?? "",
-      camp: meta.camp ?? "",
-      status: data.status,
-      paid_at: data.paid_at ?? null,
-      raw: data as any,
-    },
-    { onConflict: "reference" },
-  );
+  const row: Record<string, any> = {
+    reference: data.reference,
+    email: (data.customer?.email ?? "").toLowerCase(),
+    amount: (data.amount ?? 0) / 100,
+    currency: data.currency ?? "NGN",
+    channel: data.channel ?? "",
+    plan: meta.plan ?? "",
+    camp: meta.camp ?? "",
+    status: data.status,
+    paid_at: data.paid_at ?? null,
+    raw: data as any,
+  };
+  if (studentId) row.student_id = studentId;
+
+  const { error } = await admin.from("payments").upsert(row, { onConflict: "reference" });
+  // Older database without the student_id column — record without the link.
+  if (error && /student_id/i.test(error.message)) {
+    const { student_id: _omit, ...withoutLink } = row;
+    await admin.from("payments").upsert(withoutLink, { onConflict: "reference" });
+  }
+}
+
+// Confirm a metadata-supplied studentId is actually a learner before trusting
+// it to attribute money. Returns the id, or null.
+export async function validStudentId(admin: any, id: unknown): Promise<string | null> {
+  const studentId = typeof id === "string" ? id.trim() : "";
+  if (!studentId) return null;
+  const { data } = await admin.from("profiles").select("id, role").eq("id", studentId).maybeSingle();
+  return data?.role === "student" ? data.id : null;
 }

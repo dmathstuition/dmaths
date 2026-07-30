@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
-import { paystackSecret, verifyTransaction, recordPayment, depositNgnForPlan } from "@/lib/paystack";
+import { paystackSecret, verifyTransaction, recordPayment, depositNgnForPlan, validStudentId } from "@/lib/paystack";
 
 export const runtime = "nodejs";
 
@@ -36,8 +36,10 @@ export async function POST(req: Request) {
   const payerEmail = (data.customer?.email ?? "").toLowerCase();
   const admin = supabaseAdmin();
 
-  // 3. Record into the authoritative ledger (idempotent on reference).
-  await recordPayment(admin, data);
+  // 3. Record into the authoritative ledger (idempotent on reference). A portal
+  //    fee payment carries the learner's id in metadata; link it once verified.
+  const studentId = await validStudentId(admin, data.metadata?.studentId);
+  await recordPayment(admin, data, studentId);
 
   // 4. For camp packages, the minimum is the 50% deposit (part payment is
   //    allowed) — reject anything below that.
