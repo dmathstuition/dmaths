@@ -3,6 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import ConfirmModal from "@/components/ConfirmModal";
+import StudentImport from "@/components/admin/StudentImport";
 import { useToast } from "@/components/Toast";
 
 type ConfirmState = {
@@ -16,6 +17,7 @@ export default function StudentsClient({ initial }: { initial: any[] }) {
   const [q, setQ] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [confirmState, setConfirmState] = useState<ConfirmState | null>(null);
+  const [importing, setImporting] = useState(false);
 
   async function reload() {
     const { data } = await supabase.from("profiles").select("*")
@@ -66,8 +68,16 @@ export default function StudentsClient({ initial }: { initial: any[] }) {
           <h1 className="font-display text-3xl font-semibold">Students</h1>
           <p className="text-sm text-ink/45">{students.length} registered</p>
         </div>
-        <button className="btn-ghost" onClick={exportCSV}>Export CSV</button>
+        <div className="flex flex-wrap gap-2">
+          <button className="btn-gold !min-h-[40px]" onClick={() => setImporting(v => !v)}>
+            {importing ? "Close import" : "+ Import students"}
+          </button>
+          <button className="btn-ghost !min-h-[40px]" onClick={exportCSV}>Export CSV</button>
+        </div>
       </div>
+
+      {importing && <StudentImport onClose={() => setImporting(false)} />}
+
       <input className="field max-w-sm" placeholder="Search name, ID, level or email…" value={q} onChange={e => setQ(e.target.value)} />
 
       {/* Desktop: table */}
