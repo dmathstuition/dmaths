@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { supabaseAdmin } from "@/lib/supabase/admin";
-import { recordPayment, depositNgnForPlan, type PaystackTxn } from "@/lib/paystack";
+import { recordPayment, depositNgnForPlan, validStudentId, type PaystackTxn } from "@/lib/paystack";
 import { notifyAdmins } from "@/lib/notify";
 import { autoIssueReceipt } from "@/lib/receipts";
 import { fmtNgn } from "@/lib/summerCamp";
@@ -50,7 +50,9 @@ export async function POST(req: Request) {
     const isNew = !prior;
 
     // 1. Authoritative ledger (idempotent on reference — safe against retries/replays).
-    await recordPayment(admin, data);
+    //    Link a portal fee payment to its learner (validated metadata).
+    const studentId = await validStudentId(admin, data.metadata?.studentId);
+    await recordPayment(admin, data, studentId);
 
     // 1b. Alert admins that money came in (in-app bell + push), and issue the
     //     receipt automatically — both best-effort, and only once per reference.

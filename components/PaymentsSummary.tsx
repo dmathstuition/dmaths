@@ -4,10 +4,11 @@ import { fmtNaira, type OwingSummary } from "@/lib/payments";
 // The "this month" fee card, shared by the student and parent payment pages.
 // Reads a computed OwingSummary (lib/payments) so the arithmetic lives in one
 // tested place. Says nothing at all when the learner is on no monthly plan.
-export default function PaymentsSummary({ summary, name, dueLabel }: {
+export default function PaymentsSummary({ summary, name, dueLabel, action }: {
   summary: OwingSummary;
   name?: string;         // "Ada's" — omitted on the student's own page
   dueLabel?: string;     // pre-formatted due date, e.g. "5 Aug 2026"
+  action?: React.ReactNode;  // a "Pay now" button, shown only when there's a balance
 }) {
   if (!summary.hasPlan) return null;
 
@@ -45,6 +46,8 @@ export default function PaymentsSummary({ summary, name, dueLabel }: {
               {summary.overdue ? "Was due" : "Due"} {dueLabel}
             </p>
           )}
+
+          {summary.owing > 0 && action}
         </div>
       </div>
     </div>
