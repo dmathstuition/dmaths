@@ -114,6 +114,23 @@ export default async function ParentPaymentsPage() {
         )}
       </div>
 
+      {ctx.children.length > 0 && (
+        <div className="card p-5">
+          <p className="mb-3 font-display text-sm font-bold text-ink">Account statements</p>
+          <div className="space-y-2">
+            {ctx.children.map((c) => (
+              <Link key={c.id} href={`/statement/${c.id}`}
+                className="flex items-center justify-between gap-3 rounded-xl border border-line bg-white px-4 py-2.5 text-sm transition hover:bg-chalk">
+                <span className="font-semibold text-ink">{childName(c)}</span>
+                <span className="flex items-center gap-1.5 font-bold text-gold-deep">
+                  <Icon name="reports" className="h-4 w-4" /> Statement (PDF)
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
       <p className="px-1 text-[12px] text-ink/45">
         Tap <strong>Receipt</strong> to open a printable copy. If a payment has no receipt yet,
         message us from the Messages tab with its reference and we&apos;ll issue one.
