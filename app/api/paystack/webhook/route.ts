@@ -3,6 +3,7 @@ import crypto from "crypto";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { recordPayment, depositNgnForPlan, type PaystackTxn } from "@/lib/paystack";
 import { notifyAdmins } from "@/lib/notify";
+import { autoIssueReceipt } from "@/lib/receipts";
 import { fmtNgn } from "@/lib/summerCamp";
 
 // Node runtime required: we need `crypto` and the raw request body to verify
@@ -51,8 +52,8 @@ export async function POST(req: Request) {
     // 1. Authoritative ledger (idempotent on reference — safe against retries/replays).
     await recordPayment(admin, data);
 
-    // 1b. Alert admins that money came in (in-app bell + push). Best-effort,
-    //     and only once per reference.
+    // 1b. Alert admins that money came in (in-app bell + push), and issue the
+    //     receipt automatically — both best-effort, and only once per reference.
     if (isNew) {
       const ngn = Math.round((data.amount ?? 0) / 100);
       const payer = data.customer?.email || "a customer";
@@ -61,6 +62,7 @@ export async function POST(req: Request) {
         body: `${fmtNgn(ngn)} from ${payer}`,
         link: "/admin/applications",
       });
+      await autoIssueReceipt(admin, data.reference);
     }
 
     // 2. If the payment carries an applicationId in metadata, stamp that
