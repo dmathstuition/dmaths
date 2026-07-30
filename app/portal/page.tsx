@@ -7,6 +7,7 @@ import Reveal from "@/components/landing/Reveal";
 import { Icon, type IconName } from "@/components/Icons";
 import Mascot from "@/components/Mascot";
 import { learnerAvatar } from "@/lib/avatars";
+import { subjectAverages } from "@/lib/progress";
 import { HeroStudy } from "@/components/illustrations";
 import RateCard from "@/components/portal/RateCard";
 import AddToCalendar from "@/components/portal/AddToCalendar";
@@ -44,8 +45,9 @@ export default async function StudentDashboard() {
   const [me, { data: classes }, { data: subs }, { data: notices }, { data: unreadMsgs }] = await Promise.all([
     getProfile(),
     supa.from("classes").select("*").gte("starts_at", new Date().toISOString()).order("starts_at").limit(3),
-    // Submissions, now carrying their assignment so we can list what's upcoming.
-    supa.from("assignment_submissions").select("status, assignment:assignments(id,title,subject,due_date)").eq("student_id", user!.id),
+    // Submissions, carrying grade + assignment so we can list what's upcoming
+    // and average graded work per subject.
+    supa.from("assignment_submissions").select("status, grade, assignment:assignments(id,title,subject,due_date)").eq("student_id", user!.id),
     supa.from("notices").select("id,title,created_at").order("created_at", { ascending: false }).limit(3),
     supa.from("messages").select("id").eq("sender_role", "admin").eq("read", false),
   ]);
@@ -54,6 +56,9 @@ export default async function StudentDashboard() {
   const total = (subs ?? []).length;
   const done = total - pending;
   const unread = unreadMsgs?.length ?? 0;
+
+  // Real per-subject averages from graded work (empty until work is graded).
+  const subjectAvgs = subjectAverages(subs ?? []);
 
   // Upcoming assignments — the pending ones, soonest first.
   const upcoming = (subs ?? [])
@@ -141,6 +146,22 @@ export default async function StudentDashboard() {
               <Progress icon="calendar" label="Attendance" value={me?.attendance ?? 0} suffix="%" accent="blue" bar={me?.attendance ?? 0} />
               <Progress icon="zap" label="Current streak" text={`${streak}`} unit="days" accent="gold" flame />
             </div>
+
+            {/* Per-subject averages from graded work */}
+            {subjectAvgs.length > 0 && (
+              <div className="mt-4 space-y-2.5 border-t border-line pt-4">
+                <p className="text-[11px] font-bold uppercase tracking-wide text-ink/40">By subject</p>
+                {subjectAvgs.slice(0, 4).map((s, i) => (
+                  <div key={s.subject} className="flex items-center gap-3">
+                    <span className="w-20 flex-shrink-0 truncate text-xs font-semibold text-ink">{s.subject}</span>
+                    <div className="h-2 flex-1 overflow-hidden rounded-full bg-line">
+                      <div className="bar-animate h-full rounded-full" style={{ width: `${Math.min(s.pct, 100)}%`, backgroundColor: SUBJECT_COLORS[i % SUBJECT_COLORS.length] }} />
+                    </div>
+                    <span className="w-9 flex-shrink-0 text-right text-xs font-bold text-ink">{s.pct}%</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </Reveal>
       </div>
@@ -308,6 +329,9 @@ export default async function StudentDashboard() {
     </div>
   );
 }
+
+// Distinct bar colours for the per-subject breakdown (cycled).
+const SUBJECT_COLORS = ["#1A60AB", "#8B5CF6", "#2563EB", "#059669", "#EFAE56"];
 
 const ACCENTS: Record<string, { icon: string; bar: string }> = {
   emerald: { icon: "bg-emerald-50 text-emerald-600", bar: "#059669" },

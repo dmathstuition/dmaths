@@ -6,6 +6,7 @@ import Avatar from "@/components/Avatar";
 import Mascot from "@/components/Mascot";
 import AskBuddyButton from "@/components/AskBuddyButton";
 import { learnerAvatar, BUDDY_MASCOT, ADMIN_AVATAR } from "@/lib/avatars";
+import { countTrend, sumTrend } from "@/lib/trends";
 import { HeroStudy } from "@/components/illustrations";
 import CountUp from "@/components/landing/CountUp";
 import Reveal from "@/components/landing/Reveal";
@@ -29,11 +30,14 @@ export default async function AdminDashboard() {
   const now = new Date().toISOString();
   // Include classes that began in the last 3h so an in-progress one can read "Live now".
   const scheduleFrom = new Date(Date.now() - 3 * 3600 * 1000).toISOString();
+  // Start of last month — enough history to trend this month vs last month.
+  const trendFrom = new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1).toISOString();
   const [
     me,
     { count: students }, { count: pending }, { count: classes },
     { count: activeStudents }, { data: recent }, { data: allStudents }, { count: assignments },
     { data: payments }, { data: subs }, { data: schedule },
+    { data: assignmentDates }, { data: classDates },
   ] = await Promise.all([
     getProfile(),
     supa.from("profiles").select("*", { count: "exact", head: true }).eq("role", "student"),
@@ -50,6 +54,9 @@ export default async function AdminDashboard() {
     // Today's schedule (display only).
     supa.from("classes").select("id,subject,tutor,starts_at,duration_minutes,platform,link")
       .gte("starts_at", scheduleFrom).order("starts_at").limit(5),
+    // Dates for month-over-month trend chips (errors harmlessly to null → no chip).
+    supa.from("assignments").select("created_at").gte("created_at", trendFrom),
+    supa.from("classes").select("created_at").gte("created_at", trendFrom),
   ]);
 
   const firstName = me?.first_name?.trim() || "there";
@@ -77,6 +84,12 @@ export default async function AdminDashboard() {
 
   // Top performers — the strongest of the most recent intake (has names + score).
   const topPerformers = [...(recent ?? [])].sort((a, b) => (b.avg_score || 0) - (a.avg_score || 0)).slice(0, 3);
+
+  // Real month-over-month trends (null → the card shows a plain label instead).
+  const studentsTrend = countTrend((allStudents ?? []).map((s: any) => s.created_at));
+  const classesTrend = countTrend((classDates ?? []).map((c: any) => c.created_at));
+  const assignmentsTrend = countTrend((assignmentDates ?? []).map((a: any) => a.created_at));
+  const revenueTrend = sumTrend((payments ?? []).map((p: any) => ({ date: p.paid_at || p.created_at, amount: Number(p.amount || 0) })));
 
   return (
     <div className="space-y-6">
@@ -119,16 +132,16 @@ export default async function AdminDashboard() {
       {/* Stat cards */}
       <div data-tour="stats" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <Reveal delay={0}>
-          <StatCard icon="students" label="Total students" value={students ?? 0} href="/admin/students" tint="blue" sub={`${activeStudents ?? 0} active`} />
+          <StatCard icon="students" label="Total students" value={students ?? 0} href="/admin/students" tint="blue" sub={`${activeStudents ?? 0} active`} trend={studentsTrend} />
         </Reveal>
         <Reveal delay={60}>
-          <StatCard icon="classes" label="Upcoming classes" value={classes ?? 0} href="/admin/classes" tint="sky" sub="scheduled" />
+          <StatCard icon="classes" label="Upcoming classes" value={classes ?? 0} href="/admin/classes" tint="sky" sub="scheduled" trend={classesTrend} />
         </Reveal>
         <Reveal delay={120}>
-          <StatCard icon="assignments" label="Assignments" value={assignments ?? 0} href="/admin/assignments" tint="gold" sub="posted" />
+          <StatCard icon="assignments" label="Assignments" value={assignments ?? 0} href="/admin/assignments" tint="gold" sub="posted" trend={assignmentsTrend} />
         </Reveal>
         <Reveal delay={180}>
-          <StatCard icon="payments" label="Revenue this month" value={monthRevenue} href="/admin/payments" tint="emerald" prefix="₦" thousands sub="received" />
+          <StatCard icon="payments" label="Revenue this month" value={monthRevenue} href="/admin/payments" tint="emerald" prefix="₦" thousands sub="received" trend={revenueTrend} />
         </Reveal>
       </div>
 
@@ -323,8 +336,8 @@ const TINTS: Record<string, string> = {
   emerald: "bg-emerald-50 text-emerald-600",
 };
 
-function StatCard({ icon, label, value, href, tint, sub, prefix = "", thousands = false }: {
-  icon: IconName; label: string; value: number; href: string; tint: string; sub?: string; prefix?: string; thousands?: boolean;
+function StatCard({ icon, label, value, href, tint, sub, prefix = "", thousands = false, trend }: {
+  icon: IconName; label: string; value: number; href: string; tint: string; sub?: string; prefix?: string; thousands?: boolean; trend?: number | null;
 }) {
   return (
     <Link href={href} className="card neu-card card-interactive stat-shimmer group relative flex flex-col gap-3 overflow-hidden p-5">
@@ -332,7 +345,14 @@ function StatCard({ icon, label, value, href, tint, sub, prefix = "", thousands 
         <span className={`ci-icon flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl ${TINTS[tint]}`}>
           <Icon name={icon} />
         </span>
-        {sub && <span className="rounded-full bg-chalk px-2.5 py-1 text-[10px] font-bold text-ink/45">{sub}</span>}
+        {trend != null ? (
+          <span className={`inline-flex items-center gap-0.5 rounded-full px-2 py-1 text-[10px] font-bold ${trend >= 0 ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15" : "bg-red-50 text-red-500 dark:bg-red-500/15"}`}
+            title="vs last month">
+            {trend >= 0 ? "↑" : "↓"} {Math.abs(trend)}%
+          </span>
+        ) : sub ? (
+          <span className="rounded-full bg-chalk px-2.5 py-1 text-[10px] font-bold text-ink/45">{sub}</span>
+        ) : null}
       </div>
       <div>
         <p className="font-display text-2xl font-bold text-ink sm:text-3xl">
