@@ -114,6 +114,7 @@ export default async function ReportCardPage({ params }: { params: { id: string 
           </div>
         </div>
         <p className="mt-6 font-mono text-[10px] uppercase tracking-widest text-ink/35">Report No. {card.serial}</p>
+        <p className="mt-1 text-[10px] text-ink/35">Verify this report at dmaths.academy/verify</p>
       </div>
 
       <CertificateActions backHref={backHref} />
