@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Reveal from "@/components/landing/Reveal";
 import Tilt3D from "@/components/landing/Tilt3D";
-import PortalPhone from "@/components/landing/PortalPhone";
+import PortalScreens from "@/components/landing/PortalScreens";
 import { Icon, type IconName } from "@/components/Icons";
 
 const FEATURES: { icon: IconName; label: string }[] = [
@@ -77,7 +77,7 @@ export default function PortalShowcase({ variant = "landing" }: { variant?: "lan
               <p className="text-[9px] font-semibold text-white/60">day streak</p>
             </div>
             <Tilt3D max={8}>
-              <PortalPhone />
+              <PortalScreens />
             </Tilt3D>
           </div>
         </div>
