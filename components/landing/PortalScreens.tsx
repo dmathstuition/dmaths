@@ -4,12 +4,12 @@ import { Icon } from "@/components/Icons";
 import PortalPhone from "@/components/landing/PortalPhone";
 
 // Real app screenshots in a phone frame. Tap the phone to flip between the two
-// views with a smooth crossfade. If the images aren't uploaded yet, it falls
-// back to the built-in mock so the landing page is never broken.
-//
-// To set the screenshots: drop two portrait phone screenshots into /public as
-// portal-screen-1.png (shown first) and portal-screen-2.png (shown on tap).
-const SHOTS = ["/portal-screen-1.png", "/portal-screen-2.png"];
+// views with a smooth crossfade. If an image ever fails to load, it falls back
+// to the built-in mock so the landing page is never broken.
+const SHOTS = [
+  "/Screenshot_20260722-085524.jpg", // shown first
+  "/Screenshot_20260722-085451.jpg", // shown on tap
+];
 
 export default function PortalScreens({ className = "" }: { className?: string }) {
   const [i, setI] = useState(0);
