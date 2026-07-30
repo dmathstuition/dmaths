@@ -67,6 +67,7 @@ export default async function CertificatePage({ params }: { params: { id: string
             </div>
 
             <p className="mt-8 font-mono text-[10px] uppercase tracking-widest text-ink/35">Certificate No. {cert.serial}</p>
+            <p className="mt-1 text-[10px] text-ink/35">Verify this certificate at dmaths.academy/verify</p>
           </div>
         </div>
       </div>
