@@ -4,6 +4,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import AssistantWidget from "@/components/portal/AssistantWidget";
 import { AssistantProvider } from "@/components/portal/AssistantContext";
 import { getProfile } from "@/lib/auth";
+import { avatarForRole } from "@/lib/avatars";
 import { supabaseServer } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
@@ -60,6 +61,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
   return (
     <PortalShell nav={NAV} tabs={TABS} name={`${p?.first_name ?? ""} ${p?.last_name ?? ""}`} subtitle="Administrator"
+      avatarSrc={avatarForRole(p.role, p.id)}
       bell={{ mode: "admin", noticesHref: "/admin/applications" }} search idleMinutes={120}>
       <AuthGuard />
       <AssistantProvider>
