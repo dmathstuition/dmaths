@@ -20,12 +20,6 @@ import { useDialog } from "@/lib/useDialog";
 
 export type NavItem = { href: string; label: string; icon: IconName };
 
-// Time-aware greeting for the mobile app header.
-function greeting() {
-  const h = new Date().getHours();
-  return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
-}
-
 export default function PortalShell({
   nav, name, subtitle, children, bell, search, tabs, idleMinutes = 30, avatarSrc,
 }: {
@@ -41,7 +35,6 @@ export default function PortalShell({
   const [open, setOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const drawerRef = useRef<HTMLDivElement>(null);
-  const firstName = name.trim().split(" ")[0] || "there";
 
   // The mobile drawer is a dialog: Esc closes it, Tab stays inside, focus goes
   // back to the hamburger.
@@ -96,30 +89,27 @@ export default function PortalShell({
       {/* Desktop sidebar */}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 lg:block">{sidebar}</aside>
 
-      {/* Top bar — visible on every screen size; holds the notification bell */}
-      <header className="glass-dark sticky top-0 z-40 flex items-center justify-between px-4 py-3 lg:ml-64 lg:bg-transparent lg:px-10 lg:backdrop-blur-none">
-        {/* mobile: greeting (when app tabs are on) or hamburger fallback */}
-        {tabs ? (
-          <div className="lg:hidden">
-            <p className="text-[11px] font-semibold text-white/45">{greeting()} 👋</p>
-            <p className="font-display text-base font-bold leading-tight text-white">{firstName}</p>
-          </div>
-        ) : (
-          <>
-            <button onClick={() => setOpen(true)} aria-label="Open menu"
-              className="rounded-lg bg-white/10 p-2.5 text-white lg:hidden">
-              <Icon name="menu" />
-            </button>
-            <span className="lg:hidden"><Logo light /></span>
-          </>
-        )}
+      {/* Top bar — app-style on mobile (hamburger · logo · bell · avatar),
+          transparent on desktop where the sidebar carries the brand. */}
+      <header className="sticky top-0 z-40 flex items-center gap-3 border-b border-line bg-chalk/85 px-4 py-2.5 backdrop-blur-xl dark:border-white/10 dark:bg-board/85 lg:ml-64 lg:border-0 lg:bg-transparent lg:px-10 lg:py-4 lg:backdrop-blur-none dark:lg:bg-transparent">
+        {/* mobile: menu + brand + subtitle */}
+        <div className="flex items-center gap-2 lg:hidden">
+          <button onClick={() => setOpen(true)} aria-label="Open menu"
+            className="flex h-10 w-10 items-center justify-center rounded-xl text-ink/70 transition hover:bg-ink/5 dark:text-white dark:hover:bg-white/10">
+            <Icon name="menu" />
+          </button>
+          <Link href="/" className="flex flex-col justify-center leading-none">
+            <span className="dark:brightness-0 dark:invert"><Logo size="sm" /></span>
+            <span className="mt-0.5 pl-0.5 font-mono text-[9px] uppercase tracking-[.16em] text-ink/40 dark:text-white/40">{subtitle}</span>
+          </Link>
+        </div>
 
-        <div className="ml-auto flex items-center gap-3">
-          <CommandPalette nav={nav} />
-          <TourButton light />
-          {search && <span data-tour="search"><AdminSearch /></span>}
+        <div className="ml-auto flex items-center gap-2 sm:gap-3">
+          <span className="hidden lg:block"><CommandPalette nav={nav} /></span>
+          <span className="hidden lg:block"><TourButton light /></span>
+          {search && <span data-tour="search" className="hidden lg:block"><AdminSearch /></span>}
           {bell && <span data-tour="bell"><NotificationBell mode={bell.mode} subjects={bell.subjects} noticesHref={bell.noticesHref} /></span>}
-          <Avatar name={name} size="sm" ring src={avatarSrc} className="hidden lg:inline-flex" />
+          <Avatar name={name} size="sm" ring src={avatarSrc} />
         </div>
       </header>
 
