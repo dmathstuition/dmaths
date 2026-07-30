@@ -3,7 +3,9 @@ import { supabaseServer } from "@/lib/supabase/server";
 import { getProfile } from "@/lib/auth";
 import { Icon, type IconName } from "@/components/Icons";
 import Avatar from "@/components/Avatar";
+import Mascot from "@/components/Mascot";
 import AskBuddyButton from "@/components/AskBuddyButton";
+import { learnerAvatar, BUDDY_MASCOT } from "@/lib/avatars";
 import { HeroStudy } from "@/components/illustrations";
 import CountUp from "@/components/landing/CountUp";
 import Reveal from "@/components/landing/Reveal";
@@ -163,7 +165,7 @@ export default async function AdminDashboard() {
                       <tr key={s.id} className="group border-t border-line/60 transition hover:bg-chalk/50">
                         <td className="px-5 py-3">
                           <Link href={`/admin/students/${s.id}`} className="flex items-center gap-3">
-                            <Avatar name={`${s.first_name} ${s.last_name}`} size="sm" />
+                            <Avatar name={`${s.first_name} ${s.last_name}`} size="sm" src={learnerAvatar(s.id)} />
                             <span className="font-bold group-hover:text-gold-deep group-hover:underline">
                               {s.first_name} {s.last_name}
                             </span>
@@ -254,7 +256,7 @@ export default async function AdminDashboard() {
                   {topPerformers.map((s, i) => (
                     <Link key={s.id} href={`/admin/students/${s.id}`} className="flex items-center gap-3">
                       <span className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-[11px] font-extrabold ${i === 0 ? "bg-gold text-board" : "bg-chalk text-ink/50"}`}>{i + 1}</span>
-                      <Avatar name={`${s.first_name} ${s.last_name}`} size="sm" />
+                      <Avatar name={`${s.first_name} ${s.last_name}`} size="sm" src={learnerAvatar(s.id)} />
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-bold text-ink">{s.first_name} {s.last_name}</p>
                         <p className="truncate text-xs text-ink/45">{s.level}</p>
@@ -271,8 +273,9 @@ export default async function AdminDashboard() {
           <Reveal delay={160}>
             <div className="relative overflow-hidden rounded-2xl p-6 text-white shadow-lift"
               style={{ background: "linear-gradient(135deg, #4F46E5 0%, #312E81 100%)" }}>
-              <div aria-hidden className="pointer-events-none absolute -right-6 -bottom-6 h-40 w-40 opacity-90">
-                <HeroStudy className="h-full w-full" />
+              <div aria-hidden className="pointer-events-none absolute -right-3 -bottom-3 h-44 w-44">
+                <Mascot src={BUDDY_MASCOT} className="h-full w-full object-contain object-bottom drop-shadow-xl"
+                  fallback={<HeroStudy className="h-full w-full opacity-90" />} />
               </div>
               <div className="relative max-w-[70%]">
                 <p className="text-[11px] font-bold uppercase tracking-wider text-white/60">Meet your AI assistant</p>

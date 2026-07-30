@@ -5,6 +5,8 @@ import { getUser, getProfile } from "@/lib/auth";
 import CountUp from "@/components/landing/CountUp";
 import Reveal from "@/components/landing/Reveal";
 import { Icon, type IconName } from "@/components/Icons";
+import Mascot from "@/components/Mascot";
+import { learnerAvatar } from "@/lib/avatars";
 import { HeroStudy } from "@/components/illustrations";
 import RateCard from "@/components/portal/RateCard";
 import AddToCalendar from "@/components/portal/AddToCalendar";
@@ -119,9 +121,10 @@ export default async function StudentDashboard() {
               </div>
               <DashboardTip />
             </div>
-            {/* character illustration */}
-            <div aria-hidden className="pointer-events-none absolute -right-4 bottom-0 hidden h-[115%] w-1/2 items-end justify-end sm:flex">
-              <HeroStudy className="h-full w-full object-contain object-bottom" />
+            {/* character illustration — the learner's own mascot */}
+            <div aria-hidden className="pointer-events-none absolute -right-2 bottom-0 hidden h-[118%] w-1/2 items-end justify-end sm:flex">
+              <Mascot src={learnerAvatar(user!.id)} className="mascot-bob h-full w-full object-contain object-bottom drop-shadow-xl"
+                fallback={<HeroStudy className="h-full w-full object-contain object-bottom" />} />
             </div>
           </div>
         </Reveal>

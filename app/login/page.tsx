@@ -5,6 +5,7 @@ import Link from "next/link";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { useToast } from "@/components/Toast";
 import { Icon } from "@/components/Icons";
+import { LOGIN_MASCOT } from "@/lib/avatars";
 import { IDLE_ACTIVITY_KEY } from "@/components/IdleLogout";
 
 export default function Login() {
@@ -42,6 +43,7 @@ export default function Login() {
   // Two-factor step-up state.
   const [mfaRequired, setMfaRequired] = useState(false);
   const [mfaCode, setMfaCode] = useState("");
+  const [mascotOk, setMascotOk] = useState(true);
 
   useEffect(() => {
     setStandalone(
@@ -164,13 +166,19 @@ export default function Login() {
           {/* Curved gold header — the "Terra" look, in D-Maths gold */}
           <div className="relative px-8 pt-9 pb-16 text-white"
             style={{ background: "linear-gradient(135deg, #F4C078 0%, #EFAE56 45%, #C8881F 100%)" }}>
+            {/* Waving D-Maths mascot — greets you on sign-in (falls back to hidden if absent) */}
+            {mascotOk && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={LOGIN_MASCOT} alt="" aria-hidden onError={() => setMascotOk(false)}
+                className="mascot-greet pointer-events-none absolute -top-1 right-1 z-10 h-36 w-36 object-contain drop-shadow-xl sm:right-3 sm:h-40 sm:w-40" />
+            )}
             <div className="flex items-center gap-3">
               <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/25 backdrop-blur-sm ring-1 ring-white/40">
                 <Icon name="graduationCap" className="h-6 w-6 text-white" />
               </span>
             </div>
-            <h1 className="mt-5 font-display text-[1.75rem] font-extrabold leading-tight">{mfaRequired ? "Two-step verification" : "Welcome back"}</h1>
-            <p className="mt-1 text-sm text-white/80">{mfaRequired ? "Enter the code from your authenticator app." : "Sign in to your D-Maths portal."}</p>
+            <h1 className="mt-5 max-w-[60%] font-display text-[1.75rem] font-extrabold leading-tight">{mfaRequired ? "Two-step verification" : "Welcome back"}</h1>
+            <p className="mt-1 max-w-[62%] text-sm text-white/80">{mfaRequired ? "Enter the code from your authenticator app." : "Sign in to your D-Maths portal."}</p>
             {/* white curved base */}
             <svg className="absolute inset-x-0 bottom-[-1px] h-12 w-full" viewBox="0 0 500 48" preserveAspectRatio="none" aria-hidden="true">
               <path d="M0,48 L0,18 C160,46 340,46 500,18 L500,48 Z" fill="#fff" />

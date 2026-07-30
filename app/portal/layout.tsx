@@ -6,6 +6,7 @@ import DailyTaskGuard from "@/components/portal/DailyTaskGuard";
 import AssistantWidget from "@/components/portal/AssistantWidget";
 import { AssistantProvider } from "@/components/portal/AssistantContext";
 import { getProfile } from "@/lib/auth";
+import { avatarForRole } from "@/lib/avatars";
 import { redirect } from "next/navigation";
 
 const NAV: NavItem[] = [
@@ -57,6 +58,7 @@ export default async function PortalLayout({ children }: { children: React.React
   return (
     <PortalShell nav={NAV} tabs={TABS} name={`${p.first_name ?? ""} ${p.last_name ?? ""}`}
       subtitle={p.student_code ?? "Student"}
+      avatarSrc={avatarForRole(p.role, p.id)}
       bell={{ mode: "student", subjects, noticesHref: "/portal/notices" }}>
       <AuthGuard />
       <StreakHeartbeat />

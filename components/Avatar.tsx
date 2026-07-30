@@ -1,7 +1,11 @@
-// A consistent, on-brand avatar for anyone in the portal. There are no uploaded
-// profile photos, so we render the person's initials on a gradient that is
-// derived deterministically from their name — the same person always gets the
-// same colour, everywhere they appear (sidebar, headers, activity feeds, lists).
+"use client";
+import { useState } from "react";
+
+// A consistent, on-brand avatar for anyone in the portal. When a mascot photo
+// `src` is given it's shown cropped to a circle (face-up); otherwise — or if the
+// image fails to load — we fall back to the person's initials on a gradient that
+// is derived deterministically from their name, so the same person always gets
+// the same colour everywhere they appear (sidebar, headers, activity lists).
 
 const GRADIENTS = [
   "from-[#1A60AB] to-[#0F3A6B]", // brand blue
@@ -41,20 +45,33 @@ export default function Avatar({
   size = "md",
   ring = false,
   className = "",
+  src,
 }: {
   name: string;
   size?: "xs" | "sm" | "md" | "lg" | "xl";
   ring?: boolean;
   className?: string;
+  src?: string;
 }) {
   const label = (name || "").trim() || "User";
+  const [ok, setOk] = useState(true);
   return (
     <span
       aria-hidden
       title={label}
-      className={`inline-flex flex-shrink-0 select-none items-center justify-center rounded-full bg-gradient-to-br font-display font-bold text-white shadow-sm ${pick(label)} ${SIZES[size]} ${ring ? "ring-2 ring-white/70 dark:ring-white/15" : ""} ${className}`}
+      className={`relative inline-flex flex-shrink-0 select-none items-center justify-center overflow-hidden rounded-full bg-gradient-to-br font-display font-bold text-white shadow-sm ${pick(label)} ${SIZES[size]} ${ring ? "ring-2 ring-white/70 dark:ring-white/15" : ""} ${className}`}
     >
       {initials(label)}
+      {src && ok && (
+        // The mascot sits on top of the initials, which show through if it fails.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={src}
+          alt=""
+          onError={() => setOk(false)}
+          className="absolute inset-0 h-full w-full object-cover object-top"
+        />
+      )}
     </span>
   );
 }

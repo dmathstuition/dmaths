@@ -27,13 +27,14 @@ function greeting() {
 }
 
 export default function PortalShell({
-  nav, name, subtitle, children, bell, search, tabs, idleMinutes = 30,
+  nav, name, subtitle, children, bell, search, tabs, idleMinutes = 30, avatarSrc,
 }: {
   nav: NavItem[]; name: string; subtitle: string; children: React.ReactNode;
   bell?: { mode: "student" | "admin"; subjects?: string[]; noticesHref: string };
   search?: boolean;
   tabs?: Tab[];
   idleMinutes?: number;
+  avatarSrc?: string;
 }) {
   const path = usePathname();
   const router = useRouter();
@@ -72,7 +73,7 @@ export default function PortalShell({
       </nav>
       <div className="border-t border-white/10 p-4">
         <div className="mb-2 flex items-center gap-3 rounded-xl px-2 py-2">
-          <Avatar name={name} size="md" ring />
+          <Avatar name={name} size="md" ring src={avatarSrc} />
           <div className="min-w-0">
             <p className="truncate text-sm font-bold text-white">{name.trim() || "there"}</p>
             <p className="truncate text-[11px] font-semibold text-white/40">{subtitle}</p>
@@ -118,7 +119,7 @@ export default function PortalShell({
           <TourButton light />
           {search && <span data-tour="search"><AdminSearch /></span>}
           {bell && <span data-tour="bell"><NotificationBell mode={bell.mode} subjects={bell.subjects} noticesHref={bell.noticesHref} /></span>}
-          <Avatar name={name} size="sm" ring className="hidden lg:inline-flex" />
+          <Avatar name={name} size="sm" ring src={avatarSrc} className="hidden lg:inline-flex" />
         </div>
       </header>
 

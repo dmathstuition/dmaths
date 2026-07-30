@@ -206,6 +206,22 @@ html { scroll-behavior: smooth; }
 .reveal-4 { animation-delay: .35s; }
 .float { animation: floatY 5s ease-in-out infinite; }
 
+/* ── Character mascots (login hero, dashboard heroes) ─────── */
+@keyframes mascotIn {
+  from { opacity: 0; transform: translateY(16px) scale(.9); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes mascotBob {
+  0%, 100% { transform: translateY(0) rotate(-1.5deg); }
+  50%      { transform: translateY(-7px) rotate(1.5deg); }
+}
+.mascot-in { animation: mascotIn .6s cubic-bezier(.16,.84,.44,1) both; }
+/* the bob starts after the entrance settles */
+.mascot-bob { animation: mascotBob 4s ease-in-out .6s infinite; }
+/* login hero: entrance, then a continuous gentle bob */
+.mascot-greet { animation: mascotIn .6s cubic-bezier(.16,.84,.44,1) both, mascotBob 4s ease-in-out .7s infinite; }
+/* (the global prefers-reduced-motion rule disables both, leaving them visible) */
+
 /* ── Celebration confetti (components/ui/Confetti) ───────── */
 @keyframes confettiFall {
   0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
