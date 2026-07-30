@@ -86,7 +86,7 @@ export default async function StudentDashboard() {
         {/* Today's focus hero */}
         <Reveal className="lg:col-span-2">
           <div data-tour="hero" className="relative flex h-full items-center overflow-hidden rounded-3xl bg-gradient-to-br from-[#EEF2FE] via-[#E2ECFB] to-[#DCE7F6] p-7 dark:from-[#10406F] dark:via-[#0A2A4F] dark:to-[#071C36] sm:p-9">
-            <div className="relative z-10 max-w-md">
+            <div className="relative z-10 max-w-[62%] sm:max-w-md">
               <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-ink/45">
                 <span aria-hidden>✦</span> Today&apos;s focus
               </p>
@@ -107,7 +107,7 @@ export default async function StudentDashboard() {
                 )}
                 <span className="font-mono text-xs font-semibold text-ink/40">ID: {me?.student_code}</span>
               </div>
-              <div className="mt-5 flex flex-wrap items-center gap-3">
+              <div className="mt-5 hidden flex-wrap items-center gap-3 sm:flex">
                 <Link href="/portal/assignments"
                   className="group inline-flex items-center gap-2 rounded-full bg-board px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:shadow-lift dark:bg-gold dark:text-board">
                   View my tasks
@@ -118,11 +118,11 @@ export default async function StudentDashboard() {
                   🎁 Refer a friend
                 </Link>
               </div>
-              <DashboardTip />
+              <div className="hidden sm:block"><DashboardTip /></div>
             </div>
             {/* character illustration — the learner's own mascot */}
-            <div aria-hidden className="pointer-events-none absolute -right-2 bottom-0 hidden h-[118%] w-1/2 items-end justify-end sm:flex">
-              <Mascot src={learnerAvatar(user!.id)} className="mascot-bob h-full w-full object-contain object-bottom drop-shadow-xl"
+            <div aria-hidden className="pointer-events-none absolute -right-1 bottom-0 top-0 flex w-[42%] items-center justify-end sm:-right-2 sm:top-auto sm:h-[118%] sm:w-1/2 sm:items-end">
+              <Mascot src={learnerAvatar(user!.id)} className="mascot-bob h-[92%] w-full object-contain object-bottom drop-shadow-xl sm:h-full"
                 fallback={<HeroStudy className="h-full w-full object-contain object-bottom" />} />
             </div>
           </div>

@@ -5,7 +5,7 @@ import { Icon, type IconName } from "@/components/Icons";
 import Avatar from "@/components/Avatar";
 import Mascot from "@/components/Mascot";
 import AskBuddyButton from "@/components/AskBuddyButton";
-import { learnerAvatar, BUDDY_MASCOT } from "@/lib/avatars";
+import { learnerAvatar, BUDDY_MASCOT, ADMIN_AVATAR } from "@/lib/avatars";
 import { HeroStudy } from "@/components/illustrations";
 import CountUp from "@/components/landing/CountUp";
 import Reveal from "@/components/landing/Reveal";
@@ -82,14 +82,18 @@ export default async function AdminDashboard() {
     <div className="space-y-6">
       {/* Greeting */}
       <Reveal>
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
+        <div className="relative flex flex-wrap items-end justify-between gap-3">
+          <div className="max-w-[64%] sm:max-w-none">
             <h1 className="font-display text-3xl font-bold text-ink sm:text-4xl">
               {greeting()}, {firstName}! <span className="align-middle">👋</span>
             </h1>
             <p className="mt-1 text-sm text-ink/50">Here&apos;s what&apos;s happening at D-Maths today.</p>
           </div>
           <p className="hidden font-mono text-[11px] uppercase tracking-[.2em] text-ink/35 sm:block">{today}</p>
+          {/* mobile-only greeting mascot (the suited admin) */}
+          <div aria-hidden className="pointer-events-none absolute -top-2 right-0 h-24 w-24 sm:hidden">
+            <Mascot src={ADMIN_AVATAR} className="mascot-bob h-full w-full object-contain object-top drop-shadow-xl" fallback={null} />
+          </div>
         </div>
       </Reveal>
 
@@ -113,7 +117,7 @@ export default async function AdminDashboard() {
       )}
 
       {/* Stat cards */}
-      <div data-tour="stats" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div data-tour="stats" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <Reveal delay={0}>
           <StatCard icon="students" label="Total students" value={students ?? 0} href="/admin/students" tint="blue" sub={`${activeStudents ?? 0} active`} />
         </Reveal>
@@ -331,7 +335,7 @@ function StatCard({ icon, label, value, href, tint, sub, prefix = "", thousands 
         {sub && <span className="rounded-full bg-chalk px-2.5 py-1 text-[10px] font-bold text-ink/45">{sub}</span>}
       </div>
       <div>
-        <p className="font-display text-3xl font-bold text-ink">
+        <p className="font-display text-2xl font-bold text-ink sm:text-3xl">
           {prefix}<CountUp to={value} duration={1200} thousands={thousands} />
         </p>
         <p className="mt-0.5 text-[11px] font-bold uppercase tracking-wider text-ink/40">{label}</p>
