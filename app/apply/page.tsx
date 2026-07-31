@@ -1,5 +1,6 @@
 "use client";
 import Logo from "@/components/Logo";
+import HeroMascot from "@/components/HeroMascot";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Icon } from "@/components/Icons";
@@ -177,11 +178,14 @@ export default function Apply() {
 
   return (
     <Shell>
-      <div className="mx-auto mb-6 max-w-2xl text-center">
-        <h1 className="font-display text-2xl font-bold sm:text-3xl">Register with D-Maths</h1>
-        <p className="mt-1 text-sm text-ink/50">
-          Enrol in online maths, science &amp; coding tuition — it only takes a few minutes.
-        </p>
+      <div className="mx-auto mb-6 max-w-2xl">
+        <div className="relative flex min-h-[136px] items-center overflow-hidden rounded-3xl bg-gradient-to-br from-[#EEF2FE] via-[#E2ECFB] to-[#DCE7F6] p-6 sm:p-7">
+          <div className="relative z-10 max-w-[58%] sm:max-w-md">
+            <h1 className="font-display text-2xl font-bold text-ink sm:text-3xl">Register with D-Maths</h1>
+            <p className="mt-1 text-sm text-ink/55">Enrol in online maths, science &amp; coding tuition — it only takes a few minutes.</p>
+          </div>
+          <HeroMascot src="/avatars/student-book.png" className="absolute bottom-0 right-0 top-0 w-[42%] sm:right-2 sm:w-[38%]" />
+        </div>
       </div>
 
       {/* Step bar */}
@@ -476,17 +480,18 @@ export default function Apply() {
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <main className="min-h-screen pb-20" style={{ background: "linear-gradient(160deg, #FDF3E3 0%, #FBFAF6 42%, #FFFFFF 100%)" }}>
+    <main className="min-h-screen pb-20" style={{ background: "linear-gradient(160deg, #EEF2FE 0%, #F6F8FC 42%, #FFFFFF 100%)" }}>
       <header className="relative overflow-hidden px-5 pb-11 pt-4 text-white"
-        style={{ background: "linear-gradient(135deg, #F4C078 0%, #EFAE56 45%, #C8881F 100%)" }}>
-        <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/15 blur-2xl" />
+        style={{ background: "linear-gradient(135deg, #10406F 0%, #0A2A4F 60%, #071C36 100%)" }}>
+        <div aria-hidden className="pointer-events-none absolute -left-16 top-0 h-56 w-56 rounded-full bg-ink/40 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full bg-gold/20 blur-2xl" />
         <div className="relative mx-auto flex max-w-4xl items-center justify-between">
           <Link href="/"><Logo light /></Link>
           <Link href="/login" className="text-sm font-semibold text-white/80 hover:text-white">Already enrolled? Sign in</Link>
         </div>
-        {/* white curved base — the Terra look */}
+        {/* curved base into the light content area */}
         <svg className="absolute inset-x-0 bottom-[-1px] h-10 w-full" viewBox="0 0 500 40" preserveAspectRatio="none" aria-hidden="true">
-          <path d="M0,40 L0,14 C160,40 340,40 500,14 L500,40 Z" fill="#FDF3E3" />
+          <path d="M0,40 L0,14 C160,40 340,40 500,14 L500,40 Z" fill="#EEF2FE" />
         </svg>
       </header>
       <div className="relative px-5 pt-8">{children}</div>
