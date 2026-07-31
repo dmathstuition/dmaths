@@ -67,7 +67,7 @@ export default function Login() {
 
     if (profile && profile.role === "student" && !profile.is_active) {
       await supabase.auth.signOut();
-      setError("Your account is deactivated. Contact dmathstuition@gmail.com.");
+      setError("Your account is deactivated. Contact support@dmaths.academy.");
       setBusy(false);
       return;
     }

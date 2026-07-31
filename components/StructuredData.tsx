@@ -26,7 +26,7 @@ export default function StructuredData() {
       image: `${base}/dmathslogo.png`,
       description:
         "A virtual learning community for students across Nigeria — expert online tuition in maths, sciences and coding, with exam prep for WAEC, JAMB, IGCSE, SAT and A-Levels. Live classes, personalised feedback and a portal built for results.",
-      email: "dmathstuition@gmail.com",
+      email: "support@dmaths.academy",
       telephone: "+2347025674894",
       address: {
         "@type": "PostalAddress",

@@ -97,7 +97,7 @@ export default function ApplicationsClient({ initial }: { initial: App[] }) {
   }
 
   async function sendTestEmail() {
-    const to = window.prompt("Send a test email to which address?", "dmathstuition@gmail.com");
+    const to = window.prompt("Send a test email to which address?", "support@dmaths.academy");
     if (!to) return;
     const res = await fetch("/api/admin/test-email", {
       method: "POST", headers: { "Content-Type": "application/json" },

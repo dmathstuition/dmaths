@@ -59,7 +59,7 @@ export default function PortalErrorState({
         </div>
 
         {!offline && (
-          <a href="mailto:dmathstuition@gmail.com" className="text-[12px] font-semibold text-ink/40 hover:text-ink/70">
+          <a href="mailto:support@dmaths.academy" className="text-[12px] font-semibold text-ink/40 hover:text-ink/70">
             Contact support
           </a>
         )}

@@ -17,7 +17,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
       <p className="mt-8 font-display text-5xl font-extrabold text-gold">Oops</p>
       <h1 className="mt-2 font-display text-2xl font-semibold">Something went wrong</h1>
       <p className="mt-2 max-w-sm text-sm text-white/55">
-        An unexpected error occurred. Please try again — if it keeps happening, contact us at dmathstuition@gmail.com.
+        An unexpected error occurred. Please try again — if it keeps happening, contact us at support@dmaths.academy.
       </p>
       <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
         <button onClick={reset} className="btn-gold !rounded-full !px-6">Try again</button>

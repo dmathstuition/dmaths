@@ -41,8 +41,8 @@ export default function DeleteAccountPage() {
         <div className="card mt-4 p-6">
           <h2 className="font-display text-lg font-semibold">Or ask us to do it</h2>
           <p className="mt-2 text-sm leading-relaxed text-ink/70">
-            Email <a href="mailto:dmathstuition@gmail.com?subject=Delete%20my%20account"
-              className="font-semibold text-gold-deep underline">dmathstuition@gmail.com</a>{" "}
+            Email <a href="mailto:support@dmaths.academy?subject=Delete%20my%20account"
+              className="font-semibold text-gold-deep underline">support@dmaths.academy</a>{" "}
             from the address on your account (or include your Student ID) with the subject
             “Delete my account”. We action requests within <strong>7 days</strong>.
           </p>
