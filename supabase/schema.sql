@@ -166,11 +166,34 @@ language sql stable security definer set search_path = public as $$
 $$;
 
 -- Next student code, e.g. DM-2026-0042
+-- Issues the lowest free Student ID for the current year, reusing the gap a
+-- deleted learner leaves (see migration-reuse-student-codes.sql). Safe because
+-- deletion is a complete hard-delete keyed on the UUID, so a recycled code
+-- carries no old data; the unique constraint stops two learners sharing one ID.
 create or replace function next_student_code() returns text
-language sql security definer set search_path = public as $$
-  select 'DM-' || to_char(now(),'YYYY') || '-' ||
-         lpad(nextval('student_code_seq')::text, 4, '0');
-$$;
+language plpgsql security definer set search_path = public as $$
+declare
+  yr        text := to_char(now(), 'YYYY');
+  max_used  int;
+  next_num  int;
+begin
+  select coalesce(max((split_part(student_code, '-', 3))::int), 0)
+    into max_used
+    from profiles
+   where student_code ~ ('^DM-' || yr || '-[0-9]+$');
+
+  select g
+    into next_num
+    from generate_series(1, max_used + 1) as g
+   where not exists (
+     select 1 from profiles
+      where student_code = 'DM-' || yr || '-' || lpad(g::text, 4, '0')
+   )
+   order by g
+   limit 1;
+
+  return 'DM-' || yr || '-' || lpad(next_num::text, 4, '0');
+end $$;
 
 -- Login by Student ID: resolve code → email (called from login page)
 create or replace function student_code_to_email(code text) returns text
