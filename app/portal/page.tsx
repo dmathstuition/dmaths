@@ -113,7 +113,7 @@ export default async function StudentDashboard() {
                 <span className="font-mono text-xs font-semibold text-ink/40">ID: {me?.student_code}</span>
               </div>
               <div className="mt-5 hidden flex-wrap items-center gap-3 sm:flex">
-                <Link href="/portal/assignments"
+                <Link href="/portal/plan"
                   className="group inline-flex items-center gap-2 rounded-full bg-board px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:shadow-lift dark:bg-gold dark:text-board">
                   View my tasks
                   <span className="transition-transform duration-200 group-hover:translate-x-0.5">→</span>
