@@ -4,6 +4,8 @@ import Link from "next/link";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { useToast } from "@/components/Toast";
 import { Icon, type IconName } from "@/components/Icons";
+import WhatsAppShare from "@/components/WhatsAppShare";
+import { waNumber } from "@/lib/whatsapp";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { fileHref } from "@/lib/storageUrls";
 
@@ -770,11 +772,31 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
               Ask the learner to sign in at <span className="font-semibold">{resetCreds.loginUrl}</span> and change it
               afterwards (Profile → Change password).
             </p>
+            <div className="mt-3">
+              <WhatsAppShare
+                phone={student.guardian_contact || student.phone}
+                label="Send login on WhatsApp"
+                text={`Hi, here is your D-Maths login.\n\nStudent ID: ${student.student_code}\nPassword: ${resetCreds.tempPassword}\n\nSign in: ${resetCreds.loginUrl}\n\nPlease change your password after you sign in (Profile → Change password).`}
+              />
+            </div>
           </div>
         ) : (
           <button className="btn-gold mt-4" onClick={resetPassword} disabled={resetting}>
             {resetting ? "Resetting…" : "Reset password"}
           </button>
+        )}
+
+        {/* Always available: message the guardian on WhatsApp (a reliable channel
+            when email is unavailable). Only shown when there's a usable number. */}
+        {waNumber(student.guardian_contact || student.phone) && (
+          <div className="mt-4 border-t border-line pt-4">
+            <WhatsAppShare
+              phone={student.guardian_contact || student.phone}
+              label="Message guardian on WhatsApp"
+              className="inline-flex items-center gap-2 rounded-lg border border-[#25D366] px-3.5 py-2 text-sm font-bold text-[#128C4B] transition hover:bg-[#25D366]/10"
+              text={`Hello, this is D-Maths Tuition Centre regarding ${student.first_name} ${student.last_name}.`}
+            />
+          </div>
         )}
       </div>
 
