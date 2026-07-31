@@ -4,6 +4,7 @@ import { getProfile } from "@/lib/auth";
 import { Icon, type IconName } from "@/components/Icons";
 import Avatar from "@/components/Avatar";
 import Mascot from "@/components/Mascot";
+import HeroMascot from "@/components/HeroMascot";
 import AskBuddyButton from "@/components/AskBuddyButton";
 import { learnerAvatar, BUDDY_MASCOT, ADMIN_AVATAR } from "@/lib/avatars";
 import { countTrend, sumTrend } from "@/lib/trends";
@@ -95,18 +96,16 @@ export default async function AdminDashboard() {
     <div className="space-y-6">
       {/* Greeting */}
       <Reveal>
-        <div className="relative flex flex-wrap items-end justify-between gap-3">
-          <div className="max-w-[64%] sm:max-w-none">
+        <div className="relative min-h-[150px] sm:min-h-[140px]">
+          <div className="max-w-[56%] sm:max-w-[68%]">
             <h1 className="font-display text-3xl font-bold text-ink sm:text-4xl">
               {greeting()}, {firstName}! <span className="align-middle">👋</span>
             </h1>
             <p className="mt-1 text-sm text-ink/50">Here&apos;s what&apos;s happening at D-Maths today.</p>
+            <p className="mt-2 hidden font-mono text-[11px] uppercase tracking-[.2em] text-ink/35 sm:block">{today}</p>
           </div>
-          <p className="hidden font-mono text-[11px] uppercase tracking-[.2em] text-ink/35 sm:block">{today}</p>
-          {/* mobile-only greeting mascot (the suited admin) */}
-          <div aria-hidden className="pointer-events-none absolute -top-2 right-0 h-24 w-24 sm:hidden">
-            <Mascot src={ADMIN_AVATAR} className="mascot-bob h-full w-full object-contain object-top drop-shadow-xl" fallback={null} />
-          </div>
+          {/* the suited admin mascot — large, with the soft halo */}
+          <HeroMascot src={ADMIN_AVATAR} className="absolute -top-4 right-0 h-40 w-40 sm:-top-6 sm:h-52 sm:w-56" />
         </div>
       </Reveal>
 
