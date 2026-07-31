@@ -47,7 +47,7 @@ export default function RefundsPage() {
       <H2>Ongoing tuition refunds</H2>
       <p>
         For rolling/ongoing tuition (outside a fixed programme), contact us at
-        dmathstuition@gmail.com. Refunds, where granted, are calculated on a pro-rata basis for
+        support@dmaths.academy. Refunds, where granted, are calculated on a pro-rata basis for
         unused tuition and exclude any non-refundable deposit or administrative charges disclosed
         at sign-up. Refunds are not available once a substantial portion of a paid tuition period
         has been delivered.
@@ -67,7 +67,7 @@ export default function RefundsPage() {
       </p>
 
       <H2>Contact</H2>
-      <p>dmathstuition@gmail.com</p>
+      <p>support@dmaths.academy</p>
     </LegalPage>
   );
 }

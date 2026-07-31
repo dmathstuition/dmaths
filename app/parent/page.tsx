@@ -26,8 +26,8 @@ export default async function ParentPage() {
         <p className="text-xl font-semibold text-ink">No students linked yet.</p>
         <p className="mt-2 text-sm text-ink/55">
           If you believe this is a mistake, contact{" "}
-          <a href="mailto:dmathstuition@gmail.com" className="font-semibold text-gold-deep hover:underline">
-            dmathstuition@gmail.com
+          <a href="mailto:support@dmaths.academy" className="font-semibold text-gold-deep hover:underline">
+            support@dmaths.academy
           </a>
           .
         </p>

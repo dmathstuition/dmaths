@@ -20,7 +20,7 @@ export default function LegalPage({ title, updated, children }: {
         </div>
       </main>
       <footer className="border-t border-line py-8 text-center text-xs text-ink/40">
-        D-Maths Tuition Centre · dmathstuition@gmail.com
+        D-Maths Tuition Centre · support@dmaths.academy
       </footer>
     </div>
   );

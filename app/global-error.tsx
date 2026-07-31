@@ -34,7 +34,7 @@ export default function GlobalError({ error }: { error: Error & { digest?: strin
         <h1 style={{ marginTop: "8px", fontSize: "1.5rem", fontWeight: 600 }}>Something went wrong</h1>
         <p style={{ marginTop: "8px", maxWidth: "24rem", fontSize: "0.9rem", color: "rgba(255,255,255,0.6)" }}>
           An unexpected error occurred. Please try again — if it keeps happening, contact us at
-          {" "}dmathstuition@gmail.com.
+          {" "}support@dmaths.academy.
         </p>
         <a
           href="/"

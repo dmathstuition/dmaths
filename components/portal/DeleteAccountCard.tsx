@@ -24,7 +24,7 @@ export default function DeleteAccountCard() {
     });
     if (!res.ok) {
       const j = await res.json().catch(() => ({}));
-      setError(j.error || "Could not delete the account — please try again or email dmathstuition@gmail.com.");
+      setError(j.error || "Could not delete the account — please try again or email support@dmaths.academy.");
       setBusy(false);
       return;
     }
