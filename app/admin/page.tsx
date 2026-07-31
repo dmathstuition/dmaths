@@ -147,7 +147,7 @@ export default async function AdminDashboard() {
 
       <div className="grid gap-5 lg:grid-cols-3">
         {/* Left column — the analytical, wide content */}
-        <div className="space-y-5 lg:col-span-2">
+        <div className="min-w-0 space-y-5 lg:col-span-2">
           {/* Finance overview */}
           <Reveal>
             <FinanceOverview totalCollected={totalCollected} monthRevenue={monthRevenue} mrr={mrr}
@@ -223,7 +223,7 @@ export default async function AdminDashboard() {
         </div>
 
         {/* Right column — schedule, standouts, assistant, quick actions */}
-        <div className="space-y-5">
+        <div className="min-w-0 space-y-5">
           {/* Today's schedule */}
           <Reveal delay={80}>
             <div className="card neu-card p-6">
