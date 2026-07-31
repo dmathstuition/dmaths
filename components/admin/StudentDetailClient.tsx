@@ -23,6 +23,8 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmName, setConfirmName] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [resetting, setResetting] = useState(false);
+  const [resetCreds, setResetCreds] = useState<{ email: string; tempPassword: string; loginUrl: string; emailed: boolean } | null>(null);
   const [guardianEmail, setGuardianEmail] = useState(student.guardian_email ?? "");
   const [savingGuardian, setSavingGuardian] = useState(false);
   const [gradeTarget, setGradeTarget] = useState<string>(student.grade_target != null ? String(student.grade_target) : "");
@@ -381,6 +383,19 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
     window.location.href = "/admin/students";
   }
 
+  async function resetPassword() {
+    setResetting(true);
+    const res = await fetch("/api/students/reset-password", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ studentId: student.id }),
+    });
+    const json = await res.json();
+    setResetting(false);
+    if (!res.ok) { push(json.error || "Could not reset the password.", "error"); return; }
+    setResetCreds(json);
+    push(json.emailed ? "Password reset and emailed." : "Password reset — email is down, share it below.", "success");
+  }
+
   const fullName = `${student.first_name} ${student.last_name}`;
 
   return (
@@ -734,6 +749,35 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
         </div>
       </div>
 
+      {/* Login & password — reset and reveal, so a mail outage never strands a learner */}
+      <div className="card p-6">
+        <h2 className="font-display text-lg font-semibold text-ink">Login &amp; password</h2>
+        <p className="mt-1 text-sm text-ink/55">
+          The temporary password is shown only once at approval and isn&apos;t stored, so it can&apos;t be
+          looked up. Reset it here to set a new one — it&apos;s shown on screen to share with the learner,
+          so this works even when email is down.
+        </p>
+        {resetCreds ? (
+          <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+            <p className="text-sm font-bold text-emerald-900">
+              New password set ✓ {resetCreds.emailed ? "(also emailed)" : "(email didn't send — share it below)"}
+            </p>
+            <div className="mt-3 space-y-2">
+              <CredRow label="Student ID" value={student.student_code || resetCreds.email} />
+              <CredRow label="New password" value={resetCreds.tempPassword} mono />
+            </div>
+            <p className="mt-3 text-xs text-emerald-800/70">
+              Ask the learner to sign in at <span className="font-semibold">{resetCreds.loginUrl}</span> and change it
+              afterwards (Profile → Change password).
+            </p>
+          </div>
+        ) : (
+          <button className="btn-gold mt-4" onClick={resetPassword} disabled={resetting}>
+            {resetting ? "Resetting…" : "Reset password"}
+          </button>
+        )}
+      </div>
+
       {/* Danger zone — delete learner */}
       <div className="card border-red-200 p-6">
         <h2 className="font-display text-lg font-semibold text-red-700">Danger zone</h2>
@@ -763,6 +807,21 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function CredRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-lg bg-white px-3 py-2 ring-1 ring-emerald-200">
+      <div className="min-w-0">
+        <p className="text-[10px] font-bold uppercase tracking-wide text-ink/40">{label}</p>
+        <p className={`truncate text-sm font-bold text-ink ${mono ? "font-mono" : ""}`}>{value}</p>
+      </div>
+      <button type="button" onClick={() => navigator.clipboard?.writeText(value)}
+        className="flex-shrink-0 rounded-lg border border-line px-2.5 py-1.5 text-xs font-bold text-gold-deep transition hover:bg-chalk">
+        Copy
+      </button>
     </div>
   );
 }
