@@ -5,7 +5,7 @@ import { getUser, getProfile } from "@/lib/auth";
 import CountUp from "@/components/landing/CountUp";
 import Reveal from "@/components/landing/Reveal";
 import { Icon, type IconName } from "@/components/Icons";
-import Mascot from "@/components/Mascot";
+import HeroMascot from "@/components/HeroMascot";
 import { learnerAvatar } from "@/lib/avatars";
 import { subjectAverages } from "@/lib/progress";
 import { HeroStudy } from "@/components/illustrations";
@@ -89,8 +89,8 @@ export default async function StudentDashboard() {
       {/* Hero + progress overview */}
       <div className="grid gap-5 lg:grid-cols-3">
         {/* Today's focus hero */}
-        <Reveal className="lg:col-span-2">
-          <div data-tour="hero" className="relative flex h-full items-center overflow-hidden rounded-3xl bg-gradient-to-br from-[#EEF2FE] via-[#E2ECFB] to-[#DCE7F6] p-7 dark:from-[#10406F] dark:via-[#0A2A4F] dark:to-[#071C36] sm:p-9">
+        <Reveal className="min-w-0 lg:col-span-2">
+          <div data-tour="hero" className="relative flex min-h-[250px] items-center overflow-hidden rounded-3xl bg-gradient-to-br from-[#EEF2FE] via-[#E2ECFB] to-[#DCE7F6] p-7 dark:from-[#10406F] dark:via-[#0A2A4F] dark:to-[#071C36] sm:min-h-[270px] sm:p-9">
             <div className="relative z-10 max-w-[62%] sm:max-w-md">
               <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-ink/45">
                 <span aria-hidden>✦</span> Today&apos;s focus
@@ -125,11 +125,10 @@ export default async function StudentDashboard() {
               </div>
               <div className="hidden sm:block"><DashboardTip /></div>
             </div>
-            {/* character illustration — the learner's own mascot */}
-            <div aria-hidden className="pointer-events-none absolute -right-1 bottom-0 top-0 flex w-[42%] items-center justify-end sm:-right-2 sm:top-auto sm:h-[118%] sm:w-1/2 sm:items-end">
-              <Mascot src={learnerAvatar(user!.id)} className="mascot-bob h-[92%] w-full object-contain object-bottom drop-shadow-xl sm:h-full"
-                fallback={<HeroStudy className="h-full w-full object-contain object-bottom" />} />
-            </div>
+            {/* character illustration — the learner's own mascot, large with halo */}
+            <HeroMascot src={learnerAvatar(user!.id)}
+              fallback={<HeroStudy className="h-full w-full object-contain object-bottom" />}
+              className="absolute bottom-0 right-0 top-0 w-[50%] sm:right-2 sm:w-[52%]" />
           </div>
         </Reveal>
 
