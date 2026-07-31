@@ -126,7 +126,7 @@ export default function PortalShell({
         </div>
       </div>
 
-      <main id="main" tabIndex={-1} className={`px-4 pt-4 sm:px-7 lg:ml-64 lg:px-10 lg:pb-10 ${tabs ? "pb-28" : "pb-10"}`}>{children}</main>
+      <main id="main" tabIndex={-1} className={`overflow-x-clip px-4 pt-4 sm:px-7 lg:ml-64 lg:px-10 lg:pb-10 ${tabs ? "pb-28" : "pb-10"}`}>{children}</main>
 
       {/* App-style bottom tab bar (mobile only) */}
       {tabs && <PortalTabBar tabs={tabs} path={path} onMore={() => setMoreOpen(true)} />}
