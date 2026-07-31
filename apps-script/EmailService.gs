@@ -25,8 +25,7 @@
 
 const EMAIL_SECRET = 'change-me-to-a-64-char-random-string';
 const FROM_NAME = 'D-Maths Tuition Centre';
-const FROM_ALIAS = 'support@dmaths.academy'; // verified "Send mail as" alias
-const REPLY_TO = 'support@dmaths.academy';
+const REPLY_TO = 'dmathstuition@gmail.com';
 
 function doPost(e) {
   let body;
@@ -45,17 +44,11 @@ function doPost(e) {
 
   try {
     const { subject, html } = t(data || {});
-    const options = {
+    GmailApp.sendEmail(to, subject, '', {
       htmlBody: wrap_(html),
       name: FROM_NAME,
       replyTo: REPLY_TO,
-    };
-    // Send from the branded alias only when it's verified on this account,
-    // so a mis-config can never stop emails going out.
-    if (GmailApp.getAliases().indexOf(FROM_ALIAS) !== -1) {
-      options.from = FROM_ALIAS;
-    }
-    GmailApp.sendEmail(to, subject, '', options);
+    });
     return json_({ ok: true });
   } catch (err) {
     return json_({ ok: false, error: String(err) });
@@ -236,7 +229,7 @@ function wrap_(inner) {
     '<div style="font-size:22px;font-weight:bold;color:#E8841C;margin-bottom:18px">D-Maths <span style="font-size:11px;color:#94A3B8;letter-spacing:2px">TUITION CENTRE</span></div>' +
     inner +
     '<hr style="border:none;border-top:1px solid #e5e7eb;margin:28px 0 14px">' +
-    '<p style="color:#94A3B8;font-size:12px">D-Maths Tuition Centre · Asaba, Nigeria · support@dmaths.academy</p>' +
+    '<p style="color:#94A3B8;font-size:12px">D-Maths Tuition Centre · Asaba, Nigeria · dmathstuition@gmail.com</p>' +
     '</div>'
   );
 }
