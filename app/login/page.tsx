@@ -5,6 +5,8 @@ import Link from "next/link";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { useToast } from "@/components/Toast";
 import { Icon } from "@/components/Icons";
+import Logo from "@/components/Logo";
+import HeroMascot from "@/components/HeroMascot";
 import { LOGIN_MASCOT } from "@/lib/avatars";
 import { IDLE_ACTIVITY_KEY } from "@/components/IdleLogout";
 
@@ -43,7 +45,6 @@ export default function Login() {
   // Two-factor step-up state.
   const [mfaRequired, setMfaRequired] = useState(false);
   const [mfaCode, setMfaCode] = useState("");
-  const [mascotOk, setMascotOk] = useState(true);
 
   useEffect(() => {
     setStandalone(
@@ -151,42 +152,42 @@ export default function Login() {
   }
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden p-5"
-      style={{ background: "linear-gradient(160deg, #FDF3E3 0%, #FBFAF6 45%, #FFFFFF 100%)" }}>
-      {/* soft warm depth blobs */}
-      <div className="pointer-events-none absolute -left-24 -top-24 h-96 w-96 rounded-full bg-gold/25 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-28 -right-20 h-96 w-96 rounded-full bg-gold-soft/30 blur-3xl" />
+    <main className="relative min-h-screen bg-gradient-to-b from-[#EEF2FE] to-white lg:grid lg:grid-cols-[1.05fr_1fr]">
+      {/* Brand panel (desktop) — the portal look, with a big mascot */}
+      <aside className="relative hidden overflow-hidden bg-gradient-to-br from-[#10406F] via-[#0A2A4F] to-[#071C36] p-12 text-white lg:flex lg:flex-col">
+        <div aria-hidden className="pointer-events-none absolute -left-16 top-0 h-72 w-72 rounded-full bg-ink/40 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute -right-10 bottom-1/4 h-72 w-72 rounded-full bg-gold/20 blur-3xl" />
+        <Link href="/" className="relative w-fit"><Logo light size="lg" /></Link>
+        <div className="relative mt-16 max-w-sm">
+          <h2 className="font-display text-3xl font-bold leading-tight">Welcome back to your D-Maths portal <span className="align-middle">👋</span></h2>
+          <p className="mt-3 text-sm leading-relaxed text-white/60">Live classes, grades, streaks and reminders — your whole learning journey in one beautiful app.</p>
+          <ul className="mt-6 space-y-2.5 text-sm text-white/85">
+            <li className="flex items-center gap-2.5"><span className="text-gold">✓</span> Grades, attendance &amp; streaks, tracked live</li>
+            <li className="flex items-center gap-2.5"><span className="text-gold">✓</span> Join live classes from your phone</li>
+            <li className="flex items-center gap-2.5"><span className="text-gold">✓</span> Assignments &amp; instant class reminders</li>
+          </ul>
+        </div>
+        <div aria-hidden className="pointer-events-none absolute -bottom-2 right-0 h-[58%] w-[82%]">
+          <HeroMascot src={LOGIN_MASCOT} className="h-full w-full" />
+        </div>
+      </aside>
 
-      <div className="relative z-10 w-full max-w-md page-enter">
-        {!standalone && (
-          <Link href="/" className="mb-5 inline-flex items-center gap-2 text-sm font-semibold text-ink/45 hover:text-ink/80">← Back to D-Maths</Link>
-        )}
-
-        <div className="overflow-hidden rounded-[2rem] bg-white shadow-[0_24px_70px_-15px_rgba(200,136,31,0.35)] ring-1 ring-gold/10">
-          {/* Curved gold header — the "Terra" look, in D-Maths gold */}
-          <div className="relative px-8 pt-9 pb-16 text-white"
-            style={{ background: "linear-gradient(135deg, #F4C078 0%, #EFAE56 45%, #C8881F 100%)" }}>
-            {/* Waving D-Maths mascot — greets you on sign-in (falls back to hidden if absent) */}
-            {mascotOk && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={LOGIN_MASCOT} alt="" aria-hidden onError={() => setMascotOk(false)}
-                className="mascot-greet pointer-events-none absolute -top-1 right-1 z-10 h-36 w-36 object-contain drop-shadow-xl sm:right-3 sm:h-40 sm:w-40" />
-            )}
-            <div className="flex items-center gap-3">
-              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/25 backdrop-blur-sm ring-1 ring-white/40">
-                <Icon name="graduationCap" className="h-6 w-6 text-white" />
-              </span>
-            </div>
-            <h1 className="mt-5 max-w-[60%] font-display text-[1.75rem] font-extrabold leading-tight">{mfaRequired ? "Two-step verification" : "Welcome back"}</h1>
-            <p className="mt-1 max-w-[62%] text-sm text-white/80">{mfaRequired ? "Enter the code from your authenticator app." : "Sign in to your D-Maths portal."}</p>
-            {/* white curved base */}
-            <svg className="absolute inset-x-0 bottom-[-1px] h-12 w-full" viewBox="0 0 500 48" preserveAspectRatio="none" aria-hidden="true">
-              <path d="M0,48 L0,18 C160,46 340,46 500,18 L500,48 Z" fill="#fff" />
-            </svg>
+      {/* Form */}
+      <div className="relative flex min-h-screen items-center justify-center px-5 py-10">
+        <div className="w-full max-w-md page-enter">
+          {/* mobile: big mascot above the card */}
+          <div aria-hidden className="mx-auto -mb-6 h-44 w-44 lg:hidden">
+            <HeroMascot src={LOGIN_MASCOT} className="h-full w-full" />
           </div>
 
+          <div className="relative overflow-hidden rounded-[2rem] bg-white p-7 shadow-[0_24px_70px_-15px_rgba(16,64,111,0.28)] ring-1 ring-ink/5 sm:p-8">
+            <div className="mb-5">
+              <h1 className="font-display text-2xl font-bold text-ink">{mfaRequired ? "Two-step verification" : "Welcome back"}</h1>
+              <p className="mt-1 text-sm text-ink/50">{mfaRequired ? "Enter the code from your authenticator app." : "Sign in to your D-Maths portal."}</p>
+            </div>
+
           {mfaRequired ? (
-            <form onSubmit={verifyMfa} className="space-y-4 px-8 pb-8 pt-2">
+            <form onSubmit={verifyMfa} className="space-y-4">
               {error && <p role="alert" className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-800">{error}</p>}
               <div>
                 <label className="mb-1.5 block text-[13px] font-bold text-ink/60" htmlFor="mfa">Authentication code</label>
@@ -205,7 +206,7 @@ export default function Login() {
               </button>
             </form>
           ) : (
-          <form onSubmit={signIn} className="space-y-4 px-8 pb-8 pt-2">
+          <form onSubmit={signIn} className="space-y-4">
             {notice && (
               <p role="status" className={`rounded-2xl px-4 py-3 text-sm font-semibold ${notice.kind === "success" ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-800"}`}>
                 {notice.text}
@@ -256,9 +257,13 @@ export default function Login() {
             </p>
           </form>
           )}
-        </div>
+          </div>
 
-        <p className="mt-5 text-center text-xs text-ink/40">Students use their Student ID · Parents &amp; staff use their email</p>
+          <p className="mt-5 text-center text-xs text-ink/40">Students use their Student ID · Parents &amp; staff use their email</p>
+          {!standalone && (
+            <Link href="/" className="mt-3 block text-center text-sm font-semibold text-ink/45 hover:text-ink/80">← Back to D-Maths</Link>
+          )}
+        </div>
       </div>
     </main>
   );
