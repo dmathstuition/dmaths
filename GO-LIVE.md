@@ -27,8 +27,8 @@ Have these to hand (Vercel → Settings → Environment Variables):
 Supabase → **SQL Editor → New query**. Open each file in `supabase/`, paste, **Run**.
 They're **idempotent** — if you're unsure whether one was already run, run it again.
 
-Go in the numbered order in `LAUNCH-CHECKLIST.md` §2 (1 → 38). If the project already has
-data, **skip `schema.sql`**.
+Go in the numbered order in `LAUNCH-CHECKLIST.md` §2 (1 → 30), then the table below
+(31 → 44). If the project already has data, **skip `schema.sql`**.
 
 The most recently added ones — likely still outstanding:
 
@@ -46,7 +46,8 @@ The most recently added ones — likely still outstanding:
 | 40 | `migration-question-bank.sql` | Reusable CBT questions (**Admin → Question bank**) |
 | 41 | `migration-receipts.sql` | Printable payment receipts for parents |
 | 42 | `migration-payment-links.sql` | Links a payment to a learner (student & parent see their records + what's owed) |
-| 43 | `migration-schema-fixes.sql` | **Run last** — patches anything missing |
+| 43 | `migration-reuse-student-codes.sql` | A deleted learner's Student ID (e.g. `DM-2026-0001`) becomes free for the next enrolment |
+| 44 | `migration-schema-fixes.sql` | **Run last** — patches anything missing |
 
 Then run **`storage-buckets.sql`** (file uploads fail with "Bucket not found" without it).
 
@@ -147,6 +148,18 @@ Three Supabase settings, no code — full detail in `LAUNCH-CHECKLIST.md` §6:
 
 **✅ Check:** `/login` → "Forgot password?" → the email arrives → the link sets a new
 password. Until this works, a locked-out student is stuck.
+
+> **Branded sender — `support@dmaths.academy`.** Two independent email channels:
+> - **Auth emails** (password reset, above): point the **SMTP** to Resend with
+>   `support@dmaths.academy` as the sender.
+> - **App emails** (welcome, receipts, reminders — sent through the Apps Script relay,
+>   `EMAIL_RELAY_URL`): in the relay's Gmail account add `support@dmaths.academy` as a
+>   **verified "Send mail as" alias** (Gmail → Settings → Accounts → Send mail as, using
+>   Resend SMTP). The relay's `doPost` sets `from` to the alias only when it's verified
+>   (`GmailApp.getAliases()`), so it's safe to deploy before verifying. Gmail's daily
+>   quota (100 consumer / 1,500 Workspace) still applies; outgrow it → move the relay to
+>   Resend's API. Point `replyTo` at `support@dmaths.academy` only once you can **receive**
+>   mail there (forwarding / Resend inbound).
 
 ---
 
