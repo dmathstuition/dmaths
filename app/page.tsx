@@ -299,7 +299,7 @@ print("Hello from D-Maths!")`}</code></pre>
                 <div className="hero-glow absolute -inset-4 z-0" />
                 <Tilt3D max={7}>
                   <Image
-                    src="/how-it-works.jpg"
+                    src="/how-it-works.png"
                     alt="D-Maths — personalised online learning"
                     width={1200}
                     height={820}
