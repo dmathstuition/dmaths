@@ -742,6 +742,10 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
           payment history). This cannot be undone. Use this only for learners who are no longer
           interested — otherwise <strong>deactivate</strong> instead, which keeps the record.
         </p>
+        <p className="mt-2 text-xs text-ink/45">
+          Once deleted, their Student ID{student.student_code ? <> (<span className="font-mono font-semibold">{student.student_code}</span>)</> : null} becomes
+          free for the next incoming learner to use.
+        </p>
         {!confirmDelete ? (
           <button className="btn-danger mt-4" onClick={() => setConfirmDelete(true)}>Delete this learner</button>
         ) : (
