@@ -299,8 +299,8 @@ print("Hello from D-Maths!")`}</code></pre>
                 <div className="hero-glow absolute -inset-4 z-0" />
                 <Tilt3D max={7}>
                   <Image
-                    src="https://images.unsplash.com/photo-1509062522246-3755977927d7?w=1200&q=85"
-                    alt="Students in an online classroom"
+                    src="/how-it-works.jpg"
+                    alt="D-Maths — personalised online learning"
                     width={1200}
                     height={820}
                     quality={90}
