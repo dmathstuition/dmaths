@@ -168,11 +168,11 @@ export default function Login() {
             <li className="flex items-center gap-2.5"><span className="text-gold">✓</span> Assignments &amp; instant class reminders</li>
           </ul>
         </div>
-        {/* soft ambient glow (not a hard circle, so the mascot never looks cropped) */}
-        <div aria-hidden className="pointer-events-none absolute -bottom-10 right-0 h-[72%] w-[78%] rounded-full bg-[radial-gradient(circle,rgba(203,223,247,0.30),transparent_62%)] blur-2xl" />
-        {/* big mascot, flush to the bottom edge (rises from the bottom) */}
-        <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 flex h-[88%] w-[68%] items-end justify-center">
-          <Mascot src={LOGIN_MASCOT} className="mascot-bob h-full w-full object-contain object-bottom drop-shadow-2xl"
+        {/* soft ambient glow behind the mascot */}
+        <div aria-hidden className="pointer-events-none absolute bottom-0 right-[3%] h-[62%] w-[64%] rounded-full bg-[radial-gradient(circle,rgba(203,223,247,0.28),transparent_62%)] blur-2xl" />
+        {/* big mascot, standing flush on the bottom edge (padding trimmed off the art) */}
+        <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 flex h-[82%] w-[64%] items-end justify-center">
+          <Mascot src={LOGIN_MASCOT} className="h-full w-full object-contain object-bottom drop-shadow-2xl"
             fallback={<HeroStudy className="h-full w-full object-contain object-bottom" />} />
         </div>
       </aside>
@@ -181,13 +181,13 @@ export default function Login() {
       <div className="relative flex min-h-screen items-center justify-center px-5 py-10">
         <div className="w-full max-w-md page-enter">
           {/* mobile: big mascot above the card */}
-          <div aria-hidden className="relative mx-auto -mb-8 h-52 w-64 lg:hidden">
+          <div aria-hidden className="relative mx-auto -mb-8 h-56 w-64 lg:hidden">
             <div className="absolute inset-x-6 bottom-3 top-4 rounded-full bg-[radial-gradient(circle,rgba(123,163,202,0.35),transparent_62%)] blur-2xl" />
-            <Mascot src={LOGIN_MASCOT} className="mascot-bob relative h-full w-full object-contain object-bottom drop-shadow-xl"
+            <Mascot src={LOGIN_MASCOT} className="relative h-full w-full object-contain object-bottom drop-shadow-xl"
               fallback={<HeroStudy className="h-full w-full object-contain object-bottom" />} />
           </div>
 
-          <div className="relative overflow-hidden rounded-[2rem] bg-white p-7 shadow-[0_24px_70px_-15px_rgba(16,64,111,0.28)] ring-1 ring-ink/5 sm:p-8">
+          <div className="reveal relative overflow-hidden rounded-[2rem] bg-white p-7 shadow-[0_24px_70px_-15px_rgba(16,64,111,0.28)] ring-1 ring-ink/5 transition-shadow duration-300 hover:shadow-[0_30px_80px_-15px_rgba(16,64,111,0.35)] sm:p-8">
             <div className="mb-5">
               <h1 className="font-display text-2xl font-bold text-ink">{mfaRequired ? "Two-step verification" : "Welcome back"}</h1>
               <p className="mt-1 text-sm text-ink/50">{mfaRequired ? "Enter the code from your authenticator app." : "Sign in to your D-Maths portal."}</p>
@@ -204,7 +204,7 @@ export default function Login() {
                 <p className="mt-1.5 text-xs text-ink/45">Open your authenticator app and enter the current 6-digit code.</p>
               </div>
               <button disabled={busy || mfaCode.length !== 6}
-                className="w-full rounded-2xl py-4 text-base font-bold text-white shadow-lg shadow-gold/30 transition hover:brightness-[1.04] active:scale-[.99] disabled:opacity-60"
+                className="w-full rounded-2xl py-4 text-base font-bold text-white shadow-lg shadow-gold/30 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-gold/40 hover:brightness-[1.04] active:translate-y-0 active:scale-[.99] disabled:opacity-60"
                 style={{ background: "linear-gradient(135deg, #EFAE56 0%, #C8881F 100%)" }}>
                 {busy ? "Verifying…" : "Verify & sign in"}
               </button>
