@@ -6,7 +6,8 @@ import { supabaseBrowser } from "@/lib/supabase/client";
 import { useToast } from "@/components/Toast";
 import { Icon } from "@/components/Icons";
 import Logo from "@/components/Logo";
-import HeroMascot from "@/components/HeroMascot";
+import Mascot from "@/components/Mascot";
+import { HeroStudy } from "@/components/illustrations";
 import { LOGIN_MASCOT } from "@/lib/avatars";
 import { IDLE_ACTIVITY_KEY } from "@/components/IdleLogout";
 
@@ -167,8 +168,12 @@ export default function Login() {
             <li className="flex items-center gap-2.5"><span className="text-gold">✓</span> Assignments &amp; instant class reminders</li>
           </ul>
         </div>
-        <div aria-hidden className="pointer-events-none absolute -bottom-2 right-0 h-[58%] w-[82%]">
-          <HeroMascot src={LOGIN_MASCOT} className="h-full w-full" />
+        {/* soft ambient glow (not a hard circle, so the mascot never looks cropped) */}
+        <div aria-hidden className="pointer-events-none absolute -bottom-10 right-0 h-[72%] w-[78%] rounded-full bg-[radial-gradient(circle,rgba(203,223,247,0.30),transparent_62%)] blur-2xl" />
+        {/* big mascot, flush to the bottom edge (rises from the bottom) */}
+        <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 flex h-[88%] w-[68%] items-end justify-center">
+          <Mascot src={LOGIN_MASCOT} className="mascot-bob h-full w-full object-contain object-bottom drop-shadow-2xl"
+            fallback={<HeroStudy className="h-full w-full object-contain object-bottom" />} />
         </div>
       </aside>
 
@@ -176,8 +181,10 @@ export default function Login() {
       <div className="relative flex min-h-screen items-center justify-center px-5 py-10">
         <div className="w-full max-w-md page-enter">
           {/* mobile: big mascot above the card */}
-          <div aria-hidden className="mx-auto -mb-6 h-44 w-44 lg:hidden">
-            <HeroMascot src={LOGIN_MASCOT} className="h-full w-full" />
+          <div aria-hidden className="relative mx-auto -mb-8 h-52 w-64 lg:hidden">
+            <div className="absolute inset-x-6 bottom-3 top-4 rounded-full bg-[radial-gradient(circle,rgba(123,163,202,0.35),transparent_62%)] blur-2xl" />
+            <Mascot src={LOGIN_MASCOT} className="mascot-bob relative h-full w-full object-contain object-bottom drop-shadow-xl"
+              fallback={<HeroStudy className="h-full w-full object-contain object-bottom" />} />
           </div>
 
           <div className="relative overflow-hidden rounded-[2rem] bg-white p-7 shadow-[0_24px_70px_-15px_rgba(16,64,111,0.28)] ring-1 ring-ink/5 sm:p-8">
