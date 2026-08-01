@@ -1,6 +1,11 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Icon } from "@/components/Icons";
+import Reveal from "@/components/landing/Reveal";
+import CountUp from "@/components/landing/CountUp";
+import Confetti from "@/components/ui/Confetti";
+import Mascot from "@/components/Mascot";
+import { learnerAvatar } from "@/lib/avatars";
 
 type Winner = {
   id: string; first_name: string | null; last_name: string | null;
@@ -19,7 +24,24 @@ function initials(s: Winner) {
 }
 
 const MEDAL = ["🥇", "🥈", "🥉"];
-const PLACE_COLOR = ["#EFAE56", "#9CA3AF", "#B87333"];
+// Podium theming by place — gold / silver / bronze arena furniture.
+const PLACE = [
+  { grad: "from-[#F4C078] via-[#EFAE56] to-[#C8881F]", glow: "shadow-[0_0_46px_-8px_rgba(239,174,86,.9)]", ring: "ring-gold/60", bar: "from-[#EFAE56] to-[#C8881F]", h: 128, badge: "#EFAE56" },
+  { grad: "from-[#D8DEE9] via-[#AEB6C4] to-[#7C8698]", glow: "shadow-[0_0_38px_-12px_rgba(174,182,196,.8)]", ring: "ring-slate-300/60", bar: "from-[#C6CDD9] to-[#7C8698]", h: 92, badge: "#AEB6C4" },
+  { grad: "from-[#E0A46B] via-[#B87333] to-[#8A5626]", glow: "shadow-[0_0_34px_-12px_rgba(184,115,51,.8)]", ring: "ring-[#B87333]/60", bar: "from-[#C88A4E] to-[#8A5626]", h: 68, badge: "#B87333" },
+];
+
+// A circular podium/list avatar: the learner's mascot with an initials fallback.
+function AvatarBubble({ s, size, ring }: { s: Winner; size: number; ring?: string }) {
+  const px = { width: size, height: size };
+  return (
+    <span className={`relative inline-flex flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-ink to-board font-display font-bold text-gold-soft shadow-lift ${ring ?? ""}`}
+      style={px}>
+      <span className="absolute inset-0 flex items-center justify-center" aria-hidden>{initials(s)}</span>
+      <Mascot src={learnerAvatar(s.id)} alt="" className="relative h-full w-full object-cover object-top" fallback={null} />
+    </span>
+  );
+}
 
 export default function LeaderboardClient({
   meId, myLevel, mySubjects, winners, levels, subjects,
@@ -34,6 +56,9 @@ export default function LeaderboardClient({
     const mine = mySubjects.find(s => subjects.includes(s));
     return mine ?? subjects[0] ?? "";
   });
+  const [mounted, setMounted] = useState(false);
+  const [celebrate, setCelebrate] = useState(0);
+  useEffect(() => { const t = setTimeout(() => setMounted(true), 60); return () => clearTimeout(t); }, []);
 
   const list = useMemo(() => {
     if (scope === "class") return winners.filter(w => w.level === level);
@@ -43,13 +68,22 @@ export default function LeaderboardClient({
 
   const myRank = list.findIndex(s => s.id === meId) + 1;
   const myPts = list.find(s => s.id === meId)?.reward_points ?? 0;
+  // The learner directly ahead — a target to chase.
+  const ahead = myRank > 1 ? list[myRank - 2] : null;
+  const gap = ahead ? ahead.reward_points - myPts : 0;
 
   // Show only the top 10 (myRank above still uses the full list, so a learner
   // outside the top 10 can still see their own position).
   const top = list.slice(0, 10);
   const podium = top.slice(0, 3);
   const rest = top.slice(3);
-  const podiumOrder = [podium[1], podium[0], podium[2]];
+  const podiumOrder = [podium[1], podium[0], podium[2]]; // silver · gold · bronze
+
+  // Celebrate on entry if the learner is on the podium — and re-fire on tap.
+  useEffect(() => {
+    if (mounted && myRank >= 1 && myRank <= 3) setCelebrate(c => c + 1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mounted, scope]);
 
   const scopeTabs: { id: Scope; label: string; icon: any }[] = [
     { id: "overall", label: "Overall", icon: "students" },
@@ -64,9 +98,15 @@ export default function LeaderboardClient({
 
   return (
     <div className="space-y-6">
+      {/* confetti — rains over the page when a podium finisher is viewing */}
+      <div className="pointer-events-none fixed inset-0 z-[60]"><Confetti fire={celebrate > 0} key={celebrate} pieces={52} /></div>
+
+      {/* ── Header HUD ───────────────────────────────────────────── */}
       <div className="boardgrid relative overflow-hidden rounded-2xl bg-board p-7 text-white">
         <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full"
           style={{ background: "radial-gradient(circle, rgba(239,174,86,.4), transparent 70%)" }} />
+        <div aria-hidden className="pointer-events-none absolute right-6 top-6 select-none text-xl float">🏆</div>
+        <div aria-hidden className="pointer-events-none absolute right-24 bottom-6 select-none text-base float" style={{ animationDelay: "1.1s" }}>✨</div>
         <div className="relative flex items-center gap-4">
           <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gold/15 text-gold ring-1 ring-gold/25">
             <Icon name="trophy" className="h-6 w-6" />
@@ -103,41 +143,72 @@ export default function LeaderboardClient({
 
       {/* your position */}
       {myRank > 0 && (
-        <div className="card flex items-center gap-4 p-4">
+        <div className="card flex flex-wrap items-center gap-x-4 gap-y-2 p-4">
           <span className="font-display text-3xl font-bold text-gold-deep">#{myRank}</span>
-          <div>
+          <div className="min-w-0 flex-1">
             <p className="font-semibold text-ink">Your position <span className="text-ink/40">· {scopeName}</span></p>
-            <p className="text-xs text-ink/40">{myPts} reward pts</p>
+            <p className="text-xs text-ink/40">🪙 {myPts} reward pts</p>
+          </div>
+          {ahead && gap > 0 && (
+            <p className="rounded-full bg-gold-pale px-3 py-1.5 text-[12px] font-bold text-gold-deep">
+              {gap} pts to overtake {fullName(ahead)} ⬆
+            </p>
+          )}
+          {myRank === 1 && (
+            <p className="rounded-full bg-emerald-50 px-3 py-1.5 text-[12px] font-bold text-emerald-600">👑 You&apos;re #1 — defend it!</p>
+          )}
+        </div>
+      )}
+
+      {/* ── Champion arena (podium) ─────────────────────────────── */}
+      {podium.length >= 3 && (
+        <div onClick={() => setCelebrate(c => c + 1)}
+          className="boardgrid relative cursor-pointer overflow-hidden rounded-3xl bg-gradient-to-br from-[#10406F] via-[#0A2A4F] to-[#071C36] px-3 pt-8 pb-0 sm:px-8"
+          title="Tap to celebrate 🎉">
+          <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-40 opacity-70"
+            style={{ background: "radial-gradient(60% 90% at 50% 0%, rgba(239,174,86,.25), transparent 70%)" }} />
+          <p className="relative mb-2 text-center text-[11px] font-extrabold uppercase tracking-[.25em] text-gold/70">Champions</p>
+
+          <div className="relative grid grid-cols-3 items-end gap-2 sm:gap-4">
+            {podiumOrder.map((s, col) => {
+              if (!s) return <div key={col} />;
+              const place = list.indexOf(s);          // 0 = gold, 1 = silver, 2 = bronze
+              const p = PLACE[place];
+              const isMe = s.id === meId;
+              return (
+                <div key={s.id} className="flex flex-col items-center">
+                  {/* crown on the champion */}
+                  {place === 0 && <span className="mb-0.5 text-2xl badge-pulse">👑</span>}
+                  {/* avatar with glowing ring + medal badge */}
+                  <div className={`relative transition-all duration-500 ${mounted ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"}`}>
+                    <span aria-hidden className={`absolute inset-0 -z-10 rounded-full ${p.glow}`} />
+                    <div className="float">
+                      <AvatarBubble s={s} size={place === 0 ? 76 : 60} ring={`ring-2 ${p.ring} ${isMe ? "ring-offset-2 ring-offset-board" : ""}`} />
+                    </div>
+                    <span className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-board text-sm ring-1 ring-white/20">{MEDAL[place]}</span>
+                  </div>
+
+                  <p className="mt-2 line-clamp-1 max-w-full text-center text-[13px] font-bold text-white">{fullName(s)}</p>
+                  {isMe && <span className="text-[10px] font-bold text-gold">(you)</span>}
+                  <p className="font-display text-base font-extrabold text-gold">
+                    🪙 <CountUp to={s.reward_points} duration={1100} />
+                  </p>
+
+                  {/* pedestal — grows in on mount */}
+                  <div className="mt-2 w-full overflow-hidden rounded-t-xl">
+                    <div className={`mx-auto flex w-full items-start justify-center bg-gradient-to-b ${p.bar} transition-[height] duration-700 ease-out`}
+                      style={{ height: mounted ? p.h : 0 }}>
+                      <span className="mt-2 font-display text-2xl font-black text-white/90 drop-shadow sm:text-3xl">{place + 1}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
 
-      {/* podium */}
-      {podium.length >= 3 && (
-        <div className="grid grid-cols-3 gap-3">
-          {podiumOrder.map((s, col) => {
-            if (!s) return <div key={col} />;
-            const place = list.indexOf(s);
-            const isMe = s.id === meId;
-            const raised = place === 0;
-            return (
-              <div key={s.id}
-                className={`card relative flex flex-col items-center px-2 pb-4 pt-5 text-center ${raised ? "sm:-mt-4" : "mt-2"} ${isMe ? "ring-2 ring-gold/50" : ""}`}>
-                <span className="absolute -top-3 text-2xl">{MEDAL[place]}</span>
-                <span className="flex h-14 w-14 items-center justify-center rounded-full font-display text-lg font-bold text-white shadow-lift"
-                  style={{ background: `linear-gradient(135deg, ${PLACE_COLOR[place]}, #0A2A4F)` }}>
-                  {initials(s)}
-                </span>
-                <p className="mt-2 line-clamp-2 text-sm font-bold text-ink">{fullName(s)}</p>
-                {isMe && <span className="text-[11px] font-semibold text-gold-deep">(you)</span>}
-                <span className="mt-1 font-display text-lg font-extrabold text-emerald-600">+{s.reward_points}</span>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* ranked list */}
+      {/* ── Ranked list (4th onward, or all when < 3 on the podium) ─ */}
       <div className="card divide-y divide-line/60">
         {(podium.length >= 3 ? rest : list).map((student, idx) => {
           const rank = (podium.length >= 3 ? 3 : 0) + idx + 1;
@@ -145,19 +216,18 @@ export default function LeaderboardClient({
           const medal = rank <= 3 ? MEDAL[rank - 1] : null;
           return (
             <div key={student.id}
-              className={`flex items-center gap-3 px-4 py-3 sm:px-5 ${isMe ? "bg-gold/5" : ""}`}>
-              <span className="w-7 flex-shrink-0 text-center font-display text-base font-bold text-ink/30">
-                {medal ?? `#${rank}`}
+              className={`group flex items-center gap-3 px-4 py-3 transition-colors sm:px-5 ${isMe ? "bg-gold/5" : "hover:bg-chalk/60"}`}>
+              <span className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg text-center font-display text-sm font-bold ${
+                isMe ? "bg-gold text-board" : "bg-ink/5 text-ink/45"}`}>
+                {medal ?? rank}
               </span>
-              <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-ink/90 font-display text-xs font-bold text-gold-soft">
-                {initials(student)}
-              </span>
+              <AvatarBubble s={student} size={38} ring={isMe ? "ring-2 ring-gold/50" : ""} />
               <p className={`flex-1 truncate font-semibold ${isMe ? "text-gold-deep" : "text-ink"}`}>
                 {fullName(student)}
                 {isMe && <span className="ml-2 text-xs font-normal text-ink/40">(you)</span>}
               </p>
               <span className="flex-shrink-0 font-display text-base font-semibold text-emerald-600">
-                +{student.reward_points}
+                🪙 {student.reward_points}
               </span>
             </div>
           );
