@@ -75,7 +75,7 @@ export default function PlannerClient({
       <Reveal>
         <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#EEF2FE] via-[#E2ECFB] to-[#DCE7F6] p-7 dark:from-[#10406F] dark:via-[#0A2A4F] dark:to-[#071C36]">
           <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-ink/45">
-            <span aria-hidden>✦</span> My plan
+<Icon name="sparkles" className="h-3.5 w-3.5" /> My plan
           </p>
           <h1 className="mt-2 font-display text-2xl font-bold text-ink sm:text-3xl">Stay on top of your work</h1>
           <p className="mt-1 text-sm text-ink/55">

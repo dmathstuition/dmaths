@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useAssistantTask } from "@/components/portal/AssistantContext";
+import { Icon } from "@/components/Icons";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -111,9 +112,9 @@ export default function AssistantWidget({ context, mode = "learner" }: { context
         <button
           onClick={() => setOpen(true)}
           aria-label={`Open D-Maths A.I, the ${staff ? "teaching assistant" : "learning buddy"}`}
-          className="fixed bottom-24 right-4 z-[60] flex h-14 w-14 items-center justify-center rounded-full bg-gold text-2xl shadow-xl shadow-gold/40 transition hover:scale-105 active:scale-95 lg:bottom-6 lg:right-6"
+          className="fixed bottom-24 right-4 z-[60] flex h-14 w-14 items-center justify-center rounded-full bg-gold text-board shadow-xl shadow-gold/40 transition hover:scale-105 active:scale-95 lg:bottom-6 lg:right-6"
         >
-          <span>🧭</span>
+          <span><Icon name="compass" className="h-6 w-6" /></span>
           <span className="absolute -right-0.5 -top-0.5 flex h-3.5 w-3.5">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-70" />
             <span className="relative inline-flex h-3.5 w-3.5 rounded-full bg-emerald-500" />
@@ -127,7 +128,7 @@ export default function AssistantWidget({ context, mode = "learner" }: { context
           className="fixed inset-x-3 bottom-24 z-[60] flex max-h-[70vh] flex-col overflow-hidden rounded-3xl border border-line bg-white shadow-2xl sm:inset-x-auto sm:right-6 sm:w-[380px] lg:bottom-6">
           {/* Header */}
           <div className="flex items-center gap-3 bg-board px-4 py-3 text-white">
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gold text-lg">🧭</span>
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gold text-board"><Icon name="compass" className="h-5 w-5" /></span>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-bold leading-tight">D-Maths A.I · {staff ? "Teaching assistant" : "Learning buddy"}</p>
               <p className="text-[11px] text-white/55">{staff ? "Solutions, lesson ideas & marking help" : "Hints to help you — not the answers"}</p>

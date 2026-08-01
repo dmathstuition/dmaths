@@ -75,7 +75,7 @@ export default function DailyTaskGuard() {
             className="absolute inset-0 bg-board/60 backdrop-blur-md" />
           <div ref={panelRef} className="relative z-10 w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl">
             <div className="bg-board px-6 py-5 text-white">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-gold px-2.5 py-0.5 text-[11px] font-extrabold uppercase text-board">📌 Task of the day</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-gold px-2.5 py-0.5 text-[11px] font-extrabold uppercase text-board"><Icon name="pin" className="h-3 w-3" /> Task of the day</span>
               <h2 id={titleId} className="mt-2 font-display text-xl font-bold">{active.title}</h2>
             </div>
             <div className="p-6">

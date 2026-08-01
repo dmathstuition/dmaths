@@ -118,8 +118,8 @@ export default function ProgressClient({
         style={{ background: "linear-gradient(135deg, #10406F 0%, #0A2A4F 55%, #071C36 100%)" }}>
         <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full"
           style={{ background: "radial-gradient(circle, rgba(239,174,86,.4), transparent 70%)" }} />
-        <div aria-hidden className="pointer-events-none absolute right-6 top-6 select-none text-xl float">📈</div>
-        <div aria-hidden className="pointer-events-none absolute right-24 bottom-6 select-none text-base float" style={{ animationDelay: "1.1s" }}>⭐</div>
+        <div aria-hidden className="pointer-events-none absolute right-6 top-6 text-gold/30 float"><Icon name="progress" className="h-6 w-6" /></div>
+        <div aria-hidden className="pointer-events-none absolute right-24 bottom-6 text-gold/25 float" style={{ animationDelay: "1.1s" }}><Icon name="star" className="h-5 w-5" /></div>
         <div className="relative flex items-center gap-4">
           <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gold/15 text-gold ring-1 ring-gold/25">
             <Icon name="progress" className="h-6 w-6" />
@@ -146,13 +146,13 @@ export default function ProgressClient({
               <p className="mt-0.5 text-[13px] text-ink/50">Based on your recent results and overall average.</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {strongest && (
-                  <span className="rounded-full bg-emerald-50 px-3 py-1 text-[12px] font-bold text-emerald-700">
-                    💪 Strength: {strongest.subject} · {strongest.avg}%
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-[12px] font-bold text-emerald-700">
+                    <Icon name="award" className="h-3.5 w-3.5" /> Strength: {strongest.subject} · {strongest.avg}%
                   </span>
                 )}
                 {focus && (
-                  <span className="rounded-full bg-amber-50 px-3 py-1 text-[12px] font-bold text-amber-700">
-                    🎯 Focus: {focus.subject} · {focus.avg}%
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-[12px] font-bold text-amber-700">
+                    <Icon name="target" className="h-3.5 w-3.5" /> Focus: {focus.subject} · {focus.avg}%
                   </span>
                 )}
               </div>

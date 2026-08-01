@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import ConfirmModal from "@/components/ConfirmModal";
+import { Icon } from "@/components/Icons";
 
 type Question = {
   id: number;
@@ -126,8 +127,8 @@ export default function CBTClient({
         <div className="flex items-start justify-between gap-4">
           <p className="pill-gold mb-2">{subject}</p>
           {secsLeft !== null && (
-            <span className={`font-mono text-sm font-bold tabular-nums ${urgent ? "animate-pulse text-red-300" : "text-white/60"}`}>
-              {urgent && "⏱ "}{fmtTime(secsLeft)}
+            <span className={`inline-flex items-center gap-1 font-mono text-sm font-bold tabular-nums ${urgent ? "animate-pulse text-red-300" : "text-white/60"}`}>
+              {urgent && <Icon name="clock" className="h-3.5 w-3.5" />}{fmtTime(secsLeft)}
             </span>
           )}
         </div>

@@ -266,7 +266,7 @@ export default function ClassesClient({ initialClasses, initialStudents, initial
               <label className="flex items-center gap-3">
                 <input type="checkbox" className="h-4 w-4 accent-gold"
                   checked={!!f.repeat_weekly} onChange={e => setF({ ...f, repeat_weekly: e.target.checked })} />
-                <span className="text-sm font-bold text-ink">🔁 Repeat weekly</span>
+                <span className="inline-flex items-center gap-1.5 text-sm font-bold text-ink"><Icon name="repeat" className="h-4 w-4" /> Repeat weekly</span>
               </label>
               {f.repeat_weekly && (
                 <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-ink/70">
@@ -344,7 +344,7 @@ export default function ClassesClient({ initialClasses, initialStudents, initial
             </p>
             <div className="mt-4 flex flex-wrap gap-2 border-t border-line pt-4">
               {c.attendance_locked ? (
-                <span className="pill-green flex-1 text-center !py-2.5 min-w-[130px]">✓ Attendance locked</span>
+                <span className="pill-green inline-flex flex-1 items-center justify-center gap-1 !py-2.5 min-w-[130px]"><Icon name="checkCircle" className="h-3.5 w-3.5" /> Attendance locked</span>
               ) : (
                 <button className="btn-gold !min-h-[38px] flex-1 min-w-[130px]" onClick={() => openAttendance(c)}>Take attendance</button>
               )}
@@ -389,7 +389,7 @@ export default function ClassesClient({ initialClasses, initialStudents, initial
                     )}
                     <button className="btn-ghost !min-h-[36px] !px-3 !text-sm"
                       onClick={() => { setRecFor(recFor === c.id ? null : c.id); setRecUrl(c.recording_url || ""); }}>
-                      {c.recording_url ? "Edit recording" : "🎥 Add recording"}
+                      {c.recording_url ? "Edit recording" : <span className="inline-flex items-center gap-1.5"><Icon name="classes" className="h-4 w-4" /> Add recording</span>}
                     </button>
                     <button className="btn-danger !min-h-[36px] !px-4 !text-sm" onClick={() => deleteClass(c)}>Delete</button>
                   </div>

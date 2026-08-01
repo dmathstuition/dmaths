@@ -61,7 +61,7 @@ export default function AttendanceClient({
         style={{ background: "linear-gradient(135deg, #10406F 0%, #0A2A4F 55%, #071C36 100%)" }}>
         <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full"
           style={{ background: "radial-gradient(circle, rgba(239,174,86,.4), transparent 70%)" }} />
-        <div aria-hidden className="pointer-events-none absolute right-6 top-6 select-none text-xl float">📅</div>
+        <div aria-hidden className="pointer-events-none absolute right-6 top-6 text-gold/30 float"><Icon name="calendar" className="h-6 w-6" /></div>
         <div className="relative flex flex-wrap items-center gap-5">
           <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gold/15 text-gold ring-1 ring-gold/25">
             <Icon name="calendar" className="h-6 w-6" />
@@ -70,12 +70,12 @@ export default function AttendanceClient({
             <h1 className="font-display text-2xl font-semibold sm:text-3xl">My attendance</h1>
             <p className="mt-1 text-sm text-white/50">
               Overall <span className="font-bold text-gold"><CountUp to={attendance} duration={1000} />%</span>
-              {streak > 1 && <span className="ml-2">· 🔥 {streak}-session streak</span>}
+              {streak > 1 && <span className="ml-2 inline-flex items-center gap-1">· <Icon name="flame" className="h-3.5 w-3.5 text-gold" /> {streak}-session streak</span>}
             </p>
           </div>
           {streak > 1 && (
             <div className="rounded-2xl bg-white/5 px-4 py-2 text-center ring-1 ring-white/10">
-              <p className="font-display text-2xl font-extrabold text-gold leading-none">🔥 {streak}</p>
+              <p className="inline-flex items-center gap-1 font-display text-2xl font-extrabold text-gold leading-none"><Icon name="flame" className="h-5 w-5" /> {streak}</p>
               <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-white/45">Streak</p>
             </div>
           )}
@@ -86,15 +86,15 @@ export default function AttendanceClient({
       <div className="grid grid-cols-3 gap-4">
         <div className="card p-4 text-center">
           <p className="font-display text-2xl font-semibold"><CountUp to={records.length} duration={900} /></p>
-          <p className="text-xs text-ink/40">📋 Total sessions</p>
+          <p className="inline-flex items-center gap-1 text-xs text-ink/40"><Icon name="calendar" className="h-3.5 w-3.5" /> Total sessions</p>
         </div>
         <div className="card p-4 text-center">
           <p className="font-display text-2xl font-semibold text-emerald-600"><CountUp to={presentCount} duration={900} /></p>
-          <p className="text-xs text-ink/40">✅ Present</p>
+          <p className="inline-flex items-center gap-1 text-xs text-ink/40"><Icon name="checkCircle" className="h-3.5 w-3.5 text-emerald-600" /> Present</p>
         </div>
         <div className="card p-4 text-center">
           <p className="font-display text-2xl font-semibold text-red-500"><CountUp to={absentCount} duration={900} /></p>
-          <p className="text-xs text-ink/40">❌ Absent</p>
+          <p className="inline-flex items-center gap-1 text-xs text-ink/40"><Icon name="close" className="h-3.5 w-3.5 text-red-500" /> Absent</p>
         </div>
       </div>
 

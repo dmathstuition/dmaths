@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import Confetti from "@/components/ui/Confetti";
+import { Icon } from "@/components/Icons";
 import { makeQuestion, type Question } from "@/lib/mathSprint";
 
 const DURATION = 60;
@@ -70,11 +71,11 @@ export default function MathSprintClient() {
 
         {phase === "idle" && (
           <div className="relative text-center">
-            <p className="text-4xl">⚡️</p>
+            <p className="flex justify-center text-gold"><Icon name="zap" className="h-10 w-10" /></p>
             <h1 className="mt-2 font-display text-2xl font-bold sm:text-3xl">Math Sprint</h1>
             <p className="mt-1 text-sm text-white/60">How many can you solve in 60 seconds?</p>
-            {best > 0 && <p className="mt-3 text-sm font-bold text-gold">🏆 Your best: {best}</p>}
-            <button onClick={start} className="btn-gold mt-6 !rounded-full !px-8">Start ⚡️</button>
+            {best > 0 && <p className="mt-3 inline-flex items-center gap-1.5 text-sm font-bold text-gold"><Icon name="trophy" className="h-4 w-4" /> Your best: {best}</p>}
+            <button onClick={start} className="btn-gold mt-6 !rounded-full !px-8"><span className="inline-flex items-center gap-1.5">Start <Icon name="zap" className="h-4 w-4" /></span></button>
           </div>
         )}
 
@@ -82,7 +83,7 @@ export default function MathSprintClient() {
           <div className="relative">
             <div className="flex items-center justify-between text-sm font-bold">
               <span className="text-gold">Score {score}</span>
-              <span className={time <= 10 ? "text-red-300" : "text-white/70"}>⏱ {time}s</span>
+              <span className={`inline-flex items-center gap-1 ${time <= 10 ? "text-red-300" : "text-white/70"}`}><Icon name="clock" className="h-4 w-4" /> {time}s</span>
             </div>
             <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/10">
               <div className="h-full rounded-full bg-gradient-to-r from-gold to-gold-deep transition-[width] duration-1000 ease-linear"
@@ -105,11 +106,11 @@ export default function MathSprintClient() {
 
         {phase === "over" && (
           <div className="relative text-center">
-            <p className="text-4xl">{isBest ? "🎉" : "⏱"}</p>
+            <p className="flex justify-center text-gold">{isBest ? <Icon name="partyPopper" className="h-10 w-10" /> : <Icon name="clock" className="h-10 w-10" />}</p>
             <h1 className="mt-2 font-display text-2xl font-bold sm:text-3xl">{isBest ? "New personal best!" : "Time's up!"}</h1>
             <p className="mt-3 font-display text-6xl font-extrabold text-gold">{score}</p>
             <p className="text-sm text-white/60">correct in 60 seconds{!isBest && best > 0 ? ` · best ${best}` : ""}</p>
-            <button onClick={start} className="btn-gold mt-6 !rounded-full !px-8">Play again ⚡️</button>
+            <button onClick={start} className="btn-gold mt-6 !rounded-full !px-8"><span className="inline-flex items-center gap-1.5">Play again <Icon name="zap" className="h-4 w-4" /></span></button>
           </div>
         )}
       </div>

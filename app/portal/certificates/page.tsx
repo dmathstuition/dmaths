@@ -22,8 +22,8 @@ export default async function CertificatesPage() {
         style={{ background: "linear-gradient(135deg, #10406F 0%, #0A2A4F 55%, #071C36 100%)" }}>
         <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full"
           style={{ background: "radial-gradient(circle, rgba(239,174,86,.4), transparent 70%)" }} />
-        <div aria-hidden className="pointer-events-none absolute right-6 top-6 select-none text-xl float">🏆</div>
-        <div aria-hidden className="pointer-events-none absolute right-24 bottom-6 select-none text-base float" style={{ animationDelay: "1.1s" }}>✨</div>
+        <div aria-hidden className="pointer-events-none absolute right-6 top-6 text-gold/30 float"><Icon name="trophy" className="h-6 w-6" /></div>
+        <div aria-hidden className="pointer-events-none absolute right-24 bottom-6 text-gold/25 float" style={{ animationDelay: "1.1s" }}><Icon name="sparkles" className="h-5 w-5" /></div>
         <span className="relative flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gold/15 text-gold ring-1 ring-gold/25">
           <Icon name="graduationCap" className="h-6 w-6" />
         </span>

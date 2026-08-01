@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import CountUp from "@/components/landing/CountUp";
 import Confetti from "@/components/ui/Confetti";
+import { Icon } from "@/components/Icons";
 
 // A lively "today's wins" card for the admin dashboard — animated counters and a
 // confetti burst when something good happened today, plus a milestone bar to
@@ -31,8 +32,8 @@ export default function AdminWins({
       <div aria-hidden className="pointer-events-none absolute -right-6 -top-6 h-28 w-28 rounded-full bg-gold/20 blur-2xl" />
 
       <div className="relative">
-        <p className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-white/45">
-          {win ? "🎉 Today's wins" : "📊 Today so far"}
+        <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-white/45">
+          <Icon name={win ? "partyPopper" : "dashboard"} className="h-3.5 w-3.5" /> {win ? "Today's wins" : "Today so far"}
         </p>
 
         <div className="mt-3 flex flex-wrap gap-6">

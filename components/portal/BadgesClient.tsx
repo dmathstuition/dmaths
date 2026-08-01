@@ -13,12 +13,12 @@ interface Badge {
 interface EarnedBadge { badge_id: string; earned_at: string; }
 
 // Loot-style rarity by the points needed to unlock — pure presentation flavour.
-function rarity(threshold: number | null) {
-  if (threshold === null) return { name: "Special", emoji: "✨", chip: "bg-[#8B5CF6] text-white" };
-  if (threshold >= 300) return { name: "Legendary", emoji: "👑", chip: "bg-gold text-board" };
-  if (threshold >= 100) return { name: "Epic", emoji: "💎", chip: "bg-[#8B5CF6] text-white" };
-  if (threshold >= 50) return { name: "Rare", emoji: "🎖", chip: "bg-[#3B82F6] text-white" };
-  return { name: "Common", emoji: "⭐", chip: "bg-emerald-500 text-white" };
+function rarity(threshold: number | null): { name: string; icon: IconName; chip: string } {
+  if (threshold === null) return { name: "Special", icon: "sparkles", chip: "bg-[#8B5CF6] text-white" };
+  if (threshold >= 300) return { name: "Legendary", icon: "crown", chip: "bg-gold text-board" };
+  if (threshold >= 100) return { name: "Epic", icon: "gem", chip: "bg-[#8B5CF6] text-white" };
+  if (threshold >= 50) return { name: "Rare", icon: "medal", chip: "bg-[#3B82F6] text-white" };
+  return { name: "Common", icon: "star", chip: "bg-emerald-500 text-white" };
 }
 
 type Filter = "all" | "earned" | "locked";
@@ -58,8 +58,8 @@ export default function BadgesClient({
         style={{ background: "linear-gradient(135deg, #10406F 0%, #0A2A4F 55%, #071C36 100%)" }}>
         <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full"
           style={{ background: "radial-gradient(circle, rgba(239,174,86,.4), transparent 70%)" }} />
-        <div aria-hidden className="pointer-events-none absolute right-6 top-6 select-none text-xl float">🏅</div>
-        <div aria-hidden className="pointer-events-none absolute right-24 bottom-8 select-none text-base float" style={{ animationDelay: "1.1s" }}>✨</div>
+        <div aria-hidden className="pointer-events-none absolute right-6 top-6 text-gold/30 float"><Icon name="award" className="h-6 w-6" /></div>
+        <div aria-hidden className="pointer-events-none absolute right-24 bottom-8 text-gold/25 float" style={{ animationDelay: "1.1s" }}><Icon name="sparkles" className="h-5 w-5" /></div>
 
         <div className="relative flex items-center gap-4">
           <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gold/15 text-gold ring-1 ring-gold/25">
@@ -111,7 +111,7 @@ export default function BadgesClient({
                   isEarned ? "shadow-lift ring-transparent hover:-translate-y-1" : "ring-line grayscale-[35%] hover:grayscale-0 dark:ring-white/10"}`}
                   style={isEarned ? { boxShadow: `0 10px 40px -14px ${badge.color}99` } : undefined}>
                   {/* rarity chip */}
-                  <span className={`absolute right-3 top-3 rounded-full px-2 py-0.5 text-[10px] font-extrabold ${r.chip}`}>{r.emoji} {r.name}</span>
+                  <span className={`absolute right-3 top-3 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-extrabold ${r.chip}`}><Icon name={r.icon} className="h-3 w-3" /> {r.name}</span>
 
                   <div className="flex items-center gap-4">
                     <div className="relative flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full text-white transition-transform duration-300 group-hover:scale-110"
@@ -131,17 +131,17 @@ export default function BadgesClient({
                   <div className="mt-4">
                     {isEarned ? (
                       <p className="inline-flex items-center gap-1.5 text-xs font-bold" style={{ color: badge.color }}>
-                        <span>🎉</span> Earned {new Date(earnedAt!).toLocaleDateString("en-NG", { dateStyle: "medium" })}
+                        <Icon name="partyPopper" className="h-3.5 w-3.5" /> Earned {new Date(earnedAt!).toLocaleDateString("en-NG", { dateStyle: "medium" })}
                       </p>
                     ) : ptsLeft !== null && ptsLeft > 0 ? (
                       <>
                         <div className="h-2 w-full overflow-hidden rounded-full bg-ink/10 dark:bg-white/10">
                           <div className="h-full rounded-full transition-all" style={{ background: badge.color, width: `${progress}%` }} />
                         </div>
-                        <p className="mt-1.5 text-xs font-semibold text-ink/45 dark:text-white/45">🔒 {ptsLeft} more pts to unlock</p>
+                        <p className="mt-1.5 inline-flex items-center gap-1 text-xs font-semibold text-ink/45 dark:text-white/45"><Icon name="lock" className="h-3 w-3" /> {ptsLeft} more pts to unlock</p>
                       </>
                     ) : (
-                      <p className="text-xs font-semibold text-ink/40 dark:text-white/40">🔒 Special achievement — keep going!</p>
+                      <p className="inline-flex items-center gap-1 text-xs font-semibold text-ink/40 dark:text-white/40"><Icon name="lock" className="h-3 w-3" /> Special achievement — keep going!</p>
                     )}
                   </div>
                 </div>
@@ -151,7 +151,7 @@ export default function BadgesClient({
         })}
         {!shown.length && (
           <div className="card col-span-full flex flex-col items-center gap-2 py-12 text-center text-ink/40">
-            <span className="text-4xl">🏅</span>
+            <Icon name="award" className="h-12 w-12 text-ink/30" />
             <p className="text-sm">{filter === "earned" ? "No badges earned yet — your first trophy is waiting!" : "Nothing here."}</p>
           </div>
         )}

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useToast } from "@/components/Toast";
 import ConfirmModal from "@/components/ConfirmModal";
+import { Icon } from "@/components/Icons";
 import { findTier, fmtNgn } from "@/lib/summerCamp";
 
 type Payment = Record<string, any>;
@@ -232,8 +233,8 @@ export default function PaymentsClient({ initial, subscribers = [], receipts = [
           {editing && (
             <div className="rounded-xl bg-chalk px-4 py-3 text-[13px] text-ink/60">
               {rec._hasReceipt && (
-                <p className="font-semibold text-amber-700">
-                  ⚠️ A receipt has already been issued for this payment — if you change the amount, re-issue the receipt so it matches.
+                <p className="flex items-start gap-1.5 font-semibold text-amber-700">
+                  <Icon name="alertTriangle" className="mt-0.5 h-4 w-4 flex-shrink-0" /> A receipt has already been issued for this payment — if you change the amount, re-issue the receipt so it matches.
                 </p>
               )}
               <p className={rec._hasReceipt ? "mt-1" : ""}>
@@ -362,7 +363,7 @@ export default function PaymentsClient({ initial, subscribers = [], receipts = [
                     <td className="px-5 py-3 text-ink/70">{p.email || "—"}</td>
                     <td className="px-5 py-3">
                       <span className="font-semibold text-ink/75">{planName(p)}</span>
-                      {p.camp && <span className="ml-2 pill-amber">☀️ {p.camp}</span>}
+                      {p.camp && <span className="ml-2 pill-amber inline-flex items-center gap-1"><Icon name="sun" className="h-3 w-3" /> {p.camp}</span>}
                     </td>
                     <td className="px-5 py-3 capitalize text-ink/60">{p.channel || "—"}</td>
                     <td className="px-5 py-3 text-right font-extrabold text-ink">{fmtNgn(Number(p.amount || 0))}</td>
@@ -407,7 +408,7 @@ export default function PaymentsClient({ initial, subscribers = [], receipts = [
                 </div>
                 <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-line pt-3 text-xs text-ink/50">
                   <span className={p.status === "success" ? "pill-green" : "pill-amber"}>{p.status}</span>
-                  {p.camp && <span className="pill-amber">☀️ {p.camp}</span>}
+                  {p.camp && <span className="pill-amber inline-flex items-center gap-1"><Icon name="sun" className="h-3 w-3" /> {p.camp}</span>}
                   {p.channel && <span className="capitalize">{p.channel}</span>}
                   <span className="ml-auto">{new Date(p.paid_at || p.created_at).toLocaleDateString("en-NG", { dateStyle: "medium" })}</span>
                 </div>
