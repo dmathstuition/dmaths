@@ -47,9 +47,25 @@ The most recently added ones — likely still outstanding:
 | 41 | `migration-receipts.sql` | Printable payment receipts for parents |
 | 42 | `migration-payment-links.sql` | Links a payment to a learner (student & parent see their records + what's owed) |
 | 43 | `migration-reuse-student-codes.sql` | A deleted learner's Student ID (e.g. `DM-2026-0001`) becomes free for the next enrolment |
-| 44 | `migration-schema-fixes.sql` | **Run last** — patches anything missing |
+| 44 | `migration-study-tasks.sql` | Learner study planner — the **My plan** to-do list |
+| 45 | `migration-rewards-shop.sql` | **Rewards shop** — learners spend earned points on perks the admin lists |
+| 46 | `migration-daily-rewards.sql` | **Daily reward chest** — +5 points once a day (needs the rewards shop above) |
+| 47 | `migration-question-bank.sql` | Reusable CBT questions — **also required by Practice below** (skip if already run at #40) |
+| 48 | `migration-practice.sql` | **Self-practice quiz** — learners practise from the bank & earn capped points |
+| 49 | `migration-leaderboard-seasons.sql` | **Leaderboard seasons + Hall of Fame** — monthly competition on top of the all-time board |
+| — | `migration-schema-fixes.sql` | **Run last, after everything above** — patches anything missing |
 
 Then run **`storage-buckets.sql`** (file uploads fail with "Bucket not found" without it).
+
+> **Engagement/gamification set (44–49)** are the features added in the most recent
+> sessions. They're independent of each other except: **daily reward (46) needs the
+> rewards shop (45)**, and **practice (48) needs the question bank (47/40)**. All are
+> idempotent and degrade to a friendly empty state until run, so nothing breaks if you
+> do them later — but the shop, daily chest, practice tab and "This month" leaderboard
+> stay dark until you do.
+>
+> *Optional maintenance:* `cleanup-duplicate-nudges.sql` only needs running if you saw
+> duplicate nudge notifications before `cleanup`/dedupe shipped — most projects can skip it.
 
 > **Re-run `storage-buckets.sql` even if you ran it before.** It now makes
 > `submissions` (children's uploaded work) and `voice-notes` (private chat audio)
@@ -58,7 +74,8 @@ Then run **`storage-buckets.sql`** (file uploads fail with "Bucket not found" wi
 > Old links people already copied will stop working — that is the fix, not a fault.
 
 **✅ Check:** Supabase → **Table Editor** — you can see `certificates`, `report_cards`,
-`lesson_notes`, `daily_tasks`, `study_sessions`, `flashcard_decks`.
+`lesson_notes`, `daily_tasks`, `study_sessions`, `flashcard_decks`, and — for the
+engagement set — `reward_items`, `daily_rewards`, `practice_sessions`, `season_baselines`.
 
 ---
 
