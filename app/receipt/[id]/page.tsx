@@ -4,6 +4,8 @@ import CertificateActions from "@/components/CertificateActions";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { getUser, getProfile } from "@/lib/auth";
 import { fmtNgn } from "@/lib/summerCamp";
+import WhatsAppShare from "@/components/WhatsAppShare";
+import { siteBaseUrl } from "@/lib/siteUrl";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Receipt — D-Maths", robots: { index: false } };
@@ -39,7 +41,7 @@ export default async function ReceiptPage({ params }: { params: { id: string } }
   if (!allowed) notFound();
 
   const { data: student } = receipt.student_id
-    ? await admin.from("profiles").select("first_name, last_name, student_code, level").eq("id", receipt.student_id).maybeSingle()
+    ? await admin.from("profiles").select("first_name, last_name, student_code, level, phone, guardian_contact").eq("id", receipt.student_id).maybeSingle()
     : { data: null };
 
   const name = `${student?.first_name ?? ""} ${student?.last_name ?? ""}`.trim();
@@ -93,6 +95,16 @@ export default async function ReceiptPage({ params }: { params: { id: string } }
           Receipt No. {receipt.serial}
         </p>
       </div>
+
+      {isStaff && (student?.guardian_contact || student?.phone) && (
+        <div className="no-print mx-auto mt-5 flex max-w-3xl justify-center">
+          <WhatsAppShare
+            phone={student?.guardian_contact || student?.phone}
+            label="Send receipt on WhatsApp"
+            text={`D-Maths payment receipt ${receipt.serial}\n\nAmount: ${fmtNgn(Number(receipt.amount ?? 0))}\nDate: ${date(receipt.paid_at)}\nReference: ${receipt.payment_reference}${name ? `\nFor: ${name}` : ""}\n\nView & print: ${siteBaseUrl()}/receipt/${receipt.id}\n\nThank you for your payment!`}
+          />
+        </div>
+      )}
 
       <CertificateActions backHref={backHref} />
 
