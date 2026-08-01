@@ -14,6 +14,12 @@ export type Nudge = { kind: NudgeKind; title: string; body: string };
 // these strings breaks that dedupe — update the cleanup SQL too if you do.
 export const STREAK_TITLE = "🔥 Keep your streak going!";
 export const INACTIVE_TITLE = "We've missed you 👋";
+export const DAILY_REWARD_TITLE = "🎁 Your daily reward is waiting";
+
+// The WAT hour from which the daily-reward chest reminder may fire — late enough
+// that most learners who'd open it naturally already have, so it lands as an
+// evening "before midnight" nudge however often the cron runs.
+export const DAILY_REWARD_HOUR = 16;
 
 // Whole days between a YYYY-MM-DD date and "today" (UTC date math on date-only
 // values — no time component, so DST/timezone drift can't skew the day count).
