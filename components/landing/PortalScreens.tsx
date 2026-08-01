@@ -8,7 +8,7 @@ import PortalPhone from "@/components/landing/PortalPhone";
 // to the built-in mock so the landing page is never broken.
 const SHOTS = [
   "/Screenshot_20260722-085524.jpg", // shown first
-  "/Screenshot_20260722-085451.jpg", // shown on tap
+  "/Screenshot_20260801-073950.jpg", // shown on tap
 ];
 
 export default function PortalScreens({ className = "" }: { className?: string }) {
