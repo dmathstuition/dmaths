@@ -125,10 +125,12 @@ export default function AssistantWidget({ context, mode = "learner" }: { context
       {/* Panel */}
       {open && (
         <div role="dialog" aria-label="D-Maths A.I assistant"
-          className="fixed inset-x-3 bottom-24 z-[60] flex max-h-[70vh] flex-col overflow-hidden rounded-3xl border border-line bg-white shadow-2xl sm:inset-x-auto sm:right-6 sm:w-[380px] lg:bottom-6">
+          className="chat-in fixed inset-x-3 bottom-24 z-[60] flex max-h-[70vh] flex-col overflow-hidden rounded-3xl border border-line bg-white shadow-2xl sm:inset-x-auto sm:right-6 sm:w-[380px] lg:bottom-6">
           {/* Header */}
-          <div className="flex items-center gap-3 bg-board px-4 py-3 text-white">
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gold text-board"><Icon name="compass" className="h-5 w-5" /></span>
+          <div className="relative flex items-center gap-3 overflow-hidden px-4 py-3 text-white"
+            style={{ background: "linear-gradient(120deg, #10406F 0%, #0A2A4F 60%, #071C36 100%)" }}>
+            <div aria-hidden className="pointer-events-none absolute right-10 top-1 text-gold/25 float"><Icon name="sparkles" className="h-4 w-4" /></div>
+            <span className="relative flex h-9 w-9 items-center justify-center rounded-full bg-gold text-board shadow-[0_0_18px_-4px_rgba(239,174,86,.9)]"><Icon name="compass" className="h-5 w-5" /></span>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-bold leading-tight">D-Maths A.I · {staff ? "Teaching assistant" : "Learning buddy"}</p>
               <p className="text-[11px] text-white/55">{staff ? "Solutions, lesson ideas & marking help" : "Hints to help you — not the answers"}</p>
@@ -147,7 +149,7 @@ export default function AssistantWidget({ context, mode = "learner" }: { context
           {/* Messages */}
           <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto bg-chalk/40 px-3 py-4">
             {msgs.map((m, i) => (
-              <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+              <div key={i} className={`msg-in flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                 <div
                   className={`max-w-[85%] whitespace-pre-wrap rounded-2xl px-3.5 py-2 text-[13.5px] leading-relaxed ${
                     m.role === "user"
@@ -197,7 +199,7 @@ export default function AssistantWidget({ context, mode = "learner" }: { context
               onClick={() => send()}
               disabled={busy || !input.trim()}
               aria-label="Send"
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold text-board transition disabled:opacity-40"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold text-board shadow-sm transition hover:scale-105 hover:brightness-105 active:scale-90 disabled:opacity-40 disabled:hover:scale-100"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" /></svg>
             </button>

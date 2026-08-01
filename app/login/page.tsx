@@ -158,21 +158,31 @@ export default function Login() {
       <aside className="relative hidden overflow-hidden bg-gradient-to-br from-[#10406F] via-[#0A2A4F] to-[#071C36] p-12 text-white lg:flex lg:flex-col">
         <div aria-hidden className="pointer-events-none absolute -left-16 top-0 h-72 w-72 rounded-full bg-ink/40 blur-3xl" />
         <div aria-hidden className="pointer-events-none absolute -right-10 bottom-1/4 h-72 w-72 rounded-full bg-gold/20 blur-3xl" />
+        {/* drifting maths glyphs — subtle depth behind the copy */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 select-none font-display font-bold text-white/[0.06]">
+          <span className="float absolute left-[12%] top-[18%] text-5xl">∑</span>
+          <span className="float absolute right-[16%] top-[30%] text-4xl" style={{ animationDelay: "1.4s" }}>π</span>
+          <span className="float absolute left-[20%] top-[54%] text-4xl" style={{ animationDelay: ".8s" }}>√</span>
+          <span className="float absolute left-[46%] top-[10%] text-3xl" style={{ animationDelay: "2s" }}>ƒ(x)</span>
+        </div>
         <Link href="/" className="relative w-fit"><Logo light size="lg" /></Link>
         <div className="relative mt-16 max-w-sm">
           <h2 className="font-display text-3xl font-bold leading-tight">Welcome back to your D-Maths portal <span className="align-middle">👋</span></h2>
           <p className="mt-3 text-sm leading-relaxed text-white/60">Live classes, grades, streaks and reminders — your whole learning journey in one beautiful app.</p>
           <ul className="mt-6 space-y-2.5 text-sm text-white/85">
-            <li className="flex items-center gap-2.5"><span className="text-gold">✓</span> Grades, attendance &amp; streaks, tracked live</li>
-            <li className="flex items-center gap-2.5"><span className="text-gold">✓</span> Join live classes from your phone</li>
-            <li className="flex items-center gap-2.5"><span className="text-gold">✓</span> Assignments &amp; instant class reminders</li>
+            {["Grades, attendance & streaks, tracked live", "Join live classes from your phone", "Assignments & instant class reminders"].map((t) => (
+              <li key={t} className="flex items-center gap-2.5">
+                <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-gold/15 text-gold ring-1 ring-gold/25"><Icon name="checkCircle" className="h-3.5 w-3.5" /></span>
+                {t}
+              </li>
+            ))}
           </ul>
         </div>
         {/* soft ambient glow behind the mascot */}
         <div aria-hidden className="pointer-events-none absolute bottom-0 right-[3%] h-[62%] w-[64%] rounded-full bg-[radial-gradient(circle,rgba(203,223,247,0.28),transparent_62%)] blur-2xl" />
         {/* big mascot, standing flush on the bottom edge (padding trimmed off the art) */}
         <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 flex h-[82%] w-[64%] items-end justify-center">
-          <Mascot src={LOGIN_MASCOT} className="h-full w-full object-contain object-bottom drop-shadow-2xl"
+          <Mascot src={LOGIN_MASCOT} className="float h-full w-full object-contain object-bottom drop-shadow-2xl"
             fallback={<HeroStudy className="h-full w-full object-contain object-bottom" />} />
         </div>
       </aside>
