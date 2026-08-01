@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, CartesianGrid, PieChart, Pie, Cell, Legend, ReferenceLine } from "recharts";
 import ProgressRing from "@/components/ui/ProgressRing";
 import ActivityHeatmap from "@/components/portal/ActivityHeatmap";
+import { Icon } from "@/components/Icons";
 
 const COLORS = ["#1A60AB", "#EFAE56", "#059669", "#dc2626", "#8b5cf6", "#ec4899"];
 
@@ -113,9 +114,20 @@ export default function ProgressClient({
 
   return (
     <div className="space-y-6">
-      <div className="boardgrid relative overflow-hidden rounded-2xl bg-board p-7 text-white">
-        <h1 className="font-display text-2xl font-semibold sm:text-3xl">My progress</h1>
-        <p className="mt-1 text-sm text-white/50">{profile.first_name} {profile.last_name} · {profile.student_code}</p>
+      <div className="boardgrid relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#10406F] via-[#0A2A4F] to-[#071C36] p-7 text-white">
+        <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full"
+          style={{ background: "radial-gradient(circle, rgba(239,174,86,.4), transparent 70%)" }} />
+        <div aria-hidden className="pointer-events-none absolute right-6 top-6 select-none text-xl float">📈</div>
+        <div aria-hidden className="pointer-events-none absolute right-24 bottom-6 select-none text-base float" style={{ animationDelay: "1.1s" }}>⭐</div>
+        <div className="relative flex items-center gap-4">
+          <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gold/15 text-gold ring-1 ring-gold/25">
+            <Icon name="progress" className="h-6 w-6" />
+          </span>
+          <div className="min-w-0">
+            <h1 className="font-display text-2xl font-semibold sm:text-3xl">My progress</h1>
+            <p className="mt-1 text-sm text-white/50">{profile.first_name} {profile.last_name} · {profile.student_code}</p>
+          </div>
+        </div>
       </div>
 
       {/* Predicted grade + strengths/focus */}
