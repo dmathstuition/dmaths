@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { Icon } from "@/components/Icons";
 
 // A small rotating tip line for the dashboard hero. Cycles gently on an
 // interval (the global reduced-motion rule disables the fade transition).
@@ -21,8 +22,8 @@ export default function DashboardTip({ tips = DEFAULT_TIPS }: { tips?: string[] 
   }, [tips.length]);
 
   return (
-    <p key={i} className="page-enter mt-4 max-w-md text-[13px] font-medium leading-relaxed text-ink/70">
-      <span aria-hidden="true">💡</span> {tips[i]}
+    <p key={i} className="page-enter mt-4 flex max-w-md items-start gap-1.5 text-[13px] font-medium leading-relaxed text-ink/70">
+      <Icon name="lightbulb" className="mt-0.5 h-4 w-4 flex-shrink-0 text-gold-deep" /> <span>{tips[i]}</span>
     </p>
   );
 }

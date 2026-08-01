@@ -60,8 +60,8 @@ export default function MomentumCard({
         style={{ background: `radial-gradient(circle, ${current.color}55, transparent 70%)` }} />
       <div aria-hidden className="pointer-events-none absolute -bottom-16 left-1/3 h-40 w-40 rounded-full bg-gold/10 blur-2xl" />
       {/* floating flourishes */}
-      <div aria-hidden className="pointer-events-none absolute right-5 top-5 select-none text-lg float">🪙</div>
-      <div aria-hidden className="pointer-events-none absolute right-1/4 bottom-5 select-none text-sm float" style={{ animationDelay: "1.2s" }}>✨</div>
+      <div aria-hidden className="pointer-events-none absolute right-5 top-5 text-gold/30 float"><Icon name="coins" className="h-5 w-5" /></div>
+      <div aria-hidden className="pointer-events-none absolute right-1/4 bottom-5 text-gold/25 float" style={{ animationDelay: "1.2s" }}><Icon name="sparkles" className="h-4 w-4" /></div>
 
       <div className="relative flex flex-col items-center gap-6 sm:flex-row sm:gap-8">
         {/* level ring */}

@@ -2,6 +2,7 @@ import { getProfile } from "@/lib/auth";
 import { siteBaseUrl } from "@/lib/siteUrl";
 import ReferShare from "@/components/portal/ReferShare";
 import Reveal from "@/components/landing/Reveal";
+import { Icon } from "@/components/Icons";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +19,7 @@ export default async function ReferPage() {
           <div className="pointer-events-none absolute right-0 top-0 h-full w-1/2 opacity-20"
             style={{ background: "radial-gradient(circle at 80% 20%, #EFAE56, transparent 60%)" }} />
           <div className="relative">
-            <p className="pill-gold mb-3">🎁 Refer a friend</p>
+            <p className="pill-gold mb-3 inline-flex items-center gap-1"><Icon name="gift" className="h-3 w-3" /> Refer a friend</p>
             <h1 className="font-display text-2xl font-semibold sm:text-3xl">
               Invite friends to <span className="text-gold">D-Maths</span>
             </h1>
@@ -27,7 +28,7 @@ export default async function ReferPage() {
               and let you know the moment they join.
             </p>
             <p className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-gold/15 px-3 py-1 text-sm font-bold text-gold ring-1 ring-gold/30">
-              👥 {count} friend{count === 1 ? "" : "s"} joined
+<Icon name="students" className="h-4 w-4" /> {count} friend{count === 1 ? "" : "s"} joined
             </p>
           </div>
         </div>

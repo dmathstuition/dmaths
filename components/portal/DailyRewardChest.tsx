@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Confetti from "@/components/ui/Confetti";
+import { Icon } from "@/components/Icons";
 
 type State = "loading" | "ready" | "claimed" | "opening";
 
@@ -53,8 +54,8 @@ export default function DailyRewardChest() {
 
       <div aria-hidden className="pointer-events-none absolute -right-3 -top-3 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
       <div className="relative flex items-center gap-4">
-        <span className={`flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-white/15 text-3xl ring-1 ring-white/25 ${opened ? "" : "badge-pulse"}`}>
-          {opened ? "✅" : "🎁"}
+        <span className={`flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/25 ${opened ? "" : "badge-pulse"}`}>
+          <Icon name={opened ? "checkCircle" : "gift"} className="h-7 w-7" />
         </span>
         <div className="min-w-0 flex-1">
           {opened ? (
@@ -78,7 +79,7 @@ export default function DailyRewardChest() {
         ) : (
           <button onClick={open} disabled={state === "opening"}
             className="flex-shrink-0 rounded-full bg-white px-5 py-2.5 text-sm font-extrabold text-[#4F46E5] shadow transition hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 disabled:opacity-70">
-            {state === "opening" ? "Opening…" : "Open 🎁"}
+            {state === "opening" ? "Opening…" : <span className="inline-flex items-center gap-1.5">Open <Icon name="gift" className="h-4 w-4" /></span>}
           </button>
         )}
       </div>

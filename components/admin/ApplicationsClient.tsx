@@ -4,6 +4,7 @@ import { supabaseBrowser } from "@/lib/supabase/client";
 import ConfirmModal from "@/components/ConfirmModal";
 import PromptModal from "@/components/PromptModal";
 import { useToast } from "@/components/Toast";
+import { Icon } from "@/components/Icons";
 import { findTier, discountedNgn, fmtNgn } from "@/lib/summerCamp";
 
 type App = Record<string, any>;
@@ -139,8 +140,8 @@ export default function ApplicationsClient({ initial }: { initial: App[] }) {
         </div>
         <div className="flex items-center gap-2">
           <button onClick={exportCSV} className="btn-ghost !min-h-[38px] text-xs">Export CSV</button>
-          <button onClick={sendTestEmail} className="btn-ghost !min-h-[38px] text-xs" title="Send a test email to verify the email setup is working">
-            ✉️ Send test email
+          <button onClick={sendTestEmail} className="btn-ghost !min-h-[38px] gap-1.5 text-xs" title="Send a test email to verify the email setup is working">
+            <Icon name="mail" className="h-3.5 w-3.5" /> Send test email
           </button>
         </div>
       </div>
@@ -170,7 +171,7 @@ export default function ApplicationsClient({ initial }: { initial: App[] }) {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              {a.camp && <span className="pill-amber">☀️ Summer Camp</span>}
+              {a.camp && <span className="pill-amber inline-flex items-center gap-1"><Icon name="sun" className="h-3 w-3" /> Summer Camp</span>}
               {a.pay_plan === "part" && <span className="pill-red">Part payment</span>}
               <span className={a.status === "approved" ? "pill-green" : a.status === "rejected" ? "pill-red" : "pill-amber"}>{a.status}</span>
               {a.status === "rejected" && (

@@ -199,7 +199,7 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
               </div>
               <span className="flex flex-col items-end gap-1">
                 <span className={s.status === "graded" ? "pill-green" : s.status === "submitted" ? "pill-blue" : "pill-amber"}>{s.status}</span>
-                {overdue && <span className="pill-red">⏰ overdue</span>}
+                {overdue && <span className="pill-red inline-flex items-center gap-1"><Icon name="clock" className="h-3 w-3" /> overdue</span>}
               </span>
             </div>
             {a.instructions && <p className="mt-3 text-sm leading-relaxed text-ink/60">{a.instructions}</p>}
@@ -250,8 +250,8 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
             )}
 
             {s.status === "pending" && a.type !== "cbt" && overdue && (
-              <p className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-bold text-red-800">
-                ⏰ The deadline has passed — submissions are closed. Contact your tutor if you still need to hand this in.
+              <p className="mt-4 flex items-center justify-center gap-1.5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-bold text-red-800">
+                <Icon name="clock" className="h-4 w-4 flex-shrink-0" /> The deadline has passed — submissions are closed. Contact your tutor if you still need to hand this in.
               </p>
             )}
 

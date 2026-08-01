@@ -420,7 +420,7 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
               <div className="mt-2 flex flex-wrap gap-1.5 text-xs">
                 {(student.referral_count ?? 0) > 0 && (
                   <span className="inline-flex items-center gap-1 rounded-full bg-gold-pale px-2.5 py-1 font-bold text-gold-deep">
-                    🎁 Referred {student.referral_count} student{student.referral_count === 1 ? "" : "s"}
+<Icon name="gift" className="h-3.5 w-3.5" /> Referred {student.referral_count} student{student.referral_count === 1 ? "" : "s"}
                   </span>
                 )}
                 {referredByName && (

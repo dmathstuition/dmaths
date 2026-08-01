@@ -94,7 +94,7 @@ export default async function StudentDashboard() {
           <div data-tour="hero" className="relative flex min-h-[250px] items-center overflow-hidden rounded-3xl bg-gradient-to-br from-[#EEF2FE] via-[#E2ECFB] to-[#DCE7F6] p-7 dark:from-[#10406F] dark:via-[#0A2A4F] dark:to-[#071C36] sm:min-h-[270px] sm:p-9">
             <div className="relative z-10 max-w-[62%] sm:max-w-md">
               <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-ink/45">
-                <span aria-hidden>✦</span> Today&apos;s focus
+<Icon name="sparkles" className="h-3.5 w-3.5" /> Today&apos;s focus
               </p>
               <h1 className="mt-2 font-display text-3xl font-bold text-ink sm:text-4xl">
                 {greeting()}, {me?.first_name}! <span className="align-middle">👋</span>
@@ -105,10 +105,10 @@ export default async function StudentDashboard() {
                   : "You're all caught up. Keep your streak alive and stay ahead."}
               </p>
               <div className="mt-3 flex flex-wrap items-center gap-2">
-                <span className="pill-gold">🎓 {me?.level || "Student"}</span>
+                <span className="pill-gold inline-flex items-center gap-1"><Icon name="graduationCap" className="h-3 w-3" /> {me?.level || "Student"}</span>
                 {streak > 0 && (
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-white/70 px-3 py-1 text-sm font-bold text-gold-deep ring-1 ring-gold/30 dark:bg-white/10 dark:text-gold">
-                    🔥 {streak}-day streak
+                    <Icon name="flame" className="h-3.5 w-3.5" /> {streak}-day streak
                   </span>
                 )}
                 <span className="font-mono text-xs font-semibold text-ink/40">ID: {me?.student_code}</span>
@@ -121,7 +121,7 @@ export default async function StudentDashboard() {
                 </Link>
                 <Link href="/portal/refer" data-tour="refer"
                   className="inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-2.5 text-sm font-bold text-ink ring-1 ring-ink/10 transition hover:bg-white dark:bg-white/10 dark:text-white dark:ring-white/15 dark:hover:bg-white/20">
-                  🎁 Refer a friend
+<Icon name="gift" className="h-4 w-4" /> Refer a friend
                 </Link>
               </div>
               <div className="hidden sm:block"><DashboardTip /></div>
@@ -176,7 +176,7 @@ export default async function StudentDashboard() {
             className="group flex flex-wrap items-center gap-4 rounded-2xl border border-gold/40 bg-gold-pale px-5 py-4 transition hover:shadow-lift">
             <span className="relative flex">
               <span className="absolute inset-0 animate-ping rounded-full bg-gold opacity-25" />
-              <span className="relative flex h-10 w-10 items-center justify-center rounded-full bg-gold text-lg">⏰</span>
+              <span className="relative flex h-10 w-10 items-center justify-center rounded-full bg-gold text-board"><Icon name="clock" className="h-5 w-5" /></span>
             </span>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-bold text-ink">{classSoon ? "Class starting soon" : "You have a class today"}</p>
@@ -192,8 +192,8 @@ export default async function StudentDashboard() {
         <Reveal>
           <div className={`flex flex-wrap items-center gap-4 rounded-2xl border px-5 py-4 ${
             subOverdue ? "border-red-200 bg-red-50" : "border-gold/40 bg-gold-pale"}`}>
-            <span className={`flex h-10 w-10 items-center justify-center rounded-full text-lg ${
-              subOverdue ? "bg-red-500 text-white" : "bg-gold"}`}>{subOverdue ? "⚠️" : "💛"}</span>
+            <span className={`flex h-10 w-10 items-center justify-center rounded-full ${
+              subOverdue ? "bg-red-500 text-white" : "bg-gold text-board"}`}><Icon name={subOverdue ? "alertTriangle" : "payments"} className="h-5 w-5" /></span>
             <div className="min-w-0 flex-1">
               <p className={`text-sm font-bold ${subOverdue ? "text-red-800" : "text-ink"}`}>
                 {subOverdue ? "Monthly tuition overdue" : "Monthly tuition due soon"}
@@ -353,7 +353,7 @@ function Progress({ icon, label, value, text, unit, suffix = "", accent = "blue"
         <span className={`flex h-8 w-8 items-center justify-center rounded-lg ${a.icon}`}>
           <Icon name={icon} className="h-4 w-4" />
         </span>
-        {flame && <span aria-hidden className="text-sm">🔥</span>}
+        {flame && <span aria-hidden className="text-gold"><Icon name="flame" className="h-4 w-4" /></span>}
       </div>
       <p className="mt-2 font-display text-2xl font-bold leading-none text-ink">
         {text != null ? text : <CountUp to={value ?? 0} suffix={suffix} duration={1100} />}

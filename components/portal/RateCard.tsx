@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { Icon } from "@/components/Icons";
 
 // Compact "How are we doing?" star-rating widget for students & parents.
 // Submits to /api/ratings; once submitted (this session or previously, tracked
@@ -39,7 +40,7 @@ export default function RateCard() {
   if (done) {
     return (
       <div className="card flex items-center gap-3 p-5">
-        <span className="text-2xl">💛</span>
+        <span className="text-gold"><Icon name="heart" className="h-6 w-6" /></span>
         <p className="text-sm font-semibold text-ink/70">Thanks for your feedback — it helps us improve D-Maths.</p>
       </div>
     );

@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Icon } from "@/components/Icons";
+import { Icon, type IconName } from "@/components/Icons";
 import Reveal from "@/components/landing/Reveal";
 import Tilt3D from "@/components/landing/Tilt3D";
 import CountUp from "@/components/landing/CountUp";
@@ -18,11 +18,11 @@ const STATUS: Record<string, { label: string; cls: string }> = {
 };
 
 // Loot-style rarity tiers by point cost — the "high-end game" flavour.
-function tier(cost: number) {
-  if (cost >= 500) return { name: "Legendary", chip: "bg-gold text-board", grad: "from-[#F4C078] via-[#EFAE56] to-[#C8881F]", glow: "shadow-[0_0_46px_-10px_rgba(239,174,86,.85)]", ring: "ring-gold/50", emoji: "👑" };
-  if (cost >= 300) return { name: "Epic", chip: "bg-[#8B5CF6] text-white", grad: "from-[#A78BFA] via-[#8B5CF6] to-[#5B3FB0]", glow: "shadow-[0_0_42px_-12px_rgba(139,92,246,.8)]", ring: "ring-[#8B5CF6]/40", emoji: "💎" };
-  if (cost >= 100) return { name: "Rare", chip: "bg-[#3B82F6] text-white", grad: "from-[#60A5FA] via-[#3B82F6] to-[#1D4ED8]", glow: "shadow-[0_0_38px_-14px_rgba(59,130,246,.75)]", ring: "ring-[#3B82F6]/40", emoji: "🎁" };
-  return { name: "Common", chip: "bg-[#10B981] text-white", grad: "from-[#34D399] via-[#10B981] to-[#047857]", glow: "", ring: "ring-emerald-400/30", emoji: "⭐" };
+function tier(cost: number): { name: string; chip: string; grad: string; glow: string; ring: string; icon: IconName } {
+  if (cost >= 500) return { name: "Legendary", chip: "bg-gold text-board", grad: "from-[#F4C078] via-[#EFAE56] to-[#C8881F]", glow: "shadow-[0_0_46px_-10px_rgba(239,174,86,.85)]", ring: "ring-gold/50", icon: "crown" };
+  if (cost >= 300) return { name: "Epic", chip: "bg-[#8B5CF6] text-white", grad: "from-[#A78BFA] via-[#8B5CF6] to-[#5B3FB0]", glow: "shadow-[0_0_42px_-12px_rgba(139,92,246,.8)]", ring: "ring-[#8B5CF6]/40", icon: "gem" };
+  if (cost >= 100) return { name: "Rare", chip: "bg-[#3B82F6] text-white", grad: "from-[#60A5FA] via-[#3B82F6] to-[#1D4ED8]", glow: "shadow-[0_0_38px_-14px_rgba(59,130,246,.75)]", ring: "ring-[#3B82F6]/40", icon: "medal" };
+  return { name: "Common", chip: "bg-[#10B981] text-white", grad: "from-[#34D399] via-[#10B981] to-[#047857]", glow: "", ring: "ring-emerald-400/30", icon: "star" };
 }
 
 export default function ShopClient({
@@ -70,7 +70,7 @@ export default function ShopClient({
       {flash && (
         <div className="pointer-events-none fixed inset-0 z-[61] flex items-center justify-center">
           <div className="badge-pulse rounded-3xl bg-board/90 px-8 py-6 text-center text-white shadow-2xl ring-1 ring-gold/40">
-            <p className="text-3xl">🎉</p>
+            <p className="flex justify-center text-gold"><Icon name="partyPopper" className="h-8 w-8" /></p>
             <p className="mt-1 font-display text-lg font-bold">Redeemed!</p>
             <p className="text-sm text-white/70">{flash}</p>
           </div>
@@ -82,9 +82,9 @@ export default function ShopClient({
         <div className="relative overflow-hidden rounded-3xl p-7 text-white sm:p-9"
           style={{ background: "linear-gradient(135deg, #10406F 0%, #0A2A4F 55%, #071C36 100%)" }}>
           <div className="aurora pointer-events-none absolute inset-0 opacity-25" />
-          <div aria-hidden className="pointer-events-none absolute right-6 top-6 select-none text-2xl float">🪙</div>
-          <div aria-hidden className="pointer-events-none absolute right-24 bottom-8 select-none text-lg float" style={{ animationDelay: "1.3s" }}>🪙</div>
-          <div aria-hidden className="pointer-events-none absolute left-1/3 top-8 select-none text-base float" style={{ animationDelay: ".7s" }}>✨</div>
+          <div aria-hidden className="pointer-events-none absolute right-6 top-6 text-gold/30 float"><Icon name="coins" className="h-7 w-7" /></div>
+          <div aria-hidden className="pointer-events-none absolute right-24 bottom-8 text-gold/25 float" style={{ animationDelay: "1.3s" }}><Icon name="coins" className="h-5 w-5" /></div>
+          <div aria-hidden className="pointer-events-none absolute left-1/3 top-8 text-gold/20 float" style={{ animationDelay: ".7s" }}><Icon name="sparkles" className="h-4 w-4" /></div>
 
           <div className="relative flex items-end justify-between gap-4">
             <div className="min-w-0">
@@ -92,7 +92,7 @@ export default function ShopClient({
                 <Icon name="trophy" className="h-3.5 w-3.5 text-gold" /> Rewards shop
               </p>
               <p className="mt-2 flex items-baseline gap-2">
-                <span className="text-3xl">🪙</span>
+                <span className="text-gold"><Icon name="coins" className="h-8 w-8" /></span>
                 <span className="text-gradient-gold font-display text-5xl font-extrabold leading-none sm:text-6xl">
                   <CountUp to={bal} duration={1200} key={bal} />
                 </span>
@@ -141,8 +141,8 @@ export default function ShopClient({
                   <div className={`sheen group relative flex h-full flex-col overflow-hidden rounded-2xl bg-white ring-1 transition-all duration-300 dark:bg-[#0f2942] ${t.ring} ${afford ? `hover:-translate-y-1 ${t.glow}` : "opacity-90"}`}>
                     {/* rarity banner */}
                     <div className={`relative flex items-center justify-between bg-gradient-to-r ${t.grad} px-4 py-2.5 text-white`}>
-                      <span className="text-[11px] font-extrabold uppercase tracking-wide drop-shadow">{t.emoji} {t.name}</span>
-                      <span className="rounded-full bg-black/20 px-2 py-0.5 text-[11px] font-bold">🪙 {item.cost}</span>
+                      <span className="inline-flex items-center gap-1 text-[11px] font-extrabold uppercase tracking-wide drop-shadow"><Icon name={t.icon} className="h-3.5 w-3.5" /> {t.name}</span>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-black/20 px-2 py-0.5 text-[11px] font-bold"><Icon name="coins" className="h-3 w-3" /> {item.cost}</span>
                     </div>
 
                     <div className="flex flex-1 flex-col p-5">
@@ -152,7 +152,7 @@ export default function ShopClient({
                       {afford ? (
                         <button onClick={() => redeem(item)} disabled={busyId === item.id}
                           className="btn-gold mt-4 w-full !rounded-xl transition group-hover:brightness-105 disabled:opacity-60">
-                          {busyId === item.id ? "Redeeming…" : "Redeem 🪙"}
+                          {busyId === item.id ? "Redeeming…" : <span className="inline-flex items-center gap-1.5">Redeem <Icon name="coins" className="h-4 w-4" /></span>}
                         </button>
                       ) : (
                         <div className="mt-4">
@@ -175,7 +175,7 @@ export default function ShopClient({
         </div>
       ) : (
         <div className="card flex flex-col items-center gap-2 p-10 text-center text-ink/40">
-          <span className="text-4xl">🎁</span>
+          <Icon name="sparkles" className="h-10 w-10 text-ink/30" />
           <p className="text-sm">No rewards in the shop yet — check back soon!</p>
         </div>
       )}
@@ -190,7 +190,7 @@ export default function ShopClient({
                 const s = STATUS[r.status] ?? STATUS.pending;
                 return (
                   <div key={r.id} className="flex items-center gap-3 py-3">
-                    <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-gold-pale text-gold-deep">🪙</span>
+                    <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-gold-pale text-gold-deep"><Icon name="coins" className="h-4 w-4" /></span>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-bold text-ink">{r.title}</p>
                       <p className="text-xs text-ink/40">

@@ -23,7 +23,7 @@ function initials(s: Winner) {
   return `${s.first_name?.[0] ?? ""}${s.last_name?.[0] ?? ""}`.toUpperCase() || "S";
 }
 
-const MEDAL = ["🥇", "🥈", "🥉"];
+const MEDAL_TINT = ["text-[#EFAE56]", "text-[#AEB6C4]", "text-[#B87333]"]; // gold · silver · bronze
 // Podium theming by place — gold / silver / bronze arena furniture.
 const PLACE = [
   { grad: "from-[#F4C078] via-[#EFAE56] to-[#C8881F]", glow: "shadow-[0_0_46px_-8px_rgba(239,174,86,.9)]", ring: "ring-gold/60", bar: "from-[#EFAE56] to-[#C8881F]", h: 128, badge: "#EFAE56" },
@@ -105,8 +105,8 @@ export default function LeaderboardClient({
       <div className="boardgrid relative overflow-hidden rounded-2xl bg-board p-7 text-white">
         <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full"
           style={{ background: "radial-gradient(circle, rgba(239,174,86,.4), transparent 70%)" }} />
-        <div aria-hidden className="pointer-events-none absolute right-6 top-6 select-none text-xl float">🏆</div>
-        <div aria-hidden className="pointer-events-none absolute right-24 bottom-6 select-none text-base float" style={{ animationDelay: "1.1s" }}>✨</div>
+        <div aria-hidden className="pointer-events-none absolute right-6 top-6 text-gold/30 float"><Icon name="trophy" className="h-6 w-6" /></div>
+        <div aria-hidden className="pointer-events-none absolute right-24 bottom-6 text-gold/25 float" style={{ animationDelay: "1.1s" }}><Icon name="sparkles" className="h-5 w-5" /></div>
         <div className="relative flex items-center gap-4">
           <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gold/15 text-gold ring-1 ring-gold/25">
             <Icon name="trophy" className="h-6 w-6" />
@@ -147,15 +147,15 @@ export default function LeaderboardClient({
           <span className="font-display text-3xl font-bold text-gold-deep">#{myRank}</span>
           <div className="min-w-0 flex-1">
             <p className="font-semibold text-ink">Your position <span className="text-ink/40">· {scopeName}</span></p>
-            <p className="text-xs text-ink/40">🪙 {myPts} reward pts</p>
+            <p className="inline-flex items-center gap-1 text-xs text-ink/40"><Icon name="coins" className="h-3.5 w-3.5 text-gold-deep" /> {myPts} reward pts</p>
           </div>
           {ahead && gap > 0 && (
-            <p className="rounded-full bg-gold-pale px-3 py-1.5 text-[12px] font-bold text-gold-deep">
-              {gap} pts to overtake {fullName(ahead)} ⬆
+            <p className="inline-flex items-center gap-1.5 rounded-full bg-gold-pale px-3 py-1.5 text-[12px] font-bold text-gold-deep">
+              <Icon name="target" className="h-3.5 w-3.5" /> {gap} pts to overtake {fullName(ahead)}
             </p>
           )}
           {myRank === 1 && (
-            <p className="rounded-full bg-emerald-50 px-3 py-1.5 text-[12px] font-bold text-emerald-600">👑 You&apos;re #1 — defend it!</p>
+            <p className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-[12px] font-bold text-emerald-600"><Icon name="crown" className="h-3.5 w-3.5 text-gold-deep" /> You&apos;re #1 — defend it!</p>
           )}
         </div>
       )}
@@ -179,20 +179,20 @@ export default function LeaderboardClient({
               return (
                 <div key={s.id} className="flex flex-col items-center">
                   {/* crown on the champion */}
-                  {place === 0 && <span className="mb-0.5 text-2xl badge-pulse">👑</span>}
+                  {place === 0 && <span className="mb-0.5 badge-pulse text-gold"><Icon name="crown" className="h-6 w-6" /></span>}
                   {/* avatar with glowing ring + medal badge */}
                   <div className={`relative transition-all duration-500 ${mounted ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"}`}>
                     <span aria-hidden className={`absolute inset-0 -z-10 rounded-full ${p.glow}`} />
                     <div className="float">
                       <AvatarBubble s={s} size={place === 0 ? 76 : 60} ring={`ring-2 ${p.ring} ${isMe ? "ring-offset-2 ring-offset-board" : ""}`} />
                     </div>
-                    <span className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-board text-sm ring-1 ring-white/20">{MEDAL[place]}</span>
+                    <span className={`absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-board ring-1 ring-white/20 ${MEDAL_TINT[place]}`}><Icon name="medal" className="h-3.5 w-3.5" /></span>
                   </div>
 
                   <p className="mt-2 line-clamp-1 max-w-full text-center text-[13px] font-bold text-white">{fullName(s)}</p>
                   {isMe && <span className="text-[10px] font-bold text-gold">(you)</span>}
-                  <p className="font-display text-base font-extrabold text-gold">
-                    🪙 <CountUp to={s.reward_points} duration={1100} />
+                  <p className="inline-flex items-center gap-1 font-display text-base font-extrabold text-gold">
+                    <Icon name="coins" className="h-4 w-4" /><CountUp to={s.reward_points} duration={1100} />
                   </p>
 
                   {/* pedestal — grows in on mount */}
@@ -214,21 +214,21 @@ export default function LeaderboardClient({
         {(podium.length >= 3 ? rest : list).map((student, idx) => {
           const rank = (podium.length >= 3 ? 3 : 0) + idx + 1;
           const isMe = student.id === meId;
-          const medal = rank <= 3 ? MEDAL[rank - 1] : null;
+          const isTop3 = rank <= 3;
           return (
             <div key={student.id}
               className={`group flex items-center gap-3 px-4 py-3 transition-colors sm:px-5 ${isMe ? "bg-gold/5" : "hover:bg-chalk/60"}`}>
               <span className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg text-center font-display text-sm font-bold ${
                 isMe ? "bg-gold text-board" : "bg-ink/5 text-ink/45"}`}>
-                {medal ?? rank}
+                {isTop3 ? <Icon name="medal" className={`h-4 w-4 ${isMe ? "" : MEDAL_TINT[rank - 1]}`} /> : rank}
               </span>
               <AvatarBubble s={student} size={38} ring={isMe ? "ring-2 ring-gold/50" : ""} />
               <p className={`flex-1 truncate font-semibold ${isMe ? "text-gold-deep" : "text-ink"}`}>
                 {fullName(student)}
                 {isMe && <span className="ml-2 text-xs font-normal text-ink/40">(you)</span>}
               </p>
-              <span className="flex-shrink-0 font-display text-base font-semibold text-emerald-600">
-                🪙 {student.reward_points}
+              <span className="inline-flex flex-shrink-0 items-center gap-1 font-display text-base font-semibold text-emerald-600">
+                <Icon name="coins" className="h-4 w-4" /> {student.reward_points}
               </span>
             </div>
           );
