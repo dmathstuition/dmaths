@@ -10,8 +10,11 @@ import { learnerAvatar } from "@/lib/avatars";
 type Winner = {
   id: string; first_name: string | null; last_name: string | null;
   reward_points: number; level: string | null; subjects: string[] | null;
+  season_points?: number;
 };
 type Scope = "overall" | "class" | "program";
+type Mode = "all" | "season";
+type Champion = { rank: number; name: string; points: number };
 
 function fullName(s: Winner) {
   // First name, plus a last initial to tell two "Tobi"s apart.
@@ -47,11 +50,14 @@ function AvatarBubble({ s, size, ring }: { s: Winner; size: number; ring?: strin
 
 export default function LeaderboardClient({
   meId, myLevel, mySubjects, winners, levels, subjects,
+  seasonEnabled = false, seasonName = "", champions = [], hofLabel = "",
 }: {
   meId: string; myLevel: string; mySubjects: string[];
   winners: Winner[]; levels: string[]; subjects: string[];
+  seasonEnabled?: boolean; seasonName?: string; champions?: Champion[]; hofLabel?: string;
 }) {
   const [scope, setScope] = useState<Scope>("overall");
+  const [mode, setMode] = useState<Mode>("all");
   // default the pickers to the learner's own class/program where possible
   const [level, setLevel] = useState(() => (levels.includes(myLevel) ? myLevel : levels[0] ?? ""));
   const [subject, setSubject] = useState(() => {
@@ -62,17 +68,23 @@ export default function LeaderboardClient({
   const [celebrate, setCelebrate] = useState(0);
   useEffect(() => { const t = setTimeout(() => setMounted(true), 60); return () => clearTimeout(t); }, []);
 
+  // The metric a row is ranked & shown by — lifetime points, or this season's.
+  const metric = (w: Winner) => (mode === "season" ? (w.season_points ?? 0) : w.reward_points);
+
   const list = useMemo(() => {
-    if (scope === "class") return winners.filter(w => w.level === level);
-    if (scope === "program") return winners.filter(w => (w.subjects ?? []).includes(subject));
-    return winners;
-  }, [scope, level, subject, winners]);
+    let l = winners;
+    if (scope === "class") l = l.filter(w => w.level === level);
+    else if (scope === "program") l = l.filter(w => (w.subjects ?? []).includes(subject));
+    if (mode === "season") l = l.filter(w => (w.season_points ?? 0) > 0);
+    // Season mode re-ranks by this month's points; all-time arrives pre-sorted.
+    return mode === "season" ? [...l].sort((a, b) => (b.season_points ?? 0) - (a.season_points ?? 0)) : l;
+  }, [scope, level, subject, winners, mode]);
 
   const myRank = list.findIndex(s => s.id === meId) + 1;
-  const myPts = list.find(s => s.id === meId)?.reward_points ?? 0;
+  const myPts = list.find(s => s.id === meId) ? metric(list.find(s => s.id === meId)!) : 0;
   // The learner directly ahead — a target to chase.
   const ahead = myRank > 1 ? list[myRank - 2] : null;
-  const gap = ahead ? ahead.reward_points - myPts : 0;
+  const gap = ahead ? metric(ahead) - myPts : 0;
 
   // Show only the top 10 (myRank above still uses the full list, so a learner
   // outside the top 10 can still see their own position).
@@ -85,7 +97,7 @@ export default function LeaderboardClient({
   useEffect(() => {
     if (mounted && myRank >= 1 && myRank <= 3) setCelebrate(c => c + 1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mounted, scope]);
+  }, [mounted, scope, mode]);
 
   const scopeTabs: { id: Scope; label: string; icon: any }[] = [
     { id: "overall", label: "Overall", icon: "students" },
@@ -115,10 +127,26 @@ export default function LeaderboardClient({
           </span>
           <div>
             <h1 className="font-display text-2xl font-semibold sm:text-3xl">Leaderboard</h1>
-            <p className="mt-1 text-sm text-white/50">Top students by reward points across {scopeName}.</p>
+            <p className="mt-1 text-sm text-white/50">
+              {mode === "season"
+                ? <>Top climbers this season across {scopeName}{seasonName ? ` · ${seasonName}` : ""}.</>
+                : <>Top students by reward points across {scopeName}.</>}
+            </p>
           </div>
         </div>
       </div>
+
+      {/* all-time vs this-season toggle */}
+      {seasonEnabled && (
+        <div className="inline-flex rounded-xl border border-line bg-white p-1 text-sm font-bold">
+          {([["all", "All-time"], ["season", "This month"]] as [Mode, string][]).map(([m, label]) => (
+            <button key={m} onClick={() => setMode(m)}
+              className={`inline-flex items-center gap-1.5 rounded-lg px-4 py-1.5 transition ${mode === m ? "bg-gold text-board" : "text-ink/55 hover:text-ink"}`}>
+              {m === "season" && <Icon name="flame" className="h-3.5 w-3.5" />}{label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* scope filter */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -149,7 +177,7 @@ export default function LeaderboardClient({
           <span className="font-display text-3xl font-bold text-gold-deep">#{myRank}</span>
           <div className="min-w-0 flex-1">
             <p className="font-semibold text-ink">Your position <span className="text-ink/40">· {scopeName}</span></p>
-            <p className="inline-flex items-center gap-1 text-xs text-ink/40"><Icon name="coins" className="h-3.5 w-3.5 text-gold-deep" /> {myPts} reward pts</p>
+            <p className="inline-flex items-center gap-1 text-xs text-ink/40"><Icon name="coins" className="h-3.5 w-3.5 text-gold-deep" /> {myPts} {mode === "season" ? "pts this month" : "reward pts"}</p>
           </div>
           {ahead && gap > 0 && (
             <p className="inline-flex items-center gap-1.5 rounded-full bg-gold-pale px-3 py-1.5 text-[12px] font-bold text-gold-deep">
@@ -202,7 +230,7 @@ export default function LeaderboardClient({
                   <p className="mt-2 line-clamp-1 max-w-full text-center text-[13px] font-bold text-white">{fullName(s)}</p>
                   {isMe && <span className="text-[10px] font-bold text-gold">(you)</span>}
                   <p className="inline-flex items-center gap-1 font-display text-base font-extrabold text-gold">
-                    <Icon name="coins" className="h-4 w-4" /><CountUp to={s.reward_points} duration={1100} />
+                    <Icon name="coins" className="h-4 w-4" /><CountUp to={metric(s)} duration={1100} />
                   </p>
 
                   {/* pedestal — a 3D block that rises on mount */}
@@ -242,17 +270,44 @@ export default function LeaderboardClient({
                 {isMe && <span className="ml-2 text-xs font-normal text-ink/40">(you)</span>}
               </p>
               <span className="inline-flex flex-shrink-0 items-center gap-1 font-display text-base font-semibold text-emerald-600">
-                <Icon name="coins" className="h-4 w-4" /> {student.reward_points}
+                <Icon name="coins" className="h-4 w-4" /> {metric(student)}
               </span>
             </div>
           );
         })}
         {!list.length && (
           <p className="p-6 text-center text-sm text-ink/40">
-            No ranked students in {scopeName} yet — earn reward points to appear here! 🏆
+            {mode === "season"
+              ? <>No points earned in {scopeName} this month yet — be the first to climb! 🏆</>
+              : <>No ranked students in {scopeName} yet — earn reward points to appear here! 🏆</>}
           </p>
         )}
       </div>
+
+      {/* ── Hall of Fame — champions of the last completed season ─── */}
+      {champions.length > 0 && (
+        <div className="card overflow-hidden p-0">
+          <div className="flex items-center gap-2 border-b border-line/60 px-5 py-3">
+            <Icon name="crown" className="h-4 w-4 text-gold-deep" />
+            <h2 className="font-display text-base font-semibold text-ink">Hall of Fame</h2>
+            {hofLabel && <span className="ml-auto rounded-full bg-gold-pale px-2.5 py-0.5 text-[11px] font-bold text-gold-deep">{hofLabel}</span>}
+          </div>
+          <div className="divide-y divide-line/60">
+            {champions.map((c) => (
+              <div key={c.rank} className="flex items-center gap-3 px-5 py-3">
+                <span className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg ${MEDAL_TINT[c.rank - 1] ?? "text-ink/40"}`}>
+                  <Icon name="medal" className="h-4 w-4" />
+                </span>
+                <p className="flex-1 truncate font-semibold text-ink">{c.name}</p>
+                <span className="inline-flex flex-shrink-0 items-center gap-1 font-display text-sm font-semibold text-emerald-600">
+                  <Icon name="coins" className="h-3.5 w-3.5" /> {c.points}
+                </span>
+              </div>
+            ))}
+          </div>
+          <p className="px-5 py-2.5 text-[11px] text-ink/40">Top climbers of {hofLabel || "last season"} — a new champion is crowned every month.</p>
+        </div>
+      )}
     </div>
   );
 }
