@@ -20,6 +20,7 @@ const NAV: NavItem[] = [
   { href: "/portal/code", label: "Code playground", icon: "code" },
   { href: "/portal/math-lab", label: "Math Lab", icon: "sigma" },
   { href: "/portal/focus", label: "Focus mode", icon: "zap" },
+  { href: "/portal/sprint", label: "Math Sprint", icon: "trophy" },
   { href: "/portal/flashcards", label: "Revision cards", icon: "book" },
   { href: "/portal/progress", label: "My progress", icon: "progress" },
   { href: "/portal/calendar", label: "Calendar", icon: "calendar" },
