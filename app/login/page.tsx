@@ -179,9 +179,9 @@ export default function Login() {
           </ul>
         </div>
         {/* soft ambient glow behind the mascot */}
-        <div aria-hidden className="pointer-events-none absolute bottom-0 right-[3%] h-[62%] w-[64%] rounded-full bg-[radial-gradient(circle,rgba(203,223,247,0.28),transparent_62%)] blur-2xl" />
-        {/* big mascot, standing flush on the bottom edge (padding trimmed off the art) */}
-        <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 flex h-[82%] w-[64%] items-end justify-center">
+        <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-[54%] w-[46%] rounded-full bg-[radial-gradient(circle,rgba(203,223,247,0.28),transparent_62%)] blur-2xl" />
+        {/* mascot, standing flush on the bottom-right — sized to clear the copy on the left */}
+        <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 flex h-[70%] w-[46%] items-end justify-end xl:w-[50%]">
           <Mascot src={LOGIN_MASCOT} className="float h-full w-full object-contain object-bottom drop-shadow-2xl"
             fallback={<HeroStudy className="h-full w-full object-contain object-bottom" />} />
         </div>
