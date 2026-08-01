@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { subscribeToPush as subscribe, VAPID_PUBLIC as VAPID } from "@/lib/push";
+import { Icon } from "@/components/Icons";
 
 const DISMISS_KEY = "dmaths-push-dismissed";
 
@@ -53,7 +54,7 @@ export default function PushManager() {
   return (
     <div className="fixed inset-x-3 bottom-4 z-50 mx-auto max-w-sm sm:left-auto sm:right-6">
       <div className="glass-card flex items-start gap-3 p-4 shadow-2xl">
-        <span className="text-2xl" aria-hidden="true">🔔</span>
+        <span className="flex-shrink-0 text-gold-deep dark:text-gold" aria-hidden="true"><Icon name="bell" className="h-6 w-6" /></span>
         <div className="min-w-0 flex-1">
           <p className="font-display text-sm font-bold text-ink dark:text-white">Turn on notifications</p>
           <p className="mt-0.5 text-[13px] leading-relaxed text-ink/60 dark:text-white/55">
