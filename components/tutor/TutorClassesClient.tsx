@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useToast } from "@/components/Toast";
 import { Icon } from "@/components/Icons";
+import PageHero from "@/components/portal/PageHero";
 import { fmtWATDate, fmtWATTime, utcToWatParts } from "@/lib/time";
 import TutorClassForm from "@/components/tutor/TutorClassForm";
 import { useRouter } from "next/navigation";
@@ -79,10 +80,8 @@ export default function TutorClassesClient({ initialClasses, roster = [] }: { in
 
   return (
     <div className="space-y-6 py-2">
-      <div>
-        <h1 className="font-display text-2xl font-bold">My Classes</h1>
-        <p className="text-sm text-ink/50">Join your classes, take attendance, and share recordings.</p>
-      </div>
+      <PageHero icon="classes" title="My Classes" decor={["classes", "sparkles"]}
+        subtitle="Join your classes, take attendance, and share recordings." />
 
       <TutorClassForm roster={roster} editing={editing} onDone={() => setEditing(null)} key={editing?.id ?? "new"} />
 

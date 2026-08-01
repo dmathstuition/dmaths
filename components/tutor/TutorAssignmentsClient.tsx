@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useToast } from "@/components/Toast";
 import { watToUtcISO } from "@/lib/time";
 import { codeDisplay } from "@/lib/codeSubmission";
+import PageHero from "@/components/portal/PageHero";
 
 export default function TutorAssignmentsClient({ students, initialSubs }: { students: any[]; initialSubs: any[] }) {
   const router = useRouter();
@@ -71,15 +72,12 @@ export default function TutorAssignmentsClient({ students, initialSubs }: { stud
 
   return (
     <div className="space-y-5 py-2">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="font-display text-2xl font-bold">Assignments</h1>
-          <p className="text-sm text-ink/50">Set work for your learners and grade what they submit.</p>
-        </div>
+      <PageHero icon="assignments" title="Assignments" decor={["assignments", "sparkles"]}
+        subtitle="Set work for your learners and grade what they submit.">
         <button className="btn-gold" onClick={() => setShowForm((v) => !v)} disabled={!students.length}>
           {showForm ? "Cancel" : "+ New assignment"}
         </button>
-      </div>
+      </PageHero>
 
       {!students.length && (
         <div className="card p-8 text-center text-sm text-ink/45">

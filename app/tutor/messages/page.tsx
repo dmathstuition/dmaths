@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getUser } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import MessagesClient from "@/components/portal/MessagesClient";
+import PageHero from "@/components/portal/PageHero";
 
 export const dynamic = "force-dynamic";
 
@@ -19,10 +20,8 @@ export default async function TutorMessages() {
 
   return (
     <div className="space-y-4 py-2">
-      <div>
-        <h1 className="font-display text-2xl font-bold">Messages</h1>
-        <p className="text-sm text-ink/50">Chat directly with the D-Maths admin.</p>
-      </div>
+      <PageHero icon="messages" title="Messages" decor={["messages"]}
+        subtitle="Chat directly with the D-Maths admin." />
       <MessagesClient meId={user.id} initialMessages={messages ?? []} />
     </div>
   );
