@@ -1,12 +1,12 @@
 import { describe, it, expect } from "vitest";
-import { rollDailyReward, DAILY_TIERS, watDay } from "@/lib/dailyReward";
+import { rollDailyReward, DAILY_TIERS, DAILY_REWARD, watDay } from "@/lib/dailyReward";
 
 describe("rollDailyReward", () => {
-  it("maps the RNG to the weighted tiers", () => {
-    expect(rollDailyReward(() => 0.01)).toBe(50); // jackpot band
-    expect(rollDailyReward(() => 0.10)).toBe(30);
-    expect(rollDailyReward(() => 0.40)).toBe(20);
-    expect(rollDailyReward(() => 0.90)).toBe(10);
+  it("always gives a flat 5 points, whatever the RNG", () => {
+    expect(rollDailyReward(() => 0.01)).toBe(5);
+    expect(rollDailyReward(() => 0.50)).toBe(5);
+    expect(rollDailyReward(() => 0.99)).toBe(5);
+    expect(DAILY_REWARD).toBe(5);
   });
   it("only ever returns a valid tier", () => {
     for (let i = 0; i < 200; i++) {

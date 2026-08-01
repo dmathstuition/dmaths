@@ -68,7 +68,7 @@ export default function DailyRewardChest() {
           ) : (
             <>
               <p className="font-display text-lg font-bold">Your daily reward is ready!</p>
-              <p className="text-sm text-white/70">Open the chest for bonus points 🪙</p>
+              <p className="text-sm text-white/70">Open the chest for +5 points 🪙</p>
             </>
           )}
         </div>
