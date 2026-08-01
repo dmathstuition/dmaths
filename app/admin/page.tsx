@@ -14,6 +14,7 @@ import Reveal from "@/components/landing/Reveal";
 import Tour from "@/components/tour/Tour";
 import { adminTour } from "@/components/tour/steps";
 import AdminCharts from "@/components/admin/AdminCharts";
+import AdminWins from "@/components/admin/AdminWins";
 import AssistantHealthCheck from "@/components/admin/AssistantHealthCheck";
 import FinanceOverview from "@/components/admin/FinanceOverview";
 import { fmtWAT } from "@/lib/time";
@@ -86,6 +87,15 @@ export default async function AdminDashboard() {
   // Top performers — the strongest of the most recent intake (has names + score).
   const topPerformers = [...(recent ?? [])].sort((a, b) => (b.avg_score || 0) - (a.avg_score || 0)).slice(0, 3);
 
+  // "Today's wins" for the admin — computed from data already loaded (WAT day).
+  const todayWAT = new Date().toLocaleDateString("en-CA", { timeZone: "Africa/Lagos" });
+  const isToday = (v: any) => v && new Date(v).toLocaleDateString("en-CA", { timeZone: "Africa/Lagos" }) === todayWAT;
+  const newStudentsToday = (allStudents ?? []).filter((s: any) => isToday(s.created_at)).length;
+  const paymentsTodayRows = (payments ?? []).filter((p: any) => isToday(p.paid_at || p.created_at));
+  const collectedToday = paymentsTodayRows.reduce((a: number, p: any) => a + Number(p.amount || 0), 0);
+  const totalStudents = students ?? 0;
+  const nextMilestone = Math.floor(totalStudents / 25) * 25 + 25;
+
   // Real month-over-month trends (null → the card shows a plain label instead).
   const studentsTrend = countTrend((allStudents ?? []).map((s: any) => s.created_at));
   const classesTrend = countTrend((classDates ?? []).map((c: any) => c.created_at));
@@ -143,6 +153,12 @@ export default async function AdminDashboard() {
           <StatCard icon="payments" label="Revenue this month" value={monthRevenue} href="/admin/payments" tint="emerald" prefix="₦" thousands sub="received" trend={revenueTrend} />
         </Reveal>
       </div>
+
+      {/* Today's wins — a fun celebration strip */}
+      <Reveal>
+        <AdminWins newStudentsToday={newStudentsToday} collectedToday={collectedToday}
+          paymentsToday={paymentsTodayRows.length} totalStudents={totalStudents} nextMilestone={nextMilestone} />
+      </Reveal>
 
       <div className="grid gap-5 lg:grid-cols-3">
         {/* Left column — the analytical, wide content */}
