@@ -409,7 +409,14 @@ html { scroll-behavior: smooth; }
 /* Smooth pop-in for menus/dropdowns/popovers. */
 @keyframes popIn { from { opacity: 0; transform: scale(.96) translateY(-4px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 .pop-in { animation: popIn .16s cubic-bezier(.16,.84,.44,1); transform-origin: top right; }
-@media (prefers-reduced-motion: reduce) { .pop-in { animation: none; } }
+
+/* Chat panel entrance (slides up from its launcher) + per-message entrance. */
+@keyframes chatIn { from { opacity: 0; transform: translateY(16px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.chat-in { animation: chatIn .22s cubic-bezier(.16,.84,.44,1); transform-origin: bottom right; }
+@keyframes msgIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.msg-in { animation: msgIn .2s ease-out both; }
+
+@media (prefers-reduced-motion: reduce) { .pop-in, .chat-in, .msg-in { animation: none; } }
 
 /* ── Tour spotlight ring (pulses around the highlighted element) ── */
 @keyframes tourPulse {

@@ -217,11 +217,13 @@ export default function Landing() {
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {SERVICES.map((s, i) => (
             <Reveal key={s.t} delay={i * 80}>
-              <div className="card-premium group h-full rounded-3xl p-6 text-center">
-                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl font-mono text-xl font-bold text-white shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6" style={{ background: s.c }}>{s.sym}</div>
-                <h3 className="font-display text-lg font-bold">{s.t}</h3>
-                <p className="mt-2 text-[13px] leading-relaxed text-ink/55">{s.d}</p>
-              </div>
+              <Tilt3D max={8} className="h-full">
+                <div className="card-premium group h-full rounded-3xl p-6 text-center">
+                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl font-mono text-xl font-bold text-white shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6" style={{ background: s.c }}>{s.sym}</div>
+                  <h3 className="font-display text-lg font-bold">{s.t}</h3>
+                  <p className="mt-2 text-[13px] leading-relaxed text-ink/55">{s.d}</p>
+                </div>
+              </Tilt3D>
             </Reveal>
           ))}
         </div>
