@@ -36,6 +36,7 @@ const NAV: NavItem[] = [
   { href: "/admin/certificates", label: "Certificates", icon: "graduationCap" },
   { href: "/admin/report-cards", label: "Report cards", icon: "reports" },
   { href: "/admin/ratings", label: "Feedback", icon: "thumbsUp" },
+  { href: "/admin/rewards", label: "Rewards shop", icon: "trophy" },
   { href: "/admin/security", label: "Security", icon: "lock" },
   { href: "/admin/health", label: "System health", icon: "monitor" },
 ];
