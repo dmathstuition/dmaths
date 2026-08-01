@@ -9,7 +9,10 @@ type Winner = {
 type Scope = "overall" | "class" | "program";
 
 function fullName(s: Winner) {
-  return `${s.first_name ?? ""} ${s.last_name ?? ""}`.trim() || "Student";
+  // First name, plus a last initial to tell two "Tobi"s apart.
+  const f = (s.first_name ?? "").trim();
+  const li = s.last_name?.trim()?.[0];
+  return (f + (li ? ` ${li.toUpperCase()}.` : "")).trim() || "Student";
 }
 function initials(s: Winner) {
   return `${s.first_name?.[0] ?? ""}${s.last_name?.[0] ?? ""}`.toUpperCase() || "S";
@@ -41,8 +44,11 @@ export default function LeaderboardClient({
   const myRank = list.findIndex(s => s.id === meId) + 1;
   const myPts = list.find(s => s.id === meId)?.reward_points ?? 0;
 
-  const podium = list.slice(0, 3);
-  const rest = list.slice(3);
+  // Show only the top 10 (myRank above still uses the full list, so a learner
+  // outside the top 10 can still see their own position).
+  const top = list.slice(0, 10);
+  const podium = top.slice(0, 3);
+  const rest = top.slice(3);
   const podiumOrder = [podium[1], podium[0], podium[2]];
 
   const scopeTabs: { id: Scope; label: string; icon: any }[] = [

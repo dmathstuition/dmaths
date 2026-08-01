@@ -1,14 +1,17 @@
 import LeaderboardClient from "@/components/portal/LeaderboardClient";
-import { supabaseServer } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 import { getProfile } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function LeaderboardPage() {
   const me = await getProfile();
-  const supa = supabaseServer();
+  // A learner's RLS only exposes their OWN profile row, so ranking every learner
+  // needs the service-role client. Only leaderboard-safe fields are selected and
+  // sent on (first name, points, class/program) — no contact details, etc.
+  const admin = supabaseAdmin();
 
-  const { data } = await supa
+  const { data } = await admin
     .from("profiles")
     .select("id, first_name, last_name, reward_points, level, subjects")
     .eq("role", "student")
