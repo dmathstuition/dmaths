@@ -79,7 +79,8 @@ export default function ShopClient({
 
       {/* ── Balance HUD ─────────────────────────────────────────── */}
       <Reveal>
-        <div className="boardgrid relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#10406F] via-[#0A2A4F] to-[#071C36] p-7 text-white sm:p-9">
+        <div className="relative overflow-hidden rounded-3xl p-7 text-white sm:p-9"
+          style={{ background: "linear-gradient(135deg, #10406F 0%, #0A2A4F 55%, #071C36 100%)" }}>
           <div className="aurora pointer-events-none absolute inset-0 opacity-25" />
           <div aria-hidden className="pointer-events-none absolute right-6 top-6 select-none text-2xl float">🪙</div>
           <div aria-hidden className="pointer-events-none absolute right-24 bottom-8 select-none text-lg float" style={{ animationDelay: "1.3s" }}>🪙</div>
