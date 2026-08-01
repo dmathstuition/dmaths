@@ -30,12 +30,14 @@ export default function PortalTabBar({
             <Link
               key={t.href}
               href={t.href}
-              className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-bold transition-colors ${
+              className={`relative flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-bold transition-colors ${
                 active ? "text-gold-deep dark:text-gold" : "text-ink/45 dark:text-white/45"
               }`}
             >
-              <span className={`flex h-7 w-11 items-center justify-center rounded-full transition-colors ${
-                active ? "bg-gold-pale dark:bg-gold/15" : ""
+              {/* sliding active indicator */}
+              <span aria-hidden className={`absolute top-0 h-1 w-8 rounded-full bg-gradient-to-r from-gold to-gold-deep transition-all duration-300 ${active ? "scale-100 opacity-100" : "scale-0 opacity-0"}`} />
+              <span className={`flex h-7 w-11 items-center justify-center rounded-full transition-all duration-200 active:scale-90 ${
+                active ? "-translate-y-0.5 scale-110 bg-gold-pale dark:bg-gold/15" : ""
               }`}>
                 <Icon name={t.icon} className="h-5 w-5" />
               </span>
@@ -48,7 +50,7 @@ export default function PortalTabBar({
           className="flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-bold text-ink/45 transition-colors hover:text-ink dark:text-white/45"
           aria-label="More menu"
         >
-          <span className="flex h-7 w-11 items-center justify-center rounded-full">
+          <span className="flex h-7 w-11 items-center justify-center rounded-full transition-transform duration-200 active:scale-90">
             <Icon name="grid" className="h-5 w-5" />
           </span>
           More

@@ -71,15 +71,18 @@ export default function NotificationBell({ mode, noticesHref }: { mode?: string;
         className="relative flex h-11 w-11 items-center justify-center rounded-lg bg-ink/5 text-ink/70 transition hover:bg-ink/10 active:scale-95 dark:bg-white/10 dark:text-white">
         <Icon name="notices" />
         {unread > 0 && (
-          <span className="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-gold px-1 text-[10px] font-bold text-board">
-            {unread > 9 ? "9+" : unread}
+          <span className="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center">
+            <span aria-hidden className="absolute inset-0 animate-ping rounded-full bg-gold/60" />
+            <span className="relative flex h-5 min-w-[20px] items-center justify-center rounded-full bg-gold px-1 text-[10px] font-bold text-board shadow-sm">
+              {unread > 9 ? "9+" : unread}
+            </span>
           </span>
         )}
       </button>
 
       {open && (
         <div role="menu" aria-label="Notifications"
-          className="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/5 dark:bg-board dark:ring-white/10">
+          className="pop-in absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/5 dark:bg-board dark:ring-white/10">
           <div className="flex items-center justify-between border-b border-line px-4 py-3 dark:border-white/10">
             <p className="font-display font-semibold text-ink dark:text-white">Notifications</p>
             {unread > 0 && <span className="rounded-full bg-gold-pale px-2 py-0.5 text-[10px] font-bold text-gold-deep">{unread} new</span>}
