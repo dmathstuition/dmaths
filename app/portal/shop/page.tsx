@@ -2,6 +2,7 @@ import { supabaseServer } from "@/lib/supabase/server";
 import { getUser, getProfile } from "@/lib/auth";
 import ShopClient from "@/components/portal/ShopClient";
 import { spendable } from "@/lib/rewards";
+import { learnerAvatar } from "@/lib/avatars";
 
 export const dynamic = "force-dynamic";
 
@@ -19,5 +20,5 @@ export default async function ShopPage() {
   const earned = Number((me as any)?.reward_points ?? 0);
   const balance = spendable(earned, reds ?? []);
 
-  return <ShopClient earned={earned} balance={balance} items={items ?? []} initialRedemptions={reds ?? []} />;
+  return <ShopClient earned={earned} balance={balance} items={items ?? []} initialRedemptions={reds ?? []} mascot={learnerAvatar(user!.id)} />;
 }
