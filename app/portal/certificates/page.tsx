@@ -18,7 +18,8 @@ export default async function CertificatesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="boardgrid relative flex items-center gap-4 overflow-hidden rounded-3xl bg-gradient-to-br from-[#10406F] via-[#0A2A4F] to-[#071C36] p-7 text-white">
+      <div className="relative flex items-center gap-4 overflow-hidden rounded-3xl p-7 text-white"
+        style={{ background: "linear-gradient(135deg, #10406F 0%, #0A2A4F 55%, #071C36 100%)" }}>
         <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full"
           style={{ background: "radial-gradient(circle, rgba(239,174,86,.4), transparent 70%)" }} />
         <div aria-hidden className="pointer-events-none absolute right-6 top-6 select-none text-xl float">🏆</div>

@@ -163,7 +163,8 @@ export default function LeaderboardClient({
       {/* ── Champion arena (podium) ─────────────────────────────── */}
       {podium.length >= 3 && (
         <div onClick={() => setCelebrate(c => c + 1)}
-          className="boardgrid relative cursor-pointer overflow-hidden rounded-3xl bg-gradient-to-br from-[#10406F] via-[#0A2A4F] to-[#071C36] px-3 pt-8 pb-0 sm:px-8"
+          className="relative cursor-pointer overflow-hidden rounded-3xl px-3 pt-8 pb-0 sm:px-8"
+          style={{ background: "linear-gradient(135deg, #10406F 0%, #0A2A4F 55%, #071C36 100%)" }}
           title="Tap to celebrate 🎉">
           <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-40 opacity-70"
             style={{ background: "radial-gradient(60% 90% at 50% 0%, rgba(239,174,86,.25), transparent 70%)" }} />

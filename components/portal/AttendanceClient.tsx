@@ -57,7 +57,8 @@ export default function AttendanceClient({
       <div className="pointer-events-none fixed inset-0 z-[60]"><Confetti fire={celebrate > 0} key={celebrate} pieces={44} /></div>
 
       {/* ── Attendance HUD ──────────────────────────────────────── */}
-      <div className="boardgrid relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#10406F] via-[#0A2A4F] to-[#071C36] p-7 text-white sm:p-8">
+      <div className="relative overflow-hidden rounded-3xl p-7 text-white sm:p-8"
+        style={{ background: "linear-gradient(135deg, #10406F 0%, #0A2A4F 55%, #071C36 100%)" }}>
         <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full"
           style={{ background: "radial-gradient(circle, rgba(239,174,86,.4), transparent 70%)" }} />
         <div aria-hidden className="pointer-events-none absolute right-6 top-6 select-none text-xl float">📅</div>
