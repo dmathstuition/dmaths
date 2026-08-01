@@ -18,11 +18,12 @@ const STATUS: Record<string, { label: string; cls: string }> = {
 };
 
 // Loot-style rarity tiers by point cost — the "high-end game" flavour.
-function tier(cost: number): { name: string; chip: string; grad: string; glow: string; ring: string; icon: IconName } {
-  if (cost >= 500) return { name: "Legendary", chip: "bg-gold text-board", grad: "from-[#F4C078] via-[#EFAE56] to-[#C8881F]", glow: "shadow-[0_0_46px_-10px_rgba(239,174,86,.85)]", ring: "ring-gold/50", icon: "crown" };
-  if (cost >= 300) return { name: "Epic", chip: "bg-[#8B5CF6] text-white", grad: "from-[#A78BFA] via-[#8B5CF6] to-[#5B3FB0]", glow: "shadow-[0_0_42px_-12px_rgba(139,92,246,.8)]", ring: "ring-[#8B5CF6]/40", icon: "gem" };
-  if (cost >= 100) return { name: "Rare", chip: "bg-[#3B82F6] text-white", grad: "from-[#60A5FA] via-[#3B82F6] to-[#1D4ED8]", glow: "shadow-[0_0_38px_-14px_rgba(59,130,246,.75)]", ring: "ring-[#3B82F6]/40", icon: "medal" };
-  return { name: "Common", chip: "bg-[#10B981] text-white", grad: "from-[#34D399] via-[#10B981] to-[#047857]", glow: "", ring: "ring-emerald-400/30", icon: "star" };
+type Tier = { name: string; chip: string; grad: string; glow: string; ring: string; icon: IconName; glowColor: string; hot: boolean; legendary: boolean };
+function tier(cost: number): Tier {
+  if (cost >= 500) return { name: "Legendary", chip: "bg-gold text-board", grad: "from-[#F4C078] via-[#EFAE56] to-[#C8881F]", glow: "shadow-[0_0_46px_-10px_rgba(239,174,86,.85)]", ring: "ring-gold/50", icon: "crown", glowColor: "rgba(239,174,86,.8)", hot: true, legendary: true };
+  if (cost >= 300) return { name: "Epic", chip: "bg-[#8B5CF6] text-white", grad: "from-[#A78BFA] via-[#8B5CF6] to-[#5B3FB0]", glow: "shadow-[0_0_42px_-12px_rgba(139,92,246,.8)]", ring: "ring-[#8B5CF6]/40", icon: "gem", glowColor: "rgba(139,92,246,.75)", hot: true, legendary: false };
+  if (cost >= 100) return { name: "Rare", chip: "bg-[#3B82F6] text-white", grad: "from-[#60A5FA] via-[#3B82F6] to-[#1D4ED8]", glow: "shadow-[0_0_38px_-14px_rgba(59,130,246,.75)]", ring: "ring-[#3B82F6]/40", icon: "medal", glowColor: "rgba(59,130,246,.7)", hot: false, legendary: false };
+  return { name: "Common", chip: "bg-[#10B981] text-white", grad: "from-[#34D399] via-[#10B981] to-[#047857]", glow: "", ring: "ring-emerald-400/30", icon: "star", glowColor: "rgba(16,185,129,.6)", hot: false, legendary: false };
 }
 
 export default function ShopClient({
@@ -40,6 +41,7 @@ export default function ShopClient({
   const [err, setErr] = useState("");
   const [celebrate, setCelebrate] = useState(0);
   const [flash, setFlash] = useState<string | null>(null);
+  const [popId, setPopId] = useState<string | null>(null);
 
   // Progress toward the cheapest reward the learner can't yet afford.
   const nextLocked = [...items].filter((i) => i.cost > bal).sort((a, b) => a.cost - b.cost)[0];
@@ -57,6 +59,8 @@ export default function ShopClient({
     setRedemptions((prev) => [json.redemption, ...prev]);
     setCelebrate((c) => c + 1);
     setFlash(item.title);
+    setPopId(item.id);
+    setTimeout(() => setPopId(null), 650);
     setTimeout(() => setFlash(null), 2200);
   }
 
@@ -138,11 +142,13 @@ export default function ShopClient({
             return (
               <Reveal key={item.id} delay={i * 50}>
                 <Tilt3D max={8} className="h-full">
-                  <div className={`sheen group relative flex h-full flex-col overflow-hidden rounded-2xl bg-white ring-1 transition-all duration-300 dark:bg-[#0f2942] ${t.ring} ${afford ? `hover:-translate-y-1 ${t.glow}` : "opacity-90"}`}>
-                    {/* rarity banner */}
-                    <div className={`relative flex items-center justify-between bg-gradient-to-r ${t.grad} px-4 py-2.5 text-white`}>
-                      <span className="inline-flex items-center gap-1 text-[11px] font-extrabold uppercase tracking-wide drop-shadow"><Icon name={t.icon} className="h-3.5 w-3.5" /> {t.name}</span>
-                      <span className="inline-flex items-center gap-1 rounded-full bg-black/20 px-2 py-0.5 text-[11px] font-bold"><Icon name="coins" className="h-3 w-3" /> {item.cost}</span>
+                  <div style={{ ["--loot-glow" as any]: t.glowColor }}
+                    className={`sheen group relative flex h-full flex-col overflow-hidden rounded-2xl bg-white ring-1 transition-all duration-300 dark:bg-[#0f2942] ${t.ring} ${t.hot ? "loot-pulse" : ""} ${popId === item.id ? "scale-[1.04] ring-2 ring-gold" : ""} ${afford ? `hover:-translate-y-1 ${t.glow}` : "opacity-90"}`}>
+                    {/* rarity banner (rarest cards get an auto shine sweep) */}
+                    <div className={`relative flex items-center justify-between bg-gradient-to-r ${t.grad} px-4 py-2.5 text-white ${t.legendary ? "loot-shine" : ""}`}>
+                      <span className="relative z-[4] inline-flex items-center gap-1 text-[11px] font-extrabold uppercase tracking-wide drop-shadow"><Icon name={t.icon} className="h-3.5 w-3.5" /> {t.name}</span>
+                      <span className="relative z-[4] inline-flex items-center gap-1 rounded-full bg-black/20 px-2 py-0.5 text-[11px] font-bold"><Icon name="coins" className="h-3 w-3" /> {item.cost}</span>
+                      {t.hot && <span aria-hidden className="pointer-events-none absolute right-16 top-1 text-white/60 float"><Icon name="sparkles" className="h-3.5 w-3.5" /></span>}
                     </div>
 
                     <div className="flex flex-1 flex-col p-5">

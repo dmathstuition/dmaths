@@ -1,15 +1,15 @@
-// The daily-reward roll. Weighted so most days give a little and a jackpot is
-// rare — that surprise is what keeps the chest fun to open. Pure (takes the RNG)
-// so it's deterministic under test.
+// The daily reward. A flat 5 points every day — simple and predictable: show up,
+// claim 5. Still takes the RNG param for a stable signature (and so callers/tests
+// don't change), but the value is constant.
 
-export const DAILY_TIERS = [10, 20, 30, 50] as const;
+export const DAILY_REWARD = 5 as const;
+export const DAILY_TIERS = [DAILY_REWARD] as const;
 
+// The RNG param is kept for a stable signature (callers/tests pass one) but the
+// value is now constant, so the argument is intentionally ignored.
 export function rollDailyReward(rand: () => number = Math.random): number {
-  const r = rand();
-  if (r < 0.05) return 50; // jackpot ·  5%
-  if (r < 0.20) return 30; //          · 15%
-  if (r < 0.55) return 20; //          · 35%
-  return 10; //                        · 45%
+  void rand;
+  return DAILY_REWARD;
 }
 
 // The date (in WAT) a claim belongs to — one claim per calendar day.

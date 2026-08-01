@@ -24,11 +24,13 @@ function initials(s: Winner) {
 }
 
 const MEDAL_TINT = ["text-[#EFAE56]", "text-[#AEB6C4]", "text-[#B87333]"]; // gold · silver · bronze
+const PLACE_LABEL = ["1ST", "2ND", "3RD"];
 // Podium theming by place — gold / silver / bronze arena furniture.
+// `top` is the lighter 3D "step surface"; `bar` is the front face of the block.
 const PLACE = [
-  { grad: "from-[#F4C078] via-[#EFAE56] to-[#C8881F]", glow: "shadow-[0_0_46px_-8px_rgba(239,174,86,.9)]", ring: "ring-gold/60", bar: "from-[#EFAE56] to-[#C8881F]", h: 128, badge: "#EFAE56" },
-  { grad: "from-[#D8DEE9] via-[#AEB6C4] to-[#7C8698]", glow: "shadow-[0_0_38px_-12px_rgba(174,182,196,.8)]", ring: "ring-slate-300/60", bar: "from-[#C6CDD9] to-[#7C8698]", h: 92, badge: "#AEB6C4" },
-  { grad: "from-[#E0A46B] via-[#B87333] to-[#8A5626]", glow: "shadow-[0_0_34px_-12px_rgba(184,115,51,.8)]", ring: "ring-[#B87333]/60", bar: "from-[#C88A4E] to-[#8A5626]", h: 68, badge: "#B87333" },
+  { glow: "shadow-[0_0_54px_-6px_rgba(239,174,86,.95)]", ring: "ring-gold/60", top: "from-[#FBE0AE] to-[#F4C078]", bar: "from-[#EFAE56] to-[#B4791A]", h: 156 },
+  { glow: "shadow-[0_0_40px_-10px_rgba(174,182,196,.85)]", ring: "ring-slate-300/60", top: "from-[#EEF1F6] to-[#C6CDD9]", bar: "from-[#C6CDD9] to-[#6F7A8C]", h: 110 },
+  { glow: "shadow-[0_0_36px_-10px_rgba(184,115,51,.85)]", ring: "ring-[#B87333]/60", top: "from-[#EAB988] to-[#C88A4E]", bar: "from-[#C88A4E] to-[#7C4D22]", h: 78 },
 ];
 
 // A circular podium/list avatar: the learner's mascot with an initials fallback.
@@ -166,9 +168,16 @@ export default function LeaderboardClient({
           className="relative cursor-pointer overflow-hidden rounded-3xl px-3 pt-8 pb-0 sm:px-8"
           style={{ background: "linear-gradient(135deg, #10406F 0%, #0A2A4F 55%, #071C36 100%)" }}
           title="Tap to celebrate 🎉">
-          <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-40 opacity-70"
-            style={{ background: "radial-gradient(60% 90% at 50% 0%, rgba(239,174,86,.25), transparent 70%)" }} />
-          <p className="relative mb-2 text-center text-[11px] font-extrabold uppercase tracking-[.25em] text-gold/70">Champions</p>
+          {/* stage spotlight + champion beam */}
+          <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-56 opacity-80"
+            style={{ background: "radial-gradient(55% 100% at 50% 0%, rgba(239,174,86,.28), transparent 70%)" }} />
+          <div aria-hidden className="pointer-events-none absolute left-1/2 top-0 h-56 w-40 -translate-x-1/2 opacity-60 badge-pulse"
+            style={{ background: "linear-gradient(to bottom, rgba(239,174,86,.30), transparent 80%)", clipPath: "polygon(38% 0, 62% 0, 100% 100%, 0 100%)" }} />
+          {/* floating sparkles */}
+          <div aria-hidden className="pointer-events-none absolute left-6 top-10 text-gold/25 float"><Icon name="sparkles" className="h-4 w-4" /></div>
+          <div aria-hidden className="pointer-events-none absolute right-8 top-16 text-gold/20 float" style={{ animationDelay: "1.4s" }}><Icon name="star" className="h-3.5 w-3.5" /></div>
+
+          <p className="relative mb-3 text-center text-[11px] font-extrabold uppercase tracking-[.3em] text-gold/80">Champions</p>
 
           <div className="relative grid grid-cols-3 items-end gap-2 sm:gap-4">
             {podiumOrder.map((s, col) => {
@@ -179,12 +188,13 @@ export default function LeaderboardClient({
               return (
                 <div key={s.id} className="flex flex-col items-center">
                   {/* crown on the champion */}
-                  {place === 0 && <span className="mb-0.5 badge-pulse text-gold"><Icon name="crown" className="h-6 w-6" /></span>}
+                  {place === 0 && <span className="mb-1 badge-pulse text-gold drop-shadow"><Icon name="crown" className="h-7 w-7" /></span>}
                   {/* avatar with glowing ring + medal badge */}
-                  <div className={`relative transition-all duration-500 ${mounted ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"}`}>
+                  <div className={`relative transition-all duration-500 ${mounted ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"}`}
+                    style={{ transitionDelay: `${(2 - place) * 120}ms` }}>
                     <span aria-hidden className={`absolute inset-0 -z-10 rounded-full ${p.glow}`} />
                     <div className="float">
-                      <AvatarBubble s={s} size={place === 0 ? 76 : 60} ring={`ring-2 ${p.ring} ${isMe ? "ring-offset-2 ring-offset-board" : ""}`} />
+                      <AvatarBubble s={s} size={place === 0 ? 82 : 62} ring={`ring-2 ${p.ring} ${isMe ? "ring-offset-2 ring-offset-board" : ""}`} />
                     </div>
                     <span className={`absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-board ring-1 ring-white/20 ${MEDAL_TINT[place]}`}><Icon name="medal" className="h-3.5 w-3.5" /></span>
                   </div>
@@ -195,11 +205,15 @@ export default function LeaderboardClient({
                     <Icon name="coins" className="h-4 w-4" /><CountUp to={s.reward_points} duration={1100} />
                   </p>
 
-                  {/* pedestal — grows in on mount */}
-                  <div className="mt-2 w-full overflow-hidden rounded-t-xl">
-                    <div className={`mx-auto flex w-full items-start justify-center bg-gradient-to-b ${p.bar} transition-[height] duration-700 ease-out`}
-                      style={{ height: mounted ? p.h : 0 }}>
-                      <span className="mt-2 font-display text-2xl font-black text-white/90 drop-shadow sm:text-3xl">{place + 1}</span>
+                  {/* pedestal — a 3D block that rises on mount */}
+                  <div className="mt-3 w-full">
+                    {/* lighter top "step" face */}
+                    <div className={`mx-auto h-2.5 w-[94%] rounded-t-md bg-gradient-to-b ${p.top} shadow-[0_-1px_0_rgba(255,255,255,.4)_inset]`} />
+                    {/* front face */}
+                    <div className={`relative mx-auto flex w-full flex-col items-center justify-start overflow-hidden bg-gradient-to-b ${p.bar} shadow-[inset_0_2px_0_rgba(255,255,255,.28),inset_0_-14px_24px_-12px_rgba(0,0,0,.5),0_12px_28px_-12px_rgba(0,0,0,.55)] transition-[height] duration-700 ease-out`}
+                      style={{ height: mounted ? p.h : 0, transitionDelay: `${(2 - place) * 120}ms` }}>
+                      <span className="mt-1.5 text-[9px] font-extrabold uppercase tracking-widest text-white/70">{PLACE_LABEL[place]}</span>
+                      <span className="font-display text-3xl font-black text-white/95 drop-shadow sm:text-4xl">{place + 1}</span>
                     </div>
                   </div>
                 </div>
