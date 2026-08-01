@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useToast } from "@/components/Toast";
+import PageHero from "@/components/portal/PageHero";
 
 export default function TutorMaterialsClient({ initial }: { initial: any[] }) {
   const push = useToast();
@@ -51,13 +52,10 @@ export default function TutorMaterialsClient({ initial }: { initial: any[] }) {
 
   return (
     <div className="space-y-5 py-2">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="font-display text-2xl font-bold">Learning materials</h1>
-          <p className="text-sm text-ink/50">Post notes and resources for your learners.</p>
-        </div>
+      <PageHero icon="materials" title="Learning materials" decor={["materials", "sparkles"]}
+        subtitle="Post notes and resources for your learners.">
         <button className="btn-gold" onClick={() => setShowForm((v) => !v)}>{showForm ? "Cancel" : "+ Post material"}</button>
-      </div>
+      </PageHero>
 
       {showForm && (
         <div className="card space-y-3 p-6">

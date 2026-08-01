@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getUser } from "@/lib/auth";
 import { getRoster } from "@/lib/authRole";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import PageHero from "@/components/portal/PageHero";
 
 export const dynamic = "force-dynamic";
 
@@ -22,10 +23,8 @@ export default async function TutorLearners() {
 
   return (
     <div className="space-y-6 py-2">
-      <div>
-        <h1 className="font-display text-2xl font-bold">My Learners</h1>
-        <p className="text-sm text-ink/50">Learners in your classes and those assigned to you directly.</p>
-      </div>
+      <PageHero icon="students" title="My Learners" decor={["students", "sparkles"]}
+        subtitle="Learners in your classes and those assigned to you directly." />
 
       {learners.length === 0 ? (
         <div className="card p-8 text-center text-sm text-ink/45">

@@ -3,6 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/Icons";
+import PageHero from "@/components/portal/PageHero";
 import { useToast } from "@/components/Toast";
 import { fmtWAT } from "@/lib/time";
 
@@ -48,15 +49,8 @@ export default function TutorReportCardsClient({ students, classes, issued }: {
 
   return (
     <div className="space-y-6 py-2">
-      <div className="boardgrid relative flex items-center gap-4 overflow-hidden rounded-2xl bg-board p-7 text-white">
-        <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gold/15 text-gold ring-1 ring-gold/25">
-          <Icon name="reports" className="h-6 w-6" />
-        </span>
-        <div>
-          <h1 className="font-display text-2xl font-semibold sm:text-3xl">Report cards</h1>
-          <p className="mt-1 text-sm text-white/50">Issue a termly progress report for your learners — they download it as a PDF.</p>
-        </div>
-      </div>
+      <PageHero icon="reports" title="Report cards" decor={["reports", "sparkles"]}
+        subtitle="Issue a termly progress report for your learners — they download it as a PDF." />
 
       <div className="card p-6">
         <h2 className="mb-4 font-display text-lg font-semibold">Issue a report card</h2>

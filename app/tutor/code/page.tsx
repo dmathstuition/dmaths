@@ -1,6 +1,7 @@
 import { getUser } from "@/lib/auth";
 import Playground from "@/components/code/Playground";
 import { loadCodeData } from "@/lib/notebookData";
+import PageHero from "@/components/portal/PageHero";
 
 export const dynamic = "force-dynamic";
 
@@ -12,10 +13,8 @@ export default async function TutorCodePage() {
 
   return (
     <div className="space-y-5 py-2">
-      <div>
-        <h1 className="font-display text-2xl font-bold">Code playground</h1>
-        <p className="text-sm text-ink/50">Run Python, build a web page, or make a Colab-style notebook — and share starter notebooks with your learners.</p>
-      </div>
+      <PageHero icon="code" title="Code playground" decor={["code", "sparkles"]}
+        subtitle="Run Python, build a web page, or make a Colab-style notebook — and share starter notebooks with your learners." />
       <Playground persist meId={user?.id ?? ""} snippets={snippets} sharedNotebooks={sharedNotebooks} canShare />
     </div>
   );
