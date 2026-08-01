@@ -27,6 +27,7 @@ const NAV: NavItem[] = [
   { href: "/portal/notifications", label: "Notifications", icon: "bell" },
   { href: "/portal/behavior", label: "My behaviour", icon: "checkCircle" },
   { href: "/portal/badges", label: "Badges", icon: "trophy" },
+  { href: "/portal/shop", label: "Rewards shop", icon: "payments" },
   { href: "/portal/certificates", label: "Certificates", icon: "graduationCap" },
   { href: "/portal/report-cards", label: "Report cards", icon: "reports" },
   { href: "/portal/payments", label: "My payments", icon: "payments" },
