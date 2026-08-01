@@ -28,11 +28,15 @@ export default async function FocusPage() {
 
   return (
     <div className="space-y-6">
-      <div className="boardgrid relative flex items-center gap-4 overflow-hidden rounded-2xl bg-board p-7 text-white">
-        <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gold/15 text-gold ring-1 ring-gold/25">
+      <div className="boardgrid relative flex items-center gap-4 overflow-hidden rounded-3xl bg-gradient-to-br from-[#10406F] via-[#0A2A4F] to-[#071C36] p-7 text-white">
+        <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full"
+          style={{ background: "radial-gradient(circle, rgba(239,174,86,.4), transparent 70%)" }} />
+        <div aria-hidden className="pointer-events-none absolute right-6 top-6 select-none text-xl float">⚡️</div>
+        <div aria-hidden className="pointer-events-none absolute right-24 bottom-6 select-none text-base float" style={{ animationDelay: "1.1s" }}>🎯</div>
+        <span className="relative flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gold/15 text-gold ring-1 ring-gold/25">
           <Icon name="zap" className="h-6 w-6" />
         </span>
-        <div>
+        <div className="relative">
           <h1 className="font-display text-2xl font-semibold sm:text-3xl">Focus mode</h1>
           <p className="mt-1 text-sm text-white/50">Study in focused bursts — your minutes are tracked and build your streak.</p>
         </div>
