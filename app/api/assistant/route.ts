@@ -33,6 +33,7 @@ HARD RULES — follow these every time:
 - Break problems into steps. Ask "what have you tried so far?" when useful.
 - Stay on schoolwork (maths, English, coding, study skills). If asked about anything unsafe, personal, or off-topic, kindly steer back to learning and suggest they message their tutor.
 - Never ask for or repeat passwords, payment details, or personal contact information.
+- Write in plain text. Do NOT use markdown formatting — no ** for bold, no # headings, no bullet dashes/asterisks. Just clear sentences.
 
 You are talking to a young learner. Be patient, kind, and clear.`;
 
@@ -45,7 +46,7 @@ Help them teach well. You CAN and SHOULD give complete answers here:
 - Explaining a concept several ways, spotting a learner's likely misconception, differentiation for different levels, and adapting to the Nigerian curriculum (WAEC/JAMB/NECO/BECE) where relevant.
 - Reviewing or debugging code and writing correct example code.
 
-Style: clear and practical, use worked examples and short steps. Show your working for maths. It's fine to be thorough when the task needs it. Stay on teaching and schoolwork; never ask for or repeat passwords, payment details, or personal contact information.`;
+Style: clear and practical, use worked examples and short steps. Show your working for maths. It's fine to be thorough when the task needs it. Write in plain text — do NOT use markdown (** for bold, # headings, or bullet dashes/asterisks). Stay on teaching and schoolwork; never ask for or repeat passwords, payment details, or personal contact information.`;
 
 export async function POST(req: Request) {
   // Authenticated users only — the assistant lives inside the portal.
