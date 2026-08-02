@@ -79,3 +79,19 @@ export function owingSummary(
 }
 
 export const fmtNaira = (n: number) => `₦${Math.round(n).toLocaleString("en-NG")}`;
+
+// "August 2026" for the current month's invoice heading/line item.
+export function monthLabel(ref: Date = new Date()): string {
+  return ref.toLocaleDateString("en-NG", { timeZone: "Africa/Lagos", month: "long", year: "numeric" });
+}
+
+// A stable, human-readable invoice number for a learner's monthly fee:
+//   INV-2026-08-DM20260001
+// Deterministic (same learner + same month → same number) so re-opening the
+// invoice doesn't mint a new one, and it sorts chronologically.
+export function invoiceNumber(studentCode: string | null | undefined, ref: Date = new Date()): string {
+  const y = ref.getUTCFullYear();
+  const m = String(ref.getUTCMonth() + 1).padStart(2, "0");
+  const suffix = String(studentCode ?? "").replace(/[^A-Za-z0-9]/g, "").toUpperCase() || "ACCT";
+  return `INV-${y}-${m}-${suffix}`;
+}

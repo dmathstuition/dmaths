@@ -60,6 +60,13 @@ export default async function PortalPaymentsPage() {
       <PaymentsSummary summary={summary} dueLabel={summary.dueDate ? fmtWATDate(summary.dueDate) : undefined}
         action={<PayBalanceButton email={me?.email ?? ""} amount={summary.owing} studentId={user.id} />} />
 
+      {summary.hasPlan && (
+        <Link href={`/invoice/${user.id}`}
+          className="flex items-center justify-center gap-2 rounded-xl border border-line bg-white px-4 py-3 text-sm font-bold text-gold-deep transition hover:bg-chalk">
+          <Icon name="reports" className="h-4 w-4" /> View this month&apos;s invoice
+        </Link>
+      )}
+
       <div className="card neu-card overflow-hidden">
         {rows.length ? (
           <div className="divide-y divide-line/60">

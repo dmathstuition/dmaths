@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { paidInMonth, owingSummary } from "@/lib/payments";
+import { paidInMonth, owingSummary, invoiceNumber, monthLabel } from "@/lib/payments";
 
 const REF = new Date("2026-08-15T10:00:00.000Z");
 const on = (day: string, amount: number, status = "success") =>
@@ -86,5 +86,24 @@ describe("owingSummary", () => {
     );
     expect(s.overdue).toBe(false);
     expect(s.state).toBe("paid");
+  });
+});
+
+describe("invoiceNumber", () => {
+  const REF = new Date("2026-08-15T10:00:00.000Z");
+  it("is deterministic per learner per month and sortable", () => {
+    expect(invoiceNumber("DM-2026-0001", REF)).toBe("INV-2026-08-DM20260001");
+    // Same inputs → same number (re-opening never mints a new one).
+    expect(invoiceNumber("DM-2026-0001", REF)).toBe(invoiceNumber("DM-2026-0001", REF));
+  });
+  it("falls back to ACCT when there's no student code", () => {
+    expect(invoiceNumber(null, REF)).toBe("INV-2026-08-ACCT");
+    expect(invoiceNumber("", REF)).toBe("INV-2026-08-ACCT");
+  });
+});
+
+describe("monthLabel", () => {
+  it("renders a human month + year", () => {
+    expect(monthLabel(new Date("2026-08-15T10:00:00.000Z"))).toBe("August 2026");
   });
 });
