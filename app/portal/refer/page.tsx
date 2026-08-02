@@ -1,5 +1,6 @@
 import { getProfile } from "@/lib/auth";
 import { siteBaseUrl } from "@/lib/siteUrl";
+import { REFERRAL_REWARD, REFERRAL_WELCOME } from "@/lib/rewards";
 import ReferShare from "@/components/portal/ReferShare";
 import Reveal from "@/components/landing/Reveal";
 import { Icon } from "@/components/Icons";
@@ -10,6 +11,7 @@ export default async function ReferPage() {
   const me = await getProfile();
   const code = (me as any)?.student_code as string | undefined;
   const count = (me as any)?.referral_count ?? 0;
+  const earned = count * REFERRAL_REWARD;
   const link = code ? `${siteBaseUrl()}/apply?ref=${encodeURIComponent(code)}` : `${siteBaseUrl()}/apply`;
 
   return (
@@ -24,12 +26,20 @@ export default async function ReferPage() {
               Invite friends to <span className="text-gold">D-Maths</span>
             </h1>
             <p className="mt-2 max-w-md text-sm text-white/55">
-              Share your personal link. When a friend enrols through it, we&apos;ll count it here —
-              and let you know the moment they join.
+              Share your personal link. When a friend enrols through it you both win —
+              you earn <span className="font-bold text-gold">{REFERRAL_REWARD} reward points</span> and
+              they get a <span className="font-bold text-gold">{REFERRAL_WELCOME}-point</span> head-start.
             </p>
-            <p className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-gold/15 px-3 py-1 text-sm font-bold text-gold ring-1 ring-gold/30">
-<Icon name="students" className="h-4 w-4" /> {count} friend{count === 1 ? "" : "s"} joined
-            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-gold/15 px-3 py-1 text-sm font-bold text-gold ring-1 ring-gold/30">
+                <Icon name="students" className="h-4 w-4" /> {count} friend{count === 1 ? "" : "s"} joined
+              </span>
+              {earned > 0 && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-gold/15 px-3 py-1 text-sm font-bold text-gold ring-1 ring-gold/30">
+                  <Icon name="coins" className="h-4 w-4" /> {earned} points earned
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </Reveal>
@@ -51,7 +61,7 @@ export default async function ReferPage() {
             {[
               "Share your link with a friend or their parent.",
               "They tap it and complete the quick registration.",
-              "Once we approve their enrolment, it shows up here — and you get a notification. 🎉",
+              `Once we approve their enrolment, you both get reward points — you ${REFERRAL_REWARD}, them ${REFERRAL_WELCOME} — and you get a notification. 🎉`,
             ].map((t, i) => (
               <li key={i} className="flex gap-3">
                 <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gold text-[13px] font-extrabold text-board">{i + 1}</span>

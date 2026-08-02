@@ -186,6 +186,12 @@ export default function Apply() {
           </div>
           <HeroMascot src="/avatars/student-book.png" className="absolute bottom-0 right-0 top-0 w-[42%] sm:right-2 sm:w-[38%]" />
         </div>
+        {ref && (
+          <p className="mt-3 flex items-center gap-2 rounded-2xl bg-gold-pale px-4 py-3 text-sm font-semibold text-ink/75">
+            <Icon name="gift" className="h-4 w-4 shrink-0 text-gold-deep" />
+            You&apos;re joining through a friend&apos;s invite — you&apos;ll both earn bonus reward points once your enrolment is approved.
+          </p>
+        )}
       </div>
 
       {/* Step bar */}
