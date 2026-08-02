@@ -507,6 +507,8 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
         <GradeModal
           studentName={`${gradeTarget.student.first_name} ${gradeTarget.student.last_name}`}
           assignmentTitle={gradeTarget.assignment.title}
+          subject={gradeTarget.assignment.subject}
+          learner={gradeTarget.student.first_name}
           initialGrade={gradeTarget.grade ?? null}
           initialFeedback={gradeTarget.feedback ?? ""}
           onConfirm={(grade, feedback) => doGrade(gradeTarget, grade, feedback)}
