@@ -10,15 +10,21 @@ const LEARNER_GREETING =
 const STAFF_GREETING =
   "Hi, I'm D-Maths A.I — your teaching assistant. 🧭 Ask me for worked solutions, lesson ideas, practice questions, marking help, or a concept explained a few ways.";
 
-// Render an assistant reply with light formatting: ```fenced``` code as a block and
-// `inline code` as a chip. Everything else is plain text (newlines preserved by the
-// bubble's whitespace-pre-wrap).
+// Render an assistant reply with light formatting: ```fenced``` code as a block,
+// `inline code` as a chip, and **bold** as bold. Any stray ** markers that slip
+// through are stripped so they never show as literal asterisks. Newlines are
+// preserved by the bubble's whitespace-pre-wrap.
 function inline(t: string, keyBase: number): React.ReactNode {
-  return t.split(/(`[^`]+`)/g).map((p, i) =>
-    p.length > 1 && p.startsWith("`") && p.endsWith("`")
-      ? <code key={`${keyBase}-${i}`} className="rounded bg-ink/10 px-1 py-0.5 font-mono text-[12px]">{p.slice(1, -1)}</code>
-      : <span key={`${keyBase}-${i}`}>{p}</span>,
-  );
+  return t.split(/(`[^`]+`|\*\*[^*]+\*\*)/g).map((p, i) => {
+    if (p.length > 1 && p.startsWith("`") && p.endsWith("`")) {
+      return <code key={`${keyBase}-${i}`} className="rounded bg-ink/10 px-1 py-0.5 font-mono text-[12px]">{p.slice(1, -1)}</code>;
+    }
+    if (p.length > 3 && p.startsWith("**") && p.endsWith("**")) {
+      return <strong key={`${keyBase}-${i}`} className="font-bold">{p.slice(2, -2)}</strong>;
+    }
+    // Strip any orphan ** / __ markers left in plain prose.
+    return <span key={`${keyBase}-${i}`}>{p.replace(/\*\*|__/g, "")}</span>;
+  });
 }
 function formatMessage(text: string): React.ReactNode {
   const out: React.ReactNode[] = [];
@@ -125,7 +131,7 @@ export default function AssistantWidget({ context, mode = "learner" }: { context
       {/* Panel */}
       {open && (
         <div role="dialog" aria-label="D-Maths A.I assistant"
-          className="chat-in fixed inset-x-3 bottom-24 z-[60] flex max-h-[70vh] flex-col overflow-hidden rounded-3xl border border-line bg-white shadow-2xl sm:inset-x-auto sm:right-6 sm:w-[380px] lg:bottom-6">
+          className="chat-in fixed inset-x-3 bottom-24 z-[60] flex max-h-[72vh] flex-col overflow-hidden rounded-3xl border border-line bg-white shadow-2xl ring-1 ring-black/5 dark:border-white/10 dark:bg-board dark:ring-white/10 sm:inset-x-auto sm:right-6 sm:w-[400px] lg:bottom-6">
           {/* Header */}
           <div className="relative flex items-center gap-3 overflow-hidden px-4 py-3 text-white"
             style={{ background: "linear-gradient(120deg, #10406F 0%, #0A2A4F 60%, #071C36 100%)" }}>
@@ -147,14 +153,19 @@ export default function AssistantWidget({ context, mode = "learner" }: { context
           </div>
 
           {/* Messages */}
-          <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto bg-chalk/40 px-3 py-4">
+          <div ref={scrollRef} className="flex-1 space-y-3.5 overflow-y-auto bg-chalk/50 px-3 py-4 dark:bg-board/40">
             {msgs.map((m, i) => (
-              <div key={i} className={`msg-in flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+              <div key={i} className={`msg-in flex items-end gap-2 ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+                {m.role === "assistant" && (
+                  <span aria-hidden className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-gold to-gold-deep text-board shadow-sm">
+                    <Icon name="compass" className="h-4 w-4" />
+                  </span>
+                )}
                 <div
-                  className={`max-w-[85%] whitespace-pre-wrap rounded-2xl px-3.5 py-2 text-[13.5px] leading-relaxed ${
+                  className={`max-w-[78%] whitespace-pre-wrap rounded-2xl px-3.5 py-2.5 text-[13.5px] leading-relaxed ${
                     m.role === "user"
-                      ? "rounded-br-sm bg-gold text-board"
-                      : "rounded-bl-sm bg-white text-ink shadow-sm"
+                      ? "rounded-br-md bg-gradient-to-br from-gold to-gold-deep text-board shadow-sm"
+                      : "rounded-bl-md border border-line bg-white text-ink shadow-sm dark:border-white/10 dark:bg-[#0f2942] dark:text-white"
                   }`}
                 >
                   {m.role === "assistant" ? formatMessage(m.content) : m.content}
@@ -162,11 +173,14 @@ export default function AssistantWidget({ context, mode = "learner" }: { context
               </div>
             ))}
             {busy && (
-              <div className="flex justify-start">
-                <div className="flex gap-1 rounded-2xl rounded-bl-sm bg-white px-3.5 py-3 shadow-sm">
-                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-ink/40 [animation-delay:-0.3s]" />
-                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-ink/40 [animation-delay:-0.15s]" />
-                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-ink/40" />
+              <div className="flex items-end gap-2">
+                <span aria-hidden className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-gold to-gold-deep text-board shadow-sm">
+                  <Icon name="compass" className="h-4 w-4" />
+                </span>
+                <div className="flex gap-1 rounded-2xl rounded-bl-md border border-line bg-white px-3.5 py-3 shadow-sm dark:border-white/10 dark:bg-[#0f2942]">
+                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-ink/40 [animation-delay:-0.3s] dark:bg-white/40" />
+                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-ink/40 [animation-delay:-0.15s] dark:bg-white/40" />
+                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-ink/40 dark:bg-white/40" />
                 </div>
               </div>
             )}
@@ -174,10 +188,10 @@ export default function AssistantWidget({ context, mode = "learner" }: { context
 
           {/* Suggested-prompt chips — shown before the first question */}
           {!started && !busy && (
-            <div className="flex flex-wrap gap-1.5 border-t border-line bg-white px-2.5 pt-2.5">
+            <div className="flex flex-wrap gap-1.5 border-t border-line bg-white px-2.5 pt-2.5 dark:border-white/10 dark:bg-board">
               {chips.map((c) => (
                 <button key={c} onClick={() => send(c)}
-                  className="rounded-full border border-line bg-chalk/50 px-3 py-1.5 text-[12px] font-semibold text-ink/70 transition hover:border-gold hover:bg-gold-pale hover:text-gold-deep">
+                  className="rounded-full border border-line bg-chalk/50 px-3 py-1.5 text-[12px] font-semibold text-ink/70 transition hover:-translate-y-0.5 hover:border-gold hover:bg-gold-pale hover:text-gold-deep dark:border-white/10 dark:bg-white/5 dark:text-white/70">
                   {c}
                 </button>
               ))}
@@ -185,7 +199,7 @@ export default function AssistantWidget({ context, mode = "learner" }: { context
           )}
 
           {/* Composer */}
-          <div className="flex items-center gap-2 border-t border-line bg-white p-2.5">
+          <div className="flex items-center gap-2 border-t border-line bg-white p-2.5 dark:border-white/10 dark:bg-board">
             <input
               ref={inputRef}
               value={input}
@@ -193,7 +207,7 @@ export default function AssistantWidget({ context, mode = "learner" }: { context
               onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
               placeholder="Ask me anything about your work…"
               maxLength={2000}
-              className="min-w-0 flex-1 rounded-full border border-line bg-chalk/50 px-4 py-2.5 text-sm outline-none focus:border-gold"
+              className="min-w-0 flex-1 rounded-full border border-line bg-chalk/50 px-4 py-2.5 text-sm text-ink outline-none transition focus:border-gold focus:bg-white dark:border-white/10 dark:bg-white/5 dark:text-white dark:focus:bg-white/10"
             />
             <button
               onClick={() => send()}

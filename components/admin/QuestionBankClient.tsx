@@ -59,16 +59,29 @@ export default function QuestionBankClient({
 
   async function saveGenerated() {
     if (!generated.length) return;
+    const n = generated.length;
     setGenBusy(true); setGenErr("");
-    const res = await fetch("/api/question-bank", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ questions: generated, subject: gen.subject, level: gen.level, topic: gen.topic }),
-    });
-    setGenBusy(false);
-    const j = await res.json().catch(() => ({}));
-    if (!res.ok) { setGenErr(j.error || "Couldn't save."); return; }
-    push(`${generated.length} question${generated.length === 1 ? "" : "s"} saved to the bank.`, "success");
-    setGenerated([]); setGenOpen(false); reload();
+    try {
+      const res = await fetch("/api/question-bank", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ questions: generated, subject: gen.subject, level: gen.level, topic: gen.topic }),
+      });
+      const j = await res.json().catch(() => ({}));
+      setGenBusy(false);
+      if (!res.ok) {
+        const msg = j.error || "Couldn't save the questions.";
+        setGenErr(msg); push(msg, "error");   // keep `generated` so nothing is lost
+        return;
+      }
+      push(`${n} question${n === 1 ? "" : "s"} saved to the bank.`, "success");
+      setGenerated([]); setGenOpen(false);
+      // Clear the filters so the newly-saved questions are visible in the list.
+      setSubject(""); setLevel(""); setSearch("");
+      await reload();
+    } catch {
+      setGenBusy(false);
+      setGenErr("Couldn't reach the server — try again."); push("Couldn't save — try again.", "error");
+    }
   }
 
   function dropGenerated(idx: number) {
