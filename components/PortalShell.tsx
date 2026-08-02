@@ -5,7 +5,6 @@ import { useRef, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { Icon, type IconName } from "@/components/Icons";
 import Avatar from "@/components/Avatar";
-import { frameClass } from "@/lib/cosmetics";
 import Logo from "@/components/Logo";
 import ThemeToggle from "@/components/ThemeToggle";
 import NotificationBell from "@/components/NotificationBell";
@@ -22,7 +21,7 @@ import { useDialog } from "@/lib/useDialog";
 export type NavItem = { href: string; label: string; icon: IconName };
 
 export default function PortalShell({
-  nav, name, subtitle, children, bell, search, tabs, idleMinutes = 30, avatarSrc, avatarFrame,
+  nav, name, subtitle, children, bell, search, tabs, idleMinutes = 30, avatarSrc, avatarTitle,
 }: {
   nav: NavItem[]; name: string; subtitle: string; children: React.ReactNode;
   bell?: { mode: "student" | "admin"; subjects?: string[]; noticesHref: string };
@@ -30,12 +29,11 @@ export default function PortalShell({
   tabs?: Tab[];
   idleMinutes?: number;
   avatarSrc?: string;
-  avatarFrame?: string;
+  avatarTitle?: string;
 }) {
-  // Equipped cosmetic frame (Avatar Studio) → a ring/glow on the learner's own
-  // avatar. When set it replaces the default white ring.
-  const frameCls = frameClass(avatarFrame);
-  const hasFrame = !!frameCls;
+  // Equipped cosmetic TITLE (Avatar Studio) → a small gold flair shown next to
+  // the learner's name in the sidebar. "" = no title.
+  const title = (avatarTitle ?? "").trim();
   const path = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -72,10 +70,16 @@ export default function PortalShell({
       </nav>
       <div className="border-t border-white/10 p-4">
         <div className="mb-2 flex items-center gap-3 rounded-xl px-2 py-2">
-          <Avatar name={name} size="md" ring={!hasFrame} src={avatarSrc} className={frameCls} />
+          <Avatar name={name} size="md" ring src={avatarSrc} />
           <div className="min-w-0">
             <p className="truncate text-sm font-bold text-white">{name.trim() || "there"}</p>
-            <p className="truncate text-[11px] font-semibold text-white/40">{subtitle}</p>
+            {title ? (
+              <span className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-gold px-2 py-0.5 text-[10px] font-extrabold text-board">
+                <Icon name="star" className="h-2.5 w-2.5" /> {title}
+              </span>
+            ) : (
+              <p className="truncate text-[11px] font-semibold text-white/40">{subtitle}</p>
+            )}
           </div>
         </div>
         <ThemeToggle />
@@ -118,7 +122,7 @@ export default function PortalShell({
           <span className="hidden lg:block"><TourButton light /></span>
           {search && <span data-tour="search" className="hidden lg:block"><AdminSearch /></span>}
           {bell && <span data-tour="bell"><NotificationBell mode={bell.mode} subjects={bell.subjects} noticesHref={bell.noticesHref} /></span>}
-          <Avatar name={name} size="sm" ring={!hasFrame} src={avatarSrc} className={frameCls} />
+          <Avatar name={name} size="sm" ring src={avatarSrc} />
         </div>
       </header>
 
