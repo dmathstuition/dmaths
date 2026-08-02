@@ -5,7 +5,7 @@ describe("cosmetics catalog", () => {
   it("has a free 'none' default and priced premium frames", () => {
     expect(frameByKey("none").cost).toBe(0);
     expect(frameByKey("gold").cost).toBeGreaterThan(0);
-    expect(CHARACTERS.length).toBe(4);
+    expect(CHARACTERS.length).toBeGreaterThanOrEqual(4);
   });
   it("falls back to 'none' for unknown keys", () => {
     expect(frameByKey("bogus").key).toBe("none");

@@ -18,12 +18,18 @@ export type Character = { key: string; name: string; src: string };
 //  reuse or rename an existing `key` — that's what a learner's choice is saved as.
 // ─────────────────────────────────────────────────────────────────────────
 export const CHARACTERS: Character[] = [
-  { key: "wave",   name: "Waver",   src: "/avatars/student-wave.png" },   // waving boy, blue hoodie
-  { key: "laptop", name: "Coder",   src: "/avatars/student-laptop.png" }, // boy at a laptop, thumbs up
-  { key: "book",   name: "Reader",  src: "/avatars/student-book.png" },   // boy reading a maths book
-  { key: "girl",   name: "Scholar", src: "/avatars/student-girl.png" },   // waving girl, purple hoodie
-  // ── Add more here, e.g.:
-  // { key: "rocket", name: "Rocket", src: "/avatars/rocket.png" },
+  { key: "wave",      name: "Waver",     src: "/avatars/student-wave.png" },   // waving boy, blue hoodie
+  { key: "laptop",    name: "Coder",     src: "/avatars/student-laptop.png" }, // boy at a laptop, thumbs up
+  { key: "book",      name: "Reader",    src: "/avatars/student-book.png" },   // boy reading a maths book
+  { key: "girl",      name: "Scholar",   src: "/avatars/student-girl.png" },   // waving girl, purple hoodie
+  { key: "scientist", name: "Scientist", src: "/avatars/char-scientist.png" }, // boy, lab coat, flask + laptop
+  { key: "achiever",  name: "Achiever",  src: "/avatars/char-achiever.png" },  // girl, jersey, tablet dashboard
+  { key: "notetaker", name: "Note-taker",src: "/avatars/char-notetaker.png" }, // girl, pencil + notebooks
+  { key: "greeter",   name: "Greeter",   src: "/avatars/char-greeter.png" },   // girl, waving, purple hoodie
+  { key: "analyst",   name: "Analyst",   src: "/avatars/char-analyst.png" },   // girl, laptop data dashboard
+  { key: "techie",    name: "Techie",    src: "/avatars/char-techie.png" },    // boy, headphones, laptop
+  { key: "mathlete",  name: "Mathlete",  src: "/avatars/char-mathlete.png" },  // girl, calculator + ruler
+  // ── Add more here: drop a PNG in /public/avatars and add one line.
 ];
 
 // The deterministic pool (every character is a possible "random" default).
