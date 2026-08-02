@@ -5,6 +5,7 @@ import { useToast } from "@/components/Toast";
 import { watToUtcISO } from "@/lib/time";
 import { codeDisplay } from "@/lib/codeSubmission";
 import PageHero from "@/components/portal/PageHero";
+import { Icon } from "@/components/Icons";
 
 export default function TutorAssignmentsClient({ students, initialSubs }: { students: any[]; initialSubs: any[] }) {
   const router = useRouter();
@@ -16,6 +17,25 @@ export default function TutorAssignmentsClient({ students, initialSubs }: { stud
   const [gradeFor, setGradeFor] = useState<string | null>(null);
   const [gradeVal, setGradeVal] = useState("");
   const [feedback, setFeedback] = useState("");
+  const [drafting, setDrafting] = useState(false);
+
+  async function draftFeedback(sub: any) {
+    setDrafting(true);
+    try {
+      const work = sub.code ? codeDisplay(sub.code, sub.assignment?.code_language) : (sub.answer || sub.text || "");
+      const res = await fetch("/api/ai/feedback", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: sub.assignment?.title, subject: sub.assignment?.subject,
+          grade: gradeVal ? Number(gradeVal) : null, learner: sub.student?.first_name, work,
+        }),
+      });
+      const j = await res.json();
+      if (res.ok && j.feedback) setFeedback(j.feedback);
+      else push(j.error || "Couldn't draft feedback.", "error");
+    } catch { push("Couldn't draft feedback — try again.", "error"); }
+    finally { setDrafting(false); }
+  }
 
   async function create() {
     if (!f.title?.trim()) { push("Add a title.", "error"); return; }
@@ -188,6 +208,10 @@ export default function TutorAssignmentsClient({ students, initialSubs }: { stud
                   value={gradeVal} onChange={(e) => setGradeVal(e.target.value)} />
                 <input className="field min-w-0 flex-1" placeholder="Feedback (optional)"
                   value={feedback} onChange={(e) => setFeedback(e.target.value)} />
+                <button type="button" onClick={() => draftFeedback(sub)} disabled={drafting}
+                  title="Draft feedback with A.I" className="btn !min-h-[40px] !px-3 !text-sm border border-gold/50 bg-white text-gold-deep hover:bg-gold-pale disabled:opacity-50">
+                  <span className="inline-flex items-center gap-1.5"><Icon name="sparkles" className="h-4 w-4" /> {drafting ? "…" : "Draft"}</span>
+                </button>
                 <button className="btn-gold !min-h-[40px] !px-4 !text-sm" disabled={busy} onClick={() => grade(sub)}>Save grade</button>
               </div>
             )}

@@ -24,6 +24,25 @@ export default function PracticeClient({ mySubjects, myLevel }: { mySubjects: st
 
   const [score, setScore] = useState<{ correct: number; total: number; points: number; capReached: boolean; results: Result[] } | null>(null);
   const [celebrate, setCelebrate] = useState(0);
+  const [explains, setExplains] = useState<Record<string, string>>({});
+  const [explaining, setExplaining] = useState<string | null>(null);
+
+  async function explain(r: Result, q: Q) {
+    if (explains[q.id] || explaining) return;
+    setExplaining(q.id);
+    try {
+      const res = await fetch("/api/ai/explain", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: q.question, options: q.options, answer: r.answer, chosen: r.chosen, subject }),
+      });
+      const j = await res.json();
+      setExplains((e) => ({ ...e, [q.id]: res.ok ? j.explanation : (j.error || "Couldn't explain right now.") }));
+    } catch {
+      setExplains((e) => ({ ...e, [q.id]: "Couldn't explain right now — try again." }));
+    } finally {
+      setExplaining(null);
+    }
+  }
 
   // Load the filter options once; default the subject to one the learner takes.
   useEffect(() => {
@@ -212,6 +231,19 @@ export default function PracticeClient({ mySubjects, myLevel }: { mySubjects: st
                   <div className="ml-7 mt-1.5 space-y-0.5 text-[13px]">
                     {!r.correct && r.chosen >= 0 && <p className="text-red-600">Your answer: {q.options[r.chosen]}</p>}
                     <p className="text-emerald-700">Correct: {q.options[r.answer]}</p>
+                  </div>
+                  <div className="ml-7 mt-2">
+                    {explains[q.id] ? (
+                      <div className="rounded-xl bg-board/[0.04] p-3 text-[13px] leading-relaxed text-ink/75 ring-1 ring-line dark:bg-white/5">
+                        <span className="mb-0.5 inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wide text-gold-deep"><Icon name="compass" className="h-3 w-3" /> D-Maths A.I</span>
+                        <p>{explains[q.id]}</p>
+                      </div>
+                    ) : (
+                      <button onClick={() => explain(r, q)} disabled={explaining === q.id}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3 py-1 text-[12px] font-bold text-gold-deep transition hover:bg-gold-pale disabled:opacity-50 dark:bg-white/5">
+                        <Icon name="compass" className="h-3.5 w-3.5" /> {explaining === q.id ? "Thinking…" : "Explain this"}
+                      </button>
+                    )}
                   </div>
                 </div>
               );
