@@ -7,3 +7,6 @@ node_modules
 public/sw.js
 public/sw.js.map
 public/swe-worker-*.js
+
+# TypeScript incremental build cache (generated)
+tsconfig.tsbuildinfo
