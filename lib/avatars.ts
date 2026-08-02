@@ -27,6 +27,18 @@ export function learnerAvatar(id: string | null | undefined): string {
   return LEARNER_AVATARS[hash(String(id ?? "")) % LEARNER_AVATARS.length];
 }
 
+// A learner's chosen character (from Avatar Studio), falling back to the stable
+// deterministic pick when they haven't chosen one. Keys match lib/cosmetics.
+const CHARACTER_SRC: Record<string, string> = {
+  wave: "/avatars/student-wave.png",
+  laptop: "/avatars/student-laptop.png",
+  book: "/avatars/student-book.png",
+  girl: "/avatars/student-girl.png",
+};
+export function learnerAvatarFor(id: string | null | undefined, choice: string | null | undefined): string {
+  return (choice && CHARACTER_SRC[choice]) || learnerAvatar(id);
+}
+
 // The mascot for a person, by role. undefined → use the initials avatar.
 export function avatarForRole(role: string | null | undefined, id: string | null | undefined): string | undefined {
   if (role === "admin") return ADMIN_AVATAR;

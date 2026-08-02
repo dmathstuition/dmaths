@@ -6,7 +6,7 @@ import DailyTaskGuard from "@/components/portal/DailyTaskGuard";
 import AssistantWidget from "@/components/portal/AssistantWidget";
 import { AssistantProvider } from "@/components/portal/AssistantContext";
 import { getProfile } from "@/lib/auth";
-import { avatarForRole } from "@/lib/avatars";
+import { learnerAvatarFor } from "@/lib/avatars";
 import { redirect } from "next/navigation";
 
 const NAV: NavItem[] = [
@@ -22,6 +22,7 @@ const NAV: NavItem[] = [
   { href: "/portal/focus", label: "Focus mode", icon: "zap" },
   { href: "/portal/sprint", label: "Math Sprint", icon: "trophy" },
   { href: "/portal/practice", label: "Practice", icon: "target" },
+  { href: "/portal/style", label: "Avatar Studio", icon: "sparkles" },
   { href: "/portal/flashcards", label: "Revision cards", icon: "book" },
   { href: "/portal/progress", label: "My progress", icon: "progress" },
   { href: "/portal/calendar", label: "Calendar", icon: "calendar" },
@@ -62,7 +63,8 @@ export default async function PortalLayout({ children }: { children: React.React
   return (
     <PortalShell nav={NAV} tabs={TABS} name={`${p.first_name ?? ""} ${p.last_name ?? ""}`}
       subtitle={p.student_code ?? "Student"}
-      avatarSrc={avatarForRole(p.role, p.id)}
+      avatarSrc={learnerAvatarFor(p.id, (p as any).avatar_choice)}
+      avatarFrame={(p as any).avatar_frame ?? undefined}
       bell={{ mode: "student", subjects, noticesHref: "/portal/notices" }}>
       <AuthGuard />
       <StreakHeartbeat />
