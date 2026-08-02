@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { notifyUser } from "@/lib/notify";
-import { nudgeFor, STREAK_TITLE, INACTIVE_TITLE, DAILY_REWARD_TITLE, DAILY_REWARD_HOUR } from "@/lib/nudges";
+import { nudgeFor, STREAK_TITLE, INACTIVE_TITLE, DAILY_REWARD_TITLE, DUE_CARDS_TITLE, DAILY_REWARD_HOUR } from "@/lib/nudges";
 import { watDay } from "@/lib/dailyReward";
 import { cronOk } from "@/lib/cronRun";
 
@@ -102,5 +102,47 @@ export async function GET(req: Request) {
     }
   }
 
-  return cronOk(admin, "nudges", { sent: streak + inactive + dailyReward, streak, inactive, dailyReward, skipped });
+  // ── Revision cards due nudge ───────────────────────────────────
+  // Learners with spaced-repetition cards whose due date has arrived. Once per
+  // day per learner (deduped on the notification title). Degrades independently
+  // if migration-flashcards.sql hasn't been run.
+  let dueCards = 0;
+  {
+    const { data: due, error: dueErr } = await admin
+      .from("flashcard_reviews")
+      .select("student_id")
+      .lte("due_on", watDay());
+
+    if (!dueErr && due?.length) {
+      // Tally how many cards are due per learner.
+      const counts = new Map<string, number>();
+      for (const r of due) counts.set(r.student_id, (counts.get(r.student_id) ?? 0) + 1);
+      const ids = Array.from(counts.keys());
+
+      // Only active students, and only those not already nudged today.
+      const { data: actives } = await admin
+        .from("profiles").select("id").eq("role", "student").eq("is_active", true).in("id", ids);
+      const activeIds = (actives ?? []).map((a: any) => a.id);
+
+      if (activeIds.length) {
+        const { data: sent } = await admin
+          .from("notifications").select("user_id")
+          .in("user_id", activeIds).eq("title", DUE_CARDS_TITLE).gte("created_at", startOfToday);
+        const sentSet = new Set((sent ?? []).map((n: any) => n.user_id));
+        const toNudge = activeIds.filter((id) => !sentSet.has(id));
+
+        await Promise.allSettled(toNudge.map((id) => {
+          const n = counts.get(id) ?? 0;
+          return notifyUser(admin, id, {
+            title: DUE_CARDS_TITLE,
+            body: `You have ${n} revision card${n === 1 ? "" : "s"} to review — a quick session keeps them in memory.`,
+            link: "/portal/flashcards",
+          });
+        }));
+        dueCards = toNudge.length;
+      }
+    }
+  }
+
+  return cronOk(admin, "nudges", { sent: streak + inactive + dailyReward + dueCards, streak, inactive, dailyReward, dueCards, skipped });
 }

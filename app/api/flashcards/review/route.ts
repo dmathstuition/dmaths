@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
-import { schedule, type Grade } from "@/lib/srs";
+import { schedule, flashcardReviewPoints, type Grade } from "@/lib/srs";
+import { watDay } from "@/lib/dailyReward";
 
 const GRADES: Grade[] = ["again", "hard", "good", "easy"];
 
@@ -29,7 +30,7 @@ export async function POST(req: Request) {
 
   const admin = supabaseAdmin();
   const { data: existing } = await admin.from("flashcard_reviews")
-    .select("reps, interval_days, ease").eq("student_id", user.id).eq("card_id", cardId).maybeSingle();
+    .select("reps, interval_days, ease, last_reviewed").eq("student_id", user.id).eq("card_id", cardId).maybeSingle();
 
   const next = schedule(
     existing ? { reps: existing.reps, intervalDays: existing.interval_days, ease: Number(existing.ease) } : null,
@@ -47,5 +48,27 @@ export async function POST(req: Request) {
       ? "Flashcards need migration-flashcards.sql — run it in Supabase." : error.message;
     return NextResponse.json({ error: msg }, { status: 500 });
   }
-  return NextResponse.json({ ok: true, dueOn: next.dueOn, intervalDays: next.intervalDays });
+
+  // Reward keeping up revision: a point per distinct card reviewed today, capped.
+  // Re-grading a card already reviewed today earns nothing (not a new card).
+  const today = watDay();
+  const alreadyReviewedToday = !!existing?.last_reviewed && watDay(new Date(existing.last_reviewed)) === today;
+  let points = 0, newTotal: number | undefined;
+  try {
+    const dayStart = new Date(`${today}T00:00:00+01:00`).toISOString();
+    const { count } = await admin.from("flashcard_reviews")
+      .select("id", { count: "exact", head: true })
+      .eq("student_id", user.id).gte("last_reviewed", dayStart);
+    // `count` includes the row we just upserted; if this card is newly reviewed
+    // today, back it out so the cap is measured against *earlier* cards.
+    const earlierToday = Math.max(0, (count ?? 0) - (alreadyReviewedToday ? 0 : 1));
+    points = flashcardReviewPoints(earlierToday, alreadyReviewedToday);
+    if (points > 0) {
+      const { data: me } = await admin.from("profiles").select("reward_points").eq("id", user.id).single();
+      newTotal = Number(me?.reward_points ?? 0) + points;
+      await admin.from("profiles").update({ reward_points: newTotal }).eq("id", user.id);
+    }
+  } catch { /* rewards are a bonus — never fail a saved review over them */ }
+
+  return NextResponse.json({ ok: true, dueOn: next.dueOn, intervalDays: next.intervalDays, points, newTotal });
 }

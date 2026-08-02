@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { schedule, isDue, DEFAULT_STATE, EASE_MIN, EASE_MAX } from "@/lib/srs";
+import { schedule, isDue, DEFAULT_STATE, EASE_MIN, EASE_MAX, flashcardReviewPoints, FLASHCARD_DAILY_CAP } from "@/lib/srs";
 
 const TODAY = new Date("2026-04-01T12:00:00Z");
 const plus = (n: number) => new Date(TODAY.getTime() + n * 86_400_000).toISOString().slice(0, 10);
@@ -67,4 +67,19 @@ describe("isDue", () => {
     expect(isDue(plus(-3), TODAY)).toBe(true);
   });
   it("the future is not due", () => expect(isDue(plus(2), TODAY)).toBe(false));
+});
+
+describe("flashcardReviewPoints", () => {
+  it("awards a point per new distinct card until the daily cap", () => {
+    expect(flashcardReviewPoints(0, false)).toBe(1);
+    expect(flashcardReviewPoints(FLASHCARD_DAILY_CAP - 1, false)).toBe(1);
+    expect(flashcardReviewPoints(FLASHCARD_DAILY_CAP, false)).toBe(0);   // cap reached
+  });
+  it("earns nothing for a card already reviewed today", () => {
+    expect(flashcardReviewPoints(0, true)).toBe(0);
+  });
+  it("honours custom cap/perReview", () => {
+    expect(flashcardReviewPoints(2, false, { perReview: 3, cap: 5 })).toBe(3);
+    expect(flashcardReviewPoints(5, false, { perReview: 3, cap: 5 })).toBe(0);
+  });
 });
