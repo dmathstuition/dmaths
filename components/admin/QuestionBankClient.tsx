@@ -77,7 +77,13 @@ export default function QuestionBankClient({
       setGenerated([]); setGenOpen(false);
       // Clear the filters so the newly-saved questions are visible in the list.
       setSubject(""); setLevel(""); setSearch("");
-      await reload();
+      // Show the saved rows immediately (don't wait on a possibly-cached refetch).
+      if (Array.isArray(j.rows) && j.rows.length) {
+        setRows((prev) => [...(j.rows as BankRow[]), ...prev]);
+        router.refresh();
+      } else {
+        await reload();
+      }
     } catch {
       setGenBusy(false);
       setGenErr("Couldn't reach the server — try again."); push("Couldn't save — try again.", "error");
@@ -103,7 +109,7 @@ export default function QuestionBankClient({
   );
 
   async function reload() {
-    const res = await fetch("/api/question-bank");
+    const res = await fetch("/api/question-bank", { cache: "no-store" });
     const j = await res.json().catch(() => ({}));
     setRows(j.questions ?? []);
     router.refresh();
@@ -134,7 +140,14 @@ export default function QuestionBankClient({
     push(f.id ? "Question updated." : "Question saved to the bank.", "success");
     setShowForm(false);
     setF({ ...BLANK });
-    reload();
+    // A brand-new question comes back in `rows`; show it right away. Edits refetch.
+    if (!f.id && Array.isArray(j.rows) && j.rows.length) {
+      setSubject(""); setLevel(""); setSearch("");
+      setRows((prev) => [...(j.rows as BankRow[]), ...prev]);
+      router.refresh();
+    } else {
+      reload();
+    }
   }
 
   async function remove(r: BankRow) {

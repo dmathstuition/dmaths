@@ -75,9 +75,14 @@ export async function POST(req: Request) {
     owner_id: staff.id,
   }));
 
-  const { data, error } = await supabaseAdmin().from("question_bank").insert(rows).select("id");
+  // Return the full inserted rows so the client can show them immediately,
+  // without depending on a re-fetch (which the browser can serve from cache).
+  const { data, error } = await supabaseAdmin()
+    .from("question_bank")
+    .insert(rows)
+    .select("id, subject, level, topic, question, code, options, answer, owner_id, created_at");
   if (error) return NextResponse.json({ error: explain(error.message) }, { status: 500 });
-  return NextResponse.json({ ok: true, saved: data?.length ?? rows.length });
+  return NextResponse.json({ ok: true, saved: data?.length ?? rows.length, rows: data ?? [] });
 }
 
 // PATCH — edit one question you own.
