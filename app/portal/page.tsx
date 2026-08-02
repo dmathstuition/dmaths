@@ -6,7 +6,7 @@ import CountUp from "@/components/landing/CountUp";
 import Reveal from "@/components/landing/Reveal";
 import { Icon, type IconName } from "@/components/Icons";
 import HeroMascot from "@/components/HeroMascot";
-import { learnerAvatar } from "@/lib/avatars";
+import { learnerAvatarFor } from "@/lib/avatars";
 import { subjectAverages } from "@/lib/progress";
 import { HeroStudy } from "@/components/illustrations";
 import RateCard from "@/components/portal/RateCard";
@@ -127,7 +127,7 @@ export default async function StudentDashboard() {
               <div className="hidden sm:block"><DashboardTip /></div>
             </div>
             {/* character illustration — the learner's own mascot, large with halo */}
-            <HeroMascot src={learnerAvatar(user!.id)}
+            <HeroMascot src={learnerAvatarFor(user!.id, (me as any)?.avatar_choice)}
               fallback={<HeroStudy className="h-full w-full object-contain object-bottom" />}
               className="absolute bottom-0 right-0 top-0 w-[50%] sm:right-2 sm:w-[52%]" />
           </div>

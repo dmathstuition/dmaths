@@ -1,22 +1,39 @@
-// Character-mascot avatars. The user uploads five PNGs to /public/avatars.
-// Learners get a stable, "random" mascot derived from their id (so it never
-// changes between visits); admins get the suited mascot. Tutors/parents fall
-// back to the initials avatar (returns undefined here).
+// Character-mascot avatars. Learners pick one in Avatar Studio; until they do,
+// they get a stable, "random" mascot derived from their id (so it never changes
+// between visits). Admins get the suited mascot. Tutors/parents fall back to the
+// initials avatar (returns undefined here).
 //
-// If a file is missing, <Avatar> / <Mascot> fall back gracefully (initials or
-// an SVG), so this is safe to ship before the images land.
+// If a file is missing, <Avatar> / <Mascot> fall back gracefully (initials or an
+// SVG), so this is safe to ship before the images land.
 
-export const LEARNER_AVATARS = [
-  "/avatars/student-wave.png",   // waving boy, blue hoodie
-  "/avatars/student-laptop.png", // boy at a laptop, thumbs up
-  "/avatars/student-book.png",   // boy reading a maths book
-  "/avatars/student-girl.png",   // waving girl, purple hoodie
+export type Character = { key: string; name: string; src: string };
+
+// ─────────────────────────────────────────────────────────────────────────
+//  THE CHARACTER CATALOG — the single source of truth.
+//
+//  TO ADD A NEW AVATAR:
+//   1. Put the PNG in /public/avatars  (square, transparent background works best).
+//   2. Add ONE line below: a short unique `key`, a display `name`, and the `src`.
+//  It then appears in Avatar Studio automatically and can be equipped. Never
+//  reuse or rename an existing `key` — that's what a learner's choice is saved as.
+// ─────────────────────────────────────────────────────────────────────────
+export const CHARACTERS: Character[] = [
+  { key: "wave",   name: "Waver",   src: "/avatars/student-wave.png" },   // waving boy, blue hoodie
+  { key: "laptop", name: "Coder",   src: "/avatars/student-laptop.png" }, // boy at a laptop, thumbs up
+  { key: "book",   name: "Reader",  src: "/avatars/student-book.png" },   // boy reading a maths book
+  { key: "girl",   name: "Scholar", src: "/avatars/student-girl.png" },   // waving girl, purple hoodie
+  // ── Add more here, e.g.:
+  // { key: "rocket", name: "Rocket", src: "/avatars/rocket.png" },
 ];
+
+// The deterministic pool (every character is a possible "random" default).
+export const LEARNER_AVATARS = CHARACTERS.map((c) => c.src);
+
 export const ADMIN_AVATAR = "/avatars/admin.png"; // suited man
 export const LOGIN_MASCOT = "/avatars/student-wave.png";
 export const BUDDY_MASCOT = "/avatars/student-laptop.png";
 
-// Stable string hash → index, so a learner always gets the same mascot.
+// Stable string hash → index, so a learner always gets the same default mascot.
 function hash(s: string) {
   let h = 0;
   for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
@@ -24,19 +41,15 @@ function hash(s: string) {
 }
 
 export function learnerAvatar(id: string | null | undefined): string {
-  return LEARNER_AVATARS[hash(String(id ?? "")) % LEARNER_AVATARS.length];
+  const pool = LEARNER_AVATARS.length ? LEARNER_AVATARS : ["/avatars/student-wave.png"];
+  return pool[hash(String(id ?? "")) % pool.length];
 }
 
 // A learner's chosen character (from Avatar Studio), falling back to the stable
-// deterministic pick when they haven't chosen one. Keys match lib/cosmetics.
-const CHARACTER_SRC: Record<string, string> = {
-  wave: "/avatars/student-wave.png",
-  laptop: "/avatars/student-laptop.png",
-  book: "/avatars/student-book.png",
-  girl: "/avatars/student-girl.png",
-};
+// deterministic pick when they haven't chosen one (or the key no longer exists).
 export function learnerAvatarFor(id: string | null | undefined, choice: string | null | undefined): string {
-  return (choice && CHARACTER_SRC[choice]) || learnerAvatar(id);
+  const chosen = CHARACTERS.find((c) => c.key === choice);
+  return chosen ? chosen.src : learnerAvatar(id);
 }
 
 // The mascot for a person, by role. undefined → use the initials avatar.

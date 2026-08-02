@@ -3,16 +3,14 @@
 // sit outside the circular clip and need no image assets). Premium frames cost
 // reward points. Kept pure so the API and UI share one source of truth.
 
-export type Character = { key: string; name: string; src: string };
+import { CHARACTERS, type Character } from "@/lib/avatars";
+
 export type Frame = { key: string; name: string; cost: number; ring: string };
 
-// The four character mascots (paths mirror lib/avatars LEARNER_AVATARS).
-export const CHARACTERS: Character[] = [
-  { key: "wave",   name: "Waver",   src: "/avatars/student-wave.png" },
-  { key: "laptop", name: "Coder",   src: "/avatars/student-laptop.png" },
-  { key: "book",   name: "Reader",  src: "/avatars/student-book.png" },
-  { key: "girl",   name: "Scholar", src: "/avatars/student-girl.png" },
-];
+// Characters live in lib/avatars (the single source of truth) — re-exported here
+// so the Studio UI + API keep one import.
+export { CHARACTERS };
+export type { Character };
 
 // cost 0 = free (always owned). `ring` is the class applied to the avatar span.
 export const FRAMES: Frame[] = [
