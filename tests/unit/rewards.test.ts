@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { spentPoints, spendable } from "@/lib/rewards";
+import { spentPoints, spendable, REFERRAL_REWARD, REFERRAL_WELCOME } from "@/lib/rewards";
 
 const r = (cost: number, status: string) => ({ cost, status });
 
@@ -21,5 +21,17 @@ describe("spendable", () => {
   });
   it("rejected redemptions refund the balance", () => {
     expect(spendable(300, [r(300, "rejected")])).toBe(300);
+  });
+  it("a referral bounty adds to the spendable balance", () => {
+    // The referrer's total rises by REFERRAL_REWARD with nothing committed yet.
+    expect(spendable(REFERRAL_REWARD, [])).toBe(REFERRAL_REWARD);
+  });
+});
+
+describe("referral bounty", () => {
+  it("rewards both sides, with the referrer earning more", () => {
+    expect(REFERRAL_REWARD).toBeGreaterThan(0);
+    expect(REFERRAL_WELCOME).toBeGreaterThan(0);
+    expect(REFERRAL_REWARD).toBeGreaterThanOrEqual(REFERRAL_WELCOME);
   });
 });

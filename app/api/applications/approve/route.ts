@@ -6,6 +6,7 @@ import { expectedNgnForPlan, depositNgnForPlan } from "@/lib/paystack";
 import { loginUrl } from "@/lib/siteUrl";
 import { findTier, fmtNgn } from "@/lib/summerCamp";
 import { notifyUser } from "@/lib/notify";
+import { REFERRAL_REWARD, REFERRAL_WELCOME } from "@/lib/rewards";
 
 // POST { id } — approve an application: create login, profile, email credentials.
 export async function POST(req: Request) {
@@ -189,23 +190,28 @@ export async function POST(req: Request) {
   });
 
   // 6d. Referral attribution — if this applicant came through a referral link
-  //     (?ref=<student_code>), link them to the referring student and bump that
-  //     student's referral count. Best-effort: a referral is a nicety and must
-  //     never block an approval.
+  //     (?ref=<student_code>), link them to the referring student, bump that
+  //     student's referral count, and credit reward points to BOTH sides (the
+  //     referrer earns the bigger bounty, the newcomer a welcome head-start).
+  //     Best-effort: a referral is a nicety and must never block an approval.
   const refCode = ((app.referred_by_code as string) || "").trim();
   if (refCode && refCode !== code) {
     try {
       const { data: referrer } = await admin
-        .from("profiles").select("id, referral_count")
+        .from("profiles").select("id, referral_count, reward_points")
         .eq("student_code", refCode).eq("role", "student").maybeSingle();
       if (referrer) {
-        await admin.from("profiles").update({ referred_by: referrer.id }).eq("id", created.user.id);
-        await admin.from("profiles")
-          .update({ referral_count: (referrer.referral_count ?? 0) + 1 })
-          .eq("id", referrer.id);
+        await admin.from("profiles").update({
+          referred_by: referrer.id,
+          reward_points: REFERRAL_WELCOME,
+        }).eq("id", created.user.id);
+        await admin.from("profiles").update({
+          referral_count: (referrer.referral_count ?? 0) + 1,
+          reward_points: Number(referrer.reward_points ?? 0) + REFERRAL_REWARD,
+        }).eq("id", referrer.id);
         await notifyUser(admin, referrer.id, {
           title: "🎉 Someone you referred just joined!",
-          body: "Thanks for spreading the word about D-Maths.",
+          body: `Thanks for spreading the word — you've earned ${REFERRAL_REWARD} reward points.`,
           link: "/portal/refer",
         });
       }
