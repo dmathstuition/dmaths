@@ -37,6 +37,26 @@ export default function CBTClient({
     if (!cbtClose) return null;
     return Math.max(0, Math.floor((new Date(cbtClose).getTime() - Date.now()) / 1000));
   });
+  // AI "Explain this" on the post-submission review (safe: already graded).
+  const [explains, setExplains] = useState<Record<number, string>>({});
+  const [explaining, setExplaining] = useState<number | null>(null);
+
+  async function explain(i: number, ques: Question, ci: number, picked: number | null) {
+    if (explains[i] || explaining !== null) return;
+    setExplaining(i);
+    try {
+      const res = await fetch("/api/ai/explain", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: ques.question, options: ques.options, answer: ci, chosen: picked ?? -1, subject }),
+      });
+      const j = await res.json();
+      setExplains((e) => ({ ...e, [i]: res.ok ? j.explanation : (j.error || "Couldn't explain right now.") }));
+    } catch {
+      setExplains((e) => ({ ...e, [i]: "Couldn't explain right now — try again." }));
+    } finally {
+      setExplaining(null);
+    }
+  }
 
   const answersRef = useRef(answers);
   answersRef.current = answers;
@@ -109,6 +129,21 @@ export default function CBTClient({
                     </p>
                   ))}
                 </div>
+                {typeof ci === "number" && (
+                  <div className="mt-2.5">
+                    {explains[i] ? (
+                      <div className="rounded-lg bg-white/70 p-2.5 text-[13px] leading-relaxed text-ink/75 ring-1 ring-black/5">
+                        <span className="mb-0.5 inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wide text-gold-deep"><Icon name="compass" className="h-3 w-3" /> D-Maths A.I</span>
+                        <p>{explains[i]}</p>
+                      </div>
+                    ) : (
+                      <button onClick={() => explain(i, q, ci, picked)} disabled={explaining === i}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3 py-1 text-[12px] font-bold text-gold-deep transition hover:bg-gold-pale disabled:opacity-50">
+                        <Icon name="compass" className="h-3.5 w-3.5" /> {explaining === i ? "Thinking…" : "Explain this"}
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             );
           })}
