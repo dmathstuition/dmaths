@@ -1,5 +1,5 @@
 "use client";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, CartesianGrid, PieChart, Pie, Cell, Legend, ReferenceLine } from "recharts";
 import ProgressRing from "@/components/ui/ProgressRing";
 import ActivityHeatmap from "@/components/portal/ActivityHeatmap";
@@ -24,6 +24,20 @@ export default function ProgressClient({
   gradeTarget?: number | null;
   activityDates?: string[];
 }) {
+  // ── AI study coach ──
+  const [coach, setCoach] = useState<string>("");
+  const [coaching, setCoaching] = useState(false);
+  const [coachErr, setCoachErr] = useState("");
+  async function getCoachPlan() {
+    setCoaching(true); setCoachErr("");
+    try {
+      const res = await fetch("/api/ai/coach", { method: "POST" });
+      const j = await res.json();
+      if (res.ok) setCoach(j.plan || ""); else setCoachErr(j.error || "Couldn't build a plan right now.");
+    } catch { setCoachErr("Couldn't build a plan — try again."); }
+    finally { setCoaching(false); }
+  }
+
   // ── Score trend over time ──
   const scoreTrend = useMemo(() => {
     const graded = (history.length ? history : submissions
@@ -159,6 +173,28 @@ export default function ProgressClient({
             </div>
           </div>
         )}
+      </div>
+
+      {/* AI study coach */}
+      <div className="relative overflow-hidden rounded-3xl p-6 text-white"
+        style={{ background: "linear-gradient(135deg, #10406F 0%, #0A2A4F 55%, #071C36 100%)" }}>
+        <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full" style={{ background: "radial-gradient(circle, rgba(239,174,86,.4), transparent 70%)" }} />
+        <div className="relative flex flex-wrap items-start gap-4">
+          <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-gold/15 text-gold ring-1 ring-gold/25"><Icon name="compass" className="h-5 w-5" /></span>
+          <div className="min-w-0 flex-1">
+            <p className="font-display text-lg font-bold">Coach&apos;s plan</p>
+            {coach ? (
+              <p className="mt-1 text-sm leading-relaxed text-white/80">{coach}</p>
+            ) : (
+              <p className="mt-1 text-sm text-white/55">Let D-Maths A.I turn your results into a short focus plan for this week.</p>
+            )}
+            {coachErr && <p className="mt-2 text-sm font-semibold text-red-300">{coachErr}</p>}
+          </div>
+          <button onClick={getCoachPlan} disabled={coaching}
+            className="btn-gold !min-h-[40px] flex-shrink-0 !rounded-full !px-5 disabled:opacity-60">
+            {coaching ? "Thinking…" : coach ? "Refresh" : "Get my plan"}
+          </button>
+        </div>
       </div>
 
       <ActivityHeatmap dates={activityDates} />

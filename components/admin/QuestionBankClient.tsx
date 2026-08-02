@@ -37,6 +37,44 @@ export default function QuestionBankClient({
   const [level, setLevel] = useState("");
   const [search, setSearch] = useState("");
 
+  // ── A.I question generator ──
+  const [genOpen, setGenOpen] = useState(false);
+  const [gen, setGen] = useState({ subject: SUBJECTS[0], level: "", topic: "", count: 5 });
+  const [genBusy, setGenBusy] = useState(false);
+  const [genErr, setGenErr] = useState("");
+  const [generated, setGenerated] = useState<{ question: string; options: string[]; answer: number }[]>([]);
+
+  async function generate() {
+    setGenBusy(true); setGenErr(""); setGenerated([]);
+    try {
+      const res = await fetch("/api/ai/questions", {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(gen),
+      });
+      const j = await res.json();
+      if (!res.ok) { setGenErr(j.error || "Couldn't generate — try again."); return; }
+      setGenerated(j.questions ?? []);
+    } catch { setGenErr("Couldn't generate — try again."); }
+    finally { setGenBusy(false); }
+  }
+
+  async function saveGenerated() {
+    if (!generated.length) return;
+    setGenBusy(true); setGenErr("");
+    const res = await fetch("/api/question-bank", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ questions: generated, subject: gen.subject, level: gen.level, topic: gen.topic }),
+    });
+    setGenBusy(false);
+    const j = await res.json().catch(() => ({}));
+    if (!res.ok) { setGenErr(j.error || "Couldn't save."); return; }
+    push(`${generated.length} question${generated.length === 1 ? "" : "s"} saved to the bank.`, "success");
+    setGenerated([]); setGenOpen(false); reload();
+  }
+
+  function dropGenerated(idx: number) {
+    setGenerated((g) => g.filter((_, i) => i !== idx));
+  }
+
   const visible = useMemo(() => {
     const needle = search.trim().toLowerCase();
     return rows.filter((r) =>
@@ -118,11 +156,80 @@ export default function QuestionBankClient({
             Write a question once and reuse it in any CBT test, this term or next.
           </p>
         </div>
-        <button onClick={() => { setF({ ...BLANK }); setError(""); setShowForm((s) => !s); }}
-          className="btn-gold inline-flex items-center gap-2">
-          <Icon name="plusSquare" className="h-4 w-4" /> {showForm ? "Close" : "Add a question"}
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button onClick={() => { setGenOpen((s) => !s); setGenErr(""); }}
+            className="btn inline-flex items-center gap-2 border border-gold/50 bg-white text-gold-deep hover:bg-gold-pale">
+            <Icon name="sparkles" className="h-4 w-4" /> {genOpen ? "Close A.I" : "Generate with A.I"}
+          </button>
+          <button onClick={() => { setF({ ...BLANK }); setError(""); setShowForm((s) => !s); }}
+            className="btn-gold inline-flex items-center gap-2">
+            <Icon name="plusSquare" className="h-4 w-4" /> {showForm ? "Close" : "Add a question"}
+          </button>
+        </div>
       </div>
+
+      {/* ── A.I generator ─────────────────────────────────────────── */}
+      {genOpen && (
+        <div className="card space-y-4 border-gold/30 p-6">
+          <div className="flex items-center gap-2">
+            <Icon name="sparkles" className="h-5 w-5 text-gold-deep" />
+            <h2 className="font-display text-lg font-semibold">Generate questions with A.I</h2>
+          </div>
+          <p className="text-sm text-ink/55">The A.I drafts multiple-choice questions — review, drop any you don&apos;t want, then save them all to the bank.</p>
+          <div className="grid gap-3 sm:grid-cols-4">
+            <div>
+              <label className="flabel">Subject</label>
+              <select className="field" value={gen.subject} onChange={(e) => setGen({ ...gen, subject: e.target.value })}>
+                {SUBJECTS.map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="flabel">Level</label>
+              <select className="field" value={gen.level} onChange={(e) => setGen({ ...gen, level: e.target.value })}>
+                {LEVELS.map((l) => <option key={l || "any"} value={l}>{l || "Any level"}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="flabel">Topic <span className="font-normal text-ink/40">(optional)</span></label>
+              <input className="field" value={gen.topic} onChange={(e) => setGen({ ...gen, topic: e.target.value })} placeholder="e.g. Quadratic equations" />
+            </div>
+            <div>
+              <label className="flabel">How many</label>
+              <select className="field" value={gen.count} onChange={(e) => setGen({ ...gen, count: Number(e.target.value) })}>
+                {[3, 5, 8, 10].map((n) => <option key={n} value={n}>{n}</option>)}
+              </select>
+            </div>
+          </div>
+          {genErr && <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-800">{genErr}</p>}
+          <button onClick={generate} disabled={genBusy} className="btn-gold inline-flex items-center gap-2">
+            <Icon name="sparkles" className="h-4 w-4" /> {genBusy ? "Generating…" : "Generate"}
+          </button>
+
+          {generated.length > 0 && (
+            <div className="space-y-3 border-t border-line pt-4">
+              <p className="text-sm font-bold text-ink/70">{generated.length} draft{generated.length === 1 ? "" : "s"} — review before saving</p>
+              {generated.map((q, i) => (
+                <div key={i} className="rounded-xl border border-line bg-chalk/40 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="font-semibold text-ink">{i + 1}. {q.question}</p>
+                    <button onClick={() => dropGenerated(i)} aria-label="Drop this question"
+                      className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-ink/40 hover:bg-red-50 hover:text-red-600"><Icon name="close" className="h-4 w-4" /></button>
+                  </div>
+                  <ul className="mt-1.5 space-y-0.5">
+                    {q.options.map((o, j) => (
+                      <li key={j} className={`text-[13px] ${j === q.answer ? "font-bold text-emerald-700" : "text-ink/55"}`}>{j === q.answer ? "✓ " : "· "}{o}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+              <div className="flex flex-wrap gap-2">
+                <button onClick={saveGenerated} disabled={genBusy} className="btn-gold">{genBusy ? "Saving…" : `Save all ${generated.length} to bank`}</button>
+                <button onClick={() => setGenerated([])} className="btn-ghost">Discard</button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {needsMigration && (
         <p role="alert" className="rounded-xl bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900">
