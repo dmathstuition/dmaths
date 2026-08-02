@@ -178,24 +178,24 @@ export default function QuestionBankClient({
           <p className="text-sm text-ink/55">The A.I drafts multiple-choice questions — review, drop any you don&apos;t want, then save them all to the bank.</p>
           <div className="grid gap-3 sm:grid-cols-4">
             <div>
-              <label className="flabel">Subject</label>
-              <select className="field" value={gen.subject} onChange={(e) => setGen({ ...gen, subject: e.target.value })}>
+              <label htmlFor="gen-subject" className="flabel">Subject</label>
+              <select id="gen-subject" className="field" value={gen.subject} onChange={(e) => setGen({ ...gen, subject: e.target.value })}>
                 {SUBJECTS.map((s) => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
             <div>
-              <label className="flabel">Level</label>
-              <select className="field" value={gen.level} onChange={(e) => setGen({ ...gen, level: e.target.value })}>
+              <label htmlFor="gen-level" className="flabel">Level</label>
+              <select id="gen-level" className="field" value={gen.level} onChange={(e) => setGen({ ...gen, level: e.target.value })}>
                 {LEVELS.map((l) => <option key={l || "any"} value={l}>{l || "Any level"}</option>)}
               </select>
             </div>
             <div>
-              <label className="flabel">Topic <span className="font-normal text-ink/40">(optional)</span></label>
-              <input className="field" value={gen.topic} onChange={(e) => setGen({ ...gen, topic: e.target.value })} placeholder="e.g. Quadratic equations" />
+              <label htmlFor="gen-topic" className="flabel">Topic <span className="font-normal text-ink/40">(optional)</span></label>
+              <input id="gen-topic" className="field" value={gen.topic} onChange={(e) => setGen({ ...gen, topic: e.target.value })} placeholder="e.g. Quadratic equations" />
             </div>
             <div>
-              <label className="flabel">How many</label>
-              <select className="field" value={gen.count} onChange={(e) => setGen({ ...gen, count: Number(e.target.value) })}>
+              <label htmlFor="gen-count" className="flabel">How many</label>
+              <select id="gen-count" className="field" value={gen.count} onChange={(e) => setGen({ ...gen, count: Number(e.target.value) })}>
                 {[3, 5, 8, 10].map((n) => <option key={n} value={n}>{n}</option>)}
               </select>
             </div>
