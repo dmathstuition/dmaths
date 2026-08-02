@@ -66,3 +66,18 @@ export function isDue(dueOn: string | null | undefined, today: Date = new Date()
   if (!dueOn) return true;
   return String(dueOn).slice(0, 10) <= today.toISOString().slice(0, 10);
 }
+
+// Reward for keeping up revision: a point per distinct card reviewed each day,
+// capped so it can't be farmed by re-grading the same pile. Re-reviewing a card
+// already done today earns nothing (it isn't a new distinct card).
+export const FLASHCARD_PER_REVIEW = 1;
+export const FLASHCARD_DAILY_CAP = 10;
+
+export function flashcardReviewPoints(
+  distinctReviewedToday: number,
+  alreadyReviewedToday: boolean,
+  { perReview = FLASHCARD_PER_REVIEW, cap = FLASHCARD_DAILY_CAP }: { perReview?: number; cap?: number } = {},
+): number {
+  if (alreadyReviewedToday) return 0;
+  return Math.max(0, distinctReviewedToday) < cap ? perReview : 0;
+}

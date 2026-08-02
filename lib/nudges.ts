@@ -15,6 +15,7 @@ export type Nudge = { kind: NudgeKind; title: string; body: string };
 export const STREAK_TITLE = "🔥 Keep your streak going!";
 export const INACTIVE_TITLE = "We've missed you 👋";
 export const DAILY_REWARD_TITLE = "🎁 Your daily reward is waiting";
+export const DUE_CARDS_TITLE = "🧠 Revision cards are due";
 
 // The WAT hour from which the daily-reward chest reminder may fire — late enough
 // that most learners who'd open it naturally already have, so it lands as an

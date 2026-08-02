@@ -99,6 +99,8 @@ export default function StudyDeck({ deck, cards, totalCards }: {
         push(j.error || "Could not save that review.", "error");
         return;
       }
+      const j = await res.json().catch(() => ({}));
+      if (j.points > 0) push(`+${j.points} reward point${j.points === 1 ? "" : "s"} 🪙`, "success");
     }
 
     setDone((d) => d + 1);
