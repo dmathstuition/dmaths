@@ -1,13 +1,16 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { notifyUser } from "@/lib/notify";
+import { sendEmail } from "@/lib/email";
+import { loginUrl } from "@/lib/siteUrl";
 import { cronOk } from "@/lib/cronRun";
 
 // Monthly-subscription payment reminders. Call daily from cron-job.org with
 // ?key=<CRON_SECRET> (or Authorization: Bearer) — same auth as the class
 // reminders. Nudges subscribers (and their linked parents) from 3 days before
-// the due date, then re-nudges weekly while overdue. sub_reminded_at keeps a
-// daily cron from spamming.
+// the due date, then re-nudges weekly while overdue — in-app + push AND email,
+// so a parent who isn't in the app still hears about it. sub_reminded_at keeps
+// a daily cron from spamming.
 export const dynamic = "force-dynamic";
 
 const DAY = 86_400_000;
@@ -25,7 +28,7 @@ export async function GET(req: Request) {
   // Subscribers due within 3 days (or already overdue).
   const { data: subs, error } = await admin
     .from("profiles")
-    .select("id, first_name, sub_amount, sub_due_date, sub_reminded_at")
+    .select("id, first_name, email, sub_amount, sub_due_date, sub_reminded_at")
     .eq("role", "student")
     .eq("sub_active", true)
     .lte("sub_due_date", soon);
@@ -46,16 +49,32 @@ export async function GET(req: Request) {
       : { title: "💛 Tuition due soon", body: `${amount}monthly tuition is due on ${dueLabel}.`, link: "/portal" };
 
     await notifyUser(admin, s.id, note);
+    // Email the learner too (best-effort — a bounce must never block the cron).
+    if (s.email) {
+      await sendEmail("notice", s.email, {
+        firstName: s.first_name || "there",
+        title: note.title,
+        body: `${note.body} You can view your invoice and pay from the Payments page in your portal.`,
+        loginUrl: loginUrl(),
+      });
+    }
 
-    // Nudge linked parents too.
+    // Nudge linked parents too — in-app, and by email where we have one.
     const { data: links } = await admin
       .from("parent_student_links").select("parent_id").eq("student_id", s.id);
+    const parentBody = `${s.first_name}'s ${note.body[0].toLowerCase()}${note.body.slice(1)}`;
     for (const l of links ?? []) {
-      await notifyUser(admin, l.parent_id, {
-        ...note,
-        body: `${s.first_name}'s ${note.body[0].toLowerCase()}${note.body.slice(1)}`,
-        link: "/parent",
-      });
+      await notifyUser(admin, l.parent_id, { ...note, body: parentBody, link: "/parent" });
+      const { data: parent } = await admin
+        .from("profiles").select("first_name, email").eq("id", l.parent_id).maybeSingle();
+      if (parent?.email) {
+        await sendEmail("notice", parent.email, {
+          firstName: parent.first_name || "there",
+          title: note.title,
+          body: `${parentBody} You can view the invoice and pay from the Payments page in the parent portal.`,
+          loginUrl: loginUrl(),
+        });
+      }
     }
 
     await admin.from("profiles").update({ sub_reminded_at: new Date().toISOString() }).eq("id", s.id);
