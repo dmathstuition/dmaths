@@ -1,30 +1,30 @@
 import { describe, it, expect } from "vitest";
-import { frameByKey, frameClass, isFree, frameOwned, canUnlock, FRAMES, CHARACTERS } from "@/lib/cosmetics";
+import { titleByKey, titleLabel, isFreeTitle, titleOwned, canUnlock, TITLES, CHARACTERS } from "@/lib/cosmetics";
 
 describe("cosmetics catalog", () => {
-  it("has a free 'none' default and priced premium frames", () => {
-    expect(frameByKey("none").cost).toBe(0);
-    expect(frameByKey("gold").cost).toBeGreaterThan(0);
+  it("has a free default and priced premium titles", () => {
+    expect(titleByKey("none").cost).toBe(0);
+    expect(titleByKey("whiz").cost).toBeGreaterThan(0);
     expect(CHARACTERS.length).toBeGreaterThanOrEqual(4);
   });
   it("falls back to 'none' for unknown keys", () => {
-    expect(frameByKey("bogus").key).toBe("none");
-    expect(frameClass("bogus")).toBe("");
+    expect(titleByKey("bogus").key).toBe("none");
+    expect(titleLabel("bogus")).toBe("");
   });
 });
 
 describe("ownership & unlock rules", () => {
-  it("free frames are always owned; premium only when in the owned set", () => {
-    expect(isFree("bronze")).toBe(true);
-    expect(frameOwned("bronze", [])).toBe(true);
-    expect(frameOwned("gold", [])).toBe(false);
-    expect(frameOwned("gold", ["gold"])).toBe(true);
-    expect(frameOwned("gold", new Set(["gold"]))).toBe(true);
+  it("free titles are always owned; premium only when in the owned set", () => {
+    expect(isFreeTitle("learner")).toBe(true);
+    expect(titleOwned("learner", [])).toBe(true);
+    expect(titleOwned("whiz", [])).toBe(false);
+    expect(titleOwned("whiz", ["whiz"])).toBe(true);
+    expect(titleOwned("whiz", new Set(["whiz"]))).toBe(true);
   });
   it("canUnlock needs a positive cost and enough spendable", () => {
-    const gold = FRAMES.find((f) => f.key === "gold")!;
-    expect(canUnlock(gold.cost, gold.cost)).toBe(true);
-    expect(canUnlock(gold.cost - 1, gold.cost)).toBe(false);
-    expect(canUnlock(999, 0)).toBe(false); // free frames aren't "unlocked"
+    const whiz = TITLES.find((t) => t.key === "whiz")!;
+    expect(canUnlock(whiz.cost, whiz.cost)).toBe(true);
+    expect(canUnlock(whiz.cost - 1, whiz.cost)).toBe(false);
+    expect(canUnlock(999, 0)).toBe(false); // free titles aren't "unlocked"
   });
 });

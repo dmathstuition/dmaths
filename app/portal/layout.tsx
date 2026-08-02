@@ -7,6 +7,7 @@ import AssistantWidget from "@/components/portal/AssistantWidget";
 import { AssistantProvider } from "@/components/portal/AssistantContext";
 import { getProfile } from "@/lib/auth";
 import { learnerAvatarFor } from "@/lib/avatars";
+import { titleLabel } from "@/lib/cosmetics";
 import { redirect } from "next/navigation";
 
 const NAV: NavItem[] = [
@@ -65,7 +66,7 @@ export default async function PortalLayout({ children }: { children: React.React
     <PortalShell nav={NAV} tabs={TABS} name={`${p.first_name ?? ""} ${p.last_name ?? ""}`}
       subtitle={p.student_code ?? "Student"}
       avatarSrc={learnerAvatarFor(p.id, (p as any).avatar_choice)}
-      avatarFrame={(p as any).avatar_frame ?? undefined}
+      avatarTitle={titleLabel((p as any).avatar_title)}
       bell={{ mode: "student", subjects, noticesHref: "/portal/notices" }}>
       <AuthGuard />
       <StreakHeartbeat />
