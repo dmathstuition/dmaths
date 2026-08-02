@@ -1,10 +1,12 @@
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import GuardianClient from "@/components/guardian/GuardianClient";
+import WeeklySummary from "@/components/guardian/WeeklySummary";
 import RateCard from "@/components/portal/RateCard";
 import DeleteAccountCard from "@/components/portal/DeleteAccountCard";
 import Tour from "@/components/tour/Tour";
 import { parentTour } from "@/components/tour/steps";
+import { summariseWeek } from "@/lib/weeklySummary";
 
 export const dynamic = "force-dynamic";
 
@@ -35,6 +37,9 @@ export default async function ParentPage() {
     );
   }
 
+  const weekAgo = new Date(Date.now() - 7 * 86_400_000).toISOString();
+  const weekAgoDate = weekAgo.slice(0, 10);
+
   const students = await Promise.all(
     links.map(async ({ student_id }: { student_id: string }) => {
       const [
@@ -44,10 +49,14 @@ export default async function ParentPage() {
         { data: gradedSubs },
         { data: pendingSubs },
         { data: reportCards },
+        { data: weekPractice },
+        { data: weekMocks },
+        { data: weekGraded },
+        { data: weekAttendance },
       ] = await Promise.all([
         admin
           .from("profiles")
-          .select("first_name, last_name, student_code, level, avg_score, attendance, reward_points, sanction_points, grade_target")
+          .select("first_name, last_name, student_code, level, avg_score, attendance, reward_points, sanction_points, grade_target, streak_count")
           .eq("id", student_id)
           .single(),
         admin
@@ -76,6 +85,12 @@ export default async function ParentPage() {
           .eq("student_id", student_id)
           .order("issued_at", { ascending: false })
           .limit(8),
+        // This week's activity — each errors harmlessly to null before its
+        // migration is run, so the summary just shows fewer signals.
+        admin.from("practice_sessions").select("points, created_at").eq("student_id", student_id).gte("created_at", weekAgo),
+        admin.from("mock_exam_sessions").select("percent, band, points, created_at").eq("student_id", student_id).gte("created_at", weekAgo),
+        admin.from("assignment_submissions").select("grade, submitted_at").eq("student_id", student_id).eq("status", "graded").gte("submitted_at", weekAgo),
+        admin.from("attendance_records").select("present, session_date").eq("student_id", student_id).gte("session_date", weekAgoDate),
       ]);
 
       const typeMap = new Map((behaviorTypes ?? []).map((t: any) => [t.id, t]));
@@ -84,28 +99,44 @@ export default async function ParentPage() {
         behavior_type: typeMap.get(l.behavior_type_id) ?? null,
       }));
 
+      const weekSummary = summariseWeek({
+        practice: (weekPractice ?? []).map((r: any) => ({ at: r.created_at, points: Number(r.points || 0) })),
+        mocks: (weekMocks ?? []).map((r: any) => ({ at: r.created_at, percent: Number(r.percent || 0), band: r.band, points: Number(r.points || 0) })),
+        graded: (weekGraded ?? []).map((r: any) => ({ at: r.submitted_at, grade: r.grade })),
+        attendance: (weekAttendance ?? []).map((r: any) => ({ at: r.session_date, present: !!r.present })),
+        behaviour: (behaviorLogs ?? [])
+          .map((l: any) => ({ at: l.created_at, points: Number(typeMap.get(l.behavior_type_id)?.points || 0) })),
+        streak: Number((student as any)?.streak_count || 0),
+      });
+
       return {
         student,
         logs,
         gradedSubs: gradedSubs ?? [],
         pendingCount: pendingSubs?.length ?? 0,
         reportCards: reportCards ?? [],
+        weekSummary,
       };
     }),
   );
 
   return (
     <div className="space-y-10">
-      {students.map(({ student, logs, gradedSubs, pendingCount, reportCards }, i) =>
+      {students.map(({ student, logs, gradedSubs, pendingCount, reportCards, weekSummary }, i) =>
         student ? (
-          <GuardianClient
-            key={i}
-            student={student as any}
-            behaviorLogs={logs}
-            gradedSubs={gradedSubs}
-            pendingCount={pendingCount}
-            reportCards={reportCards as any}
-          />
+          <div key={i} className="space-y-4">
+            <WeeklySummary
+              name={`${(student as any).first_name ?? ""}`.trim() || "Your child"}
+              summary={weekSummary}
+            />
+            <GuardianClient
+              student={student as any}
+              behaviorLogs={logs}
+              gradedSubs={gradedSubs}
+              pendingCount={pendingCount}
+              reportCards={reportCards as any}
+            />
+          </div>
         ) : null,
       )}
       <RateCard />
