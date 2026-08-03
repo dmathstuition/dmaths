@@ -6,6 +6,8 @@ import { pickRandom } from "@/lib/questionBank";
 import { gradeAnswers, type Response } from "@/lib/practice";
 import { presetByKey, topicBreakdown, scorePercent, gradeBand, MOCK_DAILY_BONUS } from "@/lib/mockExam";
 import { boostMultiplier } from "@/lib/powerups";
+import { aggregateTopics } from "@/lib/skillTree";
+import { recordTopicMastery } from "@/lib/topicMastery";
 
 // Mock Exam mode. A timed, exam-style paper is pulled from the staff-only
 // question_bank and marked here with the service role, so the answer key never
@@ -85,7 +87,7 @@ export async function POST(req: Request) {
   const admin = supabaseAdmin();
   const ids = responses.map((r) => r.id);
 
-  const { data: keyRows, error: keyErr } = await admin.from("question_bank").select("id, answer, topic").in("id", ids);
+  const { data: keyRows, error: keyErr } = await admin.from("question_bank").select("id, answer, subject, topic").in("id", ids);
   if (keyErr) return NextResponse.json({ error: explain(keyErr.message) }, { status: 500 });
   const key = (keyRows ?? []).map((r: any) => ({ id: r.id, answer: Number(r.answer) }));
   if (!key.length) return NextResponse.json({ error: "Those questions are no longer available." }, { status: 400 });
@@ -95,6 +97,10 @@ export async function POST(req: Request) {
   const percent = scorePercent(correct, total);
   const band = gradeBand(percent);
   const topics = topicBreakdown(results.map((r) => ({ topic: topicById.get(r.id) ?? "", correct: r.correct })));
+
+  // Accumulate per-topic mastery for the skill tree (best-effort).
+  const meta = new Map((keyRows ?? []).map((r: any) => [r.id, { subject: String(r.subject ?? subject), topic: String(r.topic ?? "") }]));
+  await recordTopicMastery(admin, gate.user.id, aggregateTopics(results, meta));
 
   // Completion bonus — only for the first finished mock each day (anti-farm),
   // doubled while a 2× Points Boost is active.

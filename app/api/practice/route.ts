@@ -4,6 +4,8 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { watDay } from "@/lib/dailyReward";
 import { pickRandom } from "@/lib/questionBank";
 import { gradeAnswers, practicePoints, PRACTICE_DAILY_CAP, type Response } from "@/lib/practice";
+import { aggregateTopics } from "@/lib/skillTree";
+import { recordTopicMastery } from "@/lib/topicMastery";
 
 // Self-practice quiz. Questions come from the staff-only question_bank, served
 // and graded here with the service role so the answer key never reaches the
@@ -77,12 +79,16 @@ export async function POST(req: Request) {
   const ids = responses.map((r) => r.id);
 
   // Re-read the answer key straight from the bank — only real bank questions count.
-  const { data: keyRows, error: keyErr } = await admin.from("question_bank").select("id, answer").in("id", ids);
+  const { data: keyRows, error: keyErr } = await admin.from("question_bank").select("id, answer, subject, topic").in("id", ids);
   if (keyErr) return NextResponse.json({ error: explain(keyErr.message) }, { status: 500 });
   const key = (keyRows ?? []).map((r: any) => ({ id: r.id, answer: Number(r.answer) }));
   if (!key.length) return NextResponse.json({ error: "Those questions are no longer available." }, { status: 400 });
 
   const { correct, total, results } = gradeAnswers(key, responses);
+
+  // Accumulate per-topic mastery for the skill tree (best-effort).
+  const meta = new Map((keyRows ?? []).map((r: any) => [r.id, { subject: String(r.subject ?? subject), topic: String(r.topic ?? "") }]));
+  await recordTopicMastery(admin, gate.user.id, aggregateTopics(results, meta));
 
   // Daily cap: sum points already earned from practice today (WAT).
   const day = watDay();
