@@ -595,6 +595,46 @@ html { scroll-behavior: smooth; }
 /* Avatar stack ring for social proof. */
 .avatar-ring { box-shadow: 0 0 0 2px #fff; }
 
+/* ══════════════════════════════════════════════════════════════════
+   SHARED PRIMITIVE POLISH
+   Subtle depth + life on the base classes every page already uses
+   (buttons, inputs, pills), so the whole app lifts at once. Raw CSS on
+   purpose — it layers on top of the @apply component definitions above
+   (same pattern as the .card hover higher up). All motion is disabled by
+   the global prefers-reduced-motion rule at the top of the file.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Buttons — a warm, top-lit sheen and a lively micro-lift on hover. */
+.btn { transition: transform .18s ease, box-shadow .18s ease, filter .18s ease, background-color .18s ease; }
+.btn-gold {
+  background-image: linear-gradient(180deg, #F4C078 0%, #EFAE56 52%, #EAA544 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 4px 16px rgba(239,174,86,.36);
+}
+.btn-gold:hover {
+  filter: brightness(1.04);
+  transform: translateY(-1px);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.55), 0 9px 24px rgba(239,174,86,.5);
+}
+.btn-ink {
+  background-image: linear-gradient(180deg, #1E6AB8 0%, #14508F 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 4px 16px rgba(15,58,107,.26);
+}
+.btn-ink:hover { transform: translateY(-1px); box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 9px 24px rgba(15,58,107,.36); }
+.btn-ghost { box-shadow: 0 1px 2px rgba(26,96,171,.05); }
+.btn-ghost:hover { transform: translateY(-1px); box-shadow: 0 7px 20px rgba(26,96,171,.11); border-color: rgba(239,174,86,.45); }
+.btn:active { transform: translateY(0) scale(.96); }
+
+/* Inputs — smooth focus, and a hint of gold on hover so fields feel alive. */
+.field, .terra-field { transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease; }
+.field:hover:not(:focus) { border-color: rgba(239,174,86,.5); }
+
+/* Pills — a faint hairline ring for crisper, more defined edges. */
+.pill { box-shadow: inset 0 0 0 1px rgba(15,58,107,.06); }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-gold:hover, .btn-ink:hover, .btn-ghost:hover { transform: none; }
+}
+
 /* Code playground editor is CodeMirror 6 (see components/code/Editor.tsx);
    it ships its own theme, so no editor token CSS is needed here. */
 
