@@ -1,6 +1,7 @@
 import { supabaseServer } from "@/lib/supabase/server";
 import { getUser, getProfile } from "@/lib/auth";
 import ShopClient from "@/components/portal/ShopClient";
+import PowerUps from "@/components/portal/PowerUps";
 import { spendable } from "@/lib/rewards";
 import { learnerAvatarFor } from "@/lib/avatars";
 import { dealForDay, dealExpiry, watDayNumber } from "@/lib/shopDeals";
@@ -31,6 +32,11 @@ export default async function ShopPage() {
   const { next, remaining } = nextTier(earned);
   const vip = { name: tier.name, color: tier.color, discountPct: tier.discountPct, nextName: next?.name ?? null, remaining };
 
-  return <ShopClient earned={earned} balance={balance} items={items ?? []} initialRedemptions={reds ?? []}
-    mascot={learnerAvatarFor(user!.id, (me as any)?.avatar_choice)} deal={dealInfo} vip={vip} />;
+  return (
+    <div className="space-y-6">
+      <ShopClient earned={earned} balance={balance} items={items ?? []} initialRedemptions={reds ?? []}
+        mascot={learnerAvatarFor(user!.id, (me as any)?.avatar_choice)} deal={dealInfo} vip={vip} />
+      <PowerUps />
+    </div>
+  );
 }
