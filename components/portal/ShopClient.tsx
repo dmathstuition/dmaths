@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Icon, type IconName } from "@/components/Icons";
 import Reveal from "@/components/landing/Reveal";
 import Tilt3D from "@/components/landing/Tilt3D";
@@ -26,14 +26,31 @@ function tier(cost: number): Tier {
   return { name: "Common", chip: "bg-[#10B981] text-white", grad: "from-[#34D399] via-[#10B981] to-[#047857]", glow: "", ring: "ring-emerald-400/30", icon: "star", glowColor: "rgba(16,185,129,.6)", hot: false, legendary: false };
 }
 
+type Deal = { itemId: string; original: number; price: number; discountPct: number; expiresAt: string };
+
+// Live countdown to the deal's expiry (next WAT midnight). Ticks each second.
+function DealCountdown({ expiresAt }: { expiresAt: string }) {
+  const [left, setLeft] = useState(() => Math.max(0, new Date(expiresAt).getTime() - Date.now()));
+  useEffect(() => {
+    const t = setInterval(() => setLeft(Math.max(0, new Date(expiresAt).getTime() - Date.now())), 1000);
+    return () => clearInterval(t);
+  }, [expiresAt]);
+  const h = Math.floor(left / 3_600_000);
+  const m = Math.floor((left % 3_600_000) / 60_000);
+  const s = Math.floor((left % 60_000) / 1000);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return <span className="font-mono tabular-nums">{pad(h)}:{pad(m)}:{pad(s)}</span>;
+}
+
 export default function ShopClient({
-  earned, balance, items, initialRedemptions, mascot,
+  earned, balance, items, initialRedemptions, mascot, deal,
 }: {
   earned: number;
   balance: number;
   items: Item[];
   initialRedemptions: Redemption[];
   mascot?: string;
+  deal?: Deal | null;
 }) {
   const [bal, setBal] = useState(balance);
   const [redemptions, setRedemptions] = useState<Redemption[]>(initialRedemptions);
@@ -43,8 +60,12 @@ export default function ShopClient({
   const [flash, setFlash] = useState<string | null>(null);
   const [popId, setPopId] = useState<string | null>(null);
 
+  // The price a learner actually pays — the discounted price for today's deal.
+  const costOf = (item: Item) => (deal && deal.itemId === item.id ? deal.price : item.cost);
+  const dealItem = deal ? items.find((i) => i.id === deal.itemId) ?? null : null;
+
   // Progress toward the cheapest reward the learner can't yet afford.
-  const nextLocked = [...items].filter((i) => i.cost > bal).sort((a, b) => a.cost - b.cost)[0];
+  const nextLocked = [...items].filter((i) => costOf(i) > bal).sort((a, b) => costOf(a) - costOf(b))[0];
 
   async function redeem(item: Item) {
     setBusyId(item.id); setErr("");
@@ -133,12 +154,48 @@ export default function ShopClient({
 
       {err && <p role="alert" className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-800">{err}</p>}
 
+      {/* ── Deal of the Day ─────────────────────────────────────── */}
+      {deal && dealItem && (
+        <Reveal>
+          <div className="relative flex flex-wrap items-center gap-4 overflow-hidden rounded-3xl border border-gold/30 p-5 text-white sm:p-6"
+            style={{ background: "linear-gradient(120deg, #7A1E3A 0%, #3B1E4F 55%, #10406F 100%)" }}>
+            <div aria-hidden className="loot-shine pointer-events-none absolute inset-0" />
+            <span className="badge-pulse relative flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-gold text-board">
+              <Icon name="flame" className="h-7 w-7" />
+            </span>
+            <div className="relative min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-gold ring-1 ring-gold/30">Deal of the Day</span>
+                <span className="rounded-full bg-gold px-2 py-0.5 text-[11px] font-extrabold text-board">−{deal.discountPct}%</span>
+              </div>
+              <p className="mt-1.5 truncate font-display text-lg font-bold">{dealItem.title}</p>
+              <p className="mt-0.5 flex items-center gap-2 text-sm">
+                <span className="font-display text-xl font-extrabold text-gold">{deal.price}</span>
+                <span className="text-white/45 line-through">{deal.original}</span>
+                <span className="text-white/55">pts</span>
+                <span className="inline-flex items-center gap-1 text-white/60"><Icon name="clock" className="h-3.5 w-3.5" /> ends in <DealCountdown expiresAt={deal.expiresAt} /></span>
+              </p>
+            </div>
+            {bal >= deal.price ? (
+              <button onClick={() => redeem(dealItem)} disabled={busyId === dealItem.id}
+                className="btn-gold relative !min-h-[44px] flex-shrink-0 !rounded-2xl disabled:opacity-60">
+                {busyId === dealItem.id ? "Redeeming…" : <span className="inline-flex items-center gap-1.5">Grab it <Icon name="coins" className="h-4 w-4" /></span>}
+              </button>
+            ) : (
+              <span className="relative flex-shrink-0 rounded-2xl bg-white/10 px-4 py-2.5 text-[12px] font-bold text-white/60 ring-1 ring-white/15">{deal.price - bal} more to grab</span>
+            )}
+          </div>
+        </Reveal>
+      )}
+
       {/* ── Loot grid ───────────────────────────────────────────── */}
       {items.length ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((item, i) => {
             const t = tier(item.cost);
-            const afford = bal >= item.cost;
+            const price = costOf(item);
+            const onDeal = deal?.itemId === item.id;
+            const afford = bal >= price;
             return (
               <Reveal key={item.id} delay={i * 50}>
                 <Tilt3D max={8} className="h-full">
@@ -146,8 +203,14 @@ export default function ShopClient({
                     className={`sheen group relative flex h-full flex-col overflow-hidden rounded-2xl bg-white ring-1 transition-all duration-300 dark:bg-[#0f2942] ${t.ring} ${t.hot ? "loot-pulse" : ""} ${popId === item.id ? "scale-[1.04] ring-2 ring-gold" : ""} ${afford ? `hover:-translate-y-1 ${t.glow}` : "opacity-90"}`}>
                     {/* rarity banner (rarest cards get an auto shine sweep) */}
                     <div className={`relative flex items-center justify-between bg-gradient-to-r ${t.grad} px-4 py-2.5 text-white ${t.legendary ? "loot-shine" : ""}`}>
-                      <span className="relative z-[4] inline-flex items-center gap-1 text-[11px] font-extrabold uppercase tracking-wide drop-shadow"><Icon name={t.icon} className="h-3.5 w-3.5" /> {t.name}</span>
-                      <span className="relative z-[4] inline-flex items-center gap-1 rounded-full bg-black/20 px-2 py-0.5 text-[11px] font-bold"><Icon name="coins" className="h-3 w-3" /> {item.cost}</span>
+                      <span className="relative z-[4] inline-flex items-center gap-1 text-[11px] font-extrabold uppercase tracking-wide drop-shadow">
+                        <Icon name={t.icon} className="h-3.5 w-3.5" /> {t.name}
+                        {onDeal && <span className="ml-1 rounded-full bg-black/25 px-1.5 py-0.5 text-[9px] font-black text-gold">−{deal!.discountPct}%</span>}
+                      </span>
+                      <span className="relative z-[4] inline-flex items-center gap-1 rounded-full bg-black/20 px-2 py-0.5 text-[11px] font-bold">
+                        <Icon name="coins" className="h-3 w-3" />
+                        {onDeal ? <><span className="text-white/50 line-through">{item.cost}</span> <span className="text-gold">{price}</span></> : item.cost}
+                      </span>
                       {t.hot && <span aria-hidden className="pointer-events-none absolute right-16 top-1 text-white/60 float"><Icon name="sparkles" className="h-3.5 w-3.5" /></span>}
                     </div>
 
@@ -164,11 +227,11 @@ export default function ShopClient({
                         <div className="mt-4">
                           <div className="mb-1.5 flex items-center justify-between text-[11px] font-bold text-ink/45 dark:text-white/40">
                             <span className="inline-flex items-center gap-1"><Icon name="lock" className="h-3 w-3" /> Locked</span>
-                            <span>{item.cost - bal} more</span>
+                            <span>{price - bal} more</span>
                           </div>
                           <div className="h-1.5 overflow-hidden rounded-full bg-line dark:bg-white/10">
                             <div className="h-full rounded-full bg-gradient-to-r from-gold to-gold-deep"
-                              style={{ width: `${Math.min(100, Math.round((bal / item.cost) * 100))}%` }} />
+                              style={{ width: `${Math.min(100, Math.round((bal / price) * 100))}%` }} />
                           </div>
                         </div>
                       )}

@@ -3,6 +3,7 @@ import { getUser, getProfile } from "@/lib/auth";
 import ShopClient from "@/components/portal/ShopClient";
 import { spendable } from "@/lib/rewards";
 import { learnerAvatarFor } from "@/lib/avatars";
+import { dealForDay, dealExpiry, watDayNumber } from "@/lib/shopDeals";
 
 export const dynamic = "force-dynamic";
 
@@ -20,5 +21,10 @@ export default async function ShopPage() {
   const earned = Number((me as any)?.reward_points ?? 0);
   const balance = spendable(earned, reds ?? []);
 
-  return <ShopClient earned={earned} balance={balance} items={items ?? []} initialRedemptions={reds ?? []} mascot={learnerAvatarFor(user!.id, (me as any)?.avatar_choice)} />;
+  // Deal of the Day — one item discounted until the next WAT midnight.
+  const deal = dealForDay(items ?? [], watDayNumber());
+  const dealInfo = deal ? { ...deal, expiresAt: dealExpiry() } : null;
+
+  return <ShopClient earned={earned} balance={balance} items={items ?? []} initialRedemptions={reds ?? []}
+    mascot={learnerAvatarFor(user!.id, (me as any)?.avatar_choice)} deal={dealInfo} />;
 }
