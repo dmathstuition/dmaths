@@ -24,6 +24,10 @@ export default function StyleClient({
   const [celebrate, setCelebrate] = useState(0);
   const [crateOpen, setCrateOpen] = useState(false);
   const [reveal, setReveal] = useState<Rolled | null>(null);
+  const [giftTitle, setGiftTitle] = useState("");
+  const [giftCode, setGiftCode] = useState("");
+  const [giftBusy, setGiftBusy] = useState(false);
+  const [giftMsg, setGiftMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -77,6 +81,19 @@ export default function StyleClient({
     setTitle(key);
     setCelebrate((c) => c + 1);
     router.refresh();
+  }
+
+  // Gift a title to a friend by their Student ID (paid from your own balance).
+  async function sendGift() {
+    if (!giftTitle || !giftCode.trim()) { setGiftMsg({ ok: false, text: "Pick a title and enter your friend's Student ID." }); return; }
+    setGiftBusy(true); setGiftMsg(null);
+    const { ok, json } = await post({ action: "gift", title: giftTitle, toCode: giftCode.trim() });
+    setGiftBusy(false);
+    if (!ok) { setGiftMsg({ ok: false, text: json.error || "Couldn't send the gift — try again." }); return; }
+    setSpendable(json.spendable ?? spendable);
+    setGiftMsg({ ok: true, text: `Sent “${json.gifted.label}” to ${json.gifted.to}! 🎁` });
+    setGiftCode("");
+    setCelebrate((c) => c + 1);
   }
 
   // Open a Mystery Crate: show the suspense overlay, then reveal the roll.
@@ -217,6 +234,38 @@ export default function StyleClient({
         <p className="mt-3 text-[12px] text-ink/45">
           Spending points never lowers your leaderboard total — that keeps climbing.
         </p>
+      </div>
+
+      {/* ── Gift a title ────────────────────────────────────────── */}
+      <div className="card p-6">
+        <h2 className="mb-1 flex items-center gap-2 font-display text-lg font-semibold text-ink">
+          <Icon name="gift" className="h-5 w-5 text-gold-deep" /> Gift a friend
+        </h2>
+        <p className="mb-4 text-[13px] text-ink/50">Send a title to a friend — you pay from your points, they get to keep it. Enter their Student ID.</p>
+        <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
+          <label className="block">
+            <span className="flabel">Title</span>
+            <select className="field" value={giftTitle} onChange={(e) => setGiftTitle(e.target.value)}>
+              <option value="">Choose a title…</option>
+              {TITLES.filter((t) => t.cost > 0).map((t) => (
+                <option key={t.key} value={t.key}>{t.label} · {t.cost} pts</option>
+              ))}
+            </select>
+          </label>
+          <label className="block">
+            <span className="flabel">Friend&apos;s Student ID</span>
+            <input className="field font-mono uppercase" placeholder="DM-2026-0001" value={giftCode}
+              onChange={(e) => setGiftCode(e.target.value)} />
+          </label>
+          <div className="flex items-end">
+            <button onClick={sendGift} disabled={giftBusy} className="btn-gold !rounded-xl w-full disabled:opacity-50 sm:w-auto">
+              {giftBusy ? "Sending…" : <span className="inline-flex items-center gap-1.5">Send gift <Icon name="gift" className="h-4 w-4" /></span>}
+            </button>
+          </div>
+        </div>
+        {giftMsg && (
+          <p className={`mt-3 rounded-xl px-4 py-2.5 text-sm font-semibold ${giftMsg.ok ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-800"}`}>{giftMsg.text}</p>
+        )}
       </div>
 
       {/* ── Crate reveal overlay ────────────────────────────────── */}

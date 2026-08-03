@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { titleByKey, titleLabel, isFreeTitle, titleOwned, canUnlock, TITLES, CHARACTERS, cratePool, rollCrate, RARITY } from "@/lib/cosmetics";
+import { titleByKey, titleLabel, isFreeTitle, titleOwned, canUnlock, TITLES, CHARACTERS, cratePool, rollCrate, RARITY, isGiftableTitle } from "@/lib/cosmetics";
 
 describe("cosmetics catalog", () => {
   it("has a free default and priced premium titles", () => {
@@ -26,6 +26,12 @@ describe("ownership & unlock rules", () => {
     expect(canUnlock(whiz.cost, whiz.cost)).toBe(true);
     expect(canUnlock(whiz.cost - 1, whiz.cost)).toBe(false);
     expect(canUnlock(999, 0)).toBe(false); // free titles aren't "unlocked"
+  });
+  it("only priced titles are giftable", () => {
+    expect(isGiftableTitle("whiz")).toBe(true);
+    expect(isGiftableTitle("learner")).toBe(false); // free
+    expect(isGiftableTitle("none")).toBe(false);
+    expect(isGiftableTitle("bogus")).toBe(false);   // unknown
   });
 });
 
