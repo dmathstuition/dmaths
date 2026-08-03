@@ -20,15 +20,18 @@ export default async function LeaderboardPage() {
 
   // Everyone active (incl. 0-point) so season baselines can be snapshotted; the
   // all-time board itself only shows those who've actually earned points.
-  const { data: all } = await admin
-    .from("profiles")
-    .select("id, first_name, last_name, reward_points, level, subjects")
-    .eq("role", "student")
-    .eq("is_active", true)
-    .order("reward_points", { ascending: false })
-    .limit(1000);
+  const core = "id, first_name, last_name, reward_points, level, subjects";
+  const rank = (cols: string) => admin
+    .from("profiles").select(cols)
+    .eq("role", "student").eq("is_active", true)
+    .order("reward_points", { ascending: false }).limit(1000);
 
-  const learners = (all ?? []) as any[];
+  // The avatar-studio cosmetic columns may not be migrated yet — fall back to
+  // the core fields so the board still ranks (just without the cosmetic flex).
+  const primary = await rank(`${core}, avatar_choice, avatar_title`);
+  const all: any[] = (primary.error ? (await rank(core)).data : primary.data) ?? [];
+
+  const learners = all;
 
   // ── Seasons: snapshot at rollover, compute past champions, attach season pts ──
   const season = currentSeason();

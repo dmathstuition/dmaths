@@ -5,12 +5,14 @@ import Reveal from "@/components/landing/Reveal";
 import CountUp from "@/components/landing/CountUp";
 import Confetti from "@/components/ui/Confetti";
 import Mascot from "@/components/Mascot";
-import { learnerAvatar } from "@/lib/avatars";
+import { learnerAvatarFor } from "@/lib/avatars";
+import { titleLabel } from "@/lib/cosmetics";
 
 type Winner = {
   id: string; first_name: string | null; last_name: string | null;
   reward_points: number; level: string | null; subjects: string[] | null;
   season_points?: number;
+  avatar_choice?: string | null; avatar_title?: string | null;
 };
 type Scope = "overall" | "class" | "program";
 type Mode = "all" | "season";
@@ -43,7 +45,20 @@ function AvatarBubble({ s, size, ring }: { s: Winner; size: number; ring?: strin
     <span className={`relative inline-flex flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-ink to-board font-display font-bold text-gold-soft shadow-lift ${ring ?? ""}`}
       style={px}>
       <span className="absolute inset-0 flex items-center justify-center" aria-hidden>{initials(s)}</span>
-      <Mascot src={learnerAvatar(s.id)} alt="" className="relative h-full w-full object-cover object-top" fallback={null} />
+      <Mascot src={learnerAvatarFor(s.id, s.avatar_choice)} alt="" className="relative h-full w-full object-cover object-top" fallback={null} />
+    </span>
+  );
+}
+
+// The learner's equipped title (Avatar Studio) shown as a flex on the board —
+// gold on white lists, a lighter frosted pill on the dark podium.
+function TitleFlair({ s, tone = "gold" }: { s: Winner; tone?: "gold" | "light" }) {
+  const label = titleLabel(s.avatar_title);
+  if (!label) return null;
+  return (
+    <span className={`inline-flex flex-shrink-0 items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
+      tone === "light" ? "bg-white/15 text-gold ring-1 ring-gold/25" : "bg-gold-pale text-gold-deep"}`}>
+      <Icon name="star" className="h-2.5 w-2.5" /> {label}
     </span>
   );
 }
@@ -228,6 +243,7 @@ export default function LeaderboardClient({
                   </div>
 
                   <p className="mt-2 line-clamp-1 max-w-full text-center text-[13px] font-bold text-white">{fullName(s)}</p>
+                  <span className="mt-0.5"><TitleFlair s={s} tone="light" /></span>
                   {isMe && <span className="text-[10px] font-bold text-gold">(you)</span>}
                   <p className="inline-flex items-center gap-1 font-display text-base font-extrabold text-gold">
                     <Icon name="coins" className="h-4 w-4" /><CountUp to={metric(s)} duration={1100} />
@@ -265,10 +281,13 @@ export default function LeaderboardClient({
                 {isTop3 ? <Icon name="medal" className={`h-4 w-4 ${isMe ? "" : MEDAL_TINT[rank - 1]}`} /> : rank}
               </span>
               <AvatarBubble s={student} size={38} ring={isMe ? "ring-2 ring-gold/50" : ""} />
-              <p className={`flex-1 truncate font-semibold ${isMe ? "text-gold-deep" : "text-ink"}`}>
-                {fullName(student)}
-                {isMe && <span className="ml-2 text-xs font-normal text-ink/40">(you)</span>}
-              </p>
+              <div className="flex min-w-0 flex-1 items-center gap-2">
+                <p className={`truncate font-semibold ${isMe ? "text-gold-deep" : "text-ink"}`}>
+                  {fullName(student)}
+                  {isMe && <span className="ml-2 text-xs font-normal text-ink/40">(you)</span>}
+                </p>
+                <TitleFlair s={student} />
+              </div>
               <span className="inline-flex flex-shrink-0 items-center gap-1 font-display text-base font-semibold text-emerald-600">
                 <Icon name="coins" className="h-4 w-4" /> {metric(student)}
               </span>
