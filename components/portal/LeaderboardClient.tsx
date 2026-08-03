@@ -7,6 +7,7 @@ import Confetti from "@/components/ui/Confetti";
 import Mascot from "@/components/Mascot";
 import { learnerAvatarFor } from "@/lib/avatars";
 import { titleLabel } from "@/lib/cosmetics";
+import { tierFor } from "@/lib/vip";
 
 type Winner = {
   id: string; first_name: string | null; last_name: string | null;
@@ -59,6 +60,18 @@ function TitleFlair({ s, tone = "gold" }: { s: Winner; tone?: "gold" | "light" }
     <span className={`inline-flex flex-shrink-0 items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
       tone === "light" ? "bg-white/15 text-gold ring-1 ring-gold/25" : "bg-gold-pale text-gold-deep"}`}>
       <Icon name="star" className="h-2.5 w-2.5" /> {label}
+    </span>
+  );
+}
+
+// VIP tier gem — a lifetime-status flex (Silver and up; Bronze is the default,
+// so it's left unmarked to keep the board clean).
+function TierGem({ s }: { s: Winner }) {
+  const t = tierFor(s.reward_points);
+  if (t.key === "bronze") return null;
+  return (
+    <span title={`${t.name} VIP`} className="inline-flex flex-shrink-0" style={{ color: t.color }}>
+      <Icon name="gem" className="h-3.5 w-3.5" />
     </span>
   );
 }
@@ -243,7 +256,7 @@ export default function LeaderboardClient({
                   </div>
 
                   <p className="mt-2 line-clamp-1 max-w-full text-center text-[13px] font-bold text-white">{fullName(s)}</p>
-                  <span className="mt-0.5"><TitleFlair s={s} tone="light" /></span>
+                  <span className="mt-0.5 inline-flex items-center gap-1"><TierGem s={s} /><TitleFlair s={s} tone="light" /></span>
                   {isMe && <span className="text-[10px] font-bold text-gold">(you)</span>}
                   <p className="inline-flex items-center gap-1 font-display text-base font-extrabold text-gold">
                     <Icon name="coins" className="h-4 w-4" /><CountUp to={metric(s)} duration={1100} />
@@ -286,6 +299,7 @@ export default function LeaderboardClient({
                   {fullName(student)}
                   {isMe && <span className="ml-2 text-xs font-normal text-ink/40">(you)</span>}
                 </p>
+                <TierGem s={student} />
                 <TitleFlair s={student} />
               </div>
               <span className="inline-flex flex-shrink-0 items-center gap-1 font-display text-base font-semibold text-emerald-600">
