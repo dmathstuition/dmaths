@@ -92,6 +92,13 @@ export default async function StudentDashboard() {
         {/* Today's focus hero */}
         <Reveal className="min-w-0 lg:col-span-2">
           <div data-tour="hero" className="relative flex min-h-[250px] items-center overflow-hidden rounded-3xl bg-gradient-to-br from-[#EEF2FE] via-[#E2ECFB] to-[#DCE7F6] p-7 dark:from-[#10406F] dark:via-[#0A2A4F] dark:to-[#071C36] sm:min-h-[270px] sm:p-9">
+            {/* soft drifting colour wash + faint maths glyphs for depth */}
+            <div aria-hidden className="aurora pointer-events-none absolute inset-0 z-0" />
+            <div aria-hidden className="pointer-events-none absolute inset-0 z-0 select-none font-display font-bold text-ink/[0.05] dark:text-white/[0.06]">
+              <span className="float absolute right-[32%] top-[14%] text-4xl">∑</span>
+              <span className="float absolute right-[12%] bottom-[16%] text-3xl" style={{ animationDelay: "1.2s" }}>π</span>
+              <span className="float absolute left-[5%] bottom-[10%] text-3xl" style={{ animationDelay: ".7s" }}>√</span>
+            </div>
             <div className="relative z-10 max-w-[62%] sm:max-w-md">
               <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-ink/45">
 <Icon name="sparkles" className="h-3.5 w-3.5" /> Today&apos;s focus
@@ -348,9 +355,9 @@ function Progress({ icon, label, value, text, unit, suffix = "", accent = "blue"
 }) {
   const a = ACCENTS[accent] ?? ACCENTS.blue;
   return (
-    <div className="rounded-2xl border border-line bg-white/60 p-3.5 dark:bg-white/[0.04]">
+    <div className="group rounded-2xl border border-line bg-white/60 p-3.5 transition-all duration-200 hover:-translate-y-0.5 hover:border-gold/40 hover:shadow-card dark:bg-white/[0.04]">
       <div className="flex items-center justify-between">
-        <span className={`flex h-8 w-8 items-center justify-center rounded-lg ${a.icon}`}>
+        <span className={`flex h-8 w-8 items-center justify-center rounded-lg transition-transform duration-200 group-hover:scale-110 ${a.icon}`}>
           <Icon name={icon} className="h-4 w-4" />
         </span>
         {flame && <span aria-hidden className="text-gold"><Icon name="flame" className="h-4 w-4" /></span>}

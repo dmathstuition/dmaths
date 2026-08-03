@@ -155,7 +155,7 @@ export default function Login() {
   return (
     <main className="relative min-h-screen bg-gradient-to-b from-[#EEF2FE] to-white lg:grid lg:grid-cols-[1.05fr_1fr]">
       {/* Brand panel (desktop) — the portal look, with a big mascot */}
-      <aside className="relative hidden overflow-hidden bg-gradient-to-br from-[#10406F] via-[#0A2A4F] to-[#071C36] p-12 text-white lg:flex lg:flex-col">
+      <aside className="boardgrid relative hidden overflow-hidden bg-gradient-to-br from-[#10406F] via-[#0A2A4F] to-[#071C36] p-12 text-white lg:flex lg:flex-col">
         <div aria-hidden className="pointer-events-none absolute -left-16 top-0 h-72 w-72 rounded-full bg-ink/40 blur-3xl" />
         <div aria-hidden className="pointer-events-none absolute -right-10 bottom-1/4 h-72 w-72 rounded-full bg-gold/20 blur-3xl" />
         {/* drifting maths glyphs — subtle depth behind the copy */}
@@ -178,6 +178,13 @@ export default function Login() {
             ))}
           </ul>
         </div>
+        {/* Trust strip — anchored to the bottom-left, clear of the mascot */}
+        <div className="relative mt-auto max-w-xs pt-10">
+          <div className="flex items-center gap-0.5 text-gold">
+            {[0, 1, 2, 3, 4].map((n) => <Icon key={n} name="star" className="h-4 w-4" />)}
+          </div>
+          <p className="mt-1.5 text-xs leading-relaxed text-white/55">Loved by students &amp; parents across Nigeria — secure, private, and always in sync.</p>
+        </div>
         {/* soft ambient glow behind the mascot */}
         <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-[54%] w-[46%] rounded-full bg-[radial-gradient(circle,rgba(203,223,247,0.28),transparent_62%)] blur-2xl" />
         {/* mascot, standing flush on the bottom-right — sized to clear the copy on the left */}
@@ -198,6 +205,8 @@ export default function Login() {
           </div>
 
           <div className="reveal relative overflow-hidden rounded-[2rem] bg-white p-7 shadow-[0_24px_70px_-15px_rgba(16,64,111,0.28)] ring-1 ring-ink/5 transition-shadow duration-300 hover:shadow-[0_30px_80px_-15px_rgba(16,64,111,0.35)] sm:p-8">
+            {/* gradient accent bar across the top edge */}
+            <div aria-hidden className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-gold-soft via-gold to-gold-deep" />
             <div className="mb-5">
               <h1 className="font-display text-2xl font-bold text-ink">{mfaRequired ? "Two-step verification" : "Welcome back"}</h1>
               <p className="mt-1 text-sm text-ink/50">{mfaRequired ? "Enter the code from your authenticator app." : "Sign in to your D-Maths portal."}</p>
@@ -263,7 +272,7 @@ export default function Login() {
             </div>
 
             <button disabled={busy}
-              className="w-full rounded-2xl py-4 text-base font-bold text-white shadow-lg shadow-gold/30 transition hover:brightness-[1.04] active:scale-[.99] disabled:opacity-60"
+              className="w-full rounded-2xl py-4 text-base font-bold text-white shadow-lg shadow-gold/30 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-gold/40 hover:brightness-[1.04] active:translate-y-0 active:scale-[.99] disabled:opacity-60"
               style={{ background: "linear-gradient(135deg, #EFAE56 0%, #C8881F 100%)" }}>
               {busy ? "Signing in…" : "Sign In"}
             </button>
