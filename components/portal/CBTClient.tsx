@@ -41,6 +41,13 @@ export default function CBTClient({
   const [explains, setExplains] = useState<Record<number, string>>({});
   const [explaining, setExplaining] = useState<number | null>(null);
 
+  // ── Secure exam mode ──────────────────────────────────────────
+  const MAX_LEAVES = 1; // one warning; leaving again ends the exam
+  const [started, setStarted] = useState(false);
+  const [violations, setViolations] = useState(0);
+  const [warn, setWarn] = useState(false);
+  const [terminated, setTerminated] = useState(false);
+
   async function explain(i: number, ques: Question, ci: number, picked: number | null) {
     if (explains[i] || explaining !== null) return;
     setExplaining(i);
@@ -61,6 +68,11 @@ export default function CBTClient({
   const answersRef = useRef(answers);
   answersRef.current = answers;
   const hasAutoSubmitted = useRef(false);
+  const startedRef = useRef(false); startedRef.current = started;
+  const submittedRef = useRef(false); submittedRef.current = submitted;
+  const terminatedRef = useRef(false); terminatedRef.current = terminated;
+  const violationsRef = useRef(0); violationsRef.current = violations;
+  const leaveLock = useRef(0);
 
   const q = questions[current];
   const answered = Object.keys(answers).length;
@@ -104,6 +116,62 @@ export default function CBTClient({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [secsLeft]);
 
+  // ── Secure exam: fullscreen + leave detection ─────────────────
+  async function enterFullscreen() {
+    try { await (document.documentElement.requestFullscreen?.() ?? Promise.resolve()); }
+    catch { /* fullscreen may be blocked; the visibility/blur guards still apply */ }
+  }
+  async function startExam() { await enterFullscreen(); setStarted(true); }
+  async function resumeExam() { setWarn(false); await enterFullscreen(); }
+
+  // Leave the fullscreen shell once the exam is over.
+  useEffect(() => {
+    if (submitted && typeof document !== "undefined" && document.fullscreenElement) {
+      document.exitFullscreen?.().catch(() => {});
+    }
+  }, [submitted]);
+
+  // Register a "left the exam" event: warn the first time, auto-submit the next.
+  useEffect(() => {
+    if (!started || submitted) return;
+    const registerLeave = () => {
+      if (submittedRef.current || terminatedRef.current) return;
+      const now = Date.now();
+      if (now - leaveLock.current < 800) return; // debounce paired events (blur+visibility)
+      leaveLock.current = now;
+      const next = violationsRef.current + 1;
+      setViolations(next);
+      if (next > MAX_LEAVES) { setTerminated(true); doSubmit(); }
+      else setWarn(true);
+    };
+    const onVis = () => { if (document.hidden) registerLeave(); };
+    const onFs = () => { if (!document.fullscreenElement) registerLeave(); };
+    const block = (e: Event) => e.preventDefault();
+    const onBeforeUnload = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ""; };
+
+    document.addEventListener("visibilitychange", onVis);
+    window.addEventListener("blur", registerLeave);
+    document.addEventListener("fullscreenchange", onFs);
+    document.addEventListener("contextmenu", block);
+    document.addEventListener("copy", block);
+    document.addEventListener("cut", block);
+    document.addEventListener("paste", block);
+    document.addEventListener("selectstart", block);
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => {
+      document.removeEventListener("visibilitychange", onVis);
+      window.removeEventListener("blur", registerLeave);
+      document.removeEventListener("fullscreenchange", onFs);
+      document.removeEventListener("contextmenu", block);
+      document.removeEventListener("copy", block);
+      document.removeEventListener("cut", block);
+      document.removeEventListener("paste", block);
+      document.removeEventListener("selectstart", block);
+      window.removeEventListener("beforeunload", onBeforeUnload);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [started, submitted]);
+
   if (submitted && result) {
     return (
       <div className="mx-auto max-w-lg space-y-6">
@@ -112,6 +180,11 @@ export default function CBTClient({
           <p className="mt-2 font-display text-6xl font-bold">{result.grade}%</p>
           <p className="mt-2 text-white/60">{result.correct} out of {result.total} correct</p>
         </div>
+        {terminated && (
+          <p className="rounded-xl bg-red-50 px-4 py-3 text-sm font-bold text-red-800">
+            ⚠️ Your exam was submitted automatically because you left the secure screen more than once.
+          </p>
+        )}
         <div className="card p-6 space-y-4">
           <h2 className="font-display text-lg font-semibold">Review answers</h2>
           {questions.map((q, i) => {
@@ -153,10 +226,44 @@ export default function CBTClient({
     );
   }
 
+  // ── Secure-start gate: read the rules, then enter fullscreen ──
+  if (!started) {
+    return (
+      <div className="mx-auto max-w-lg space-y-5">
+        <div className="boardgrid rounded-2xl bg-board p-7 text-white">
+          <p className="pill-gold mb-2">{subject}</p>
+          <h1 className="font-display text-xl font-semibold sm:text-2xl">{assignmentTitle}</h1>
+          <p className="mt-1 text-sm text-white/50">{total} question{total === 1 ? "" : "s"}{secsLeft !== null ? ` · ${fmtTime(secsLeft)} remaining` : ""}</p>
+        </div>
+        <div className="card p-6">
+          <h2 className="flex items-center gap-2 font-display text-lg font-semibold text-ink"><Icon name="lock" className="h-5 w-5 text-gold-deep" /> Secure exam mode</h2>
+          <p className="mt-1 text-sm text-ink/55">Please read carefully — this is a monitored test.</p>
+          <ul className="mt-4 space-y-2.5 text-sm text-ink/75">
+            {[
+              "The exam opens in full screen — stay in it until you submit.",
+              "Do not switch tabs, minimise, or leave this window.",
+              "You get ONE warning. Leaving again submits your exam automatically.",
+              "Copying, right-click and text selection are turned off.",
+              "When the timer reaches 0, your answers are submitted for you.",
+            ].map((t) => (
+              <li key={t} className="flex gap-2.5">
+                <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-gold-pale text-gold-deep"><Icon name="checkCircle" className="h-3.5 w-3.5" /></span>{t}
+              </li>
+            ))}
+          </ul>
+          {error && <p className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm font-bold text-red-900">{error}</p>}
+          <button onClick={startExam} className="btn-gold mt-6 w-full !rounded-xl">
+            <span className="inline-flex items-center gap-1.5"><Icon name="lock" className="h-4 w-4" /> Start secure exam</span>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const urgent = secsLeft !== null && secsLeft < 300;
 
   return (
-    <div className="mx-auto max-w-2xl space-y-5">
+    <div className="mx-auto max-w-2xl space-y-5 select-none">
       {/* Header */}
       <div className="boardgrid rounded-2xl bg-board p-6 text-white">
         <div className="flex items-start justify-between gap-4">
@@ -232,6 +339,20 @@ export default function CBTClient({
           onConfirm={doSubmit}
           onCancel={() => setConfirmSubmit(false)}
         />
+      )}
+
+      {/* Secure-mode warning — shown the first time the learner leaves the screen */}
+      {warn && !submitted && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-red-950/70 p-6 backdrop-blur-sm">
+          <div className="max-w-sm rounded-3xl bg-white p-7 text-center shadow-2xl">
+            <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-100 text-red-600"><Icon name="alertTriangle" className="h-7 w-7" /></span>
+            <h2 className="mt-4 font-display text-lg font-bold text-ink">Stay in the exam</h2>
+            <p className="mt-2 text-sm text-ink/60">
+              Leaving the exam screen isn&apos;t allowed. This is your <span className="font-bold text-red-600">only warning</span> — if you leave again, your exam will be submitted automatically.
+            </p>
+            <button onClick={resumeExam} className="btn-gold mt-6 w-full !rounded-xl">Return to exam</button>
+          </div>
+        </div>
       )}
     </div>
   );
