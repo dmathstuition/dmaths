@@ -5,6 +5,7 @@ import { watDay } from "@/lib/dailyReward";
 import { pickRandom } from "@/lib/questionBank";
 import { gradeAnswers, type Response } from "@/lib/practice";
 import { presetByKey, topicBreakdown, scorePercent, gradeBand, MOCK_DAILY_BONUS } from "@/lib/mockExam";
+import { boostMultiplier } from "@/lib/powerups";
 
 // Mock Exam mode. A timed, exam-style paper is pulled from the staff-only
 // question_bank and marked here with the service role, so the answer key never
@@ -95,11 +96,15 @@ export async function POST(req: Request) {
   const band = gradeBand(percent);
   const topics = topicBreakdown(results.map((r) => ({ topic: topicById.get(r.id) ?? "", correct: r.correct })));
 
-  // Completion bonus — only for the first finished mock each day (anti-farm).
+  // Completion bonus — only for the first finished mock each day (anti-farm),
+  // doubled while a 2× Points Boost is active.
   const day = watDay();
-  const { data: earlier } = await admin.from("mock_exam_sessions")
-    .select("id").eq("student_id", gate.user.id).eq("day", day).limit(1);
-  const points = earlier && earlier.length ? 0 : MOCK_DAILY_BONUS;
+  const [{ data: earlier }, { data: boostRow }] = await Promise.all([
+    admin.from("mock_exam_sessions").select("id").eq("student_id", gate.user.id).eq("day", day).limit(1),
+    admin.from("profiles").select("boost_until").eq("id", gate.user.id).single(),
+  ]);
+  const mult = boostMultiplier((boostRow as any)?.boost_until);
+  const points = earlier && earlier.length ? 0 : MOCK_DAILY_BONUS * mult;
 
   await admin.from("mock_exam_sessions").insert({
     student_id: gate.user.id, preset: preset.key, subject, level,
