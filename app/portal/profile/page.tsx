@@ -1,4 +1,5 @@
 import ProfileClient from "@/components/portal/ProfileClient";
+import Achievements from "@/components/portal/Achievements";
 import NotificationSettings from "@/components/portal/NotificationSettings";
 import DeleteAccountCard from "@/components/portal/DeleteAccountCard";
 import { getProfile } from "@/lib/auth";
@@ -10,6 +11,7 @@ export default async function ProfilePage() {
   return (
     <div className="space-y-6">
       <ProfileClient me={me} />
+      <Achievements />
       <NotificationSettings />
       <DeleteAccountCard />
     </div>
