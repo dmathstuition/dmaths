@@ -155,7 +155,10 @@ export default function Login() {
   return (
     <main className="relative min-h-screen bg-gradient-to-b from-[#EEF2FE] to-white lg:grid lg:grid-cols-[1.05fr_1fr]">
       {/* Brand panel (desktop) — the portal look, with a big mascot */}
-      <aside className="boardgrid relative hidden overflow-hidden bg-gradient-to-br from-[#10406F] via-[#0A2A4F] to-[#071C36] p-12 text-white lg:flex lg:flex-col">
+      <aside className="boardgrid relative hidden overflow-hidden bg-boardDeep p-12 text-white lg:flex lg:flex-col">
+        {/* diagonal sheen for depth — a separate layer so it never clashes with
+            the grid's background-image (that clash was flattening the panel) */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#10406F]/70 via-transparent to-black/30" />
         <div aria-hidden className="pointer-events-none absolute -left-16 top-0 h-72 w-72 rounded-full bg-ink/40 blur-3xl" />
         <div aria-hidden className="pointer-events-none absolute -right-10 bottom-1/4 h-72 w-72 rounded-full bg-gold/20 blur-3xl" />
         {/* drifting maths glyphs — subtle depth behind the copy */}
@@ -167,8 +170,8 @@ export default function Login() {
         </div>
         <Link href="/" className="relative w-fit"><Logo light size="lg" /></Link>
         <div className="relative mt-16 max-w-sm">
-          <h2 className="font-display text-3xl font-bold leading-tight">Welcome back to your D-Maths portal <span className="align-middle">👋</span></h2>
-          <p className="mt-3 text-sm leading-relaxed text-white/60">Live classes, grades, streaks and reminders — your whole learning journey in one beautiful app.</p>
+          <h2 className="text-crisp font-display text-3xl font-bold leading-tight">Welcome back to your D-Maths portal <span className="align-middle">👋</span></h2>
+          <p className="mt-3 text-sm leading-relaxed text-white/75">Live classes, grades, streaks and reminders — your whole learning journey in one beautiful app.</p>
           <ul className="mt-6 space-y-2.5 text-sm text-white/85">
             {["Grades, attendance & streaks, tracked live", "Join live classes from your phone", "Assignments & instant class reminders"].map((t) => (
               <li key={t} className="flex items-center gap-2.5">
@@ -183,7 +186,7 @@ export default function Login() {
           <div className="flex items-center gap-0.5 text-gold">
             {[0, 1, 2, 3, 4].map((n) => <Icon key={n} name="star" className="h-4 w-4" />)}
           </div>
-          <p className="mt-1.5 text-xs leading-relaxed text-white/55">Loved by students &amp; parents across Nigeria — secure, private, and always in sync.</p>
+          <p className="mt-1.5 text-xs leading-relaxed text-white/70">Loved by students &amp; parents across Nigeria — secure, private, and always in sync.</p>
         </div>
         {/* soft ambient glow behind the mascot */}
         <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-[54%] w-[46%] rounded-full bg-[radial-gradient(circle,rgba(203,223,247,0.28),transparent_62%)] blur-2xl" />
