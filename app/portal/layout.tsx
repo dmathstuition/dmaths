@@ -29,6 +29,7 @@ const NAV: NavItem[] = [
   { href: "/portal/style", label: "Avatar Studio", icon: "sparkles" },
   { href: "/portal/flashcards", label: "Revision cards", icon: "book" },
   { href: "/portal/progress", label: "My progress", icon: "progress" },
+  { href: "/portal/skills", label: "Knowledge map", icon: "sigma" },
   { href: "/portal/calendar", label: "Calendar", icon: "calendar" },
   { href: "/portal/notices", label: "Notices", icon: "notices" },
   { href: "/portal/notifications", label: "Notifications", icon: "bell" },
