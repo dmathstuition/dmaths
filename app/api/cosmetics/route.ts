@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { spendable as spendableFn } from "@/lib/rewards";
-import { titleByKey, isFreeTitle, canUnlock, characterByKey, rollCrate, CRATE_COST } from "@/lib/cosmetics";
+import { titleByKey, isFreeTitle, canUnlock, characterByKey, rollCrate, CRATE_COST, isGiftableTitle } from "@/lib/cosmetics";
+import { notifyUser } from "@/lib/notify";
 
 // Avatar Studio. Characters are free; premium name TITLES are bought with reward
 // points. A purchase is recorded as a normal reward_redemptions row (item_id
@@ -22,7 +23,7 @@ async function learner() {
   const { data: { user } } = await supa.auth.getUser();
   if (!user) return { error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
   const { data: me } = await supa.from("profiles")
-    .select("role, reward_points, avatar_choice, avatar_title").eq("id", user.id).single();
+    .select("role, first_name, reward_points, avatar_choice, avatar_title").eq("id", user.id).single();
   if (me?.role !== "student") return { error: NextResponse.json({ error: "Learners only" }, { status: 403 }) };
   return { user, me };
 }
@@ -149,6 +150,53 @@ export async function POST(req: Request) {
       ownedTitles: after.ownedTitles,
       equipped: { title: rolled.key },
     });
+  }
+
+  // ── Gift a title to a friend (by Student ID) ───────────────────
+  if (action === "gift") {
+    const key = String(body?.title ?? "");
+    const code = String(body?.toCode ?? "").trim().toUpperCase();
+    const title = titleByKey(key);
+    if (!isGiftableTitle(key)) return NextResponse.json({ error: "That title can't be gifted." }, { status: 400 });
+    if (!code) return NextResponse.json({ error: "Enter your friend's Student ID." }, { status: 400 });
+
+    // Resolve the recipient — must be a real, active learner, and not yourself.
+    const { data: recipient } = await admin.from("profiles")
+      .select("id, first_name, role, is_active").eq("student_code", code).maybeSingle();
+    if (!recipient || recipient.role !== "student" || recipient.is_active === false) {
+      return NextResponse.json({ error: "No active learner found with that Student ID." }, { status: 404 });
+    }
+    if (recipient.id === gate.user.id) return NextResponse.json({ error: "You can't gift a title to yourself." }, { status: 400 });
+
+    // Skip if they already own it (don't charge the gifter for nothing).
+    const { data: already } = await admin.from("learner_cosmetics")
+      .select("id").eq("student_id", recipient.id).eq("kind", "title").eq("key", key).maybeSingle();
+    if (already) return NextResponse.json({ error: `${recipient.first_name || "They"} already owns that title.` }, { status: 409 });
+
+    // The gifter pays from their own spendable balance.
+    let snap;
+    try { snap = await snapshot(admin, gate.user.id, gate.me.reward_points ?? 0); }
+    catch (e: any) { return NextResponse.json({ error: explain(e?.message ?? "load failed") }, { status: 500 }); }
+    if (!canUnlock(snap.spendable, title.cost)) {
+      return NextResponse.json({ error: `Not enough points — a ${title.label} gift costs ${title.cost}, you have ${snap.spendable}.` }, { status: 400 });
+    }
+
+    // Spend on the gifter's ledger, grant ownership to the recipient (never
+    // equipped for them, never touches their leaderboard total), and notify them.
+    const { error: rErr } = await admin.from("reward_redemptions").insert({
+      student_id: gate.user.id, item_id: null, title: `Gift · ${title.label} → ${code}`, cost: title.cost, status: "fulfilled",
+    });
+    if (rErr) return NextResponse.json({ error: explain(rErr.message) }, { status: 500 });
+
+    await admin.from("learner_cosmetics").insert({ student_id: recipient.id, kind: "title", key });
+    await notifyUser(admin, recipient.id, {
+      title: "🎁 You got a gift!",
+      body: `${gate.me.first_name || "A friend"} sent you the "${title.label}" title. Equip it in Avatar Studio.`,
+      link: "/portal/style",
+    });
+
+    const after = await snapshot(admin, gate.user.id, gate.me.reward_points ?? 0);
+    return NextResponse.json({ ok: true, spendable: after.spendable, gifted: { label: title.label, to: recipient.first_name || code } });
   }
 
   return NextResponse.json({ error: "Unknown action." }, { status: 400 });

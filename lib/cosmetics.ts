@@ -77,6 +77,13 @@ export function canUnlock(spendable: number, cost: number): boolean {
   return cost > 0 && spendable >= cost;
 }
 
+// A title can be gifted to a friend if it's a real, priced title (free ones
+// need no gifting, and unknown keys can't be bought).
+export function isGiftableTitle(key: string): boolean {
+  const t = titleByKey(key);
+  return t.key === key && t.cost > 0;
+}
+
 // The pool a Mystery Crate can roll from: every priced title not yet owned.
 export function cratePool(owned: Iterable<string>): Title[] {
   const set = owned instanceof Set ? owned : new Set(owned);
