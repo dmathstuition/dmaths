@@ -17,7 +17,7 @@ export default async function ReferPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <Reveal>
-        <div className="boardgrid relative overflow-hidden rounded-2xl bg-gradient-to-br from-board to-boardDeep p-7 text-white sm:p-9">
+        <div className="boardgrid relative overflow-hidden rounded-2xl bg-board p-7 text-white sm:p-9">
           <div className="pointer-events-none absolute right-0 top-0 h-full w-1/2 opacity-20"
             style={{ background: "radial-gradient(circle at 80% 20%, #EFAE56, transparent 60%)" }} />
           <div className="relative">
