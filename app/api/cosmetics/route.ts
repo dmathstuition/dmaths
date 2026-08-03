@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { spendable as spendableFn } from "@/lib/rewards";
-import { titleByKey, isFreeTitle, canUnlock, characterByKey } from "@/lib/cosmetics";
+import { titleByKey, isFreeTitle, canUnlock, characterByKey, rollCrate, CRATE_COST } from "@/lib/cosmetics";
 
 // Avatar Studio. Characters are free; premium name TITLES are bought with reward
 // points. A purchase is recorded as a normal reward_redemptions row (item_id
@@ -117,6 +117,38 @@ export async function POST(req: Request) {
 
     const after = await snapshot(admin, gate.user.id, gate.me.reward_points ?? 0);
     return NextResponse.json({ ok: true, spendable: after.spendable, ownedTitles: after.ownedTitles, equipped: { title: key } });
+  }
+
+  // ── Open a Mystery Crate (rolls a random unowned title) ────────
+  if (action === "crate") {
+    let snap;
+    try { snap = await snapshot(admin, gate.user.id, gate.me.reward_points ?? 0); }
+    catch (e: any) { return NextResponse.json({ error: explain(e?.message ?? "load failed") }, { status: 500 }); }
+
+    if (snap.spendable < CRATE_COST) {
+      return NextResponse.json({ error: `Not enough points — a crate costs ${CRATE_COST}, you have ${snap.spendable}.` }, { status: 400 });
+    }
+
+    const rolled = rollCrate(snap.ownedTitles);
+    if (!rolled) return NextResponse.json({ error: "You've already collected every title! 🏆" }, { status: 409 });
+
+    // Spend via the shop ledger, record ownership, and auto-equip the new title.
+    const { error: rErr } = await admin.from("reward_redemptions").insert({
+      student_id: gate.user.id, item_id: null, title: `Mystery Crate · ${rolled.label}`, cost: CRATE_COST, status: "fulfilled",
+    });
+    if (rErr) return NextResponse.json({ error: explain(rErr.message) }, { status: 500 });
+
+    await admin.from("learner_cosmetics").insert({ student_id: gate.user.id, kind: "title", key: rolled.key });
+    await admin.from("profiles").update({ avatar_title: rolled.key }).eq("id", gate.user.id);
+
+    const after = await snapshot(admin, gate.user.id, gate.me.reward_points ?? 0);
+    return NextResponse.json({
+      ok: true,
+      rolled: { key: rolled.key, label: rolled.label, rarity: rolled.rarity },
+      spendable: after.spendable,
+      ownedTitles: after.ownedTitles,
+      equipped: { title: rolled.key },
+    });
   }
 
   return NextResponse.json({ error: "Unknown action." }, { status: 400 });

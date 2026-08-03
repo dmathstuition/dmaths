@@ -5,7 +5,9 @@ import { Icon } from "@/components/Icons";
 import Mascot from "@/components/Mascot";
 import Confetti from "@/components/ui/Confetti";
 import { learnerAvatarFor } from "@/lib/avatars";
-import { CHARACTERS, TITLES, isFreeTitle } from "@/lib/cosmetics";
+import { CHARACTERS, TITLES, RARITY, CRATE_COST, cratePool, isFreeTitle, type Rarity } from "@/lib/cosmetics";
+
+type Rolled = { key: string; label: string; rarity: Rarity };
 
 export default function StyleClient({
   meId, name, initialCharacter, initialTitle,
@@ -20,6 +22,8 @@ export default function StyleClient({
   const [busy, setBusy] = useState<string | null>(null);
   const [err, setErr] = useState("");
   const [celebrate, setCelebrate] = useState(0);
+  const [crateOpen, setCrateOpen] = useState(false);
+  const [reveal, setReveal] = useState<Rolled | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -37,6 +41,8 @@ export default function StyleClient({
   const previewSrc = learnerAvatarFor(meId, character);
   const has = (key: string) => isFreeTitle(key) || owned.has(key);
   const equippedLabel = TITLES.find((t) => t.key === title)?.label ?? "";
+  const poolLeft = cratePool(owned).length;
+  const collectedAll = poolLeft === 0;
 
   async function post(payload: any) {
     const r = await fetch("/api/cosmetics", {
@@ -73,9 +79,27 @@ export default function StyleClient({
     router.refresh();
   }
 
+  // Open a Mystery Crate: show the suspense overlay, then reveal the roll.
+  async function openCrate() {
+    if (crateOpen) return;
+    setErr(""); setCrateOpen(true); setReveal(null);
+    const started = Date.now();
+    const { ok, json } = await post({ action: "crate" });
+    const wait = Math.max(0, 1300 - (Date.now() - started)); // let the suspense breathe
+    setTimeout(() => {
+      if (!ok) { setCrateOpen(false); setErr(json.error || "Couldn't open the crate — try again."); return; }
+      setOwned(new Set(json.ownedTitles ?? []));
+      setSpendable(json.spendable ?? spendable);
+      setTitle(json.rolled.key);
+      setReveal(json.rolled);
+      setCelebrate((c) => c + 1);
+      router.refresh();
+    }, wait);
+  }
+
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <div className="pointer-events-none fixed inset-0 z-[60]"><Confetti fire={celebrate > 0} key={celebrate} pieces={48} /></div>
+      <div className="pointer-events-none fixed inset-0 z-[60]"><Confetti fire={celebrate > 0} key={celebrate} pieces={56} /></div>
 
       {/* ── Hero preview ────────────────────────────────────────── */}
       <div className="relative flex items-center gap-5 overflow-hidden rounded-3xl p-7 text-white sm:p-8"
@@ -101,6 +125,40 @@ export default function StyleClient({
 
       {err && <p role="alert" className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-800">{err}</p>}
 
+      {/* ── Mystery Crate ───────────────────────────────────────── */}
+      <div className="relative overflow-hidden rounded-3xl border border-gold/30 p-6 text-white"
+        style={{ background: "linear-gradient(135deg, #2A1E4F 0%, #1A1436 60%, #10406F 100%)" }}>
+        <div aria-hidden className="loot-aura pointer-events-none absolute inset-0" style={{ ["--loot-glow" as any]: "rgba(239,174,86,.5)" }} />
+        <div className="relative flex flex-wrap items-center gap-5">
+          <span className="loot-pulse flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-2xl bg-gold/15 text-gold ring-1 ring-gold/30" style={{ ["--loot-glow" as any]: "rgba(239,174,86,.7)" }}>
+            <Icon name="gift" className="h-10 w-10" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <h2 className="font-display text-xl font-bold">Mystery Crate</h2>
+              <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gold ring-1 ring-gold/25">Loot</span>
+            </div>
+            <p className="mt-1 max-w-md text-[13px] leading-relaxed text-white/60">
+              Open it for a random title you don&apos;t own yet. The rarer the pull, the bigger the flex — legendaries are one in a hundred. {poolLeft > 0 ? `${poolLeft} still to collect.` : ""}
+            </p>
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              {(["common", "rare", "epic", "legendary"] as Rarity[]).map((r) => (
+                <span key={r} className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ backgroundColor: `${RARITY[r].color}22`, color: RARITY[r].color }}>
+                  <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: RARITY[r].color }} /> {RARITY[r].label}
+                </span>
+              ))}
+            </div>
+          </div>
+          <button onClick={openCrate} disabled={crateOpen || collectedAll || spendable < CRATE_COST}
+            className="btn-gold !min-h-[46px] flex-shrink-0 !rounded-2xl disabled:opacity-40"
+            title={collectedAll ? "You own every title" : spendable < CRATE_COST ? `Need ${CRATE_COST} points` : ""}>
+            {collectedAll
+              ? <span className="inline-flex items-center gap-1.5"><Icon name="trophy" className="h-4 w-4" /> All collected</span>
+              : <span className="inline-flex items-center gap-1.5"><Icon name="gift" className="h-4 w-4" /> Open · {CRATE_COST}</span>}
+          </button>
+        </div>
+      </div>
+
       {/* ── Characters ──────────────────────────────────────────── */}
       <div className="card p-6">
         <h2 className="mb-4 font-display text-lg font-semibold text-ink">Character</h2>
@@ -123,18 +181,23 @@ export default function StyleClient({
       {/* ── Titles ──────────────────────────────────────────────── */}
       <div className="card p-6">
         <h2 className="mb-1 font-display text-lg font-semibold text-ink">Title</h2>
-        <p className="mb-4 text-[13px] text-ink/50">A flair shown next to your name across the portal. Buy one with reward points.</p>
+        <p className="mb-4 text-[13px] text-ink/50">A flair shown next to your name across the portal. Buy one directly, or gamble on a crate above.</p>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {TITLES.filter((t) => t.key !== "none" || title === "none").map((t) => {
             const owns = has(t.key);
             const equipped = title === t.key;
             const affordable = spendable >= t.cost;
             const loading = busy === `t:${t.key}` || busy === `u:${t.key}`;
+            const rc = RARITY[t.rarity];
             return (
               <div key={t.key} className={`flex items-center gap-3 rounded-2xl border p-3 transition ${equipped ? "border-gold bg-gold-pale/60" : "border-line bg-white"}`}>
+                {t.cost > 0 && <span aria-hidden className="h-8 w-1 flex-shrink-0 rounded-full" style={{ backgroundColor: rc.color }} />}
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-bold text-ink">{t.label || "No title"}</p>
-                  <p className="text-[11px] text-ink/45">{isFreeTitle(t.key) ? "Free" : owns ? "Owned" : <span className="inline-flex items-center gap-1"><Icon name="coins" className="h-3 w-3" /> {t.cost}</span>}</p>
+                  <p className="flex items-center gap-1.5 text-[11px] text-ink/45">
+                    {t.cost > 0 && <span className="font-bold" style={{ color: rc.color }}>{rc.label}</span>}
+                    <span>{isFreeTitle(t.key) ? "Free" : owns ? "· Owned" : <span className="inline-flex items-center gap-1">· <Icon name="coins" className="h-3 w-3" /> {t.cost}</span>}</span>
+                  </p>
                 </div>
                 {equipped ? (
                   <span className="inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-gold px-3 py-1.5 text-[11px] font-bold text-board"><Icon name="checkCircle" className="h-3.5 w-3.5" /> On</span>
@@ -152,9 +215,38 @@ export default function StyleClient({
           })}
         </div>
         <p className="mt-3 text-[12px] text-ink/45">
-          Buying a title spends points but never lowers your leaderboard total — that keeps climbing.
+          Spending points never lowers your leaderboard total — that keeps climbing.
         </p>
       </div>
+
+      {/* ── Crate reveal overlay ────────────────────────────────── */}
+      {crateOpen && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-board/80 p-6 backdrop-blur-sm">
+          {!reveal ? (
+            <div className="flex flex-col items-center gap-5 text-white">
+              <span className="loot-pulse flex h-28 w-28 items-center justify-center rounded-3xl bg-gold/15 text-gold ring-1 ring-gold/30" style={{ ["--loot-glow" as any]: "rgba(239,174,86,.85)" }}>
+                <Icon name="gift" className="h-14 w-14 animate-bounce" />
+              </span>
+              <p className="font-display text-lg font-bold">Opening…</p>
+            </div>
+          ) : (
+            <div className="chat-in loot-shine relative w-full max-w-xs overflow-hidden rounded-3xl border p-8 text-center text-white"
+              style={{ borderColor: RARITY[reveal.rarity].color, background: "linear-gradient(160deg, #142138 0%, #0A2A4F 100%)", boxShadow: `0 0 60px -12px ${RARITY[reveal.rarity].glow}` }}>
+              <div aria-hidden className="loot-aura pointer-events-none absolute inset-0" style={{ ["--loot-glow" as any]: RARITY[reveal.rarity].glow }} />
+              <div className="relative">
+                <span className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider"
+                  style={{ backgroundColor: `${RARITY[reveal.rarity].color}26`, color: RARITY[reveal.rarity].color }}>
+                  <Icon name="sparkles" className="h-3.5 w-3.5" /> {RARITY[reveal.rarity].label}
+                </span>
+                <p className="mt-4 text-[13px] font-semibold text-white/60">You pulled</p>
+                <p className="mt-1 font-display text-3xl font-extrabold" style={{ color: RARITY[reveal.rarity].color }}>{reveal.label}</p>
+                <p className="mt-3 inline-flex items-center gap-1 text-[12px] text-white/50"><Icon name="checkCircle" className="h-3.5 w-3.5 text-gold" /> Equipped &amp; added to your collection</p>
+                <button onClick={() => { setCrateOpen(false); setReveal(null); }} className="btn-gold mt-6 w-full !rounded-2xl">Awesome!</button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
