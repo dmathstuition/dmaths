@@ -4,6 +4,7 @@ import ShopClient from "@/components/portal/ShopClient";
 import { spendable } from "@/lib/rewards";
 import { learnerAvatarFor } from "@/lib/avatars";
 import { dealForDay, dealExpiry, watDayNumber } from "@/lib/shopDeals";
+import { tierFor, nextTier } from "@/lib/vip";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +26,11 @@ export default async function ShopPage() {
   const deal = dealForDay(items ?? [], watDayNumber());
   const dealInfo = deal ? { ...deal, expiresAt: dealExpiry() } : null;
 
+  // VIP tier — a lifetime-earnings status that grants a standing discount.
+  const tier = tierFor(earned);
+  const { next, remaining } = nextTier(earned);
+  const vip = { name: tier.name, color: tier.color, discountPct: tier.discountPct, nextName: next?.name ?? null, remaining };
+
   return <ShopClient earned={earned} balance={balance} items={items ?? []} initialRedemptions={reds ?? []}
-    mascot={learnerAvatarFor(user!.id, (me as any)?.avatar_choice)} deal={dealInfo} />;
+    mascot={learnerAvatarFor(user!.id, (me as any)?.avatar_choice)} deal={dealInfo} vip={vip} />;
 }

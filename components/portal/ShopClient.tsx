@@ -7,6 +7,7 @@ import CountUp from "@/components/landing/CountUp";
 import Confetti from "@/components/ui/Confetti";
 import Mascot from "@/components/Mascot";
 import { HeroStudy } from "@/components/illustrations";
+import { discountedCost } from "@/lib/shopDeals";
 
 type Item = { id: string; title: string; description: string | null; cost: number };
 type Redemption = { id: string; title: string; cost: number; status: string; created_at: string };
@@ -27,6 +28,7 @@ function tier(cost: number): Tier {
 }
 
 type Deal = { itemId: string; original: number; price: number; discountPct: number; expiresAt: string };
+type Vip = { name: string; color: string; discountPct: number; nextName: string | null; remaining: number };
 
 // Live countdown to the deal's expiry (next WAT midnight). Ticks each second.
 function DealCountdown({ expiresAt }: { expiresAt: string }) {
@@ -43,7 +45,7 @@ function DealCountdown({ expiresAt }: { expiresAt: string }) {
 }
 
 export default function ShopClient({
-  earned, balance, items, initialRedemptions, mascot, deal,
+  earned, balance, items, initialRedemptions, mascot, deal, vip,
 }: {
   earned: number;
   balance: number;
@@ -51,6 +53,7 @@ export default function ShopClient({
   initialRedemptions: Redemption[];
   mascot?: string;
   deal?: Deal | null;
+  vip?: Vip | null;
 }) {
   const [bal, setBal] = useState(balance);
   const [redemptions, setRedemptions] = useState<Redemption[]>(initialRedemptions);
@@ -60,8 +63,11 @@ export default function ShopClient({
   const [flash, setFlash] = useState<string | null>(null);
   const [popId, setPopId] = useState<string | null>(null);
 
-  // The price a learner actually pays — the discounted price for today's deal.
-  const costOf = (item: Item) => (deal && deal.itemId === item.id ? deal.price : item.cost);
+  // The price a learner actually pays — the bigger of the Deal-of-the-Day and
+  // their standing VIP-tier discount (they don't stack).
+  const tierPct = vip?.discountPct ?? 0;
+  const dealPctOf = (item: Item) => (deal && deal.itemId === item.id ? deal.discountPct : 0);
+  const costOf = (item: Item) => discountedCost(item.cost, Math.max(tierPct, dealPctOf(item)));
   const dealItem = deal ? items.find((i) => i.id === deal.itemId) ?? null : null;
 
   // Progress toward the cheapest reward the learner can't yet afford.
@@ -125,6 +131,22 @@ export default function ShopClient({
               <p className="mt-2 text-sm text-white/55">
                 points to spend <span className="text-white/30">· {earned} earned all-time</span>
               </p>
+
+              {/* VIP tier — lifetime status + standing discount */}
+              {vip && (
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-extrabold ring-1"
+                    style={{ backgroundColor: `${vip.color}22`, color: vip.color, borderColor: `${vip.color}55` }}>
+                    <Icon name="gem" className="h-3.5 w-3.5" /> {vip.name} VIP
+                  </span>
+                  {vip.discountPct > 0 && (
+                    <span className="rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-bold text-white/70 ring-1 ring-white/15">−{vip.discountPct}% on everything</span>
+                  )}
+                  {vip.nextName && (
+                    <span className="text-[11px] text-white/45">{vip.remaining} pts to {vip.nextName}</span>
+                  )}
+                </div>
+              )}
 
               {/* progress to next reward */}
               {nextLocked && (
@@ -209,7 +231,7 @@ export default function ShopClient({
                       </span>
                       <span className="relative z-[4] inline-flex items-center gap-1 rounded-full bg-black/20 px-2 py-0.5 text-[11px] font-bold">
                         <Icon name="coins" className="h-3 w-3" />
-                        {onDeal ? <><span className="text-white/50 line-through">{item.cost}</span> <span className="text-gold">{price}</span></> : item.cost}
+                        {price < item.cost ? <><span className="text-white/50 line-through">{item.cost}</span> <span className="text-gold">{price}</span></> : item.cost}
                       </span>
                       {t.hot && <span aria-hidden className="pointer-events-none absolute right-16 top-1 text-white/60 float"><Icon name="sparkles" className="h-3.5 w-3.5" /></span>}
                     </div>
