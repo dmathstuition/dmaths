@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
-import { requireStaff } from "@/lib/authRole";
+import { requireStaff, getRoster } from "@/lib/authRole";
 import { notifyUser } from "@/lib/notify";
 import { presetByKey } from "@/lib/mockExam";
 import { canStart } from "@/lib/mockRequests";
@@ -30,7 +30,13 @@ export async function GET() {
   const cols = "id, student_id, subject, preset, level, status, scheduled_for, note, created_at";
 
   if (me?.role === "admin" || me?.role === "tutor") {
-    const { data, error } = await admin.from("mock_requests").select(cols).order("created_at", { ascending: false }).limit(200);
+    let q = admin.from("mock_requests").select(cols).order("created_at", { ascending: false }).limit(200);
+    if (me.role === "tutor") {
+      // Tutors only see requests from learners on their own roster.
+      const roster = await getRoster(user.id);
+      q = q.in("student_id", roster.length ? roster : ["00000000-0000-0000-0000-000000000000"]);
+    }
+    const { data, error } = await q;
     if (error) return NextResponse.json({ error: explain(error.message), requests: [], staff: true }, { status: 200 });
     const ids = Array.from(new Set((data ?? []).map((r: any) => r.student_id)));
     const { data: studs } = ids.length
@@ -111,7 +117,12 @@ export async function POST(req: Request) {
   }
 
   if (action === "launch") {
-    const studentIds = Array.isArray(body?.studentIds) ? body.studentIds.map(String).slice(0, 200) : [];
+    let studentIds = Array.isArray(body?.studentIds) ? body.studentIds.map(String).slice(0, 200) : [];
+    // A tutor can only launch to learners on their own roster.
+    if (staff.role === "tutor") {
+      const roster = new Set(await getRoster(staff.id));
+      studentIds = studentIds.filter((id: string) => roster.has(id));
+    }
     const subject = String(body?.subject ?? "").trim().slice(0, 80);
     const preset = presetByKey(String(body?.preset ?? "")).key;
     const scheduledFor = body?.scheduledFor ? new Date(body.scheduledFor).toISOString() : null;
