@@ -73,9 +73,17 @@ export async function POST(req: Request) {
     const { data: pend } = await admin.from("mock_requests").select("id").eq("student_id", user.id).eq("status", "pending").limit(1);
     if (pend?.length) return NextResponse.json({ error: "You already have a request awaiting approval." }, { status: 409 });
 
-    const { data, error } = await admin.from("mock_requests")
-      .insert({ student_id: user.id, subject, preset, level: (me as any).level ?? "", status: "pending" })
-      .select("id, subject, preset, level, status, scheduled_for, created_at").single();
+    // The learner's exam target (best-effort — the column may not be migrated).
+    const { data: et } = await admin.from("profiles").select("exam_target").eq("id", user.id).single();
+    const exam = (et as any)?.exam_target ?? "";
+
+    const insertRow: Record<string, any> = { student_id: user.id, subject, preset, level: (me as any).level ?? "", status: "pending", exam };
+    const cols = "id, subject, preset, level, status, scheduled_for, created_at";
+    let { data, error } = await admin.from("mock_requests").insert(insertRow).select(cols).single();
+    if (error && /column .*exam/i.test(error.message)) {
+      delete insertRow.exam;
+      ({ data, error } = await admin.from("mock_requests").insert(insertRow).select(cols).single());
+    }
     if (error) return NextResponse.json({ error: explain(error.message) }, { status: 500 });
     return NextResponse.json({ ok: true, request: { ...data, startable: false } });
   }
