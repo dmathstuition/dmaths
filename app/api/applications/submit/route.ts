@@ -39,7 +39,7 @@ export async function POST(req: Request) {
   }
 
   const admin = supabaseAdmin();
-  const { error } = await admin.from("applications").insert({
+  const row: Record<string, any> = {
     first_name: body.first_name, last_name: body.last_name, email: body.email, phone: body.phone,
     dob: body.dob || null, address: body.address || "", level: body.level || "JSS 1",
     guardian_name: body.guardian_name || "", guardian_contact: body.guardian_contact || "",
@@ -51,8 +51,18 @@ export async function POST(req: Request) {
     payment_amount: Number(body.payment_amount) || 0,
     payment_date: body.payment_date || null,
     referred_by_code: String(body.ref || "").trim().slice(0, 40) || null,
+    country: String(body.country || "NG").slice(0, 4),
+    exam_target: String(body.exam_target || "").slice(0, 80),
     consented_at: new Date().toISOString(),
-  });
+  };
+
+  let { error } = await admin.from("applications").insert(row);
+  // If the international columns aren't migrated yet, don't fail a real signup —
+  // drop them and retry so registrations keep working.
+  if (error && /column .*(country|exam_target)/i.test(error.message)) {
+    delete row.country; delete row.exam_target;
+    ({ error } = await admin.from("applications").insert(row));
+  }
 
   if (error) return NextResponse.json({ error: "Could not submit — please try again." }, { status: 500 });
   return NextResponse.json({ ok: true });

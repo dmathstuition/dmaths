@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Icon } from "@/components/Icons";
 import PaystackButton from "@/components/PaystackButton";
 import { SUMMER_CAMP_TIERS, PHYSICAL_TIERS, PHYSICAL_CAMP, findTier, fmtUsd, fmtNgn, DISCOUNT_PCT, discountedUsd, discountedNgn, depositNgn, balanceNgn, tierModules, type CampTier } from "@/lib/summerCamp";
+import { REGIONS, levelsFor, examsFor, DEFAULT_REGION } from "@/lib/regions";
 
 const SUBJECTS = ["Algebra","Calculus","Statistics","Geometry","Further Mathematics","Core Maths Revision","Physics","JavaScript","Python","Python Practice Challenge","External Examinations"];
 
@@ -21,7 +22,6 @@ function isFreeApplication(subjects: string[]) {
     && subjects.length > 0
     && subjects.every((s) => FREE_SUBJECTS.includes(s));
 }
-const LEVELS = ["JSS 1","JSS 2","JSS 3","SSS 1","SSS 2","SSS 3","Post Secondary"];
 const METHODS = ["Access Bank Transfer","Opay Bank Transfer","Cash"];
 // Tab-scoped draft so leaving to read a policy page and pressing Back restores progress.
 const DRAFT_KEY = "dmaths-apply-draft";
@@ -137,7 +137,9 @@ export default function Apply() {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         first_name: f.first_name, last_name: f.last_name, email: f.email, phone: f.phone,
-        dob: f.dob || null, address: f.address || "", level: f.level || "JSS 1",
+        dob: f.dob || null, address: f.address || "",
+        level: f.level || levelsFor(f.country || DEFAULT_REGION)[0],
+        country: f.country || DEFAULT_REGION, exam_target: f.exam_target || "",
         guardian_name: f.guardian_name, guardian_contact: f.guardian_contact,
         guardian_email: f.guardian_email || "",
         subjects: f.subjects, notes: f.notes || "",
@@ -245,9 +247,26 @@ export default function Apply() {
             <h2 className="font-display text-xl font-semibold">Academic details</h2>
             <Row>
               <div>
-                <label htmlFor="page-current-level" className="flabel">Current level <Req /></label>
-                <select id="page-current-level" className="field" value={f.level || "JSS 1"} onChange={e => set("level", e.target.value)}>
-                  {LEVELS.map(l => <option key={l}>{l}</option>)}
+                <label htmlFor="page-country" className="flabel">Where do you study? <Req /></label>
+                <select id="page-country" className="field" value={f.country || DEFAULT_REGION}
+                  onChange={e => { set("country", e.target.value); set("level", ""); }}>
+                  {REGIONS.map(r => <option key={r.code} value={r.code}>{r.flag} {r.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="page-current-level" className="flabel">Current class / year <Req /></label>
+                <select id="page-current-level" className="field" value={f.level || ""} onChange={e => set("level", e.target.value)}>
+                  <option value="">Select…</option>
+                  {levelsFor(f.country || DEFAULT_REGION).map(l => <option key={l}>{l}</option>)}
+                </select>
+              </div>
+            </Row>
+            <Row>
+              <div>
+                <label htmlFor="page-exam-target" className="flabel">Preparing for an exam?</label>
+                <select id="page-exam-target" className="field" value={f.exam_target || ""} onChange={e => set("exam_target", e.target.value)}>
+                  <option value="">Not sure yet / general study</option>
+                  {examsFor(f.country || DEFAULT_REGION).map(x => <option key={x}>{x}</option>)}
                 </select>
               </div>
               <Field label="Guardian name" required value={f.guardian_name} onChange={v => set("guardian_name", v)} />
