@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { notifyUser } from "@/lib/notify";
 import { requireStaff, staffCanAccessStudent } from "@/lib/authRole";
+import { sanctionFromPoints, rewardDeltaForLog, nextRewardTotal } from "@/lib/behaviourPoints";
 
 async function awardPointsBadges(admin: ReturnType<typeof supabaseAdmin>, studentId: string, rewardPoints: number) {
   const [{ data: badges }, { data: earned }] = await Promise.all([
@@ -22,31 +23,26 @@ async function awardPointsBadges(admin: ReturnType<typeof supabaseAdmin>, studen
   }
 }
 
-async function recomputeTotals(admin: ReturnType<typeof supabaseAdmin>, studentId: string) {
+// Re-sync a learner's behaviour totals. sanction_points is behaviour-only, so
+// it's recomputed from the logs. reward_points is the SHARED running total
+// (bonuses + positive behaviour), so it's only ADJUSTED by `rewardDelta` — never
+// overwritten, which previously wiped every earned bonus point.
+async function applyBehaviourTotals(admin: ReturnType<typeof supabaseAdmin>, studentId: string, rewardDelta: number) {
   const { data: logRows } = await admin
-    .from("behavior_logs")
-    .select("behavior_type_id")
-    .eq("student_id", studentId);
+    .from("behavior_logs").select("behavior_type_id").eq("student_id", studentId);
 
-  let rewardPoints = 0;
-  let sanctionPoints = 0;
-
+  let allPoints: number[] = [];
   if (logRows && logRows.length > 0) {
     const uniqueTypeIds = [...new Set(logRows.map((l: any) => l.behavior_type_id))];
-    const { data: typeRows } = await admin
-      .from("behavior_types")
-      .select("id, points")
-      .in("id", uniqueTypeIds);
-
+    const { data: typeRows } = await admin.from("behavior_types").select("id, points").in("id", uniqueTypeIds);
     const pointsMap: Record<string, number> = {};
     for (const t of typeRows ?? []) pointsMap[(t as any).id] = (t as any).points;
-
-    for (const l of logRows) {
-      const pts = pointsMap[(l as any).behavior_type_id] ?? 0;
-      if (pts > 0) rewardPoints += pts;
-      else sanctionPoints += pts;
-    }
+    allPoints = logRows.map((l: any) => pointsMap[l.behavior_type_id] ?? 0);
   }
+  const sanctionPoints = sanctionFromPoints(allPoints);
+
+  const { data: me } = await admin.from("profiles").select("reward_points").eq("id", studentId).single();
+  const rewardPoints = nextRewardTotal(me?.reward_points ?? 0, rewardDelta);
 
   await admin.from("profiles").update({ reward_points: rewardPoints, sanction_points: sanctionPoints }).eq("id", studentId);
   return { rewardPoints, sanctionPoints };
@@ -61,18 +57,22 @@ export async function DELETE(req: Request) {
 
   const admin = supabaseAdmin();
 
-  const { data: existing } = await admin.from("behavior_logs").select("student_id").eq("id", logId).single();
+  const { data: existing } = await admin.from("behavior_logs").select("student_id, behavior_type_id").eq("id", logId).single();
   if (!existing) return NextResponse.json({ error: "Log entry not found" }, { status: 404 });
   if (!(await staffCanAccessStudent(staff, existing.student_id))) {
     return NextResponse.json({ error: "That learner isn't in your roster." }, { status: 403 });
   }
+
+  // How much this log added to reward_points, so deleting it removes exactly that.
+  const { data: bt } = await admin.from("behavior_types").select("points").eq("id", existing.behavior_type_id).single();
+  const rewardDelta = -rewardDeltaForLog(bt?.points ?? 0);
 
   const { error } = await admin.from("behavior_logs").delete().eq("id", logId);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   await admin.from("audit_log").insert({ actor_id: staff.id, action: "delete_behaviour_log", detail: { logId, studentId: existing.student_id } });
 
-  const totals = await recomputeTotals(admin, existing.student_id);
+  const totals = await applyBehaviourTotals(admin, existing.student_id, rewardDelta);
   return NextResponse.json({ ok: true, ...totals });
 }
 
@@ -102,33 +102,9 @@ export async function POST(req: Request) {
   });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // Recompute denormalised totals — two plain queries avoids FK-join cache issues
-  const { data: logRows } = await admin
-    .from("behavior_logs")
-    .select("behavior_type_id")
-    .eq("student_id", studentId);
-
-  let rewardPoints = 0;
-  let sanctionPoints = 0;
-
-  if (logRows && logRows.length > 0) {
-    const uniqueTypeIds = [...new Set(logRows.map(l => l.behavior_type_id))];
-    const { data: typeRows } = await admin
-      .from("behavior_types")
-      .select("id, points")
-      .in("id", uniqueTypeIds);
-
-    const pointsMap: Record<string, number> = {};
-    for (const t of typeRows ?? []) pointsMap[t.id] = t.points;
-
-    for (const l of logRows) {
-      const pts = pointsMap[l.behavior_type_id] ?? 0;
-      if (pts > 0) rewardPoints += pts;
-      else sanctionPoints += pts;
-    }
-  }
-
-  await admin.from("profiles").update({ reward_points: rewardPoints, sanction_points: sanctionPoints }).eq("id", studentId);
+  // A positive behaviour ADDS to the shared reward total; a negative one is a
+  // sanction only. reward_points is never overwritten, so bonuses survive.
+  const { rewardPoints, sanctionPoints } = await applyBehaviourTotals(admin, studentId, rewardDeltaForLog(btype.points));
   await awardPointsBadges(admin, studentId, rewardPoints);
   await admin.from("audit_log").insert({ actor_id: staff.id, action: "log_behaviour", detail: { studentId, behaviorTypeId, points: btype.points } });
   await notifyUser(admin, studentId, {
