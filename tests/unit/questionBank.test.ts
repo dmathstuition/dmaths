@@ -1,5 +1,38 @@
 import { describe, it, expect } from "vitest";
-import { validateQuestion, normaliseQuestion, pickRandom, toCbtQuestions, MAX_OPTIONS } from "@/lib/questionBank";
+import { validateQuestion, normaliseQuestion, pickRandom, toCbtQuestions, MAX_OPTIONS, parseQuestionBatch } from "@/lib/questionBank";
+
+describe("parseQuestionBatch", () => {
+  it("parses multiple blocks with the correct option flagged by *", () => {
+    const text = `What is 2 + 2?
+A) 3
+B) 4 *
+C) 5
+
+Capital of France?
+* A) Paris
+B) Lagos`;
+    const { questions, errors } = parseQuestionBatch(text);
+    expect(errors).toEqual([]);
+    expect(questions).toHaveLength(2);
+    expect(questions[0]).toMatchObject({ question: "What is 2 + 2?", answer: 1 });
+    expect(questions[0].options).toEqual(["3", "4", "5"]);
+    expect(questions[1]).toMatchObject({ question: "Capital of France?", answer: 0 });
+  });
+  it("strips question numbering and supports dash options", () => {
+    const { questions } = parseQuestionBatch(`1. Pick the even number\n- 3\n- 4 *`);
+    expect(questions[0].question).toBe("Pick the even number");
+    expect(questions[0].answer).toBe(1);
+  });
+  it("reports blocks with no correct option or too few options", () => {
+    const { questions, errors } = parseQuestionBatch(`No answer marked\nA) one\nB) two\n\nLonely\nA) only one`);
+    expect(questions).toHaveLength(0);
+    expect(errors.length).toBe(2);
+    expect(errors[0]).toMatch(/mark the correct option/i);
+  });
+  it("is empty-safe", () => {
+    expect(parseQuestionBatch("")).toEqual({ questions: [], errors: [] });
+  });
+});
 
 const GOOD = { question: "2x + 6 = 14, so x = ?", options: ["2", "4", "6", "8"], answer: 1 };
 

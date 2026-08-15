@@ -61,6 +61,54 @@ export function pickRandom<T>(items: T[], count: number, rng: () => number = Mat
   return out;
 }
 
+// Parse a pasted batch of questions so a teacher can add many at once (all
+// tagged with one year-group/subject/topic in the UI). Blocks are separated by a
+// blank line. In each block the first line(s) are the question; option lines
+// start with "A)"/"A."/"-", and the correct option is flagged with a "*" at the
+// start or end of its line. Lenient and pure so it's unit-testable.
+//
+//   What is 2 + 2?
+//   A) 3
+//   B) 4 *
+//   C) 5
+export function parseQuestionBatch(text: string): { questions: BankQuestion[]; errors: string[] } {
+  const questions: BankQuestion[] = [];
+  const errors: string[] = [];
+  const blocks = String(text || "").replace(/\r/g, "").split(/\n\s*\n+/).map((b) => b.trim()).filter(Boolean);
+  const optHead = /^(\*\s*)?(?:[A-Za-z][)._]|[-•*])\s+(.*)$/;
+
+  blocks.forEach((block, bi) => {
+    const lines = block.split(/\n/).map((l) => l.trim()).filter(Boolean);
+    const qLines: string[] = [];
+    const opts: { text: string; correct: boolean }[] = [];
+    let inOptions = false;
+
+    for (const raw of lines) {
+      const m = raw.match(optHead);
+      if (m) {
+        inOptions = true;
+        let t = m[2].trim();
+        let correct = !!m[1];
+        if (/\*$/.test(t)) { correct = true; t = t.replace(/\s*\*$/, "").trim(); }
+        opts.push({ text: t, correct });
+      } else if (!inOptions) {
+        qLines.push(raw.replace(/^\s*\d+[).]\s*/, "")); // strip "1." / "1)" numbering
+      } else if (opts.length) {
+        opts[opts.length - 1].text += " " + raw; // wrapped option line
+      }
+    }
+
+    const answer = opts.findIndex((o) => o.correct);
+    const q: Partial<BankQuestion> = { question: qLines.join(" ").trim(), options: opts.map((o) => o.text), answer, code: "" };
+    if (answer < 0 && opts.length >= 2) { errors.push(`Question ${bi + 1}: mark the correct option with a *`); return; }
+    const bad = validateQuestion(q);
+    if (bad) { errors.push(`Question ${bi + 1}: ${bad}`); return; }
+    questions.push(normaliseQuestion(q));
+  });
+
+  return { questions, errors };
+}
+
 // Bank row → the shape a test stores. Ids are re-numbered from 1 so a test's
 // questions read 1..n however they were picked.
 export function toCbtQuestions(rows: BankQuestion[]): (BankQuestion & { id: number })[] {

@@ -5,7 +5,7 @@ import { Icon } from "@/components/Icons";
 import ConfirmModal from "@/components/ConfirmModal";
 import { useToast } from "@/components/Toast";
 import EmptyState from "@/components/ui/EmptyState";
-import { MAX_OPTIONS, validateQuestion, type BankRow } from "@/lib/questionBank";
+import { MAX_OPTIONS, validateQuestion, parseQuestionBatch, type BankRow } from "@/lib/questionBank";
 
 const SUBJECTS = ["Algebra", "Calculus", "Statistics", "Geometry", "Further Mathematics",
   "Core Maths Revision", "Physics", "English", "JavaScript", "Python", "External Examinations"];
@@ -92,6 +92,36 @@ export default function QuestionBankClient({
 
   function dropGenerated(idx: number) {
     setGenerated((g) => g.filter((_, i) => i !== idx));
+  }
+
+  // ── Batch import: paste many questions, tag them all with one year-group ──
+  const [batchOpen, setBatchOpen] = useState(false);
+  const [batchText, setBatchText] = useState("");
+  const [batchMeta, setBatchMeta] = useState({ subject: SUBJECTS[0], level: "", topic: "" });
+  const [batchBusy, setBatchBusy] = useState(false);
+  const [batchErr, setBatchErr] = useState("");
+  const parsed = useMemo(() => parseQuestionBatch(batchText), [batchText]);
+
+  async function saveBatch() {
+    if (!parsed.questions.length) { setBatchErr("Nothing to save yet — paste some questions."); return; }
+    setBatchBusy(true); setBatchErr("");
+    try {
+      const res = await fetch("/api/question-bank", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ questions: parsed.questions, subject: batchMeta.subject, level: batchMeta.level, topic: batchMeta.topic }),
+      });
+      const j = await res.json().catch(() => ({}));
+      setBatchBusy(false);
+      if (!res.ok) { const m = j.error || "Couldn't save the batch."; setBatchErr(m); push(m, "error"); return; }
+      const n = parsed.questions.length;
+      push(`${n} question${n === 1 ? "" : "s"} saved to ${batchMeta.level || "the bank"}.`, "success");
+      setBatchText(""); setBatchOpen(false);
+      setSubject(""); setLevel(""); setSearch("");
+      if (Array.isArray(j.rows) && j.rows.length) { setRows((prev) => [...(j.rows as BankRow[]), ...prev]); router.refresh(); }
+      else { await reload(); }
+    } catch {
+      setBatchBusy(false); setBatchErr("Couldn't reach the server — try again."); push("Couldn't save — try again.", "error");
+    }
   }
 
   const visible = useMemo(() => {
@@ -187,12 +217,66 @@ export default function QuestionBankClient({
             className="btn inline-flex items-center gap-2 border border-gold/50 bg-white text-gold-deep hover:bg-gold-pale">
             <Icon name="sparkles" className="h-4 w-4" /> {genOpen ? "Close A.I" : "Generate with A.I"}
           </button>
+          <button onClick={() => { setBatchOpen((s) => !s); setBatchErr(""); }}
+            className="btn inline-flex items-center gap-2 border border-line bg-white text-ink/70 hover:bg-chalk">
+            <Icon name="materials" className="h-4 w-4" /> {batchOpen ? "Close import" : "Batch import"}
+          </button>
           <button onClick={() => { setF({ ...BLANK }); setError(""); setShowForm((s) => !s); }}
             className="btn-gold inline-flex items-center gap-2">
             <Icon name="plusSquare" className="h-4 w-4" /> {showForm ? "Close" : "Add a question"}
           </button>
         </div>
       </div>
+
+      {/* ── Batch import ──────────────────────────────────────────── */}
+      {batchOpen && (
+        <div className="card space-y-4 p-6">
+          <div className="flex items-center gap-2">
+            <Icon name="materials" className="h-5 w-5 text-gold-deep" />
+            <h2 className="font-display text-lg font-semibold">Batch import questions</h2>
+          </div>
+          <p className="text-sm text-ink/55">
+            Paste many questions at once and tag them all with one year-group. Separate questions with a blank line;
+            options start with <code className="rounded bg-chalk px-1">A)</code> or <code className="rounded bg-chalk px-1">-</code>, and mark the correct one with a <code className="rounded bg-chalk px-1">*</code>.
+          </p>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div>
+              <label htmlFor="batch-subject" className="flabel">Subject</label>
+              <select id="batch-subject" className="field" value={batchMeta.subject} onChange={(e) => setBatchMeta({ ...batchMeta, subject: e.target.value })}>
+                {SUBJECTS.map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="batch-level" className="flabel">Year group / class</label>
+              <select id="batch-level" className="field" value={batchMeta.level} onChange={(e) => setBatchMeta({ ...batchMeta, level: e.target.value })}>
+                {LEVELS.map((l) => <option key={l || "any"} value={l}>{l || "Any level"}</option>)}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="batch-topic" className="flabel">Topic (optional)</label>
+              <input id="batch-topic" className="field" value={batchMeta.topic} onChange={(e) => setBatchMeta({ ...batchMeta, topic: e.target.value })} placeholder="e.g. Algebra" />
+            </div>
+          </div>
+          <textarea value={batchText} onChange={(e) => setBatchText(e.target.value)} rows={10}
+            className="field resize-y font-mono text-[13px]"
+            placeholder={"What is 2 + 2?\nA) 3\nB) 4 *\nC) 5\n\nCapital of France?\n* A) Paris\nB) Lagos\nC) Accra"} />
+          {batchErr && <p className="rounded-xl bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-800">{batchErr}</p>}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-[13px] text-ink/55">
+              <span className="font-bold text-emerald-700">{parsed.questions.length} ready</span>
+              {parsed.errors.length > 0 && <span className="ml-2 font-bold text-red-600">· {parsed.errors.length} to fix</span>}
+            </p>
+            <button onClick={saveBatch} disabled={batchBusy || !parsed.questions.length} className="btn-gold !rounded-xl disabled:opacity-50">
+              {batchBusy ? "Saving…" : `Save ${parsed.questions.length || ""} to ${batchMeta.level || "bank"}`}
+            </button>
+          </div>
+          {parsed.errors.length > 0 && (
+            <ul className="space-y-1 rounded-xl bg-amber-50 p-3 text-[12px] text-amber-800">
+              {parsed.errors.slice(0, 6).map((e, i) => <li key={i}>• {e}</li>)}
+            </ul>
+          )}
+        </div>
+      )}
 
       {/* ── A.I generator ─────────────────────────────────────────── */}
       {genOpen && (
