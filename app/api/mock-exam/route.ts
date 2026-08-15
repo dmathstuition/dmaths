@@ -5,6 +5,7 @@ import { watDay } from "@/lib/dailyReward";
 import { pickRandom } from "@/lib/questionBank";
 import { gradeAnswers, type Response } from "@/lib/practice";
 import { presetByKey, topicBreakdown, scorePercent, gradeBand, MOCK_DAILY_BONUS } from "@/lib/mockExam";
+import { canStart } from "@/lib/mockRequests";
 import { boostMultiplier } from "@/lib/powerups";
 import { aggregateTopics } from "@/lib/skillTree";
 import { recordTopicMastery } from "@/lib/topicMastery";
@@ -38,12 +39,37 @@ export async function GET(req: Request) {
   if ("error" in gate) return gate.error;
 
   const url = new URL(req.url);
-  const subject = url.searchParams.get("subject")?.trim() ?? "";
-  const level = url.searchParams.get("level")?.trim() ?? "";
   const preset = url.searchParams.get("preset")?.trim() ?? "";
+  const requestId = url.searchParams.get("requestId")?.trim() ?? "";
   const admin = supabaseAdmin();
 
-  if (!preset) {
+  // Start a paper — only from an approved, in-window request (class-filtered).
+  if (requestId) {
+    const { data: rq } = await admin.from("mock_requests")
+      .select("id, student_id, subject, preset, level, status, scheduled_for").eq("id", requestId).maybeSingle();
+    if (!rq || rq.student_id !== gate.user.id) return NextResponse.json({ error: "That mock request wasn't found." }, { status: 404 });
+    if (!canStart(rq)) return NextResponse.json({ error: "This mock isn't open yet." }, { status: 403 });
+
+    // Consume the request on start so the paper can't be re-rolled.
+    await admin.from("mock_requests").update({ status: "used", used_at: new Date().toISOString() }).eq("id", requestId);
+
+    const p = presetByKey(rq.preset);
+    let q = admin.from("question_bank").select("id, question, code, options").limit(600);
+    if (rq.subject) q = q.eq("subject", rq.subject);
+    if (rq.level) q = q.eq("level", rq.level); // scoped to the learner's class
+    const { data, error } = await q;
+    if (error) return NextResponse.json({ error: explain(error.message), questions: [] }, { status: 200 });
+    const picked = pickRandom(data ?? [], p.count);
+    const questions = picked.map((r: any) => ({ id: r.id, question: r.question, code: r.code ?? "", options: r.options ?? [] }));
+    return NextResponse.json({ questions, preset: p.key, minutes: p.minutes, subject: rq.subject, level: rq.level });
+  }
+
+  // A raw preset self-start is no longer allowed — mocks must be requested.
+  if (preset) {
+    return NextResponse.json({ error: "Request a mock and wait for approval before starting." }, { status: 403 });
+  }
+
+  {
     const [{ data: bank, error }, hist] = await Promise.all([
       admin.from("question_bank").select("subject, level").limit(3000),
       admin.from("mock_exam_sessions")
@@ -56,18 +82,6 @@ export async function GET(req: Request) {
     const levels = Array.from(new Set(rows.map((r: any) => r.level).filter(Boolean))).sort();
     return NextResponse.json({ subjects, levels, total: rows.length, history: hist.data ?? [] });
   }
-
-  // A round: pull the matching pool, pick the preset's count at random, strip answers.
-  const p = presetByKey(preset);
-  let q = admin.from("question_bank").select("id, question, code, options").limit(600);
-  if (subject) q = q.eq("subject", subject);
-  if (level) q = q.eq("level", level);
-  const { data, error } = await q;
-  if (error) return NextResponse.json({ error: explain(error.message), questions: [] }, { status: 200 });
-
-  const picked = pickRandom(data ?? [], p.count);
-  const questions = picked.map((r: any) => ({ id: r.id, question: r.question, code: r.code ?? "", options: r.options ?? [] }));
-  return NextResponse.json({ questions, preset: p.key, minutes: p.minutes, subject, level });
 }
 
 // POST — grade a submitted paper, save it, credit the once-a-day completion bonus.

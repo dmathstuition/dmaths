@@ -20,6 +20,7 @@ const NAV: NavItem[] = [
   { href: "/admin/attendance", label: "Attendance", icon: "calendar" },
   { href: "/admin/assignments", label: "Assignments", icon: "assignments" },
   { href: "/admin/question-bank", label: "Question bank", icon: "book" },
+  { href: "/admin/mock-requests", label: "Mock requests", icon: "graduationCap" },
   { href: "/admin/materials", label: "Materials", icon: "materials" },
   { href: "/admin/curriculum", label: "Curriculum", icon: "curriculum" },
   { href: "/admin/flashcards", label: "Revision cards", icon: "book" },

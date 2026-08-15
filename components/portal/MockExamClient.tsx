@@ -4,9 +4,11 @@ import { Icon } from "@/components/Icons";
 import Confetti from "@/components/ui/Confetti";
 import CountUp from "@/components/landing/CountUp";
 import { EXAM_PRESETS } from "@/lib/mockExam";
+import { reqStatusMeta } from "@/lib/mockRequests";
 
 type Q = { id: string; question: string; code?: string; options: string[] };
 type Meta = { subjects: string[]; levels: string[]; total: number };
+type Req = { id: string; subject: string; preset: string; level: string; status: string; scheduled_for: string | null; startable: boolean; created_at: string };
 type Hist = { id: string; preset: string; subject: string; correct: number; total: number; percent: number; band: string; created_at: string };
 type Result = { id: string; correct: boolean; answer: number; chosen: number };
 type Band = { grade: string; label: string; pass: boolean };
@@ -22,8 +24,11 @@ function mmss(s: number) {
 export default function MockExamClient({ mySubjects, myLevel }: { mySubjects: string[]; myLevel: string }) {
   const [meta, setMeta] = useState<Meta | null>(null);
   const [history, setHistory] = useState<Hist[]>([]);
+  const [requests, setRequests] = useState<Req[]>([]);
+  const [reqBusy, setReqBusy] = useState(false);
+  const [reqMsg, setReqMsg] = useState("");
   const [subject, setSubject] = useState("");
-  const [level, setLevel] = useState("");
+  const [level, setLevel] = useState(myLevel);
   const [preset, setPreset] = useState("quick");
 
   const [phase, setPhase] = useState<Phase>("setup");
@@ -44,7 +49,15 @@ export default function MockExamClient({ mySubjects, myLevel }: { mySubjects: st
   const questionsRef = useRef(questions); questionsRef.current = questions;
   const submittingRef = useRef(false);
 
-  // Load filter options + recent history once; default to the learner's subject.
+  async function loadRequests() {
+    try {
+      const r = await fetch("/api/mock-requests", { cache: "no-store" });
+      const j = await r.json();
+      setRequests(j.requests ?? []);
+    } catch { /* keep */ }
+  }
+
+  // Load filter options + recent history + the learner's requests once.
   useEffect(() => {
     (async () => {
       try {
@@ -53,11 +66,26 @@ export default function MockExamClient({ mySubjects, myLevel }: { mySubjects: st
         setMeta(j); setHistory(j.history ?? []);
         const mine = (mySubjects || []).find((s) => (j.subjects || []).includes(s));
         if (mine) setSubject(mine);
-        if ((j.levels || []).includes(myLevel)) setLevel(myLevel);
       } catch { setMeta({ subjects: [], levels: [], total: 0 }); }
+      loadRequests();
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  async function requestExam() {
+    setReqBusy(true); setReqMsg(""); setErr("");
+    try {
+      const r = await fetch("/api/mock-requests", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "request", subject, preset }),
+      });
+      const j = await r.json();
+      if (!r.ok) { setReqMsg(j.error || "Couldn't send your request — try again."); return; }
+      setReqMsg("Request sent — your tutor will approve it shortly. 🎓");
+      loadRequests();
+    } catch { setReqMsg("Couldn't send your request — try again."); }
+    finally { setReqBusy(false); }
+  }
 
   const submit = useCallback(async () => {
     if (submittingRef.current) return;
@@ -90,15 +118,15 @@ export default function MockExamClient({ mySubjects, myLevel }: { mySubjects: st
     return () => clearInterval(t);
   }, [phase, submit]);
 
-  async function start() {
+  async function start(req: Req) {
     setErr(""); setPhase("loading");
-    const qs = new URLSearchParams({ preset });
-    if (subject) qs.set("subject", subject);
-    if (level) qs.set("level", level);
+    // Grade-time submit reads these — align them to the approved request.
+    setPreset(req.preset); setSubject(req.subject); setLevel(req.level);
     try {
-      const r = await fetch(`/api/mock-exam?${qs}`, { cache: "no-store" });
+      const r = await fetch(`/api/mock-exam?requestId=${encodeURIComponent(req.id)}`, { cache: "no-store" });
       const j = await r.json();
-      if (!j.questions?.length) { setErr("No questions match that filter yet — try 'Any'."); setPhase("setup"); return; }
+      if (!r.ok) { setErr(j.error || "This mock isn't open yet."); setPhase("setup"); loadRequests(); return; }
+      if (!j.questions?.length) { setErr("No questions for your class yet — ask your tutor."); setPhase("setup"); loadRequests(); return; }
       submittingRef.current = false;
       setQuestions(j.questions); setPicks({}); setIdx(0); setScore(null);
       setExplains({});
@@ -189,18 +217,49 @@ export default function MockExamClient({ mySubjects, myLevel }: { mySubjects: st
                     {(meta?.subjects ?? []).map((s) => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </label>
-                <label className="block">
-                  <span className="flabel">Level</span>
-                  <select className="field" value={level} onChange={(e) => setLevel(e.target.value)}>
-                    <option value="">Any level</option>
-                    {(meta?.levels ?? []).map((l) => <option key={l} value={l}>{l}</option>)}
-                  </select>
-                </label>
+                <div>
+                  <span className="flabel">Your class</span>
+                  <div className="field flex items-center gap-2 !bg-chalk text-ink/70">
+                    <Icon name="graduationCap" className="h-4 w-4 text-gold-deep" /> {myLevel || "Not set"}
+                  </div>
+                </div>
               </div>
-              <button onClick={start} disabled={!meta} className="btn-gold w-full !rounded-xl">
-                <span className="inline-flex items-center gap-1.5">Start exam <Icon name="clock" className="h-4 w-4" /></span>
+              <button onClick={requestExam} disabled={reqBusy || !meta} className="btn-gold w-full !rounded-xl disabled:opacity-60">
+                <span className="inline-flex items-center gap-1.5">{reqBusy ? "Sending…" : "Request this exam"} <Icon name="checkCircle" className="h-4 w-4" /></span>
               </button>
-              <p className="text-center text-xs text-ink/40">The clock starts right away and auto-submits at zero. Your first mock each day earns a small bonus.</p>
+              {reqMsg && <p className="rounded-xl bg-emerald-50 px-4 py-2.5 text-center text-sm font-semibold text-emerald-800">{reqMsg}</p>}
+              <p className="text-center text-xs text-ink/40">Mocks are approved by your tutor. Once approved you&apos;ll get a notification and a Start button here — the paper is set for your class.</p>
+
+              {/* My requests */}
+              {requests.length > 0 && (
+                <div className="border-t border-line pt-4">
+                  <p className="mb-2 flabel">My mock requests</p>
+                  <ul className="space-y-2">
+                    {requests.map((rq) => {
+                      const sm = reqStatusMeta(rq.status);
+                      const p = EXAM_PRESETS.find((x) => x.key === rq.preset);
+                      return (
+                        <li key={rq.id} className="flex flex-wrap items-center gap-2 rounded-2xl border border-line bg-white px-3 py-2.5">
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-[13px] font-bold text-ink">{rq.subject || "Any subject"} · {p?.label ?? rq.preset}</p>
+                            <p className="text-[11px] text-ink/45">
+                              {rq.level || "your class"}
+                              {rq.scheduled_for ? ` · opens ${new Date(rq.scheduled_for).toLocaleString("en-NG", { dateStyle: "medium", timeStyle: "short" })}` : ""}
+                            </p>
+                          </div>
+                          {rq.startable ? (
+                            <button onClick={() => start(rq)} className="btn-gold !min-h-[34px] !rounded-full !px-4 !text-xs">
+                              <span className="inline-flex items-center gap-1"><Icon name="clock" className="h-3.5 w-3.5" /> Start</span>
+                            </button>
+                          ) : (
+                            <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${sm.cls}`}>{sm.label}</span>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              )}
 
               {history.length > 0 && (
                 <div className="border-t border-line pt-4">
