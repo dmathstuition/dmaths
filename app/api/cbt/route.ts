@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { rateLimit, clientKey } from "@/lib/ratelimit";
+import { cbtBonus } from "@/lib/earnBonuses";
 
 export async function POST(req: Request) {
   // 10 CBT submissions per minute per IP — generous for humans, stops scripts
@@ -68,11 +69,23 @@ export async function POST(req: Request) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
+  // Reward finishing the CBT: completion + on-time + perfect. Added by delta so
+  // it never clobbers the learner's other earned points. One-shot — the
+  // pending→graded gate above means this can't be claimed twice.
+  const onTime = !sub.assignment.cbt_close || new Date() <= new Date(sub.assignment.cbt_close);
+  const points = cbtBonus({ perfect: grade === 100, onTime });
+  let newTotal: number | undefined;
+  if (points > 0) {
+    const { data: me } = await admin.from("profiles").select("reward_points").eq("id", user.id).single();
+    newTotal = Number(me?.reward_points ?? 0) + points;
+    await admin.from("profiles").update({ reward_points: newTotal }).eq("id", user.id);
+  }
+
   await admin.from("audit_log").insert({
     actor_id: user.id,
     action: "cbt_submitted",
-    detail: { submissionId, grade, correct, total: questions.length },
+    detail: { submissionId, grade, correct, total: questions.length, points },
   });
 
-  return NextResponse.json({ grade, correct, total: questions.length });
+  return NextResponse.json({ grade, correct, total: questions.length, points });
 }

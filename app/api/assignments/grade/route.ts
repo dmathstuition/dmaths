@@ -4,6 +4,7 @@ import { sendEmail } from "@/lib/email";
 import { loginUrl } from "@/lib/siteUrl";
 import { notifyUser } from "@/lib/notify";
 import { requireStaff, staffCanAccessStudent } from "@/lib/authRole";
+import { gradedAssignmentBonus } from "@/lib/earnBonuses";
 
 // POST { submissionId, grade, feedback } — grade + email the student
 export async function POST(req: Request) {
@@ -27,9 +28,21 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "That learner isn't in your roster." }, { status: 403 });
   }
 
+  const firstGrade = sub.status !== "graded"; // reward only the first time
   await admin.from("assignment_submissions")
     .update({ grade: g, feedback: cleanFeedback, status: "graded" })
     .eq("id", submissionId);
+
+  // Reward completing schoolwork (completion + perfect), by delta so earned
+  // bonuses are never clobbered. Skipped on re-grades and on already-rewarded
+  // CBT submissions (those come in already "graded").
+  if (firstGrade) {
+    const points = gradedAssignmentBonus(g);
+    if (points > 0) {
+      const { data: me } = await admin.from("profiles").select("reward_points").eq("id", sub.student_id).single();
+      await admin.from("profiles").update({ reward_points: Number(me?.reward_points ?? 0) + points }).eq("id", sub.student_id);
+    }
+  }
 
   if (g === 100) {
     const { data: perfectBadge } = await admin.from("badges").select("id, name, description").eq("slug", "perfect_score").single();
