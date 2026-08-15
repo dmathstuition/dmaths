@@ -29,7 +29,7 @@ export default function CBTClient({
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [submitted, setSubmitted] = useState(false);
-  const [result, setResult] = useState<{ grade: number; correct: number; total: number } | null>(null);
+  const [result, setResult] = useState<{ grade: number; correct: number; total: number; points?: number } | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [confirmSubmit, setConfirmSubmit] = useState(false);
@@ -179,6 +179,11 @@ export default function CBTClient({
           <p className="text-sm uppercase tracking-wider text-white/40">Your score</p>
           <p className="mt-2 font-display text-6xl font-bold">{result.grade}%</p>
           <p className="mt-2 text-white/60">{result.correct} out of {result.total} correct</p>
+          {(result.points ?? 0) > 0 && (
+            <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/10 px-4 py-1.5 text-sm font-bold text-gold ring-1 ring-gold/25">
+              <Icon name="coins" className="h-4 w-4" /> +{result.points} reward points
+            </p>
+          )}
         </div>
         {terminated && (
           <p className="rounded-xl bg-red-50 px-4 py-3 text-sm font-bold text-red-800">
