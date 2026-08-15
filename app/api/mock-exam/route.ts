@@ -53,13 +53,33 @@ export async function GET(req: Request) {
     // Consume the request on start so the paper can't be re-rolled.
     await admin.from("mock_requests").update({ status: "used", used_at: new Date().toISOString() }).eq("id", requestId);
 
+    // The learner's exam target on this request (best-effort — column may be new).
+    const { data: exRow } = await admin.from("mock_requests").select("exam").eq("id", requestId).maybeSingle();
+    const examTarget = (exRow as any)?.exam ?? "";
+
     const p = presetByKey(rq.preset);
-    let q = admin.from("question_bank").select("id, question, code, options").limit(600);
-    if (rq.subject) q = q.eq("subject", rq.subject);
-    if (rq.level) q = q.eq("level", rq.level); // scoped to the learner's class
-    const { data, error } = await q;
+    const filtered = (cols: string) => {
+      let q = admin.from("question_bank").select(cols).limit(600);
+      if (rq.subject) q = q.eq("subject", rq.subject);
+      if (rq.level) q = q.eq("level", rq.level); // scoped to the learner's class
+      return q;
+    };
+    let { data, error } = await filtered("id, question, code, options, exam");
+    let examUsable = true;
+    if (error && /column .*exam/i.test(error.message)) { examUsable = false; ({ data, error } = await filtered("id, question, code, options")); }
     if (error) return NextResponse.json({ error: explain(error.message), questions: [] }, { status: 200 });
-    const picked = pickRandom(data ?? [], p.count);
+
+    // Prefer questions tagged with the learner's exam, filling from the rest of
+    // their class so a paper is always complete.
+    const rows = data ?? [];
+    let picked: any[];
+    if (examTarget && examUsable) {
+      const matched = pickRandom(rows.filter((r: any) => (r.exam || "") === examTarget), p.count);
+      picked = matched.length >= p.count ? matched
+        : [...matched, ...pickRandom(rows.filter((r: any) => (r.exam || "") !== examTarget), p.count - matched.length)];
+    } else {
+      picked = pickRandom(rows, p.count);
+    }
     const questions = picked.map((r: any) => ({ id: r.id, question: r.question, code: r.code ?? "", options: r.options ?? [] }));
     return NextResponse.json({ questions, preset: p.key, minutes: p.minutes, subject: rq.subject, level: rq.level });
   }

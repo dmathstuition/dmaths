@@ -6,13 +6,14 @@ import ConfirmModal from "@/components/ConfirmModal";
 import { useToast } from "@/components/Toast";
 import EmptyState from "@/components/ui/EmptyState";
 import { MAX_OPTIONS, validateQuestion, parseQuestionBatch, type BankRow } from "@/lib/questionBank";
+import { ALL_EXAMS } from "@/lib/regions";
 
 const SUBJECTS = ["Algebra", "Calculus", "Statistics", "Geometry", "Further Mathematics",
   "Core Maths Revision", "Physics", "English", "JavaScript", "Python", "External Examinations"];
 const LEVELS = ["", "Primary", "JSS 1", "JSS 2", "JSS 3", "SS 1", "SS 2", "SS 3"];
 
 const BLANK = {
-  id: "", subject: SUBJECTS[0], level: "", topic: "",
+  id: "", subject: SUBJECTS[0], level: "", topic: "", exam: "",
   question: "", code: "", options: ["", "", "", ""], answer: 0,
 };
 
@@ -39,7 +40,7 @@ export default function QuestionBankClient({
 
   // ── A.I question generator ──
   const [genOpen, setGenOpen] = useState(false);
-  const [gen, setGen] = useState({ subject: SUBJECTS[0], level: "", topic: "", count: 5 });
+  const [gen, setGen] = useState({ subject: SUBJECTS[0], level: "", topic: "", count: 5, exam: "" });
   const [genBusy, setGenBusy] = useState(false);
   const [genErr, setGenErr] = useState("");
   const [generated, setGenerated] = useState<{ question: string; options: string[]; answer: number }[]>([]);
@@ -64,7 +65,7 @@ export default function QuestionBankClient({
     try {
       const res = await fetch("/api/question-bank", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ questions: generated, subject: gen.subject, level: gen.level, topic: gen.topic }),
+        body: JSON.stringify({ questions: generated, subject: gen.subject, level: gen.level, topic: gen.topic, exam: gen.exam }),
       });
       const j = await res.json().catch(() => ({}));
       setGenBusy(false);
@@ -97,7 +98,7 @@ export default function QuestionBankClient({
   // ── Batch import: paste many questions, tag them all with one year-group ──
   const [batchOpen, setBatchOpen] = useState(false);
   const [batchText, setBatchText] = useState("");
-  const [batchMeta, setBatchMeta] = useState({ subject: SUBJECTS[0], level: "", topic: "" });
+  const [batchMeta, setBatchMeta] = useState({ subject: SUBJECTS[0], level: "", topic: "", exam: "" });
   const [batchBusy, setBatchBusy] = useState(false);
   const [batchErr, setBatchErr] = useState("");
   const parsed = useMemo(() => parseQuestionBatch(batchText), [batchText]);
@@ -108,7 +109,7 @@ export default function QuestionBankClient({
     try {
       const res = await fetch("/api/question-bank", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ questions: parsed.questions, subject: batchMeta.subject, level: batchMeta.level, topic: batchMeta.topic }),
+        body: JSON.stringify({ questions: parsed.questions, subject: batchMeta.subject, level: batchMeta.level, topic: batchMeta.topic, exam: batchMeta.exam }),
       });
       const j = await res.json().catch(() => ({}));
       setBatchBusy(false);
@@ -147,7 +148,7 @@ export default function QuestionBankClient({
 
   function edit(r: BankRow) {
     setF({
-      id: r.id, subject: r.subject || SUBJECTS[0], level: r.level ?? "", topic: r.topic ?? "",
+      id: r.id, subject: r.subject || SUBJECTS[0], level: r.level ?? "", topic: r.topic ?? "", exam: (r as any).exam ?? "",
       question: r.question, code: r.code ?? "",
       options: [...(r.options ?? [])], answer: r.answer ?? 0,
     });
@@ -239,7 +240,7 @@ export default function QuestionBankClient({
             Paste many questions at once and tag them all with one year-group. Separate questions with a blank line;
             options start with <code className="rounded bg-chalk px-1">A)</code> or <code className="rounded bg-chalk px-1">-</code>, and mark the correct one with a <code className="rounded bg-chalk px-1">*</code>.
           </p>
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <div>
               <label htmlFor="batch-subject" className="flabel">Subject</label>
               <select id="batch-subject" className="field" value={batchMeta.subject} onChange={(e) => setBatchMeta({ ...batchMeta, subject: e.target.value })}>
@@ -250,6 +251,13 @@ export default function QuestionBankClient({
               <label htmlFor="batch-level" className="flabel">Year group / class</label>
               <select id="batch-level" className="field" value={batchMeta.level} onChange={(e) => setBatchMeta({ ...batchMeta, level: e.target.value })}>
                 {LEVELS.map((l) => <option key={l || "any"} value={l}>{l || "Any level"}</option>)}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="batch-exam" className="flabel">Exam (optional)</label>
+              <select id="batch-exam" className="field" value={batchMeta.exam} onChange={(e) => setBatchMeta({ ...batchMeta, exam: e.target.value })}>
+                <option value="">Any exam</option>
+                {ALL_EXAMS.map((x) => <option key={x} value={x}>{x}</option>)}
               </select>
             </div>
             <div>
@@ -302,6 +310,13 @@ export default function QuestionBankClient({
             <div>
               <label htmlFor="gen-topic" className="flabel">Topic <span className="font-normal text-ink/40">(optional)</span></label>
               <input id="gen-topic" className="field" value={gen.topic} onChange={(e) => setGen({ ...gen, topic: e.target.value })} placeholder="e.g. Quadratic equations" />
+            </div>
+            <div>
+              <label htmlFor="gen-exam" className="flabel">Exam <span className="font-normal text-ink/40">(optional)</span></label>
+              <select id="gen-exam" className="field" value={gen.exam} onChange={(e) => setGen({ ...gen, exam: e.target.value })}>
+                <option value="">Any exam</option>
+                {ALL_EXAMS.map((x) => <option key={x} value={x}>{x}</option>)}
+              </select>
             </div>
             <div>
               <label htmlFor="gen-count" className="flabel">How many</label>
@@ -371,6 +386,13 @@ export default function QuestionBankClient({
               <input id="qb-topic" className="field" list="qb-topics" value={f.topic}
                 onChange={(e) => setF({ ...f, topic: e.target.value })} placeholder="e.g. Quadratic equations" />
               <datalist id="qb-topics">{topics.map((t) => <option key={t} value={t} />)}</datalist>
+            </div>
+            <div>
+              <label htmlFor="qb-exam" className="flabel">Exam <span className="font-normal text-ink/40">(optional)</span></label>
+              <select id="qb-exam" className="field" value={(f as any).exam ?? ""} onChange={(e) => setF({ ...f, exam: e.target.value } as any)}>
+                <option value="">Any exam</option>
+                {ALL_EXAMS.map((x) => <option key={x} value={x}>{x}</option>)}
+              </select>
             </div>
           </div>
 

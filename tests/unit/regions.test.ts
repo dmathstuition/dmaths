@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { regionByCode, levelsFor, examsFor, isKnownLevel, REGIONS, DEFAULT_REGION } from "@/lib/regions";
+import { regionByCode, levelsFor, examsFor, isKnownLevel, REGIONS, DEFAULT_REGION, ALL_EXAMS } from "@/lib/regions";
 
 describe("regions", () => {
   it("has Nigeria, UK and US", () => {
@@ -23,5 +23,11 @@ describe("regions", () => {
     expect(isKnownLevel("UK", "Year 10")).toBe(true);
     expect(isKnownLevel("NG", "Year 10")).toBe(false);
     expect(isKnownLevel("NG", null)).toBe(false);
+  });
+  it("ALL_EXAMS is the de-duplicated union across regions", () => {
+    expect(ALL_EXAMS).toContain("WAEC (WASSCE)");
+    expect(ALL_EXAMS).toContain("A-Level");
+    expect(ALL_EXAMS).toContain("SAT");
+    expect(new Set(ALL_EXAMS).size).toBe(ALL_EXAMS.length); // no dupes
   });
 });

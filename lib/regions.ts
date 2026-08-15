@@ -25,6 +25,10 @@ export const REGIONS: Region[] = [
 
 export const DEFAULT_REGION = "NG";
 
+// Every exam across all regions, de-duplicated — used to tag question-bank
+// questions so mocks can prefer questions matching a learner's exam target.
+export const ALL_EXAMS: string[] = Array.from(new Set(REGIONS.flatMap((r) => r.exams)));
+
 export function regionByCode(code: string | null | undefined): Region {
   return REGIONS.find((r) => r.code === code) ?? REGIONS[0];
 }

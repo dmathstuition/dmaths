@@ -56,6 +56,7 @@ export async function POST(req: Request) {
   const subject = String(b?.subject ?? "").trim().slice(0, 80);
   const level = String(b?.level ?? "").trim().slice(0, 40);
   const topic = String(b?.topic ?? "").trim().slice(0, 80);
+  const exam = String(b?.exam ?? "").trim().slice(0, 60);
 
   const incoming: Partial<BankQuestion>[] = Array.isArray(b?.questions)
     ? b.questions
@@ -71,16 +72,19 @@ export async function POST(req: Request) {
 
   const rows = incoming.map((q) => ({
     ...normaliseQuestion(q),
-    subject, level, topic,
+    subject, level, topic, exam,
     owner_id: staff.id,
   }));
 
   // Return the full inserted rows so the client can show them immediately,
   // without depending on a re-fetch (which the browser can serve from cache).
-  const { data, error } = await supabaseAdmin()
-    .from("question_bank")
-    .insert(rows)
-    .select("id, subject, level, topic, question, code, options, answer, owner_id, created_at");
+  const cols = "id, subject, level, topic, question, code, options, answer, owner_id, created_at";
+  const admin = supabaseAdmin();
+  let { data, error } = await admin.from("question_bank").insert(rows).select(cols);
+  // If the exam column isn't migrated yet, save without it rather than fail.
+  if (error && /column .*exam/i.test(error.message)) {
+    ({ data, error } = await admin.from("question_bank").insert(rows.map(({ exam: _e, ...r }) => r)).select(cols));
+  }
   if (error) return NextResponse.json({ error: explain(error.message) }, { status: 500 });
   return NextResponse.json({ ok: true, saved: data?.length ?? rows.length, rows: data ?? [] });
 }
@@ -102,12 +106,18 @@ export async function PATCH(req: Request) {
   const problem = validateQuestion(b);
   if (problem) return NextResponse.json({ error: problem }, { status: 400 });
 
-  const { error } = await admin.from("question_bank").update({
+  const patch: Record<string, any> = {
     ...normaliseQuestion(b),
     subject: String(b?.subject ?? "").trim().slice(0, 80),
     level: String(b?.level ?? "").trim().slice(0, 40),
     topic: String(b?.topic ?? "").trim().slice(0, 80),
-  }).eq("id", id);
+    exam: String(b?.exam ?? "").trim().slice(0, 60),
+  };
+  let { error } = await admin.from("question_bank").update(patch).eq("id", id);
+  if (error && /column .*exam/i.test(error.message)) {
+    delete patch.exam;
+    ({ error } = await admin.from("question_bank").update(patch).eq("id", id));
+  }
   if (error) return NextResponse.json({ error: explain(error.message) }, { status: 500 });
   return NextResponse.json({ ok: true });
 }
