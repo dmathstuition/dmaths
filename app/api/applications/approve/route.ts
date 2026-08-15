@@ -96,13 +96,20 @@ export async function POST(req: Request) {
 
   // 4. Generate the student code and create the profile
   const { data: code } = await admin.rpc("next_student_code");
-  const { error: profErr } = await admin.from("profiles").insert({
+  const profileRow: Record<string, any> = {
     id: created.user.id, role: "student", student_code: code,
     first_name: app.first_name, last_name: app.last_name, email: app.email,
     phone: app.phone, dob: app.dob, address: app.address, level: app.level,
     guardian_name: app.guardian_name, guardian_contact: app.guardian_contact,
     subjects: app.subjects,
-  });
+    country: (app as any).country ?? "NG", exam_target: (app as any).exam_target ?? "",
+  };
+  let { error: profErr } = await admin.from("profiles").insert(profileRow);
+  // Tolerate the international columns not being migrated yet.
+  if (profErr && /column .*(country|exam_target)/i.test(profErr.message)) {
+    delete profileRow.country; delete profileRow.exam_target;
+    ({ error: profErr } = await admin.from("profiles").insert(profileRow));
+  }
   if (profErr) {
     await admin.auth.admin.deleteUser(created.user.id); // roll back
     return NextResponse.json({ error: profErr.message }, { status: 500 });
