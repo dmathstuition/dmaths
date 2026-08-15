@@ -20,6 +20,9 @@ describe("computeAchievements", () => {
   it("returns one entry per definition", () => {
     expect(computeAchievements(base).length).toBe(ACHIEVEMENTS.length);
   });
+  it("every achievement carries a positive reward", () => {
+    expect(ACHIEVEMENTS.every((a) => a.reward > 0)).toBe(true);
+  });
   it("guards junk metrics as zero", () => {
     const list = computeAchievements({ ...base, points: -50 } as any);
     expect(list.find((a) => a.id === "first_points")!.unlocked).toBe(false);

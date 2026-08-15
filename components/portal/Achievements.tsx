@@ -1,44 +1,61 @@
-import { getUser, getProfile } from "@/lib/auth";
-import { supabaseAdmin } from "@/lib/supabase/admin";
+"use client";
+import { useEffect, useState } from "react";
 import { Icon, type IconName } from "@/components/Icons";
-import { computeAchievements, unlockedCount } from "@/lib/achievements";
+import Confetti from "@/components/ui/Confetti";
 
-// A learner's trophy room — milestones computed from their own stats. Server
-// component: reads a few counts with the service role, all degrading to 0 if a
-// source table isn't migrated yet.
-export default async function Achievements() {
-  const user = await getUser();
-  const me = await getProfile();
-  if (!user || !me) return null;
-  const admin = supabaseAdmin();
+type Achievement = {
+  id: string; name: string; desc: string; icon: string; target: number; reward: number;
+  current: number; unlocked: boolean; claimed: boolean;
+};
 
-  const head = (q: any) => q.then((r: any) => r.count ?? 0).catch(() => 0);
-  const [titles, mocks, practice, cards] = await Promise.all([
-    head(admin.from("learner_cosmetics").select("id", { count: "exact", head: true }).eq("student_id", user.id).eq("kind", "title")),
-    head(admin.from("mock_exam_sessions").select("id", { count: "exact", head: true }).eq("student_id", user.id)),
-    head(admin.from("practice_sessions").select("id", { count: "exact", head: true }).eq("student_id", user.id)),
-    head(admin.from("flashcard_reviews").select("id", { count: "exact", head: true }).eq("student_id", user.id)),
-  ]);
+// A learner's trophy room — each unlocked achievement pays a one-time bonus to
+// claim. Fetches its own state so claiming updates live.
+export default function Achievements() {
+  const [list, setList] = useState<Achievement[] | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [celebrate, setCelebrate] = useState(0);
+  const [hidden, setHidden] = useState(false);
 
-  const list = computeAchievements({
-    streak: (me as any).streak_count ?? 0,
-    points: (me as any).reward_points ?? 0,
-    avgScore: (me as any).avg_score ?? 0,
-    titles, mocks, practice, cards,
-    referrals: (me as any).referral_count ?? 0,
-  });
-  const got = unlockedCount(list);
+  useEffect(() => {
+    (async () => {
+      try {
+        const r = await fetch("/api/achievements", { cache: "no-store" });
+        const j = await r.json();
+        if (j.error || !Array.isArray(j.achievements)) { setHidden(true); return; }
+        setList(j.achievements);
+      } catch { setHidden(true); }
+    })();
+  }, []);
+
+  async function claim(id: string) {
+    setBusy(id);
+    try {
+      const r = await fetch("/api/achievements", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
+      const j = await r.json();
+      if (r.ok && j.claimed) {
+        setList((prev) => prev?.map((a) => a.id === id ? { ...a, claimed: true } : a) ?? prev);
+        if ((j.reward ?? 0) > 0) setCelebrate((c) => c + 1);
+      }
+    } finally { setBusy(null); }
+  }
+
+  if (hidden || !list) return null;
+  const got = list.filter((a) => a.unlocked).length;
+  const claimable = list.filter((a) => a.unlocked && !a.claimed).length;
 
   return (
     <div className="card neu-card p-6">
+      <div className="pointer-events-none fixed inset-0 z-[60]"><Confetti fire={celebrate > 0} key={celebrate} pieces={48} /></div>
+
       <div className="mb-4 flex items-center justify-between">
         <h2 className="flex items-center gap-2 font-display text-lg font-semibold text-ink">
           <Icon name="trophy" className="h-5 w-5 text-gold-deep" /> Achievements
         </h2>
-        <span className="rounded-full bg-gold-pale px-2.5 py-1 text-[11px] font-bold text-gold-deep">{got}/{list.length} unlocked</span>
+        <span className="rounded-full bg-gold-pale px-2.5 py-1 text-[11px] font-bold text-gold-deep">
+          {got}/{list.length}{claimable > 0 ? ` · ${claimable} to claim` : ""}
+        </span>
       </div>
 
-      {/* progress bar across all achievements */}
       <div className="mb-5 h-2 overflow-hidden rounded-full bg-line">
         <div className="h-full rounded-full bg-gradient-to-r from-gold to-gold-deep transition-[width] duration-700" style={{ width: `${Math.round((got / list.length) * 100)}%` }} />
       </div>
@@ -54,12 +71,18 @@ export default async function Achievements() {
             </span>
             <div>
               <p className={`text-[13px] font-bold ${a.unlocked ? "text-ink" : "text-ink/45"}`}>{a.name}</p>
-              <p className="mt-0.5 text-[10px] leading-tight text-ink/40">{a.unlocked ? "Unlocked" : a.desc}</p>
+              <p className="mt-0.5 text-[10px] leading-tight text-ink/40">{a.unlocked ? a.desc : a.desc}</p>
             </div>
-            {!a.unlocked && a.target > 1 && (
-              <span className="text-[10px] font-bold text-ink/35">{a.current}/{a.target}</span>
+            {a.unlocked && !a.claimed ? (
+              <button onClick={() => claim(a.id)} disabled={busy === a.id}
+                className="btn-gold !min-h-[30px] !rounded-full !px-3 !text-[11px] disabled:opacity-50">
+                {busy === a.id ? "…" : <span className="inline-flex items-center gap-1"><Icon name="coins" className="h-3 w-3" /> Claim +{a.reward}</span>}
+              </button>
+            ) : a.claimed ? (
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600"><Icon name="checkCircle" className="h-3.5 w-3.5" /> Claimed</span>
+            ) : (
+              <span className="text-[10px] font-bold text-ink/35">{a.target > 1 ? `${a.current}/${a.target}` : "Locked"} · +{a.reward}</span>
             )}
-            {a.unlocked && <span aria-hidden className="absolute right-2 top-2 text-emerald-500"><Icon name="checkCircle" className="h-4 w-4" /></span>}
           </div>
         ))}
       </div>
