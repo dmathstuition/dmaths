@@ -8,6 +8,7 @@ import WhatsAppShare from "@/components/WhatsAppShare";
 import { waNumber } from "@/lib/whatsapp";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { fileHref } from "@/lib/storageUrls";
+import { regionByCode } from "@/lib/regions";
 
 export default function StudentDetailClient({ student, initialNotes, initialRewards, subs, behaviorTypes, initialBehaviorLogs, referredByName, initialParents = [] }: {
   student: any; initialNotes: any[]; initialRewards: any[]; subs: any[];
@@ -416,6 +417,20 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
             <div className="mt-2 flex flex-wrap gap-1.5">
               {(student.subjects ?? []).map((s: string) => <span key={s} className="pill-blue">{s}</span>)}
             </div>
+            {(student.country || student.exam_target) && (
+              <div className="mt-2 flex flex-wrap gap-1.5 text-xs">
+                {student.country && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-chalk px-2.5 py-1 font-bold text-ink/60">
+                    {regionByCode(student.country).flag} {regionByCode(student.country).name}
+                  </span>
+                )}
+                {student.exam_target && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-chalk px-2.5 py-1 font-bold text-ink/60">
+                    <Icon name="graduationCap" className="h-3.5 w-3.5" /> {student.exam_target}
+                  </span>
+                )}
+              </div>
+            )}
             {((student.referral_count ?? 0) > 0 || referredByName) && (
               <div className="mt-2 flex flex-wrap gap-1.5 text-xs">
                 {(student.referral_count ?? 0) > 0 && (
