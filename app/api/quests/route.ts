@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { watDay } from "@/lib/dailyReward";
-import { buildQuests, allQuestsDone, QUEST_BONUS } from "@/lib/quests";
+import { buildQuests, allQuestsDone, dailyQuests, QUEST_BONUS } from "@/lib/quests";
 
 // Daily Quests. Progress is computed live from existing activity tables; the
 // all-clear bonus is credited once per WAT day (guarded by daily_quest_claims).
@@ -27,15 +27,19 @@ async function learner() {
 async function counts(admin: ReturnType<typeof supabaseAdmin>, userId: string) {
   const day = watDay();
   const dayStart = new Date(`${day}T00:00:00+01:00`).toISOString();
-  const [practice, cards, reward] = await Promise.all([
+  const [practice, cards, reward, mock] = await Promise.all([
     admin.from("practice_sessions").select("id", { count: "exact", head: true }).eq("student_id", userId).eq("day", day),
     admin.from("flashcard_reviews").select("id", { count: "exact", head: true }).eq("student_id", userId).gte("last_reviewed", dayStart),
     admin.from("daily_rewards").select("id", { count: "exact", head: true }).eq("student_id", userId).eq("day", day),
+    admin.from("mock_exam_sessions").select("id", { count: "exact", head: true }).eq("student_id", userId).eq("day", day),
   ]);
+  const practiceCount = practice.count ?? 0;
   return {
-    practice: practice.count ?? 0,
+    practice: practiceCount,
+    practice2: practiceCount,   // "two rounds" reads the same source
     flashcards: cards.count ?? 0,
     reward: reward.count ?? 0,
+    mock: mock.count ?? 0,
   };
 }
 
@@ -51,7 +55,7 @@ export async function GET() {
   if ("error" in gate) return gate.error;
   const admin = supabaseAdmin();
   try {
-    const quests = buildQuests(await counts(admin, gate.user.id));
+    const quests = buildQuests(await counts(admin, gate.user.id), dailyQuests(watDay()));
     let claimed = false;
     try { claimed = await claimedToday(admin, gate.user.id); } catch { /* table missing → treat as unclaimed */ }
     return NextResponse.json({ quests, allDone: allQuestsDone(quests), claimed, bonus: QUEST_BONUS });
@@ -66,7 +70,7 @@ export async function POST() {
   if ("error" in gate) return gate.error;
   const admin = supabaseAdmin();
 
-  const quests = buildQuests(await counts(admin, gate.user.id));
+  const quests = buildQuests(await counts(admin, gate.user.id), dailyQuests(watDay()));
   if (!allQuestsDone(quests)) {
     return NextResponse.json({ error: "Finish all three quests first." }, { status: 400 });
   }
