@@ -184,7 +184,7 @@ export default function ProgressClient({
           <div className="min-w-0 flex-1">
             <p className="font-display text-lg font-bold">Coach&apos;s plan</p>
             {coach ? (
-              <p className="mt-1 text-sm leading-relaxed text-white/80">{coach}</p>
+              <p className="mt-1 whitespace-pre-line text-sm leading-relaxed text-white/80">{coach}</p>
             ) : (
               <p className="mt-1 text-sm text-white/55">Let D-Maths A.I turn your results into a short focus plan for this week.</p>
             )}
