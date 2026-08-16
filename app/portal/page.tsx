@@ -15,6 +15,7 @@ import MomentumCard from "@/components/portal/MomentumCard";
 import DashboardTip from "@/components/portal/DashboardTip";
 import DailyRewardChest from "@/components/portal/DailyRewardChest";
 import DailyQuests from "@/components/portal/DailyQuests";
+import HappyHourBanner from "@/components/portal/HappyHourBanner";
 import Tour from "@/components/tour/Tour";
 import { studentTour } from "@/components/tour/steps";
 import { fmtWAT, fmtWATDate } from "@/lib/time";
@@ -173,6 +174,9 @@ export default async function StudentDashboard() {
           </div>
         </Reveal>
       </div>
+
+      {/* Happy Hour — only shows while a 2× window is live */}
+      <HappyHourBanner />
 
       {/* Daily reward chest — a reason to visit every day */}
       <Reveal delay={30}><DailyRewardChest /></Reveal>

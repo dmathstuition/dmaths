@@ -4,6 +4,7 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { schedule, flashcardReviewPoints, type Grade } from "@/lib/srs";
 import { watDay } from "@/lib/dailyReward";
 import { boostMultiplier } from "@/lib/powerups";
+import { happyHourMultiplier } from "@/lib/happyHour";
 
 const GRADES: Grade[] = ["again", "hard", "good", "easy"];
 
@@ -69,7 +70,7 @@ export async function POST(req: Request) {
       // Boost is read separately so a missing (un-migrated) column can't break
       // the reward_points read above.
       const { data: bRow } = await admin.from("profiles").select("boost_until").eq("id", user.id).single();
-      points *= boostMultiplier((bRow as any)?.boost_until); // 2× while a boost is active
+      points *= Math.max(boostMultiplier((bRow as any)?.boost_until), await happyHourMultiplier(admin)); // 2× on a boost or Happy Hour
       newTotal = Number(me?.reward_points ?? 0) + points;
       await admin.from("profiles").update({ reward_points: newTotal }).eq("id", user.id);
     }
