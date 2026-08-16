@@ -1,6 +1,7 @@
 import { supabaseServer } from "@/lib/supabase/server";
 import RewardsAdminClient from "@/components/admin/RewardsAdminClient";
 import HappyHourControl from "@/components/admin/HappyHourControl";
+import BossControl from "@/components/admin/BossControl";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +24,7 @@ export default async function AdminRewardsPage() {
 
   return (
     <div className="space-y-6">
+      <BossControl />
       <HappyHourControl />
       <RewardsAdminClient initialItems={items ?? []} initialPending={pendingWithNames} />
     </div>
