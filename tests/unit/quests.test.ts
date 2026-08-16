@@ -1,5 +1,29 @@
 import { describe, it, expect } from "vitest";
-import { buildQuests, allQuestsDone, questsCompleted, QUESTS, QUEST_BONUS } from "@/lib/quests";
+import { buildQuests, allQuestsDone, questsCompleted, dailyQuests, QUESTS, QUEST_POOL, QUEST_BONUS } from "@/lib/quests";
+
+describe("dailyQuests", () => {
+  it("is deterministic per day and returns three quests from the pool", () => {
+    const a = dailyQuests("2026-08-17");
+    const b = dailyQuests("2026-08-17");
+    expect(a).toEqual(b);
+    expect(a).toHaveLength(3);
+    const poolIds = new Set(QUEST_POOL.map((q) => q.id));
+    expect(a.every((q) => poolIds.has(q.id))).toBe(true);
+  });
+
+  it("never picks both practice variants on the same day", () => {
+    for (const d of ["2026-08-17", "2026-08-18", "2026-08-19", "2026-08-20", "2026-09-05", "2027-02-02"]) {
+      const ids = dailyQuests(d).map((q) => q.id);
+      expect(ids.filter((i) => i === "practice" || i === "practice2").length).toBeLessThanOrEqual(1);
+      expect(new Set(ids).size).toBe(ids.length); // no duplicates
+    }
+  });
+
+  it("rotates across days", () => {
+    const sets = ["2026-08-17", "2026-08-18", "2026-08-19", "2026-08-20", "2026-08-21"].map((d) => dailyQuests(d).map((q) => q.id).join(","));
+    expect(new Set(sets).size).toBeGreaterThan(1);
+  });
+});
 
 describe("buildQuests", () => {
   it("marks done at/above target and clamps current to target", () => {
