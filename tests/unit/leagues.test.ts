@@ -7,10 +7,11 @@ import {
 describe("divisionFor / divisionIndex", () => {
   it("places points in the highest tier they meet", () => {
     expect(divisionFor(0).name).toBe("Bronze");
-    expect(divisionFor(149).name).toBe("Bronze");
-    expect(divisionFor(150).name).toBe("Silver");
-    expect(divisionFor(399).name).toBe("Silver");
-    expect(divisionFor(400).name).toBe("Gold");
+    expect(divisionFor(99).name).toBe("Bronze");
+    expect(divisionFor(100).name).toBe("Silver");
+    expect(divisionFor(299).name).toBe("Silver");
+    expect(divisionFor(300).name).toBe("Gold");
+    expect(divisionFor(600).name).toBe("Platinum");
     expect(divisionFor(999999).name).toBe("Diamond");
   });
   it("treats negative / junk as Bronze", () => {
@@ -28,14 +29,14 @@ describe("nextDivision", () => {
 
 describe("progressToNext", () => {
   it("computes remaining and percent toward the next tier", () => {
-    const p = progressToNext(150); // exactly Silver start; next Gold at 400
+    const p = progressToNext(100); // exactly Silver start; next Gold at 300
     expect(p.current.name).toBe("Silver");
     expect(p.next?.name).toBe("Gold");
-    expect(p.remaining).toBe(250);
+    expect(p.remaining).toBe(200);
     expect(p.pct).toBe(0);
   });
   it("is halfway when halfway through the band", () => {
-    const p = progressToNext(275); // Silver 150 → Gold 400, midpoint 275
+    const p = progressToNext(200); // Silver 100 → Gold 300, midpoint 200
     expect(p.pct).toBe(50);
   });
   it("is full and next=null at the top division", () => {
