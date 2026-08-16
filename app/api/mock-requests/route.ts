@@ -153,5 +153,24 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, count: rows.length });
   }
 
+  // ── Staff: delete a request/mock set for a learner ─────────────
+  // Removes the mock_requests row outright (any status) — used to cancel a mock
+  // or clean up while testing. Doesn't touch a completed mock_exam_sessions
+  // record, only the request that opened it.
+  if (action === "delete") {
+    const id = String(body?.id ?? "");
+    if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
+    const { data: r } = await admin.from("mock_requests").select("student_id").eq("id", id).maybeSingle();
+    if (!r) return NextResponse.json({ error: "Request not found." }, { status: 404 });
+    // A tutor may only delete mocks for learners on their own roster.
+    if (staff.role === "tutor") {
+      const roster = new Set(await getRoster(staff.id));
+      if (!roster.has(r.student_id)) return NextResponse.json({ error: "That learner isn't on your roster." }, { status: 403 });
+    }
+    const { error } = await admin.from("mock_requests").delete().eq("id", id);
+    if (error) return NextResponse.json({ error: explain(error.message) }, { status: 500 });
+    return NextResponse.json({ ok: true });
+  }
+
   return NextResponse.json({ error: "Unknown action." }, { status: 400 });
 }
