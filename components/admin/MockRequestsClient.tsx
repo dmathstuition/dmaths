@@ -51,6 +51,12 @@ export default function MockRequestsClient({ students }: { students: Student[] }
     finally { setBusy(null); }
   }
 
+  async function del(r: Req) {
+    if (!confirm(`Delete the ${r.subject || "mock"} exam set for ${nameOf(r.student)}? This can't be undone.`)) return;
+    const ok = await act({ action: "delete", id: r.id }, `x:${r.id}`);
+    if (ok) setMsg("Mock deleted.");
+  }
+
   const pending = requests.filter((r) => r.status === "pending");
   const resolved = requests.filter((r) => r.status !== "pending").slice(0, 20);
 
@@ -111,6 +117,8 @@ export default function MockRequestsClient({ students }: { students: Student[] }
                       className="btn-gold !min-h-[38px] !rounded-xl">{busy === `a:${r.id}` ? "…" : "Approve"}</button>
                     <button onClick={() => act({ action: "decline", id: r.id }, `d:${r.id}`)} disabled={busy === `d:${r.id}`}
                       className="btn-ghost !min-h-[38px] !rounded-xl">Decline</button>
+                    <button onClick={() => del(r)} disabled={busy === `x:${r.id}`} aria-label="Delete this mock"
+                      className="!min-h-[38px] rounded-xl px-3 text-sm font-bold text-red-500 hover:bg-red-50">{busy === `x:${r.id}` ? "…" : "Delete"}</button>
                   </div>
                 </div>
               );
@@ -166,6 +174,10 @@ export default function MockRequestsClient({ students }: { students: Student[] }
                     <p className="text-[11px] text-ink/45">{r.subject || "Any"} · {r.level || "—"}{r.scheduled_for ? ` · opens ${new Date(r.scheduled_for).toLocaleString("en-NG", { dateStyle: "short", timeStyle: "short" })}` : ""}</p>
                   </div>
                   <span className={`flex-shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold ${sm.cls}`}>{sm.label}</span>
+                  <button onClick={() => del(r)} disabled={busy === `x:${r.id}`} aria-label="Delete this mock"
+                    className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-ink/35 hover:bg-red-50 hover:text-red-600">
+                    <Icon name="close" className="h-4 w-4" />
+                  </button>
                 </div>
               );
             })}
