@@ -6,7 +6,8 @@ import CountUp from "@/components/landing/CountUp";
 import { PRACTICE_COUNTS } from "@/lib/practice";
 
 type Q = { id: string; question: string; code?: string; options: string[] };
-type Meta = { subjects: string[]; levels: string[]; total: number };
+type WeakTopic = { subject: string; topic: string; accuracy: number; total: number };
+type Meta = { subjects: string[]; levels: string[]; total: number; weak?: WeakTopic[] };
 type Result = { id: string; correct: boolean; answer: number; chosen: number };
 type Phase = "setup" | "loading" | "quiz" | "result";
 
@@ -24,6 +25,7 @@ export default function PracticeClient({ mySubjects, myLevel }: { mySubjects: st
 
   const [score, setScore] = useState<{ correct: number; total: number; points: number; capReached: boolean; results: Result[] } | null>(null);
   const [celebrate, setCelebrate] = useState(0);
+  const [recMode, setRecMode] = useState(false);
   const [explains, setExplains] = useState<Record<string, string>>({});
   const [explaining, setExplaining] = useState<string | null>(null);
 
@@ -59,15 +61,18 @@ export default function PracticeClient({ mySubjects, myLevel }: { mySubjects: st
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function start() {
+  async function start(recommend = false) {
     setErr(""); setPhase("loading");
     const qs = new URLSearchParams({ count: String(count) });
-    if (subject) qs.set("subject", subject);
-    if (level) qs.set("level", level);
+    if (recommend) qs.set("recommend", "1");
+    else { if (subject) qs.set("subject", subject); if (level) qs.set("level", level); }
     try {
       const r = await fetch(`/api/practice?${qs}`);
       const j = await r.json();
+      if (recommend && j.needMore) { setErr("Do a few practice rounds first so we can spot your weak topics."); setPhase("setup"); return; }
+      if (recommend && j.needQuestions) { setErr("No questions yet for your weak topics — try a normal round."); setPhase("setup"); return; }
       if (!j.questions?.length) { setErr("No questions match that filter yet — try 'Any'."); setPhase("setup"); return; }
+      setRecMode(recommend);
       setQuestions(j.questions); setPicks({}); setIdx(0); setScore(null); setPhase("quiz");
     } catch { setErr("Couldn't start — please try again."); setPhase("setup"); }
   }
@@ -87,7 +92,7 @@ export default function PracticeClient({ mySubjects, myLevel }: { mySubjects: st
     try {
       const r = await fetch("/api/practice", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ responses, subject, level }),
+        body: JSON.stringify({ responses, subject: recMode ? "" : subject, level: recMode ? "" : level }),
       });
       const j = await r.json();
       if (!r.ok) { setErr(j.error || "Couldn't grade — please try again."); setPhase("quiz"); return; }
@@ -128,6 +133,24 @@ export default function PracticeClient({ mySubjects, myLevel }: { mySubjects: st
             </div>
           ) : (
             <>
+              {!!meta?.weak?.length && (
+                <div className="rounded-2xl border border-gold/40 bg-gold-pale/50 p-4">
+                  <p className="flex items-center gap-2 text-sm font-bold text-ink">
+                    <Icon name="target" className="h-4 w-4 text-gold-deep" /> Recommended for you
+                  </p>
+                  <p className="mt-0.5 text-xs text-ink/55">A round on the topics you find hardest right now:</p>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {meta.weak!.slice(0, 3).map((w) => (
+                      <span key={`${w.subject}-${w.topic}`} className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-[12px] font-bold text-ink/70">
+                        {w.topic} <span className="text-red-500">{w.accuracy}%</span>
+                      </span>
+                    ))}
+                  </div>
+                  <button onClick={() => start(true)} className="btn-gold mt-3 !rounded-xl !py-2.5">
+                    <span className="inline-flex items-center gap-1.5">Practice these <Icon name="zap" className="h-4 w-4" /></span>
+                  </button>
+                </div>
+              )}
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="block">
                   <span className="flabel">Subject</span>
@@ -155,7 +178,7 @@ export default function PracticeClient({ mySubjects, myLevel }: { mySubjects: st
                   ))}
                 </div>
               </div>
-              <button onClick={start} disabled={!meta} className="btn-gold w-full !rounded-xl">
+              <button onClick={() => start(false)} disabled={!meta} className="btn-gold w-full !rounded-xl">
                 <span className="inline-flex items-center gap-1.5">Start practice <Icon name="zap" className="h-4 w-4" /></span>
               </button>
               <p className="text-center text-xs text-ink/40">Correct answers earn reward points (up to a daily cap) — it counts toward your leaderboard total.</p>

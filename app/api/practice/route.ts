@@ -6,6 +6,7 @@ import { pickRandom } from "@/lib/questionBank";
 import { gradeAnswers, practicePoints, PRACTICE_DAILY_CAP, type Response } from "@/lib/practice";
 import { aggregateTopics } from "@/lib/skillTree";
 import { recordTopicMastery } from "@/lib/topicMastery";
+import { weakestTopics } from "@/lib/adaptivePractice";
 import { happyHourMultiplier } from "@/lib/happyHour";
 
 // Self-practice quiz. Questions come from the staff-only question_bank, served
@@ -37,17 +38,44 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const subject = url.searchParams.get("subject")?.trim() ?? "";
   const level = url.searchParams.get("level")?.trim() ?? "";
+  const recommend = !!url.searchParams.get("recommend");
   const count = Number(url.searchParams.get("count")) || 0;
   const admin = supabaseAdmin();
 
-  // Meta: distinct subjects & levels present in the bank.
-  if (!count) {
-    const { data, error } = await admin.from("question_bank").select("subject, level").limit(3000);
-    if (error) return NextResponse.json({ error: explain(error.message), subjects: [], levels: [], total: 0 }, { status: 200 });
+  // Read this learner's weakest topics from their mastery tallies (best-effort).
+  const myWeakTopics = async () => {
+    const { data } = await admin.from("topic_mastery")
+      .select("subject, topic, correct, total").eq("student_id", gate.user.id);
+    return weakestTopics(data ?? []);
+  };
+
+  // Meta: distinct subjects & levels present in the bank, plus weak topics so the
+  // client can offer a "Recommended for you" round.
+  if (!count && !recommend) {
+    const [{ data, error }, weak] = await Promise.all([
+      admin.from("question_bank").select("subject, level").limit(3000),
+      myWeakTopics().catch(() => []),
+    ]);
+    if (error) return NextResponse.json({ error: explain(error.message), subjects: [], levels: [], total: 0, weak: [] }, { status: 200 });
     const rows = data ?? [];
     const subjects = Array.from(new Set(rows.map((r: any) => r.subject).filter(Boolean))).sort();
     const levels = Array.from(new Set(rows.map((r: any) => r.level).filter(Boolean))).sort();
-    return NextResponse.json({ subjects, levels, total: rows.length });
+    return NextResponse.json({ subjects, levels, total: rows.length, weak });
+  }
+
+  // Recommended round: target the learner's weakest topics.
+  if (recommend) {
+    const wanted = Math.min(15, Math.max(1, count || 10));
+    const weak = await myWeakTopics().catch(() => []);
+    if (!weak.length) return NextResponse.json({ questions: [], focus: [], needMore: true });
+    const topics = Array.from(new Set(weak.map((w) => w.topic)));
+    const { data, error } = await admin.from("question_bank")
+      .select("id, question, code, options, answer").in("topic", topics).limit(400);
+    if (error) return NextResponse.json({ error: explain(error.message), questions: [] }, { status: 200 });
+    const picked = pickRandom(data ?? [], wanted);
+    if (!picked.length) return NextResponse.json({ questions: [], focus: weak, needQuestions: true });
+    const questions = picked.map((r: any) => ({ id: r.id, question: r.question, code: r.code ?? "", options: r.options ?? [] }));
+    return NextResponse.json({ questions, focus: weak, recommended: true });
   }
 
   // A round: pull the matching pool, pick N at random, strip the answers.
