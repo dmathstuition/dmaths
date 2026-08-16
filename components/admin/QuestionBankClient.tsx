@@ -1,11 +1,11 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/Icons";
 import ConfirmModal from "@/components/ConfirmModal";
 import { useToast } from "@/components/Toast";
 import EmptyState from "@/components/ui/EmptyState";
-import { MAX_OPTIONS, validateQuestion, parseQuestionBatch, type BankRow } from "@/lib/questionBank";
+import { MAX_OPTIONS, GROUP_TARGET, groupReady, summariseGroups, validateQuestion, parseQuestionBatch, type BankRow } from "@/lib/questionBank";
 import { ALL_EXAMS } from "@/lib/regions";
 
 const SUBJECTS = ["Algebra", "Calculus", "Statistics", "Geometry", "Further Mathematics",
@@ -13,7 +13,7 @@ const SUBJECTS = ["Algebra", "Calculus", "Statistics", "Geometry", "Further Math
 const LEVELS = ["", "Primary", "JSS 1", "JSS 2", "JSS 3", "SS 1", "SS 2", "SS 3"];
 
 const BLANK = {
-  id: "", subject: SUBJECTS[0], level: "", topic: "", exam: "",
+  id: "", subject: SUBJECTS[0], level: "", topic: "", exam: "", group_name: "",
   question: "", code: "", options: ["", "", "", ""], answer: 0,
 };
 
@@ -37,10 +37,24 @@ export default function QuestionBankClient({
   const [subject, setSubject] = useState("");
   const [level, setLevel] = useState("");
   const [search, setSearch] = useState("");
+  const [group, setGroup] = useState("");
+
+  // Named groups + their counts, loaded across the whole bank (not just the page
+  // of rows shown), so readiness (≥ GROUP_TARGET) is accurate.
+  const [groups, setGroups] = useState<{ name: string; count: number }[]>(() => summariseGroups(initial as any));
+  async function loadGroups() {
+    try {
+      const res = await fetch("/api/question-bank?groups=1", { cache: "no-store" });
+      const j = await res.json().catch(() => ({}));
+      if (Array.isArray(j.groups)) setGroups(j.groups);
+    } catch { /* keep what we have */ }
+  }
+  useEffect(() => { loadGroups(); }, []);
+  const groupNames = useMemo(() => groups.map((g) => g.name), [groups]);
 
   // ── A.I question generator ──
   const [genOpen, setGenOpen] = useState(false);
-  const [gen, setGen] = useState({ subject: SUBJECTS[0], level: "", topic: "", count: 5, exam: "" });
+  const [gen, setGen] = useState({ subject: SUBJECTS[0], level: "", topic: "", count: 5, exam: "", group_name: "" });
   const [genBusy, setGenBusy] = useState(false);
   const [genErr, setGenErr] = useState("");
   const [generated, setGenerated] = useState<{ question: string; options: string[]; answer: number }[]>([]);
@@ -65,7 +79,7 @@ export default function QuestionBankClient({
     try {
       const res = await fetch("/api/question-bank", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ questions: generated, subject: gen.subject, level: gen.level, topic: gen.topic, exam: gen.exam }),
+        body: JSON.stringify({ questions: generated, subject: gen.subject, level: gen.level, topic: gen.topic, exam: gen.exam, group_name: gen.group_name }),
       });
       const j = await res.json().catch(() => ({}));
       setGenBusy(false);
@@ -74,8 +88,9 @@ export default function QuestionBankClient({
         setGenErr(msg); push(msg, "error");   // keep `generated` so nothing is lost
         return;
       }
-      push(`${n} question${n === 1 ? "" : "s"} saved to the bank.`, "success");
+      push(`${n} question${n === 1 ? "" : "s"} saved${gen.group_name ? ` to “${gen.group_name}”` : " to the bank"}.`, "success");
       setGenerated([]); setGenOpen(false);
+      loadGroups();
       // Clear the filters so the newly-saved questions are visible in the list.
       setSubject(""); setLevel(""); setSearch("");
       // Show the saved rows immediately (don't wait on a possibly-cached refetch).
@@ -98,7 +113,7 @@ export default function QuestionBankClient({
   // ── Batch import: paste many questions, tag them all with one year-group ──
   const [batchOpen, setBatchOpen] = useState(false);
   const [batchText, setBatchText] = useState("");
-  const [batchMeta, setBatchMeta] = useState({ subject: SUBJECTS[0], level: "", topic: "", exam: "" });
+  const [batchMeta, setBatchMeta] = useState({ subject: SUBJECTS[0], level: "", topic: "", exam: "", group_name: "" });
   const [batchBusy, setBatchBusy] = useState(false);
   const [batchErr, setBatchErr] = useState("");
   const parsed = useMemo(() => parseQuestionBatch(batchText), [batchText]);
@@ -109,14 +124,15 @@ export default function QuestionBankClient({
     try {
       const res = await fetch("/api/question-bank", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ questions: parsed.questions, subject: batchMeta.subject, level: batchMeta.level, topic: batchMeta.topic, exam: batchMeta.exam }),
+        body: JSON.stringify({ questions: parsed.questions, subject: batchMeta.subject, level: batchMeta.level, topic: batchMeta.topic, exam: batchMeta.exam, group_name: batchMeta.group_name }),
       });
       const j = await res.json().catch(() => ({}));
       setBatchBusy(false);
       if (!res.ok) { const m = j.error || "Couldn't save the batch."; setBatchErr(m); push(m, "error"); return; }
       const n = parsed.questions.length;
-      push(`${n} question${n === 1 ? "" : "s"} saved to ${batchMeta.level || "the bank"}.`, "success");
+      push(`${n} question${n === 1 ? "" : "s"} saved${batchMeta.group_name ? ` to “${batchMeta.group_name}”` : ` to ${batchMeta.level || "the bank"}`}.`, "success");
       setBatchText(""); setBatchOpen(false);
+      loadGroups();
       setSubject(""); setLevel(""); setSearch("");
       if (Array.isArray(j.rows) && j.rows.length) { setRows((prev) => [...(j.rows as BankRow[]), ...prev]); router.refresh(); }
       else { await reload(); }
@@ -130,9 +146,10 @@ export default function QuestionBankClient({
     return rows.filter((r) =>
       (!subject || r.subject === subject) &&
       (!level || r.level === level) &&
+      (!group || ((r as any).group_name ?? "") === group) &&
       (!needle || r.question.toLowerCase().includes(needle) || (r.topic ?? "").toLowerCase().includes(needle)),
     );
-  }, [rows, subject, level, search]);
+  }, [rows, subject, level, group, search]);
 
   const topics = useMemo(
     () => [...new Set(rows.map((r) => r.topic).filter(Boolean))].sort(),
@@ -148,7 +165,8 @@ export default function QuestionBankClient({
 
   function edit(r: BankRow) {
     setF({
-      id: r.id, subject: r.subject || SUBJECTS[0], level: r.level ?? "", topic: r.topic ?? "", exam: (r as any).exam ?? "",
+      id: r.id, subject: r.subject || SUBJECTS[0], level: r.level ?? "", topic: r.topic ?? "",
+      exam: (r as any).exam ?? "", group_name: (r as any).group_name ?? "",
       question: r.question, code: r.code ?? "",
       options: [...(r.options ?? [])], answer: r.answer ?? 0,
     });
@@ -171,6 +189,7 @@ export default function QuestionBankClient({
     push(f.id ? "Question updated." : "Question saved to the bank.", "success");
     setShowForm(false);
     setF({ ...BLANK });
+    loadGroups();
     // A brand-new question comes back in `rows`; show it right away. Edits refetch.
     if (!f.id && Array.isArray(j.rows) && j.rows.length) {
       setSubject(""); setLevel(""); setSearch("");
@@ -188,6 +207,7 @@ export default function QuestionBankClient({
     if (!res.ok) { push(j.error || "Could not delete that question.", "error"); return; }
     setRows((rs) => rs.filter((x) => x.id !== r.id));
     push("Question removed.", "success");
+    loadGroups();
   }
 
   function setOption(i: number, value: string) {
@@ -264,6 +284,11 @@ export default function QuestionBankClient({
               <label htmlFor="batch-topic" className="flabel">Topic (optional)</label>
               <input id="batch-topic" className="field" value={batchMeta.topic} onChange={(e) => setBatchMeta({ ...batchMeta, topic: e.target.value })} placeholder="e.g. Algebra" />
             </div>
+            <div>
+              <label htmlFor="batch-group" className="flabel">Group / set (optional)</label>
+              <input id="batch-group" className="field" list="qb-groups-batch" value={batchMeta.group_name} onChange={(e) => setBatchMeta({ ...batchMeta, group_name: e.target.value })} placeholder="e.g. SS3 Algebra Mock Set" />
+              <datalist id="qb-groups-batch">{groupNames.map((g) => <option key={g} value={g} />)}</datalist>
+            </div>
           </div>
           <textarea value={batchText} onChange={(e) => setBatchText(e.target.value)} rows={10}
             className="field resize-y font-mono text-[13px]"
@@ -317,6 +342,11 @@ export default function QuestionBankClient({
                 <option value="">Any exam</option>
                 {ALL_EXAMS.map((x) => <option key={x} value={x}>{x}</option>)}
               </select>
+            </div>
+            <div>
+              <label htmlFor="gen-group" className="flabel">Group / set <span className="font-normal text-ink/40">(optional)</span></label>
+              <input id="gen-group" className="field" list="qb-groups-gen" value={gen.group_name} onChange={(e) => setGen({ ...gen, group_name: e.target.value })} placeholder="e.g. SS3 Algebra Mock Set" />
+              <datalist id="qb-groups-gen">{groupNames.map((g) => <option key={g} value={g} />)}</datalist>
             </div>
             <div>
               <label htmlFor="gen-count" className="flabel">How many</label>
@@ -394,6 +424,12 @@ export default function QuestionBankClient({
                 {ALL_EXAMS.map((x) => <option key={x} value={x}>{x}</option>)}
               </select>
             </div>
+            <div>
+              <label htmlFor="qb-group" className="flabel">Group / set <span className="font-normal text-ink/40">(optional)</span></label>
+              <input id="qb-group" className="field" list="qb-groups" value={(f as any).group_name ?? ""}
+                onChange={(e) => setF({ ...f, group_name: e.target.value } as any)} placeholder="e.g. SS3 Algebra Mock Set" />
+              <datalist id="qb-groups">{groupNames.map((g) => <option key={g} value={g} />)}</datalist>
+            </div>
           </div>
 
           <div>
@@ -457,6 +493,37 @@ export default function QuestionBankClient({
         </div>
       )}
 
+      {/* ── Groups overview ───────────────────────────────────────── */}
+      {groups.length > 0 && (
+        <div className="card p-5">
+          <div className="mb-3 flex items-center gap-2">
+            <Icon name="materials" className="h-5 w-5 text-gold-deep" />
+            <h2 className="font-display text-lg font-semibold">Groups</h2>
+            <span className="text-sm text-ink/45">— a set is mock-ready at {GROUP_TARGET} questions</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {groups.map((g) => {
+              const ready = groupReady(g.count);
+              const active = group === g.name;
+              return (
+                <button key={g.name} onClick={() => setGroup(active ? "" : g.name)}
+                  aria-pressed={active}
+                  className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-bold transition ${
+                    active ? "border-gold bg-gold-pale text-gold-deep"
+                    : "border-line bg-white text-ink/70 hover:border-gold/50"}`}>
+                  <span>{g.name}</span>
+                  <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-extrabold ${
+                    ready ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>
+                    {ready ? <Icon name="checkCircle" className="h-3 w-3" /> : null}
+                    {g.count}{ready ? "" : `/${GROUP_TARGET}`}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Filters */}
       <div className="flex flex-wrap items-end gap-3">
         <div>
@@ -473,6 +540,15 @@ export default function QuestionBankClient({
             {LEVELS.filter(Boolean).map((l) => <option key={l} value={l}>{l}</option>)}
           </select>
         </div>
+        {groupNames.length > 0 && (
+          <div>
+            <label htmlFor="qb-filter-group" className="flabel">Group / set</label>
+            <select id="qb-filter-group" className="field !w-auto" value={group} onChange={(e) => setGroup(e.target.value)}>
+              <option value="">All groups</option>
+              {groupNames.map((g) => <option key={g} value={g}>{g}</option>)}
+            </select>
+          </div>
+        )}
         <div className="min-w-[200px] flex-1">
           <label htmlFor="qb-search" className="flabel">Search</label>
           <input id="qb-search" className="field" value={search} onChange={(e) => setSearch(e.target.value)}
@@ -496,6 +572,7 @@ export default function QuestionBankClient({
                     <span className="pill-gold">{r.subject || "General"}</span>
                     {r.level && <span className="pill-blue">{r.level}</span>}
                     {r.topic && <span className="pill bg-chalk text-ink/60">{r.topic}</span>}
+                    {(r as any).group_name && <span className="pill bg-gold-pale text-gold-deep">◆ {(r as any).group_name}</span>}
                   </div>
                   <p className="mt-2 whitespace-pre-wrap font-semibold text-ink">{r.question}</p>
                   {r.code && (

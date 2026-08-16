@@ -17,9 +17,33 @@ export type BankRow = BankQuestion & {
   subject: string;
   level: string;
   topic: string;
+  exam?: string;
+  group_name?: string;   // a named set this question belongs to (optional)
 };
 
 export const MAX_OPTIONS = 6;
+
+// A named group is "mock-ready" once it holds enough questions to build a full
+// paper from. Staff group questions under a name (e.g. "SS3 Algebra Mock Set")
+// and aim for at least this many.
+export const GROUP_TARGET = 20;
+export function groupReady(count: number): boolean {
+  return count >= GROUP_TARGET;
+}
+
+// Count questions per named group (blank names ignored), sorted by name. Pure so
+// the admin's group overview and its readiness badges can be unit-tested.
+export function summariseGroups(rows: { group_name?: string | null }[]): { name: string; count: number }[] {
+  const counts = new Map<string, number>();
+  for (const r of rows ?? []) {
+    const name = String(r?.group_name ?? "").trim();
+    if (!name) continue;
+    counts.set(name, (counts.get(name) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
 
 // A question is usable only if it has text, at least two choices, and an answer
 // that actually points at one of them. Returns the reason so the UI can say it.

@@ -1,5 +1,40 @@
 import { describe, it, expect } from "vitest";
-import { validateQuestion, normaliseQuestion, pickRandom, toCbtQuestions, MAX_OPTIONS, parseQuestionBatch } from "@/lib/questionBank";
+import { validateQuestion, normaliseQuestion, pickRandom, toCbtQuestions, MAX_OPTIONS, parseQuestionBatch, summariseGroups, groupReady, GROUP_TARGET } from "@/lib/questionBank";
+
+describe("summariseGroups", () => {
+  it("counts questions per named group, ignoring blanks, sorted by name", () => {
+    const rows = [
+      { group_name: "Beta Set" },
+      { group_name: "Alpha Set" },
+      { group_name: "Beta Set" },
+      { group_name: "" },
+      { group_name: null },
+      {},
+    ];
+    expect(summariseGroups(rows)).toEqual([
+      { name: "Alpha Set", count: 1 },
+      { name: "Beta Set", count: 2 },
+    ]);
+  });
+
+  it("trims names and merges ones that differ only by whitespace", () => {
+    expect(summariseGroups([{ group_name: "Set A" }, { group_name: "  Set A " }]))
+      .toEqual([{ name: "Set A", count: 2 }]);
+  });
+
+  it("returns an empty array for no input", () => {
+    expect(summariseGroups([])).toEqual([]);
+    expect(summariseGroups(undefined as any)).toEqual([]);
+  });
+});
+
+describe("groupReady", () => {
+  it("is ready only at or above the target", () => {
+    expect(groupReady(GROUP_TARGET - 1)).toBe(false);
+    expect(groupReady(GROUP_TARGET)).toBe(true);
+    expect(groupReady(GROUP_TARGET + 5)).toBe(true);
+  });
+});
 
 describe("parseQuestionBatch", () => {
   it("parses multiple blocks with the correct option flagged by *", () => {
