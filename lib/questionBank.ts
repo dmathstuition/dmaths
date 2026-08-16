@@ -8,6 +8,7 @@
 export type BankQuestion = {
   question: string;
   code?: string;
+  image_url?: string;  // optional figure shown with the question
   options: string[];
   answer: number;      // 0-based index into options
 };
@@ -67,6 +68,7 @@ export function normaliseQuestion(q: Partial<BankQuestion>): BankQuestion {
   return {
     question: String(q.question ?? "").trim().slice(0, 2000),
     code: String(q.code ?? "").trim().slice(0, 4000),
+    image_url: String(q.image_url ?? "").trim().slice(0, 500),
     options,
     answer: Math.max(0, Math.min(options.length - 1, Math.round(Number(q.answer) || 0))),
   };
@@ -140,6 +142,7 @@ export function toCbtQuestions(rows: BankQuestion[]): (BankQuestion & { id: numb
     id: i + 1,
     question: r.question,
     code: r.code ?? "",
+    image_url: r.image_url ?? "",
     options: r.options,
     answer: r.answer,
   }));

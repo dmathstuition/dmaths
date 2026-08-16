@@ -36,6 +36,21 @@ describe("groupReady", () => {
   });
 });
 
+describe("question images", () => {
+  it("normaliseQuestion keeps and trims an image_url", () => {
+    const q = normaliseQuestion({ question: "See the figure", options: ["a", "b"], answer: 0, image_url: "  https://x/img.png  " });
+    expect(q.image_url).toBe("https://x/img.png");
+  });
+  it("normaliseQuestion defaults a missing image_url to blank", () => {
+    expect(normaliseQuestion({ question: "q", options: ["a", "b"], answer: 0 }).image_url).toBe("");
+  });
+  it("toCbtQuestions carries the image through to the stored test", () => {
+    const out = toCbtQuestions([{ question: "q", options: ["a", "b"], answer: 1, image_url: "https://x/i.png" }]);
+    expect(out[0].image_url).toBe("https://x/i.png");
+    expect(out[0].id).toBe(1);
+  });
+});
+
 describe("parseQuestionBatch", () => {
   it("parses multiple blocks with the correct option flagged by *", () => {
     const text = `What is 2 + 2?

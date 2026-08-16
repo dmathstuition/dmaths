@@ -20,6 +20,17 @@ const explain = (m: string) =>
     ? "Practice needs migration-practice.sql (and migration-question-bank.sql) — run them in Supabase."
     : m;
 
+const Q_COLS = "id, question, code, image_url, options, answer";
+const Q_COLS_BASE = "id, question, code, options, answer";
+
+// Run a question_bank query built by `build`, retrying without image_url when
+// that column hasn't been migrated yet.
+async function withImageFallback(build: (cols: string) => any) {
+  let { data, error } = await build(Q_COLS);
+  if (error && /column .*image_url/i.test(error.message)) ({ data, error } = await build(Q_COLS_BASE));
+  return { data, error };
+}
+
 async function learner() {
   const supa = supabaseServer();
   const { data: { user } } = await supa.auth.getUser();
@@ -69,25 +80,26 @@ export async function GET(req: Request) {
     const weak = await myWeakTopics().catch(() => []);
     if (!weak.length) return NextResponse.json({ questions: [], focus: [], needMore: true });
     const topics = Array.from(new Set(weak.map((w) => w.topic)));
-    const { data, error } = await admin.from("question_bank")
-      .select("id, question, code, options, answer").in("topic", topics).limit(400);
+    const { data, error } = await withImageFallback((cols) => admin.from("question_bank").select(cols).in("topic", topics).limit(400));
     if (error) return NextResponse.json({ error: explain(error.message), questions: [] }, { status: 200 });
     const picked = pickRandom(data ?? [], wanted);
     if (!picked.length) return NextResponse.json({ questions: [], focus: weak, needQuestions: true });
-    const questions = picked.map((r: any) => ({ id: r.id, question: r.question, code: r.code ?? "", options: r.options ?? [] }));
+    const questions = picked.map((r: any) => ({ id: r.id, question: r.question, code: r.code ?? "", image_url: r.image_url ?? "", options: r.options ?? [] }));
     return NextResponse.json({ questions, focus: weak, recommended: true });
   }
 
   // A round: pull the matching pool, pick N at random, strip the answers.
-  let q = admin.from("question_bank").select("id, question, code, options, answer").limit(400);
-  if (subject) q = q.eq("subject", subject);
-  if (level) q = q.eq("level", level);
-  const { data, error } = await q;
+  const { data, error } = await withImageFallback((cols) => {
+    let q = admin.from("question_bank").select(cols).limit(400);
+    if (subject) q = q.eq("subject", subject);
+    if (level) q = q.eq("level", level);
+    return q;
+  });
   if (error) return NextResponse.json({ error: explain(error.message), questions: [] }, { status: 200 });
 
   const wanted = Math.min(15, Math.max(1, count));
   const picked = pickRandom(data ?? [], wanted);
-  const questions = picked.map((r: any) => ({ id: r.id, question: r.question, code: r.code ?? "", options: r.options ?? [] }));
+  const questions = picked.map((r: any) => ({ id: r.id, question: r.question, code: r.code ?? "", image_url: r.image_url ?? "", options: r.options ?? [] }));
   return NextResponse.json({ questions, subject, level });
 }
 

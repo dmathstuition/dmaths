@@ -65,9 +65,10 @@ export async function GET(req: Request) {
       if (rq.level) q = q.eq("level", rq.level); // scoped to the learner's class
       return q;
     };
-    let { data, error } = await filtered("id, question, code, options, exam");
+    let { data, error } = await filtered("id, question, code, image_url, options, exam");
     let examUsable = true;
-    if (error && /column .*exam/i.test(error.message)) { examUsable = false; ({ data, error } = await filtered("id, question, code, options")); }
+    // Fall back to the base columns if exam / image_url aren't migrated yet.
+    if (error && /column .*(exam|image_url)/i.test(error.message)) { examUsable = false; ({ data, error } = await filtered("id, question, code, options")); }
     if (error) return NextResponse.json({ error: explain(error.message), questions: [] }, { status: 200 });
 
     // Prefer questions tagged with the learner's exam, filling from the rest of
@@ -81,7 +82,7 @@ export async function GET(req: Request) {
     } else {
       picked = pickRandom(rows, p.count);
     }
-    const questions = picked.map((r: any) => ({ id: r.id, question: r.question, code: r.code ?? "", options: r.options ?? [] }));
+    const questions = picked.map((r: any) => ({ id: r.id, question: r.question, code: r.code ?? "", image_url: r.image_url ?? "", options: r.options ?? [] }));
     return NextResponse.json({ questions, preset: p.key, minutes: p.minutes, subject: rq.subject, level: rq.level });
   }
 

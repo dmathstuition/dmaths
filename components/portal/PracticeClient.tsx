@@ -5,7 +5,7 @@ import Confetti from "@/components/ui/Confetti";
 import CountUp from "@/components/landing/CountUp";
 import { PRACTICE_COUNTS } from "@/lib/practice";
 
-type Q = { id: string; question: string; code?: string; options: string[] };
+type Q = { id: string; question: string; code?: string; image_url?: string; options: string[] };
 type WeakTopic = { subject: string; topic: string; accuracy: number; total: number };
 type Meta = { subjects: string[]; levels: string[]; total: number; weak?: WeakTopic[] };
 type Result = { id: string; correct: boolean; answer: number; chosen: number };
@@ -205,6 +205,7 @@ export default function PracticeClient({ mySubjects, myLevel }: { mySubjects: st
           </div>
 
           <p className="font-display text-lg font-bold text-ink">{cur.question}</p>
+          {cur.image_url && <img src={cur.image_url} alt="Question figure" className="mt-3 max-h-72 rounded-xl border border-line" />}
           {cur.code && <pre className="mt-3 overflow-x-auto rounded-xl bg-board p-4 text-sm text-gold-soft"><code>{cur.code}</code></pre>}
 
           <div className="mt-4 space-y-2.5">

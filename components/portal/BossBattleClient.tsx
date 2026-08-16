@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Confetti from "@/components/ui/Confetti";
 import { Icon } from "@/components/Icons";
 
-type Q = { id: string; question: string; code: string; options: string[] };
+type Q = { id: string; question: string; code: string; image_url?: string; options: string[] };
 type Info = {
   boss: { name: string; questionCount: number; passPct: number; reward: number } | null;
   attempt: { score: number; total: number; passed: boolean; points: number } | null;
@@ -101,6 +101,7 @@ export default function BossBattleClient() {
           {questions.map((q, i) => (
             <div key={q.id} className="card p-5">
               <p className="font-semibold text-ink"><span className="text-ink/40">{i + 1}.</span> {q.question}</p>
+              {q.image_url && <img src={q.image_url} alt="Question figure" className="mt-2 max-h-64 rounded-xl border border-line" />}
               {q.code && <pre className="mt-2 overflow-x-auto rounded-xl bg-[#0b2036] p-3 font-mono text-[12px] text-slate-100">{q.code}</pre>}
               <div className="mt-3 space-y-2">
                 {q.options.map((o, j) => (

@@ -106,12 +106,15 @@ export async function POST(req: Request) {
       .select("score, total, passed, points").eq("student_id", user.id).eq("week", week).maybeSingle();
     if (prior) return NextResponse.json({ done: true, attempt: prior });
 
-    const { data, error } = await admin.from("question_bank")
-      .select("id, question, code, options").eq("group_name", boss.group_name).limit(400);
+    let { data, error }: { data: any; error: any } = await admin.from("question_bank")
+      .select("id, question, code, image_url, options").eq("group_name", boss.group_name).limit(400);
+    if (error && /column .*image_url/i.test(error.message)) {
+      ({ data, error } = await admin.from("question_bank").select("id, question, code, options").eq("group_name", boss.group_name).limit(400));
+    }
     if (error) return NextResponse.json({ error: explain(error.message) }, { status: 500 });
     const picked = pickRandom(data ?? [], BOSS_MAX_QUESTIONS);
     if (!picked.length) return NextResponse.json({ error: "The Boss's questions have gone — tell your tutor." }, { status: 404 });
-    const questions = picked.map((r: any) => ({ id: r.id, question: r.question, code: r.code ?? "", options: r.options ?? [] }));
+    const questions = picked.map((r: any) => ({ id: r.id, question: r.question, code: r.code ?? "", image_url: r.image_url ?? "", options: r.options ?? [] }));
     return NextResponse.json({ name: boss.group_name, passPct: boss.pass_pct, reward: boss.reward, questions });
   }
 
