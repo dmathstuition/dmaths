@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { requireStaff } from "@/lib/authRole";
-import { validateQuestion, normaliseQuestion, type BankQuestion } from "@/lib/questionBank";
+import { validateQuestion, normaliseQuestion, summariseGroups, type BankQuestion } from "@/lib/questionBank";
+
+// Full column list (with the newer exam / group_name) and the original base set
+// to fall back to when those columns haven't been migrated yet.
+const COLS_FULL = "id, subject, level, topic, exam, group_name, question, code, options, answer, owner_id, created_at";
+const COLS_BASE = "id, subject, level, topic, question, code, options, answer, owner_id, created_at";
 
 // The CBT question bank. Staff only — a learner reading this table would have
 // every answer, so there is no read path for them anywhere in the app.
@@ -30,19 +35,30 @@ export async function GET(req: Request) {
   const subject = url.searchParams.get("subject")?.trim() ?? "";
   const level = url.searchParams.get("level")?.trim() ?? "";
   const topic = url.searchParams.get("topic")?.trim() ?? "";
+  const group = url.searchParams.get("group")?.trim() ?? "";
   const limit = Math.min(500, Math.max(1, Number(url.searchParams.get("limit")) || 200));
+  const admin = supabaseAdmin();
 
-  let q = supabaseAdmin()
-    .from("question_bank")
-    .select("id, subject, level, topic, question, code, options, answer, owner_id, created_at")
-    .order("created_at", { ascending: false })
-    .limit(limit);
+  // Groups overview: every named set with its question count, across the whole
+  // bank (not just one page). Returns [] when the column isn't migrated.
+  if (url.searchParams.get("groups")) {
+    const { data, error } = await admin.from("question_bank").select("group_name").limit(10000);
+    if (error) return NextResponse.json({ groups: [] });
+    return NextResponse.json({ groups: summariseGroups(data ?? []) });
+  }
 
-  if (subject) q = q.eq("subject", subject);
-  if (level) q = q.eq("level", level);
-  if (topic) q = q.ilike("topic", `%${topic}%`);
+  const build = (cols: string) => {
+    let q = admin.from("question_bank").select(cols).order("created_at", { ascending: false }).limit(limit);
+    if (subject) q = q.eq("subject", subject);
+    if (level) q = q.eq("level", level);
+    if (topic) q = q.ilike("topic", `%${topic}%`);
+    if (cols === COLS_FULL && group) q = q.eq("group_name", group);
+    return q;
+  };
 
-  const { data, error } = await q;
+  let { data, error } = await build(COLS_FULL);
+  // Fall back to the base columns if exam / group_name aren't migrated yet.
+  if (error && /column/i.test(error.message)) ({ data, error } = await build(COLS_BASE));
   if (error) return NextResponse.json({ error: explain(error.message), questions: [] }, { status: 200 });
   return NextResponse.json({ questions: data ?? [] });
 }
@@ -57,6 +73,7 @@ export async function POST(req: Request) {
   const level = String(b?.level ?? "").trim().slice(0, 40);
   const topic = String(b?.topic ?? "").trim().slice(0, 80);
   const exam = String(b?.exam ?? "").trim().slice(0, 60);
+  const group_name = String(b?.group_name ?? "").trim().slice(0, 80);
 
   const incoming: Partial<BankQuestion>[] = Array.isArray(b?.questions)
     ? b.questions
@@ -72,18 +89,18 @@ export async function POST(req: Request) {
 
   const rows = incoming.map((q) => ({
     ...normaliseQuestion(q),
-    subject, level, topic, exam,
+    subject, level, topic, exam, group_name,
     owner_id: staff.id,
   }));
 
   // Return the full inserted rows so the client can show them immediately,
   // without depending on a re-fetch (which the browser can serve from cache).
-  const cols = "id, subject, level, topic, question, code, options, answer, owner_id, created_at";
   const admin = supabaseAdmin();
-  let { data, error } = await admin.from("question_bank").insert(rows).select(cols);
-  // If the exam column isn't migrated yet, save without it rather than fail.
-  if (error && /column .*exam/i.test(error.message)) {
-    ({ data, error } = await admin.from("question_bank").insert(rows.map(({ exam: _e, ...r }) => r)).select(cols));
+  let { data, error } = await admin.from("question_bank").insert(rows).select(COLS_FULL);
+  // If the exam / group_name columns aren't migrated yet, save without them.
+  if (error && /column .*(exam|group_name)/i.test(error.message)) {
+    const stripped = rows.map(({ exam: _e, group_name: _g, ...r }) => r);
+    ({ data, error } = await admin.from("question_bank").insert(stripped).select(COLS_BASE));
   }
   if (error) return NextResponse.json({ error: explain(error.message) }, { status: 500 });
   return NextResponse.json({ ok: true, saved: data?.length ?? rows.length, rows: data ?? [] });
@@ -112,10 +129,11 @@ export async function PATCH(req: Request) {
     level: String(b?.level ?? "").trim().slice(0, 40),
     topic: String(b?.topic ?? "").trim().slice(0, 80),
     exam: String(b?.exam ?? "").trim().slice(0, 60),
+    group_name: String(b?.group_name ?? "").trim().slice(0, 80),
   };
   let { error } = await admin.from("question_bank").update(patch).eq("id", id);
-  if (error && /column .*exam/i.test(error.message)) {
-    delete patch.exam;
+  if (error && /column .*(exam|group_name)/i.test(error.message)) {
+    delete patch.exam; delete patch.group_name;
     ({ error } = await admin.from("question_bank").update(patch).eq("id", id));
   }
   if (error) return NextResponse.json({ error: explain(error.message) }, { status: 500 });
