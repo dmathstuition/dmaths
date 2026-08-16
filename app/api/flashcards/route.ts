@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { requireStaff } from "@/lib/authRole";
+import { cleanCardBatch, type CardDraft } from "@/lib/flashcardDraft";
 
 // Staff create a revision deck (optionally publishing it to all learners) and
 // add cards to it. Deletion cascades to the deck's cards.
@@ -43,6 +44,20 @@ export async function POST(req: Request) {
     const { error } = await admin.from("flashcards").insert({ deck_id: deckId, front, back });
     if (error) return NextResponse.json({ error: explain(error.message) }, { status: 500 });
     return NextResponse.json({ ok: true });
+  }
+
+  // Save many cards at once — used by "Add all" after the A.I drafts a set. The
+  // drafts are re-validated and de-duped server-side, so nothing malformed lands
+  // in the deck even if the client sends junk.
+  if (action === "cards") {
+    const deckId = String(payload?.deckId ?? "");
+    if (!deckId) return NextResponse.json({ error: "deckId required" }, { status: 400 });
+    if (!(await ownsDeck(deckId))) return NextResponse.json({ error: "That deck isn't yours." }, { status: 403 });
+    const cards = cleanCardBatch((payload?.cards ?? []) as Partial<CardDraft>[]);
+    if (!cards.length) return NextResponse.json({ error: "No usable cards to add." }, { status: 400 });
+    const { error } = await admin.from("flashcards").insert(cards.map((c) => ({ deck_id: deckId, front: c.front, back: c.back })));
+    if (error) return NextResponse.json({ error: explain(error.message) }, { status: 500 });
+    return NextResponse.json({ ok: true, added: cards.length });
   }
 
   if (action === "publish") {
