@@ -2,6 +2,7 @@ import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import StudentDetailClient from "@/components/admin/StudentDetailClient";
+import { Icon } from "@/components/Icons";
 
 export const dynamic = "force-dynamic";
 
@@ -46,15 +47,24 @@ export default async function StudentDetail({ params }: { params: { id: string }
   }
 
   return (
-    <StudentDetailClient
-      student={student}
-      initialNotes={notes ?? []}
-      initialRewards={rewards ?? []}
-      subs={subs ?? []}
-      behaviorTypes={behaviorTypes ?? []}
-      initialBehaviorLogs={behaviorLogs ?? []}
-      referredByName={referredByName}
-      initialParents={parents ?? []}
-    />
+    <div className="space-y-4">
+      <a href={`/report/${params.id}`}
+        className="card flex items-center gap-3 border-l-4 border-l-gold bg-gold-pale/40 p-4 transition hover:bg-gold-pale/70">
+        <Icon name="reports" className="h-5 w-5 flex-shrink-0 text-gold-deep" />
+        <p className="text-sm text-ink/75">
+          <strong className="text-ink">Engagement report</strong> — reward points (given & earned), mocks, CBT, assignments and more. →
+        </p>
+      </a>
+      <StudentDetailClient
+        student={student}
+        initialNotes={notes ?? []}
+        initialRewards={rewards ?? []}
+        subs={subs ?? []}
+        behaviorTypes={behaviorTypes ?? []}
+        initialBehaviorLogs={behaviorLogs ?? []}
+        referredByName={referredByName}
+        initialParents={parents ?? []}
+      />
+    </div>
   );
 }
