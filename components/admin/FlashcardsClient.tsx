@@ -15,6 +15,44 @@ export default function FlashcardsClient({ decks, cards }: { decks: Deck[]; card
   const [cardForm, setCardForm] = useState({ front: "", back: "" });
   const [busy, setBusy] = useState(false);
 
+  // A.I draft state, scoped to the deck it was generated for.
+  const [aiForm, setAiForm] = useState({ topic: "", count: 8 });
+  const [aiBusy, setAiBusy] = useState(false);
+  const [drafts, setDrafts] = useState<{ front: string; back: string }[] | null>(null);
+  const [draftsDeck, setDraftsDeck] = useState<string | null>(null);
+
+  async function aiGenerate(d: Deck) {
+    setAiBusy(true);
+    try {
+      const res = await fetch("/api/ai/flashcards", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subject: d.subject || d.title, topic: aiForm.topic, count: aiForm.count }),
+      });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) { push(j.error || "The A.I couldn't draft cards.", "error"); return; }
+      setDrafts(j.cards ?? []);
+      setDraftsDeck(d.id);
+    } finally { setAiBusy(false); }
+  }
+
+  function editDraft(i: number, side: "front" | "back", value: string) {
+    setDrafts((ds) => ds ? ds.map((c, j) => (j === i ? { ...c, [side]: value } : c)) : ds);
+  }
+  function dropDraft(i: number) {
+    setDrafts((ds) => ds ? ds.filter((_, j) => j !== i) : ds);
+  }
+
+  async function addAllDrafts(deckId: string) {
+    if (!drafts?.length) return;
+    setBusy(true);
+    const j = await call({ action: "cards", deckId, cards: drafts });
+    setBusy(false);
+    if (!j) return;
+    push(`Added ${j.added} card${j.added === 1 ? "" : "s"}.`, "success");
+    setDrafts(null); setDraftsDeck(null); setAiForm({ topic: "", count: 8 });
+    router.refresh();
+  }
+
   async function call(body: any) {
     const res = await fetch("/api/flashcards", {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
@@ -121,7 +159,48 @@ export default function FlashcardsClient({ decks, cards }: { decks: Deck[]; card
                       <button onClick={() => remove(`cardId=${c.id}`, "card")} className="flex-shrink-0 text-xs font-bold text-red-500 hover:underline">Remove</button>
                     </div>
                   ))}
-                  {!deckCards.length && <p className="text-sm text-ink/40">No cards yet — add the first one below.</p>}
+                  {!deckCards.length && <p className="text-sm text-ink/40">No cards yet — draft some with the A.I or add one below.</p>}
+
+                  <div className="rounded-xl border border-gold/30 bg-gold-pale/40 p-4">
+                    <p className="flex items-center gap-2 text-sm font-bold text-ink">
+                      <Icon name="sparkles" className="h-4 w-4 text-gold-deep" /> Draft cards with A.I
+                    </p>
+                    <p className="mt-0.5 text-xs text-ink/55">For <strong>{d.subject || d.title}</strong> — review and edit before adding.</p>
+                    <div className="mt-3 flex flex-wrap items-end gap-2">
+                      <div className="min-w-[180px] flex-1">
+                        <label htmlFor={`ai-topic-${d.id}`} className="flabel">Topic (optional)</label>
+                        <input id={`ai-topic-${d.id}`} className="field" value={aiForm.topic} onChange={(e) => setAiForm({ ...aiForm, topic: e.target.value })} placeholder="e.g. Simultaneous equations" />
+                      </div>
+                      <div className="w-24">
+                        <label htmlFor={`ai-count-${d.id}`} className="flabel">How many</label>
+                        <input id={`ai-count-${d.id}`} type="number" min={1} max={12} className="field" value={aiForm.count} onChange={(e) => setAiForm({ ...aiForm, count: Math.min(12, Math.max(1, Number(e.target.value) || 1)) })} />
+                      </div>
+                      <button className="btn-gold !rounded-xl" onClick={() => aiGenerate(d)} disabled={aiBusy}>
+                        {aiBusy ? "Drafting…" : "Draft cards"}
+                      </button>
+                    </div>
+
+                    {draftsDeck === d.id && drafts && (
+                      <div className="mt-4 space-y-2">
+                        {!drafts.length && <p className="text-sm text-ink/50">No drafts left — generate again.</p>}
+                        {drafts.map((c, i) => (
+                          <div key={i} className="grid gap-2 rounded-lg bg-white/70 p-3 sm:grid-cols-2">
+                            <textarea className="field min-h-[56px] text-sm" value={c.front} onChange={(e) => editDraft(i, "front", e.target.value)} />
+                            <div className="flex items-start gap-2">
+                              <textarea className="field min-h-[56px] flex-1 text-sm" value={c.back} onChange={(e) => editDraft(i, "back", e.target.value)} />
+                              <button onClick={() => dropDraft(i)} className="mt-1 flex-shrink-0 text-xs font-bold text-red-500 hover:underline">Drop</button>
+                            </div>
+                          </div>
+                        ))}
+                        {!!drafts.length && (
+                          <div className="flex flex-wrap gap-2 pt-1">
+                            <button className="btn-ink !rounded-xl" onClick={() => addAllDrafts(d.id)} disabled={busy}>Add all {drafts.length} to deck</button>
+                            <button className="btn-ghost !rounded-xl" onClick={() => { setDrafts(null); setDraftsDeck(null); }}>Discard</button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
 
                   <div className="grid gap-3 border-t border-line pt-4 sm:grid-cols-2">
                     <div>
