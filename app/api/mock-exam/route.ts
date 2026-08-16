@@ -7,6 +7,7 @@ import { gradeAnswers, type Response } from "@/lib/practice";
 import { presetByKey, topicBreakdown, scorePercent, gradeBand, MOCK_DAILY_BONUS } from "@/lib/mockExam";
 import { canStart } from "@/lib/mockRequests";
 import { boostMultiplier } from "@/lib/powerups";
+import { happyHourMultiplier } from "@/lib/happyHour";
 import { aggregateTopics } from "@/lib/skillTree";
 import { recordTopicMastery } from "@/lib/topicMastery";
 
@@ -143,7 +144,7 @@ export async function POST(req: Request) {
     admin.from("mock_exam_sessions").select("id").eq("student_id", gate.user.id).eq("day", day).limit(1),
     admin.from("profiles").select("boost_until").eq("id", gate.user.id).single(),
   ]);
-  const mult = boostMultiplier((boostRow as any)?.boost_until);
+  const mult = Math.max(boostMultiplier((boostRow as any)?.boost_until), await happyHourMultiplier(admin));
   const points = earlier && earlier.length ? 0 : MOCK_DAILY_BONUS * mult;
 
   await admin.from("mock_exam_sessions").insert({

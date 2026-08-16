@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { ATTENDANCE_BONUS } from "@/lib/earnBonuses";
 
 // Called when a student clicks "Join class". Records a provisional
 // present=true, self_marked=true so the admin can later confirm whether
@@ -24,6 +25,12 @@ export async function POST(req: Request) {
     .select("student_id").eq("class_id", classId).eq("student_id", user.id).maybeSingle();
   if (!roster) return NextResponse.json({ error: "Not enrolled in this class" }, { status: 403 });
 
+  // First join for this class → a small attendance reward (delta, so it never
+  // clobbers earned points). Repeat joins don't re-award.
+  const { data: prior } = await admin.from("attendance_records")
+    .select("id").eq("class_id", classId).eq("student_id", user.id).limit(1);
+  const firstJoin = !prior?.length;
+
   // Joining more than 10 minutes after the class start counts as late (still present).
   const startMs = cls?.starts_at ? new Date(cls.starts_at).getTime() : Date.now();
   const late = Date.now() > startMs + 10 * 60 * 1000;
@@ -39,5 +46,12 @@ export async function POST(req: Request) {
     await admin.from("attendance_records").upsert(rest, { onConflict: "class_id,student_id,session_date" });
   }
 
-  return NextResponse.json({ ok: true, late });
+  let points = 0;
+  if (firstJoin) {
+    points = ATTENDANCE_BONUS;
+    const { data: me } = await admin.from("profiles").select("reward_points").eq("id", user.id).single();
+    await admin.from("profiles").update({ reward_points: Number(me?.reward_points ?? 0) + points }).eq("id", user.id);
+  }
+
+  return NextResponse.json({ ok: true, late, points });
 }

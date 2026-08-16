@@ -1,5 +1,6 @@
 import { supabaseServer } from "@/lib/supabase/server";
 import RewardsAdminClient from "@/components/admin/RewardsAdminClient";
+import HappyHourControl from "@/components/admin/HappyHourControl";
 
 export const dynamic = "force-dynamic";
 
@@ -20,5 +21,10 @@ export default async function AdminRewardsPage() {
   const byId = new Map((profs ?? []).map((p: any) => [p.id, p]));
   const pendingWithNames = (pending ?? []).map((p: any) => ({ ...p, student: byId.get(p.student_id) ?? null }));
 
-  return <RewardsAdminClient initialItems={items ?? []} initialPending={pendingWithNames} />;
+  return (
+    <div className="space-y-6">
+      <HappyHourControl />
+      <RewardsAdminClient initialItems={items ?? []} initialPending={pendingWithNames} />
+    </div>
+  );
 }

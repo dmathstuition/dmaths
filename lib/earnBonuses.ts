@@ -2,9 +2,10 @@
 // Pure so the values and rules are one source of truth and unit-testable; the
 // routes read/write reward_points (always by delta, never overwrite).
 
-export const SUBMIT_BONUS  = 5;   // completing a CBT / graded assignment
-export const ONTIME_BONUS  = 5;   // a CBT submitted before it closed
-export const PERFECT_BONUS = 10;  // 100%
+export const SUBMIT_BONUS     = 5;   // completing a CBT / graded assignment
+export const ONTIME_BONUS     = 5;   // a CBT submitted before it closed
+export const PERFECT_BONUS    = 10;  // 100%
+export const ATTENDANCE_BONUS = 3;   // joining a live class (first join only)
 
 // Points for finishing a CBT: completion + on-time + perfect.
 export function cbtBonus(opts: { perfect: boolean; onTime: boolean }): number {

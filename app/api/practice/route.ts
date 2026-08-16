@@ -6,6 +6,7 @@ import { pickRandom } from "@/lib/questionBank";
 import { gradeAnswers, practicePoints, PRACTICE_DAILY_CAP, type Response } from "@/lib/practice";
 import { aggregateTopics } from "@/lib/skillTree";
 import { recordTopicMastery } from "@/lib/topicMastery";
+import { happyHourMultiplier } from "@/lib/happyHour";
 
 // Self-practice quiz. Questions come from the staff-only question_bank, served
 // and graded here with the service role so the answer key never reaches the
@@ -95,7 +96,7 @@ export async function POST(req: Request) {
   const { data: todays } = await admin.from("practice_sessions")
     .select("points").eq("student_id", gate.user.id).eq("day", day);
   const awardedToday = (todays ?? []).reduce((a: number, r: any) => a + Number(r.points || 0), 0);
-  const points = practicePoints(correct, awardedToday);
+  const points = practicePoints(correct, awardedToday) * await happyHourMultiplier(admin); // 2× during Happy Hour
 
   await admin.from("practice_sessions").insert({
     student_id: gate.user.id, subject, level, total, correct, points, day,
