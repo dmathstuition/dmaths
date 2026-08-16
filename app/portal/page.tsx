@@ -16,6 +16,8 @@ import DashboardTip from "@/components/portal/DashboardTip";
 import DailyRewardChest from "@/components/portal/DailyRewardChest";
 import DailyQuests from "@/components/portal/DailyQuests";
 import HappyHourBanner from "@/components/portal/HappyHourBanner";
+import PlayLearn from "@/components/portal/PlayLearn";
+import LeagueStrip from "@/components/portal/LeagueStrip";
 import Tour from "@/components/tour/Tour";
 import { studentTour } from "@/components/tour/steps";
 import { fmtWAT, fmtWATDate } from "@/lib/time";
@@ -174,6 +176,12 @@ export default async function StudentDashboard() {
           </div>
         </Reveal>
       </div>
+
+      {/* Your league / division — reward points turned into a tier to climb */}
+      <Reveal delay={20}><LeagueStrip points={rewardPts} /></Reveal>
+
+      {/* Play & learn — a colourful launcher for the games and tools */}
+      <Reveal delay={30}><PlayLearn /></Reveal>
 
       {/* Happy Hour — only shows while a 2× window is live */}
       <HappyHourBanner />
