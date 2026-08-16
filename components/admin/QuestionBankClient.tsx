@@ -14,7 +14,7 @@ const LEVELS = ["", "Primary", "JSS 1", "JSS 2", "JSS 3", "SS 1", "SS 2", "SS 3"
 
 const BLANK = {
   id: "", subject: SUBJECTS[0], level: "", topic: "", exam: "", group_name: "",
-  question: "", code: "", options: ["", "", "", ""], answer: 0,
+  question: "", code: "", image_url: "", options: ["", "", "", ""], answer: 0,
 };
 
 // Write a question once, reuse it every term. Tests keep their own copy of the
@@ -167,7 +167,7 @@ export default function QuestionBankClient({
     setF({
       id: r.id, subject: r.subject || SUBJECTS[0], level: r.level ?? "", topic: r.topic ?? "",
       exam: (r as any).exam ?? "", group_name: (r as any).group_name ?? "",
-      question: r.question, code: r.code ?? "",
+      question: r.question, code: r.code ?? "", image_url: (r as any).image_url ?? "",
       options: [...(r.options ?? [])], answer: r.answer ?? 0,
     });
     setError("");
@@ -212,6 +212,20 @@ export default function QuestionBankClient({
 
   function setOption(i: number, value: string) {
     setF((p) => ({ ...p, options: p.options.map((o, j) => (j === i ? value : o)) }));
+  }
+
+  const [imgBusy, setImgBusy] = useState(false);
+  async function uploadImage(file: File) {
+    if (!file) return;
+    setImgBusy(true); setError("");
+    try {
+      const fd = new FormData();
+      fd.append("file", file); fd.append("bucket", "question-images"); fd.append("folder", "q");
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) { setError(j.error || "Couldn't upload the image."); return; }
+      setF((p) => ({ ...p, image_url: j.url }));
+    } finally { setImgBusy(false); }
   }
 
   return (
@@ -447,6 +461,22 @@ export default function QuestionBankClient({
           </div>
 
           <div>
+            <span className="flabel">Figure / diagram <span className="font-normal text-ink/40">(optional — for geometry, graphs…)</span></span>
+            {(f as any).image_url ? (
+              <div className="flex items-start gap-3">
+                <img src={(f as any).image_url} alt="Question figure" className="max-h-40 rounded-xl border border-line" />
+                <button type="button" onClick={() => setF({ ...f, image_url: "" } as any)} className="text-sm font-bold text-red-500 hover:underline">Remove</button>
+              </div>
+            ) : (
+              <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-dashed border-line px-4 py-2.5 text-sm font-bold text-ink/60 hover:bg-chalk">
+                <Icon name="materials" className="h-4 w-4" /> {imgBusy ? "Uploading…" : "Add an image"}
+                <input type="file" accept="image/png,image/jpeg" className="hidden" disabled={imgBusy}
+                  onChange={(e) => { const file = e.target.files?.[0]; if (file) uploadImage(file); e.target.value = ""; }} />
+              </label>
+            )}
+          </div>
+
+          <div>
             <p className="flabel">Options <span className="font-normal text-ink/40">— tick the correct one</span></p>
             <div className="space-y-2">
               {f.options.map((o, i) => (
@@ -575,6 +605,9 @@ export default function QuestionBankClient({
                     {(r as any).group_name && <span className="pill bg-gold-pale text-gold-deep">◆ {(r as any).group_name}</span>}
                   </div>
                   <p className="mt-2 whitespace-pre-wrap font-semibold text-ink">{r.question}</p>
+                  {(r as any).image_url && (
+                    <img src={(r as any).image_url} alt="Question figure" className="mt-2 max-h-32 rounded-lg border border-line" />
+                  )}
                   {r.code && (
                     <pre className="mt-2 overflow-x-auto rounded-xl bg-[#0b2036] p-3 font-mono text-[12px] text-slate-100">{r.code}</pre>
                   )}

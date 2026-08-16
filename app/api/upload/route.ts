@@ -5,7 +5,7 @@ import { rateLimit, clientKey } from "@/lib/ratelimit";
 
 const MAX_SIZE = 10 * 1024 * 1024; // 10 MB — protects your 1GB free-tier storage
 const ALLOWED_EXT = ["pdf", "doc", "docx", "ppt", "pptx", "jpg", "jpeg", "png"];
-const ALLOWED_BUCKETS = ["materials", "curricula", "assignments", "submissions"];
+const ALLOWED_BUCKETS = ["materials", "curricula", "assignments", "submissions", "question-images"];
 
 export async function POST(req: Request) {
   if (!rateLimit(clientKey(req, "upload"), 15, 60_000)) {
@@ -34,7 +34,9 @@ export async function POST(req: Request) {
   // Learners upload only submissions. Tutors may also post teaching materials +
   // assignment attachments. Everything else is admin-only.
   const role = profile?.role;
-  const tutorAllowed = role === "tutor" && (bucket === "materials" || bucket === "assignments");
+  // Tutors post teaching materials, assignment attachments and question figures;
+  // learners only submissions; everything else is admin-only.
+  const tutorAllowed = role === "tutor" && (bucket === "materials" || bucket === "assignments" || bucket === "question-images");
   if (role !== "admin" && bucket !== "submissions" && !tutorAllowed) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }

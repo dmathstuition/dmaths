@@ -7,6 +7,7 @@ type Question = {
   id: number;
   question: string;
   code?: string;
+  image_url?: string;
   options: string[];
   answer?: number;
   correctAnswer?: number;
@@ -199,6 +200,7 @@ export default function CBTClient({
             return (
               <div key={q.id} className={`rounded-xl border p-4 ${isCorrect ? "border-emerald-200 bg-emerald-50" : "border-red-200 bg-red-50"}`}>
                 <p className="text-sm font-bold">{i + 1}. {q.question}</p>
+                {q.image_url && <img src={q.image_url} alt="Question figure" className="mt-2 max-h-48 rounded-lg border border-line" />}
                 {q.code && <pre className="mt-2 overflow-x-auto rounded-lg bg-chalk p-3 font-mono text-[11px] whitespace-pre-wrap text-ink/70">{q.code}</pre>}
                 <div className="mt-2 space-y-1">
                   {q.options.map((opt, j) => (
@@ -305,6 +307,7 @@ export default function CBTClient({
       <div className="card p-6">
         <p className="text-xs font-bold uppercase tracking-wider text-ink/40 mb-2">Question {current + 1} of {total}</p>
         <p className="text-lg font-semibold leading-relaxed">{q.question}</p>
+        {q.image_url && <img src={q.image_url} alt="Question figure" className="mt-3 max-h-72 rounded-xl border border-line" />}
         {q.code && (
           <pre className="mt-3 overflow-x-auto rounded-xl bg-board p-4 font-mono text-xs leading-relaxed whitespace-pre-wrap text-gold-soft">{q.code}</pre>
         )}

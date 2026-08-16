@@ -6,7 +6,7 @@ import CountUp from "@/components/landing/CountUp";
 import { EXAM_PRESETS } from "@/lib/mockExam";
 import { reqStatusMeta } from "@/lib/mockRequests";
 
-type Q = { id: string; question: string; code?: string; options: string[] };
+type Q = { id: string; question: string; code?: string; image_url?: string; options: string[] };
 type Meta = { subjects: string[]; levels: string[]; total: number };
 type Req = { id: string; subject: string; preset: string; level: string; status: string; scheduled_for: string | null; startable: boolean; created_at: string };
 type Hist = { id: string; preset: string; subject: string; correct: number; total: number; percent: number; band: string; created_at: string };
@@ -314,6 +314,7 @@ export default function MockExamClient({ mySubjects, myLevel }: { mySubjects: st
           <div className="card p-6">
             <p className="mb-3 text-sm font-bold text-ink/45">Question {idx + 1} of {questions.length}</p>
             <p className="font-display text-lg font-bold text-ink">{cur.question}</p>
+            {cur.image_url && <img src={cur.image_url} alt="Question figure" className="mt-3 max-h-72 rounded-xl border border-line" />}
             {cur.code && <pre className="mt-3 overflow-x-auto rounded-xl bg-board p-4 text-sm text-gold-soft"><code>{cur.code}</code></pre>}
 
             <div className="mt-4 space-y-2.5">

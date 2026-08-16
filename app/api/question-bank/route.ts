@@ -5,7 +5,7 @@ import { validateQuestion, normaliseQuestion, summariseGroups, type BankQuestion
 
 // Full column list (with the newer exam / group_name) and the original base set
 // to fall back to when those columns haven't been migrated yet.
-const COLS_FULL = "id, subject, level, topic, exam, group_name, question, code, options, answer, owner_id, created_at";
+const COLS_FULL = "id, subject, level, topic, exam, group_name, question, code, image_url, options, answer, owner_id, created_at";
 const COLS_BASE = "id, subject, level, topic, question, code, options, answer, owner_id, created_at";
 
 // The CBT question bank. Staff only — a learner reading this table would have
@@ -101,9 +101,9 @@ export async function POST(req: Request) {
   // without depending on a re-fetch (which the browser can serve from cache).
   const admin = supabaseAdmin();
   let { data, error } = await admin.from("question_bank").insert(rows).select(COLS_FULL);
-  // If the exam / group_name columns aren't migrated yet, save without them.
-  if (error && /column .*(exam|group_name)/i.test(error.message)) {
-    const stripped = rows.map(({ exam: _e, group_name: _g, ...r }) => r);
+  // If the newer columns aren't migrated yet, save without them.
+  if (error && /column .*(exam|group_name|image_url)/i.test(error.message)) {
+    const stripped = rows.map(({ exam: _e, group_name: _g, image_url: _i, ...r }) => r);
     ({ data, error } = await admin.from("question_bank").insert(stripped).select(COLS_BASE));
   }
   if (error) return NextResponse.json({ error: explain(error.message) }, { status: 500 });
@@ -136,8 +136,8 @@ export async function PATCH(req: Request) {
     group_name: String(b?.group_name ?? "").trim().slice(0, 80),
   };
   let { error } = await admin.from("question_bank").update(patch).eq("id", id);
-  if (error && /column .*(exam|group_name)/i.test(error.message)) {
-    delete patch.exam; delete patch.group_name;
+  if (error && /column .*(exam|group_name|image_url)/i.test(error.message)) {
+    delete patch.exam; delete patch.group_name; delete patch.image_url;
     ({ error } = await admin.from("question_bank").update(patch).eq("id", id));
   }
   if (error) return NextResponse.json({ error: explain(error.message) }, { status: 500 });

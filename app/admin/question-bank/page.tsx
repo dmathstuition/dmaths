@@ -6,7 +6,7 @@ export const metadata = { title: "Question bank · D-Maths" };
 
 // Staff-only: the /admin layout already gates this to admins, and the API
 // re-checks on every write. Learners have no read path to this table at all.
-const COLS_FULL = "id, subject, level, topic, exam, group_name, question, code, options, answer, owner_id, created_at";
+const COLS_FULL = "id, subject, level, topic, exam, group_name, question, code, image_url, options, answer, owner_id, created_at";
 const COLS_BASE = "id, subject, level, topic, question, code, options, answer, owner_id, created_at";
 
 export default async function QuestionBankPage() {
