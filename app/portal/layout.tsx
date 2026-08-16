@@ -26,6 +26,7 @@ const NAV: NavItem[] = [
   { href: "/portal/sprint", label: "Math Sprint", icon: "trophy" },
   { href: "/portal/boss", label: "Boss Battle", icon: "trophy" },
   { href: "/portal/mathle", label: "Mathle", icon: "sigma" },
+  { href: "/portal/duel", label: "Quiz Duel", icon: "zap" },
   { href: "/portal/practice", label: "Practice", icon: "target" },
   { href: "/portal/mock-exam", label: "Mock exam", icon: "graduationCap" },
   { href: "/portal/style", label: "Avatar Studio", icon: "sparkles" },
