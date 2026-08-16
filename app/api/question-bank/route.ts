@@ -89,7 +89,11 @@ export async function POST(req: Request) {
 
   const rows = incoming.map((q) => ({
     ...normaliseQuestion(q),
-    subject, level, topic, exam, group_name,
+    subject, level,
+    // A question may carry its own topic (e.g. a mixed A.I mock paper); fall back
+    // to the batch-level topic when it doesn't.
+    topic: String((q as any).topic ?? "").trim().slice(0, 80) || topic,
+    exam, group_name,
     owner_id: staff.id,
   }));
 
