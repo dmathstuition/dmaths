@@ -3,8 +3,9 @@ import { Icon } from "@/components/Icons";
 
 export const dynamic = "force-dynamic";
 
-// A pure-fun mental-maths mini-game. No backend, no schema — the personal best
-// lives in the browser. It's here to make the portal feel playful.
+// A pure-fun mental-maths mini-game. The A.I sets staged question pools (with a
+// local generator as the instant fallback); the personal best lives in the
+// browser, so there's no backend or schema. It's here to make the portal playful.
 export default function SprintPage() {
   return (
     <div className="space-y-6">
@@ -14,7 +15,7 @@ export default function SprintPage() {
         </span>
         <div>
           <h1 className="font-display text-2xl font-semibold sm:text-3xl">Math Sprint</h1>
-          <p className="mt-1 text-sm text-white/50">Solve as many as you can in 60 seconds. Beat your best!</p>
+          <p className="mt-1 text-sm text-white/50">Climb the stages — solve as many as you can in 60 seconds and beat your best!</p>
         </div>
       </div>
 
