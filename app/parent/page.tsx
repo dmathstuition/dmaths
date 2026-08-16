@@ -7,6 +7,7 @@ import DeleteAccountCard from "@/components/portal/DeleteAccountCard";
 import Tour from "@/components/tour/Tour";
 import { parentTour } from "@/components/tour/steps";
 import { summariseWeek } from "@/lib/weeklySummary";
+import { Icon } from "@/components/Icons";
 
 export const dynamic = "force-dynamic";
 
@@ -110,6 +111,7 @@ export default async function ParentPage() {
       });
 
       return {
+        id: student_id,
         student,
         logs,
         gradedSubs: gradedSubs ?? [],
@@ -122,13 +124,20 @@ export default async function ParentPage() {
 
   return (
     <div className="space-y-10">
-      {students.map(({ student, logs, gradedSubs, pendingCount, reportCards, weekSummary }, i) =>
+      {students.map(({ id, student, logs, gradedSubs, pendingCount, reportCards, weekSummary }, i) =>
         student ? (
           <div key={i} className="space-y-4">
             <WeeklySummary
               name={`${(student as any).first_name ?? ""}`.trim() || "Your child"}
               summary={weekSummary}
             />
+            <a href={`/report/${id}`}
+              className="card flex items-center gap-3 border-l-4 border-l-gold bg-gold-pale/40 p-4 transition hover:bg-gold-pale/70">
+              <Icon name="reports" className="h-5 w-5 flex-shrink-0 text-gold-deep" />
+              <p className="text-sm text-ink/75">
+                <strong className="text-ink">Full engagement report</strong> — reward points (given &amp; earned), mocks, CBT, assignments, attendance and more. →
+              </p>
+            </a>
             <GuardianClient
               student={student as any}
               behaviorLogs={logs}
