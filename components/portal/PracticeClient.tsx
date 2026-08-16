@@ -1,9 +1,13 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Icon } from "@/components/Icons";
 import Confetti from "@/components/ui/Confetti";
 import CountUp from "@/components/landing/CountUp";
 import { PRACTICE_COUNTS } from "@/lib/practice";
+import {
+  saveRound, listSavedRounds, deleteRound, queueResult, drainQueue,
+  type SavedRound, type QueuedResult,
+} from "@/lib/offlinePractice";
 
 type Q = { id: string; question: string; code?: string; image_url?: string; options: string[] };
 type WeakTopic = { subject: string; topic: string; accuracy: number; total: number };
@@ -28,6 +32,71 @@ export default function PracticeClient({ mySubjects, myLevel }: { mySubjects: st
   const [recMode, setRecMode] = useState(false);
   const [explains, setExplains] = useState<Record<string, string>>({});
   const [explaining, setExplaining] = useState<string | null>(null);
+
+  // ── Offline practice ──
+  const [offline, setOffline] = useState(false);
+  const [saved, setSaved] = useState<SavedRound[]>([]);
+  const [pending, setPending] = useState(0);
+  const [savingOffline, setSavingOffline] = useState(false);
+  const [offlineRoundId, setOfflineRoundId] = useState<string | null>(null);
+  const [queuedDone, setQueuedDone] = useState(false);
+
+  const refreshOffline = useCallback(async () => {
+    setSaved(await listSavedRounds());
+    setPending((await (await import("@/lib/offlinePractice")).pendingResults()).length);
+  }, []);
+
+  // Sync any rounds played offline back to the server for grading + reward.
+  const sync = useCallback(async () => {
+    const { synced, points } = await drainQueue(async (r: QueuedResult) => {
+      try {
+        const res = await fetch("/api/practice", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ responses: r.responses, subject: r.subject, level: r.level }),
+        });
+        if (!res.ok) return { ok: false };
+        const j = await res.json().catch(() => ({}));
+        return { ok: true, points: Number(j.points || 0) };
+      } catch { return { ok: false }; }
+    });
+    await refreshOffline();
+    if (synced > 0) setErr(`Synced ${synced} offline round${synced === 1 ? "" : "s"}${points > 0 ? ` · +${points} points` : ""}.`);
+  }, [refreshOffline]);
+
+  useEffect(() => {
+    setOffline(!navigator.onLine);
+    refreshOffline();
+    if (navigator.onLine) sync();
+    const goOnline = () => { setOffline(false); sync(); };
+    const goOffline = () => setOffline(true);
+    window.addEventListener("online", goOnline);
+    window.addEventListener("offline", goOffline);
+    return () => { window.removeEventListener("online", goOnline); window.removeEventListener("offline", goOffline); };
+  }, [refreshOffline, sync]);
+
+  // Download the current filter's round for offline play (answers never cached —
+  // grading happens on sync, so reward stays server-authoritative).
+  async function saveForOffline() {
+    setSavingOffline(true); setErr("");
+    try {
+      const qs = new URLSearchParams({ count: String(count) });
+      if (subject) qs.set("subject", subject);
+      if (level) qs.set("level", level);
+      const r = await fetch(`/api/practice?${qs}`);
+      const j = await r.json();
+      if (!j.questions?.length) { setErr("No questions to save for that filter."); return; }
+      const id = `r-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+      await saveRound({ id, questions: j.questions, subject, level, savedAt: Date.now() });
+      await refreshOffline();
+    } finally { setSavingOffline(false); }
+  }
+
+  function startSavedRound(round: SavedRound) {
+    setErr(""); setRecMode(false);
+    setOfflineRoundId(round.id); setSubject(round.subject); setLevel(round.level);
+    setQuestions(round.questions); setPicks({}); setIdx(0); setScore(null); setQueuedDone(false);
+    setPhase("quiz");
+  }
 
   async function explain(r: Result, q: Q) {
     if (explains[q.id] || explaining) return;
@@ -86,9 +155,19 @@ export default function PracticeClient({ mySubjects, myLevel }: { mySubjects: st
   async function next() {
     if (chosen === undefined) return;
     if (!isLast) { setIdx((i) => i + 1); return; }
+    const responses = questions.map((q) => ({ id: q.id, chosen: picks[q.id] ?? -1 }));
+
+    // Offline: queue the answers to grade + reward on reconnect (no key on device).
+    if (offlineRoundId && !navigator.onLine) {
+      await queueResult({ id: offlineRoundId, responses, subject, level, at: Date.now() });
+      await deleteRound(offlineRoundId);
+      setOfflineRoundId(null); setQueuedDone(true); setPhase("result");
+      refreshOffline();
+      return;
+    }
+
     // submit
     setPhase("loading");
-    const responses = questions.map((q) => ({ id: q.id, chosen: picks[q.id] ?? -1 }));
     try {
       const r = await fetch("/api/practice", {
         method: "POST", headers: { "Content-Type": "application/json" },
@@ -99,6 +178,8 @@ export default function PracticeClient({ mySubjects, myLevel }: { mySubjects: st
       setScore(j);
       setPhase("result");
       if (j.total && j.correct / j.total >= 0.7) setCelebrate((c) => c + 1);
+      // A saved round played back online is consumed once graded.
+      if (offlineRoundId) { deleteRound(offlineRoundId); setOfflineRoundId(null); refreshOffline(); }
     } catch { setErr("Couldn't grade — please try again."); setPhase("quiz"); }
   }
 
@@ -122,6 +203,32 @@ export default function PracticeClient({ mySubjects, myLevel }: { mySubjects: st
       </div>
 
       {err && <p role="alert" className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-800">{err}</p>}
+
+      {(offline || pending > 0) && (
+        <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-gold/40 bg-gold-pale/50 px-4 py-3 text-sm font-semibold text-ink/75">
+          <Icon name={offline ? "download" : "repeat"} className="h-4 w-4 text-gold-deep" />
+          {offline
+            ? <span>You&apos;re offline — play a saved round below; your answers grade &amp; earn when you reconnect.</span>
+            : <span>{pending} offline round{pending === 1 ? "" : "s"} waiting to sync.</span>}
+        </div>
+      )}
+
+      {/* Saved offline rounds — playable with or without a connection. */}
+      {phase === "setup" && saved.length > 0 && (
+        <div className="card p-5">
+          <h3 className="mb-2 flex items-center gap-2 font-display text-base font-semibold text-ink">
+            <Icon name="download" className="h-4 w-4 text-gold-deep" /> Saved for offline
+          </h3>
+          <ul className="space-y-2">
+            {saved.map((r) => (
+              <li key={r.id} className="flex items-center gap-3 rounded-xl bg-chalk/60 px-3 py-2 text-sm">
+                <span className="min-w-0 flex-1 truncate font-semibold text-ink/75">{r.subject || "Any subject"}{r.level ? ` · ${r.level}` : ""} · {r.questions.length} questions</span>
+                <button onClick={() => startSavedRound(r)} className="btn-gold !min-h-[34px] !rounded-lg !px-4 !py-1.5 text-sm">Play</button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* ── Setup ─────────────────────────────────────────────── */}
       {phase === "setup" && (
@@ -178,9 +285,14 @@ export default function PracticeClient({ mySubjects, myLevel }: { mySubjects: st
                   ))}
                 </div>
               </div>
-              <button onClick={() => start(false)} disabled={!meta} className="btn-gold w-full !rounded-xl">
+              <button onClick={() => start(false)} disabled={!meta || offline} className="btn-gold w-full !rounded-xl disabled:opacity-50">
                 <span className="inline-flex items-center gap-1.5">Start practice <Icon name="zap" className="h-4 w-4" /></span>
               </button>
+              {!offline && (
+                <button onClick={saveForOffline} disabled={savingOffline || !meta?.total} className="w-full rounded-xl border border-line py-2.5 text-sm font-bold text-ink/60 hover:bg-chalk disabled:opacity-50">
+                  <span className="inline-flex items-center gap-1.5"><Icon name="download" className="h-4 w-4" /> {savingOffline ? "Saving…" : "Save a round for offline"}</span>
+                </button>
+              )}
               <p className="text-center text-xs text-ink/40">Correct answers earn reward points (up to a daily cap) — it counts toward your leaderboard total.</p>
             </>
           )}
@@ -225,8 +337,18 @@ export default function PracticeClient({ mySubjects, myLevel }: { mySubjects: st
         </div>
       )}
 
+      {/* ── Result: played offline, queued for grading ── */}
+      {phase === "result" && queuedDone && (
+        <div className="card p-8 text-center">
+          <p className="flex justify-center text-gold-deep"><Icon name="download" className="h-10 w-10" /></p>
+          <h2 className="mt-2 font-display text-xl font-bold text-ink">Answers saved 📥</h2>
+          <p className="mt-1 text-sm text-ink/60">You&apos;re offline, so this round will be graded and any reward points added as soon as you&apos;re back online.</p>
+          <button onClick={() => { setQueuedDone(false); setPhase("setup"); }} className="btn-gold mt-5 !rounded-xl">Done</button>
+        </div>
+      )}
+
       {/* ── Result ────────────────────────────────────────────── */}
-      {phase === "result" && score && (
+      {phase === "result" && !queuedDone && score && (
         <div className="space-y-5">
           <div className="relative overflow-hidden rounded-3xl p-7 text-center text-white"
             style={{ background: "linear-gradient(135deg, #10406F 0%, #0A2A4F 55%, #071C36 100%)" }}>
