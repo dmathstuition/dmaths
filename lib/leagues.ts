@@ -11,13 +11,14 @@
 export type Division = { name: string; min: number; emoji: string; accent: string };
 
 // Ordered low → high. `min` is the lifetime-points threshold to enter the tier.
+// One source of truth for the whole app — the dashboard momentum ring, the
+// league strip and the Leagues page all read these, so the numbers always agree.
 export const DIVISIONS: Division[] = [
-  { name: "Bronze",   min: 0,    emoji: "🥉", accent: "#a97142" },
-  { name: "Silver",   min: 150,  emoji: "🥈", accent: "#8b95a1" },
-  { name: "Gold",     min: 400,  emoji: "🥇", accent: "#d4a017" },
-  { name: "Sapphire", min: 900,  emoji: "🔷", accent: "#2f6fed" },
-  { name: "Ruby",     min: 1800, emoji: "♦️", accent: "#d1345b" },
-  { name: "Diamond",  min: 3500, emoji: "💎", accent: "#12b8c9" },
+  { name: "Bronze",   min: 0,    emoji: "🥉", accent: "#B87333" },
+  { name: "Silver",   min: 100,  emoji: "🥈", accent: "#9CA3AF" },
+  { name: "Gold",     min: 300,  emoji: "🥇", accent: "#EFAE56" },
+  { name: "Platinum", min: 600,  emoji: "💠", accent: "#5EA7C7" },
+  { name: "Diamond",  min: 1000, emoji: "💎", accent: "#8B7BE8" },
 ];
 
 // The division a lifetime total sits in (the highest tier whose min it meets).

@@ -17,7 +17,6 @@ import DailyRewardChest from "@/components/portal/DailyRewardChest";
 import DailyQuests from "@/components/portal/DailyQuests";
 import HappyHourBanner from "@/components/portal/HappyHourBanner";
 import PlayLearn from "@/components/portal/PlayLearn";
-import LeagueStrip from "@/components/portal/LeagueStrip";
 import Tour from "@/components/tour/Tour";
 import { studentTour } from "@/components/tour/steps";
 import { fmtWAT, fmtWATDate } from "@/lib/time";
@@ -177,9 +176,6 @@ export default async function StudentDashboard() {
         </Reveal>
       </div>
 
-      {/* Your league / division — reward points turned into a tier to climb */}
-      <Reveal delay={20}><LeagueStrip points={rewardPts} /></Reveal>
-
       {/* Play & learn — a colourful launcher for the games and tools */}
       <Reveal delay={30}><PlayLearn /></Reveal>
 
@@ -257,10 +253,7 @@ export default async function StudentDashboard() {
               </div>
             ))}
             {!classes?.length && (
-              <div className="flex flex-col items-center gap-2 py-8 text-ink/25">
-                <Icon name="calendar" className="h-8 w-8" />
-                <p className="text-sm">No upcoming classes yet.</p>
-              </div>
+              <SectionEmpty icon="calendar" title="No classes scheduled" body="Your next live class will appear here." cta={{ label: "See timetable", href: "/portal/calendar" }} />
             )}
           </div>
         </Reveal>
@@ -290,10 +283,7 @@ export default async function StudentDashboard() {
               );
             })}
             {!upcoming.length && (
-              <div className="flex flex-col items-center gap-2 py-8 text-ink/25">
-                <Icon name="checkCircle" className="h-8 w-8" />
-                <p className="text-sm">Nothing due — you&apos;re all caught up!</p>
-              </div>
+              <SectionEmpty emoji="🎉" icon="checkCircle" title="All caught up!" body="Nothing due right now — lovely work." cta={{ label: "Practice for fun", href: "/portal/practice" }} />
             )}
           </div>
         </Reveal>
@@ -320,10 +310,7 @@ export default async function StudentDashboard() {
               </div>
             ))}
             {!notices?.length && (
-              <div className="flex flex-col items-center gap-2 py-8 text-ink/25">
-                <Icon name="notices" className="h-8 w-8" />
-                <p className="text-sm">No notices yet.</p>
-              </div>
+              <SectionEmpty icon="notices" title="No notices yet" body="Announcements from your tutors show up here." />
             )}
           </div>
         </Reveal>
@@ -352,6 +339,25 @@ export default async function StudentDashboard() {
       <Reveal delay={160}><div data-tour="rate"><RateCard /></div></Reveal>
 
       <Tour tourId="student" steps={studentTour} />
+    </div>
+  );
+}
+
+// A soft, friendly empty state that sits inside a dashboard card — warmer than a
+// bare icon + line, with an optional nudge to the next step.
+function SectionEmpty({ icon, title, body, cta, emoji }: {
+  icon: IconName; title: string; body: string; cta?: { label: string; href: string }; emoji?: string;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-2.5 py-8 text-center">
+      <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-gold-pale to-chalk text-2xl text-gold-deep ring-1 ring-gold/15 dark:from-white/10 dark:to-white/[0.03]">
+        {emoji ? <span>{emoji}</span> : <Icon name={icon} className="h-6 w-6" />}
+      </span>
+      <div>
+        <p className="text-sm font-bold text-ink/75">{title}</p>
+        <p className="mt-0.5 text-xs text-ink/45">{body}</p>
+      </div>
+      {cta && <Link href={cta.href} className="mt-0.5 text-xs font-bold text-gold-deep hover:underline">{cta.label} →</Link>}
     </div>
   );
 }

@@ -1,35 +1,26 @@
 "use client";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/Icons";
+import { DIVISIONS, divisionIndex, progressToNext } from "@/lib/leagues";
 
 // Gamified "Level & momentum" panel for the learner dashboard. Turns reward
 // points into a tiered level with an animated progress ring and a visual tier
-// ladder — a premium, motivating centrepiece that reads at a glance.
+// ladder — a premium, motivating centrepiece that reads at a glance. Tiers come
+// from lib/leagues so this always agrees with the Leagues page + league strip.
 
-const TIERS = [
-  { name: "Bronze", at: 0, color: "#B87333" },
-  { name: "Silver", at: 100, color: "#9CA3AF" },
-  { name: "Gold", at: 300, color: "#EFAE56" },
-  { name: "Platinum", at: 600, color: "#5EA7C7" },
-  { name: "Diamond", at: 1000, color: "#8B7BE8" },
-];
-
-function tierFor(points: number) {
-  let i = 0;
-  for (let t = 0; t < TIERS.length; t++) if (points >= TIERS[t].at) i = t;
-  const current = TIERS[i];
-  const next = TIERS[i + 1] ?? null;
-  const base = current.at;
-  const span = next ? next.at - base : 1;
-  const pct = next ? Math.min(100, Math.round(((points - base) / span) * 100)) : 100;
-  const toNext = next ? next.at - points : 0;
-  return { index: i, current, next, pct, toNext };
-}
+// The ladder, in the shape this card renders (name + accent colour).
+const TIERS = DIVISIONS.map((d) => ({ name: d.name, color: d.accent }));
 
 export default function MomentumCard({
   rewardPoints = 0, streak = 0, avgScore = 0,
 }: { rewardPoints?: number; streak?: number; avgScore?: number }) {
-  const { index, current, next, pct, toNext } = tierFor(rewardPoints);
+  const index = divisionIndex(rewardPoints);
+  const prog = progressToNext(rewardPoints);
+  const current = { name: prog.current.name, color: prog.current.accent };
+  const next = prog.next ? { name: prog.next.name } : null;
+  const pct = prog.pct;
+  const toNext = prog.remaining;
   const level = index + 1;
 
   // animate the ring in from 0 on mount (reduced-motion users just see the end state)
@@ -124,6 +115,12 @@ export default function MomentumCard({
               );
             })}
           </div>
+
+          <Link href="/portal/leagues"
+            className="group mt-4 inline-flex items-center gap-1.5 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-white ring-1 ring-white/15 transition hover:bg-white/20">
+            <Icon name="students" className="h-4 w-4 text-gold" /> This week&apos;s league
+            <span className="transition-transform group-hover:translate-x-0.5">→</span>
+          </Link>
         </div>
       </div>
     </div>
