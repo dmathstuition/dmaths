@@ -1,5 +1,6 @@
 import BroadcastClient from "@/components/admin/BroadcastClient";
 import { supabaseServer } from "@/lib/supabase/server";
+import { normalizeSubjects } from "@/lib/subjects";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +18,7 @@ export default async function BroadcastPage() {
 
   // Distinct levels and subjects across active students.
   const levels = Array.from(new Set((students ?? []).map((s: any) => s.level).filter(Boolean))).sort();
-  const subjects = Array.from(new Set((students ?? []).flatMap((s: any) => s.subjects ?? []).filter(Boolean))).sort();
+  const subjects = normalizeSubjects((students ?? []).flatMap((s: any) => s.subjects ?? []));
   const total = students?.length ?? 0;
 
   return (

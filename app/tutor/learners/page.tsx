@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getUser } from "@/lib/auth";
 import { getRoster } from "@/lib/authRole";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { normalizeSubjects } from "@/lib/subjects";
 import PageHero from "@/components/portal/PageHero";
 
 export const dynamic = "force-dynamic";
@@ -40,7 +41,7 @@ export default async function TutorLearners() {
                 <p className="font-display text-base font-bold">{s.first_name} {s.last_name}</p>
                 <p className="font-mono text-xs text-ink/45">{s.student_code} · {s.level}</p>
                 <div className="mt-1.5 flex flex-wrap gap-1">
-                  {(s.subjects ?? []).slice(0, 3).map((sub: string) => (
+                  {normalizeSubjects(s.subjects).slice(0, 3).map((sub: string) => (
                     <span key={sub} className="pill-blue !py-0.5 !text-[10px]">{sub}</span>
                   ))}
                 </div>

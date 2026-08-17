@@ -10,3 +10,4 @@ public/swe-worker-*.js
 
 # TypeScript incremental build cache (generated)
 tsconfig.tsbuildinfo
+verifyX.log
