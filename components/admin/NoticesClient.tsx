@@ -1,8 +1,11 @@
 "use client";
 import { useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
+import { ACADEMY_SUBJECTS } from "@/lib/subjects";
+import { useBulkSelect } from "@/lib/useBulkSelect";
+import BulkBar from "@/components/admin/BulkBar";
 
-const TARGETS = ["all","Algebra","Calculus","Statistics","Geometry","Further Mathematics","Physics","JavaScript","Python","Python Practice Challenge","External Examinations"];
+const TARGETS = ["all", ...ACADEMY_SUBJECTS];
 
 export default function NoticesClient({ initial }: { initial: any[] }) {
   const supabase = supabaseBrowser();
@@ -10,9 +13,21 @@ export default function NoticesClient({ initial }: { initial: any[] }) {
   const [f, setF] = useState({ title: "", body: "", target: "all" });
   const [editId, setEditId] = useState<string | null>(null);
 
+  const sel = useBulkSelect();
+  const [bulkBusy, setBulkBusy] = useState(false);
+
   async function reload() {
     const { data } = await supabase.from("notices").select("*").order("created_at", { ascending: false });
     setNotices(data ?? []);
+  }
+
+  async function bulkDelete() {
+    const ids = sel.list;
+    if (!ids.length || !confirm(`Delete ${ids.length} announcement${ids.length === 1 ? "" : "s"} permanently?`)) return;
+    setBulkBusy(true);
+    await supabase.from("notices").delete().in("id", ids);
+    setBulkBusy(false);
+    sel.clear(); reload();
   }
 
   async function post() {
@@ -66,10 +81,26 @@ export default function NoticesClient({ initial }: { initial: any[] }) {
         </div>
       </div>
 
+      <BulkBar count={sel.size} noun="announcement" onClear={sel.clear}>
+        <button onClick={bulkDelete} disabled={bulkBusy}
+          className="btn border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 disabled:opacity-50">Delete selected</button>
+      </BulkBar>
+
+      {notices.length > 0 && (
+        <label className="inline-flex cursor-pointer items-center gap-2 text-sm font-bold text-ink/70">
+          <input type="checkbox" className="h-4 w-4"
+            checked={sel.allSelected(notices.map(n => n.id))}
+            onChange={e => e.target.checked ? sel.selectOnly(notices.map(n => n.id)) : sel.clear()} />
+          Select all {notices.length}
+        </label>
+      )}
+
       {notices.map(n => (
-        <article key={n.id} className="card border-l-4 border-l-gold p-6">
+        <article key={n.id} className={`card border-l-4 border-l-gold p-6 ${sel.has(n.id) ? "ring-2 ring-gold" : ""}`}>
           <div className="flex items-start justify-between gap-3">
-            <div>
+            <input type="checkbox" className="mt-1 h-4 w-4 flex-shrink-0" aria-label="Select this announcement"
+              checked={sel.has(n.id)} onChange={() => sel.toggle(n.id)} />
+            <div className="min-w-0 flex-1">
               <h2 className="font-extrabold">{n.title}</h2>
               <p className="text-xs text-ink/40">
                 {new Date(n.created_at).toLocaleDateString("en-NG", { dateStyle: "medium" })} · {n.target === "all" ? "All students" : n.target}

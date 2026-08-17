@@ -3,6 +3,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/Icons";
 import { useToast } from "@/components/Toast";
+import { useBulkSelect } from "@/lib/useBulkSelect";
+import BulkBar from "@/components/admin/BulkBar";
 
 type Deck = { id: string; title: string; subject: string | null; published: boolean };
 type Card = { id: string; deck_id: string; front: string; back: string };
@@ -99,6 +101,20 @@ export default function FlashcardsClient({ decks, cards }: { decks: Deck[]; card
     router.refresh();
   }
 
+  const sel = useBulkSelect();
+  const [bulkBusy, setBulkBusy] = useState(false);
+  async function bulkDeleteDecks() {
+    const ids = sel.list;
+    if (!ids.length || !confirm(`Delete ${ids.length} deck${ids.length === 1 ? "" : "s"} and all their cards?`)) return;
+    setBulkBusy(true);
+    const results = await Promise.all(ids.map((id) => fetch(`/api/flashcards?deckId=${id}`, { method: "DELETE" })));
+    setBulkBusy(false);
+    const failed = results.filter((r) => !r.ok).length;
+    push(failed ? `${ids.length - failed} deleted, ${failed} failed.` : `${ids.length} deck${ids.length === 1 ? "" : "s"} deleted.`, failed ? "error" : "success");
+    sel.clear();
+    router.refresh();
+  }
+
   return (
     <div className="space-y-6">
       <div className="boardgrid relative flex items-center gap-4 overflow-hidden rounded-2xl bg-board p-7 text-white">
@@ -130,13 +146,28 @@ export default function FlashcardsClient({ decks, cards }: { decks: Deck[]; card
         <button className="btn-gold mt-4" onClick={createDeck} disabled={busy}>Create deck</button>
       </div>
 
+      <BulkBar count={sel.size} noun="deck" onClear={sel.clear}>
+        <button onClick={bulkDeleteDecks} disabled={bulkBusy}
+          className="btn border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 disabled:opacity-50">Delete selected</button>
+      </BulkBar>
+      {decks.length > 0 && (
+        <label className="inline-flex cursor-pointer items-center gap-2 text-sm font-bold text-ink/70">
+          <input type="checkbox" className="h-4 w-4"
+            checked={sel.allSelected(decks.map(d => d.id))}
+            onChange={e => e.target.checked ? sel.selectOnly(decks.map(d => d.id)) : sel.clear()} />
+          Select all {decks.length} decks
+        </label>
+      )}
+
       <div className="space-y-3">
         {decks.map((d) => {
           const deckCards = cards.filter((c) => c.deck_id === d.id);
           const open = openId === d.id;
           return (
-            <div key={d.id} className="card neu-card overflow-hidden">
+            <div key={d.id} className={`card neu-card overflow-hidden ${sel.has(d.id) ? "ring-2 ring-gold" : ""}`}>
               <div className="flex flex-wrap items-center gap-3 border-b border-line px-5 py-4">
+                <input type="checkbox" className="h-4 w-4 flex-shrink-0" aria-label="Select this deck"
+                  checked={sel.has(d.id)} onChange={() => sel.toggle(d.id)} />
                 <button onClick={() => setOpenId(open ? null : d.id)} className="min-w-0 flex-1 text-left">
                   <p className="font-display text-base font-bold text-ink">{d.title}</p>
                   <p className="text-xs text-ink/50">{d.subject || "General"} · {deckCards.length} card{deckCards.length === 1 ? "" : "s"}</p>

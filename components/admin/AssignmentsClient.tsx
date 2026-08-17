@@ -12,8 +12,9 @@ import { codeDisplay } from "@/lib/codeSubmission";
 import { fileHref } from "@/lib/storageUrls";
 import BankPicker from "@/components/admin/BankPicker";
 import { toCbtQuestions, validateQuestion, type BankRow } from "@/lib/questionBank";
+import { ACADEMY_SUBJECTS } from "@/lib/subjects";
 
-const SUBJECTS = ["Algebra","Calculus","Statistics","Geometry","Further Mathematics","Core Maths Revision","Physics","JavaScript","Python","Python Practice Challenge","External Examinations"];
+const SUBJECTS: string[] = [...ACADEMY_SUBJECTS];
 
 function ChevronDown({ open }: { open: boolean }) {
   return (
@@ -49,7 +50,7 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
   const [open, setOpen] = useState<Set<string>>(new Set());
   const toggleOpen = (id: string) => setOpen((prev) => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
   const [showForm, setShowForm] = useState(false);
-  const [f, setF] = useState<any>({ subject: "Algebra", type: "written", roster: [] as string[], cbt_mode: "link" });
+  const [f, setF] = useState<any>({ subject: SUBJECTS[0], type: "written", roster: [] as string[], cbt_mode: "link" });
   const [questions, setQuestions] = useState<CBTQuestion[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
@@ -186,7 +187,7 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
       .insert(roster.map((sid: string) => ({ assignment_id: a.id, student_id: sid })));
 
     setBusy(false); setShowForm(false);
-    setF({ subject: "Algebra", type: "written", roster: [], cbt_mode: "link" });
+    setF({ subject: SUBJECTS[0], type: "written", roster: [], cbt_mode: "link" });
     setQuestions([]); setFile(null);
     reload();
   }
@@ -216,7 +217,7 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
       ({ error } = await supabase.from("assignments").update(withoutDueAt).eq("id", editId!));
     }
     setEditId(null); setShowForm(false);
-    setF({ subject: "Algebra", type: "written", roster: [], cbt_mode: "link" });
+    setF({ subject: SUBJECTS[0], type: "written", roster: [], cbt_mode: "link" });
     reload();
   }
 
@@ -259,7 +260,7 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
           <button className="btn-ghost" onClick={sendReminders} disabled={sendingReminders}>
             {sendingReminders ? <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-ink/20 border-t-ink" /> : "Send due-tomorrow reminders"}
           </button>
-          <button className="btn-gold" onClick={() => { if (showForm) { setEditId(null); setF({ subject: "Algebra", type: "written", roster: [], cbt_mode: "link" }); } setShowForm(v => !v); }}>{showForm ? "Cancel" : "+ New assignment"}</button>
+          <button className="btn-gold" onClick={() => { if (showForm) { setEditId(null); setF({ subject: SUBJECTS[0], type: "written", roster: [], cbt_mode: "link" }); } setShowForm(v => !v); }}>{showForm ? "Cancel" : "+ New assignment"}</button>
         </div>
       </div>
 
