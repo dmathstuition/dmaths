@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { Icon } from "@/components/Icons";
 import { useToast } from "@/components/Toast";
 import { fmtWAT } from "@/lib/time";
+import { useBulkSelect } from "@/lib/useBulkSelect";
+import BulkBar from "@/components/admin/BulkBar";
 
 type Student = { id: string; first_name: string | null; last_name: string | null; student_code: string | null };
 type ClassRow = { id: string; subject: string; starts_at: string };
@@ -46,6 +48,20 @@ export default function ReportCardsClient({ students, classes, issued }: { stude
     const res = await fetch(`/api/report-cards?id=${id}`, { method: "DELETE" });
     if (!res.ok) { push("Could not revoke it.", "error"); return; }
     push("Report card revoked.", "success");
+    router.refresh();
+  }
+
+  const sel = useBulkSelect();
+  const [bulkBusy, setBulkBusy] = useState(false);
+  async function bulkRevoke() {
+    const ids = sel.list;
+    if (!ids.length || !confirm(`Revoke ${ids.length} report card${ids.length === 1 ? "" : "s"}?`)) return;
+    setBulkBusy(true);
+    const results = await Promise.all(ids.map((id) => fetch(`/api/report-cards?id=${id}`, { method: "DELETE" })));
+    setBulkBusy(false);
+    const failed = results.filter((r) => !r.ok).length;
+    push(failed ? `${ids.length - failed} revoked, ${failed} failed.` : `${ids.length} report card${ids.length === 1 ? "" : "s"} revoked.`, failed ? "error" : "success");
+    sel.clear();
     router.refresh();
   }
 
@@ -117,14 +133,29 @@ export default function ReportCardsClient({ students, classes, issued }: { stude
         </button>
       </div>
 
+      <BulkBar count={sel.size} noun="report card" onClear={sel.clear}>
+        <button onClick={bulkRevoke} disabled={bulkBusy}
+          className="btn border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 disabled:opacity-50">Revoke selected</button>
+      </BulkBar>
+
       <div className="card neu-card overflow-hidden">
-        <div className="border-b border-line px-6 py-4">
+        <div className="flex items-center justify-between gap-3 border-b border-line px-6 py-4">
           <h2 className="font-display text-lg font-semibold text-ink">Issued ({issued.length})</h2>
+          {issued.length > 0 && (
+            <label className="inline-flex cursor-pointer items-center gap-2 text-sm font-bold text-ink/60">
+              <input type="checkbox" className="h-4 w-4"
+                checked={sel.allSelected(issued.map(c => c.id))}
+                onChange={e => e.target.checked ? sel.selectOnly(issued.map(c => c.id)) : sel.clear()} />
+              Select all
+            </label>
+          )}
         </div>
         {issued.length ? (
           <div className="divide-y divide-line/60">
             {issued.map(c => (
-              <div key={c.id} className="flex items-center gap-3 px-5 py-3.5">
+              <div key={c.id} className={`flex items-center gap-3 px-5 py-3.5 ${sel.has(c.id) ? "bg-gold-pale/40" : ""}`}>
+                <input type="checkbox" className="h-4 w-4 flex-shrink-0" aria-label="Select this report card"
+                  checked={sel.has(c.id)} onChange={() => sel.toggle(c.id)} />
                 <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-gold-pale text-gold-deep">
                   <Icon name="reports" className="h-4 w-4" />
                 </span>

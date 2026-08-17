@@ -1,8 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
+import { ACADEMY_SUBJECTS, isAcademySubject } from "@/lib/subjects";
+import { useBulkSelect } from "@/lib/useBulkSelect";
+import BulkBar from "@/components/admin/BulkBar";
 
-const SUBJECTS = ["Algebra","Calculus","Statistics","Geometry","Further Mathematics","Core Maths Revision","Physics","JavaScript","Python","Python Practice Challenge","External Examinations"];
+const SUBJECTS: string[] = [...ACADEMY_SUBJECTS];
 
 export default function MaterialsClient({ initial }: { initial: any[] }) {
   const supabase = supabaseBrowser();
@@ -15,9 +18,40 @@ export default function MaterialsClient({ initial }: { initial: any[] }) {
   const [q, setQ] = useState("");
   const [subjectFilter, setSubjectFilter] = useState("all");
 
+  const sel = useBulkSelect();
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const [retagOpen, setRetagOpen] = useState(false);
+  const [retagSubject, setRetagSubject] = useState(SUBJECTS[0]);
+
+  const filterSubjects = useMemo(() => {
+    const present = new Set<string>(materials.map((m) => m.subject).filter(Boolean));
+    const legacy = [...present].filter((s) => !isAcademySubject(s)).sort();
+    return [...ACADEMY_SUBJECTS, ...legacy];
+  }, [materials]);
+
   async function reload() {
     const { data } = await supabase.from("lesson_materials").select("*").order("created_at", { ascending: false });
     setMaterials(data ?? []);
+  }
+
+  async function bulkDelete() {
+    const ids = sel.list;
+    if (!ids.length || !confirm(`Delete ${ids.length} material${ids.length === 1 ? "" : "s"} permanently?`)) return;
+    setBulkBusy(true);
+    await supabase.from("lesson_materials").delete().in("id", ids);
+    setBulkBusy(false);
+    sel.clear();
+    reload();
+  }
+
+  async function bulkRetag() {
+    const ids = sel.list;
+    if (!ids.length) return;
+    setBulkBusy(true);
+    await supabase.from("lesson_materials").update({ subject: retagSubject }).in("id", ids);
+    setBulkBusy(false);
+    setRetagOpen(false); sel.clear();
+    reload();
   }
 
   async function upload() {
@@ -83,9 +117,38 @@ export default function MaterialsClient({ initial }: { initial: any[] }) {
         <input className="field max-w-xs" placeholder="Search title or description…" value={q} onChange={e => setQ(e.target.value)} />
         <select className="field max-w-[200px]" value={subjectFilter} onChange={e => setSubjectFilter(e.target.value)}>
           <option value="all">All subjects</option>
-          {SUBJECTS.map(s => <option key={s} value={s}>{s}</option>)}
+          {filterSubjects.map(s => <option key={s} value={s}>{isAcademySubject(s) ? s : `${s} (former)`}</option>)}
         </select>
       </div>
+
+      <BulkBar count={sel.size} noun="material" onClear={sel.clear}>
+        <button onClick={bulkDelete} disabled={bulkBusy}
+          className="btn border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 disabled:opacity-50">Delete selected</button>
+        <button onClick={() => setRetagOpen(s => !s)} disabled={bulkBusy}
+          className="btn border border-line bg-white text-ink/70 hover:bg-chalk disabled:opacity-50">Change subject</button>
+      </BulkBar>
+
+      {retagOpen && sel.size > 0 && (
+        <div className="card flex flex-wrap items-end gap-3 border-gold/40 p-4">
+          <div>
+            <label htmlFor="mat-retag" className="flabel">New subject for {sel.size} selected</label>
+            <select id="mat-retag" className="field" value={retagSubject} onChange={e => setRetagSubject(e.target.value)}>
+              {SUBJECTS.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </div>
+          <button onClick={bulkRetag} disabled={bulkBusy} className="btn-gold">{bulkBusy ? "Applying…" : "Apply"}</button>
+          <button onClick={() => setRetagOpen(false)} className="btn-ghost">Cancel</button>
+        </div>
+      )}
+
+      {visible.length > 0 && (
+        <label className="inline-flex cursor-pointer items-center gap-2 text-sm font-bold text-ink/70">
+          <input type="checkbox" className="h-4 w-4"
+            checked={sel.allSelected(visible.map(m => m.id))}
+            onChange={e => e.target.checked ? sel.selectOnly(visible.map(m => m.id)) : sel.clear()} />
+          Select all {visible.length} shown
+        </label>
+      )}
 
       {msg && <p className="rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-900">{msg}</p>}
 
@@ -105,8 +168,10 @@ export default function MaterialsClient({ initial }: { initial: any[] }) {
 
       <div className="grid gap-4 md:grid-cols-2">
         {visible.map(m => (
-          <div key={m.id} className="card p-5">
+          <div key={m.id} className={`card p-5 ${sel.has(m.id) ? "ring-2 ring-gold" : ""}`}>
             <div className="flex items-start justify-between gap-3">
+              <input type="checkbox" className="mt-1 h-4 w-4 flex-shrink-0" aria-label="Select this material"
+                checked={sel.has(m.id)} onChange={() => sel.toggle(m.id)} />
               <div className="min-w-0 flex-1">
                 <h2 className="font-extrabold truncate">{m.title}</h2>
                 <p className="text-xs text-ink/45">{m.subject} · {formatSize(m.file_size || 0)} · {new Date(m.created_at).toLocaleDateString("en-NG", { dateStyle: "medium" })}</p>

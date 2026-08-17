@@ -7,9 +7,14 @@ import { useToast } from "@/components/Toast";
 import EmptyState from "@/components/ui/EmptyState";
 import { MAX_OPTIONS, GROUP_TARGET, groupReady, summariseGroups, validateQuestion, parseQuestionBatch, type BankRow } from "@/lib/questionBank";
 import { ALL_EXAMS } from "@/lib/regions";
+import { ACADEMY_SUBJECTS, isAcademySubject } from "@/lib/subjects";
+import { useBulkSelect } from "@/lib/useBulkSelect";
+import BulkBar from "@/components/admin/BulkBar";
 
-const SUBJECTS = ["Algebra", "Calculus", "Statistics", "Geometry", "Further Mathematics",
-  "Core Maths Revision", "Physics", "English", "JavaScript", "Python", "External Examinations"];
+// New questions are tagged with the six academy subjects; older rows may still
+// carry a legacy topic-style subject, which the filters surface so they can be
+// found, re-tagged, or cleared out in bulk.
+const SUBJECTS: string[] = [...ACADEMY_SUBJECTS];
 const LEVELS = ["", "Primary", "JSS 1", "JSS 2", "JSS 3", "SS 1", "SS 2", "SS 3"];
 
 const BLANK = {
@@ -38,6 +43,13 @@ export default function QuestionBankClient({
   const [level, setLevel] = useState("");
   const [search, setSearch] = useState("");
   const [group, setGroup] = useState("");
+
+  // ── Bulk select / delete / re-tag ──
+  const sel = useBulkSelect();
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const [retagOpen, setRetagOpen] = useState(false);
+  const [retag, setRetag] = useState({ subject: "", level: "", group_name: "" });
+  const [confirmBulk, setConfirmBulk] = useState<null | "selected" | "legacy">(null);
 
   // Named groups + their counts, loaded across the whole bank (not just the page
   // of rows shown), so readiness (≥ GROUP_TARGET) is accurate.
@@ -156,6 +168,70 @@ export default function QuestionBankClient({
     [rows],
   );
 
+  // Filter dropdown shows the six academy subjects plus any legacy subject still
+  // present in the bank, so former-subject questions can be found and cleared.
+  const allSubjects = useMemo(() => {
+    const present = new Set(rows.map((r) => r.subject).filter(Boolean));
+    const legacy = [...present].filter((s) => !isAcademySubject(s)).sort();
+    return [...ACADEMY_SUBJECTS, ...legacy];
+  }, [rows]);
+
+  const visibleIds = useMemo(() => visible.map((r) => r.id), [visible]);
+  const legacyVisible = useMemo(() => visible.filter((r) => !isAcademySubject(r.subject)), [visible]);
+  const legacyTotal = useMemo(() => rows.filter((r) => !isAcademySubject(r.subject)).length, [rows]);
+
+  async function bulkDelete() {
+    setConfirmBulk(null);
+    const ids = sel.list;
+    if (!ids.length) return;
+    setBulkBusy(true);
+    const res = await fetch(`/api/question-bank?ids=${ids.map(encodeURIComponent).join(",")}`, { method: "DELETE" });
+    const j = await res.json().catch(() => ({}));
+    setBulkBusy(false);
+    if (!res.ok) { push(j.error || "Could not delete the selection.", "error"); return; }
+    const gone = new Set(ids);
+    setRows((rs) => rs.filter((r) => !gone.has(r.id)));
+    sel.clear();
+    push(`${j.deleted ?? ids.length} question${(j.deleted ?? ids.length) === 1 ? "" : "s"} removed.`, "success");
+    loadGroups();
+  }
+
+  async function deleteAllLegacy() {
+    setConfirmBulk(null);
+    setBulkBusy(true);
+    const res = await fetch(`/api/question-bank?legacy=1`, { method: "DELETE" });
+    const j = await res.json().catch(() => ({}));
+    setBulkBusy(false);
+    if (!res.ok) { push(j.error || "Could not clear the former questions.", "error"); return; }
+    push(`${j.deleted ?? 0} former-subject question${(j.deleted ?? 0) === 1 ? "" : "s"} removed.`, "success");
+    sel.clear();
+    await reload();
+    loadGroups();
+  }
+
+  async function bulkRetag() {
+    const ids = sel.list;
+    if (!ids.length) return;
+    const set: Record<string, string> = {};
+    if (retag.subject) set.subject = retag.subject;
+    if (retag.level) set.level = retag.level;
+    if (retag.group_name.trim()) set.group_name = retag.group_name.trim();
+    if (!Object.keys(set).length) { push("Pick a subject, level or group to apply.", "error"); return; }
+    setBulkBusy(true);
+    const res = await fetch("/api/question-bank", {
+      method: "PATCH", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids, set }),
+    });
+    const j = await res.json().catch(() => ({}));
+    setBulkBusy(false);
+    if (!res.ok) { push(j.error || "Could not re-tag the selection.", "error"); return; }
+    const idset = new Set(ids);
+    setRows((rs) => rs.map((r) => (idset.has(r.id) ? { ...r, ...set } as BankRow : r)));
+    push(`${j.updated ?? ids.length} question${(j.updated ?? ids.length) === 1 ? "" : "s"} re-tagged.`, "success");
+    setRetagOpen(false); setRetag({ subject: "", level: "", group_name: "" }); sel.clear();
+    loadGroups();
+  }
+
   async function reload() {
     const res = await fetch("/api/question-bank", { cache: "no-store" });
     const j = await res.json().catch(() => ({}));
@@ -238,6 +314,69 @@ export default function QuestionBankClient({
           onConfirm={() => remove(confirmDelete)}
           onCancel={() => setConfirmDelete(null)}
         />
+      )}
+
+      {confirmBulk === "selected" && (
+        <ConfirmModal
+          title={`Delete ${sel.size} question${sel.size === 1 ? "" : "s"}?`}
+          message="This removes them from the bank for good. Tests already built keep their own copy."
+          confirmLabel={`Delete ${sel.size}`} danger
+          onConfirm={bulkDelete}
+          onCancel={() => setConfirmBulk(null)}
+        />
+      )}
+      {confirmBulk === "legacy" && (
+        <ConfirmModal
+          title={`Clear ${legacyTotal} former question${legacyTotal === 1 ? "" : "s"}?`}
+          message="Every question still tagged with an old subject (Algebra, Calculus, JavaScript…) will be permanently removed from the bank. Tests already built keep their own copy."
+          confirmLabel="Clear the old bank" danger
+          onConfirm={deleteAllLegacy}
+          onCancel={() => setConfirmBulk(null)}
+        />
+      )}
+
+      <BulkBar count={sel.size} noun="question" onClear={sel.clear}>
+        <button onClick={() => setConfirmBulk("selected")} disabled={bulkBusy}
+          className="btn inline-flex items-center gap-1.5 border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 disabled:opacity-50">
+          <Icon name="close" className="h-4 w-4" /> Delete selected
+        </button>
+        <button onClick={() => setRetagOpen((s) => !s)} disabled={bulkBusy}
+          className="btn inline-flex items-center gap-1.5 border border-line bg-white text-ink/70 hover:bg-chalk disabled:opacity-50">
+          <Icon name="book" className="h-4 w-4" /> Re-tag selected
+        </button>
+      </BulkBar>
+
+      {retagOpen && sel.size > 0 && (
+        <div className="card space-y-3 border-gold/40 p-5">
+          <p className="text-sm font-bold text-ink">Re-tag {sel.size} selected question{sel.size === 1 ? "" : "s"}</p>
+          <p className="text-[13px] text-ink/55">Leave a field on “— keep —” to leave it unchanged.</p>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div>
+              <label htmlFor="qb-retag-subject" className="flabel">Subject</label>
+              <select id="qb-retag-subject" className="field" value={retag.subject} onChange={(e) => setRetag({ ...retag, subject: e.target.value })}>
+                <option value="">— keep —</option>
+                {ACADEMY_SUBJECTS.map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="qb-retag-level" className="flabel">Level</label>
+              <select id="qb-retag-level" className="field" value={retag.level} onChange={(e) => setRetag({ ...retag, level: e.target.value })}>
+                <option value="">— keep —</option>
+                {LEVELS.filter(Boolean).map((l) => <option key={l} value={l}>{l}</option>)}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="qb-retag-group" className="flabel">Group / set</label>
+              <input id="qb-retag-group" className="field" list="qb-groups-retag" value={retag.group_name}
+                onChange={(e) => setRetag({ ...retag, group_name: e.target.value })} placeholder="— keep —" />
+              <datalist id="qb-groups-retag">{groupNames.map((g) => <option key={g} value={g} />)}</datalist>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button onClick={bulkRetag} disabled={bulkBusy} className="btn-gold">{bulkBusy ? "Applying…" : "Apply to selected"}</button>
+            <button onClick={() => setRetagOpen(false)} className="btn-ghost">Cancel</button>
+          </div>
+        </div>
       )}
 
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -560,7 +699,7 @@ export default function QuestionBankClient({
           <label htmlFor="qb-filter-subject" className="flabel">Subject</label>
           <select id="qb-filter-subject" className="field !w-auto" value={subject} onChange={(e) => setSubject(e.target.value)}>
             <option value="">All subjects</option>
-            {SUBJECTS.map((s) => <option key={s} value={s}>{s}</option>)}
+            {allSubjects.map((s) => <option key={s} value={s}>{isAcademySubject(s) ? s : `${s} (former)`}</option>)}
           </select>
         </div>
         <div>
@@ -589,17 +728,46 @@ export default function QuestionBankClient({
         </span>
       </div>
 
+      {/* Bulk-select controls */}
+      {visible.length > 0 && (
+        <div className="flex flex-wrap items-center gap-3 rounded-xl border border-line bg-chalk/40 px-4 py-2.5 text-sm">
+          <label className="inline-flex cursor-pointer items-center gap-2 font-bold text-ink/70">
+            <input type="checkbox" className="h-4 w-4"
+              checked={sel.allSelected(visibleIds)}
+              onChange={(e) => e.target.checked ? sel.selectOnly(visibleIds) : sel.clear()} />
+            Select all {visible.length} shown
+          </label>
+          {legacyVisible.length > 0 && (
+            <button onClick={() => sel.addMany(legacyVisible.map((r) => r.id))}
+              className="font-bold text-gold-deep hover:underline">
+              Select former shown ({legacyVisible.length})
+            </button>
+          )}
+          {legacyTotal > 0 && (
+            <button onClick={() => setConfirmBulk("legacy")} disabled={bulkBusy}
+              className="ml-auto inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 font-bold text-red-700 hover:bg-red-100 disabled:opacity-50">
+              <Icon name="close" className="h-4 w-4" /> Delete all {legacyTotal} former in bank
+            </button>
+          )}
+        </div>
+      )}
+
       {visible.length === 0 ? (
         <EmptyState icon="assignments" title="No questions yet"
           body="Add one above, or save the questions from a CBT test you're building — they'll appear here for next time." />
       ) : (
         <div className="space-y-3">
           {visible.map((r) => (
-            <article key={r.id} className="card p-5">
+            <article key={r.id} className={`card p-5 ${sel.has(r.id) ? "ring-2 ring-gold" : ""}`}>
               <div className="flex flex-wrap items-start justify-between gap-3">
+                <label className="flex cursor-pointer items-center pt-0.5">
+                  <input type="checkbox" className="h-4 w-4" aria-label="Select this question"
+                    checked={sel.has(r.id)} onChange={() => sel.toggle(r.id)} />
+                </label>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-1.5">
                     <span className="pill-gold">{r.subject || "General"}</span>
+                    {!isAcademySubject(r.subject) && <span className="pill bg-red-50 text-red-600">former</span>}
                     {r.level && <span className="pill-blue">{r.level}</span>}
                     {r.topic && <span className="pill bg-chalk text-ink/60">{r.topic}</span>}
                     {(r as any).group_name && <span className="pill bg-gold-pale text-gold-deep">◆ {(r as any).group_name}</span>}

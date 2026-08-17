@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import { Icon } from "@/components/Icons";
 import { useToast } from "@/components/Toast";
 import { fmtWAT } from "@/lib/time";
+import { useBulkSelect } from "@/lib/useBulkSelect";
+import BulkBar from "@/components/admin/BulkBar";
 
 type Student = { id: string; first_name: string | null; last_name: string | null; student_code: string | null };
 type ClassRow = { id: string; subject: string; starts_at: string };
@@ -51,6 +53,22 @@ export default function DailyTasksClient({ students, levels, subjects, classes, 
     const res = await fetch(`/api/daily-tasks?batchId=${batchId}`, { method: "DELETE" });
     if (!res.ok) { push("Could not withdraw it.", "error"); return; }
     push("Unfinished tasks withdrawn.", "success");
+    router.refresh();
+  }
+
+  const sel = useBulkSelect();
+  const [bulkBusy, setBulkBusy] = useState(false);
+  // Only batches with unfinished copies (and a real batch id) can be withdrawn.
+  const withdrawable = batches.filter((b) => b.batch_id && b.done < b.total).map((b) => b.batch_id!) as string[];
+  async function bulkWithdraw() {
+    const ids = sel.list;
+    if (!ids.length || !confirm(`Withdraw the unfinished copies of ${ids.length} task${ids.length === 1 ? "" : "s"}?`)) return;
+    setBulkBusy(true);
+    const results = await Promise.all(ids.map((id) => fetch(`/api/daily-tasks?batchId=${id}`, { method: "DELETE" })));
+    setBulkBusy(false);
+    const failed = results.filter((r) => !r.ok).length;
+    push(failed ? `${ids.length - failed} withdrawn, ${failed} failed.` : `${ids.length} task${ids.length === 1 ? "" : "s"} withdrawn.`, failed ? "error" : "success");
+    sel.clear();
     router.refresh();
   }
 
@@ -111,22 +129,44 @@ export default function DailyTasksClient({ students, levels, subjects, classes, 
         </button>
       </div>
 
+      <BulkBar count={sel.size} noun="task" onClear={sel.clear}>
+        <button onClick={bulkWithdraw} disabled={bulkBusy}
+          className="btn border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 disabled:opacity-50">Withdraw selected</button>
+      </BulkBar>
+
       <div className="card neu-card overflow-hidden">
-        <div className="border-b border-line px-6 py-4"><h2 className="font-display text-lg font-semibold text-ink">Recent tasks ({batches.length})</h2></div>
+        <div className="flex items-center justify-between gap-3 border-b border-line px-6 py-4">
+          <h2 className="font-display text-lg font-semibold text-ink">Recent tasks ({batches.length})</h2>
+          {withdrawable.length > 0 && (
+            <label className="inline-flex cursor-pointer items-center gap-2 text-sm font-bold text-ink/60">
+              <input type="checkbox" className="h-4 w-4"
+                checked={sel.allSelected(withdrawable)}
+                onChange={e => e.target.checked ? sel.selectOnly(withdrawable) : sel.clear()} />
+              Select all unfinished
+            </label>
+          )}
+        </div>
         {batches.length ? (
           <div className="divide-y divide-line/60">
-            {batches.map((b, i) => (
-              <div key={i} className="flex items-center gap-3 px-5 py-3.5">
+            {batches.map((b, i) => {
+              const canWithdraw = b.done < b.total && !!b.batch_id;
+              return (
+              <div key={i} className={`flex items-center gap-3 px-5 py-3.5 ${b.batch_id && sel.has(b.batch_id) ? "bg-gold-pale/40" : ""}`}>
+                {canWithdraw ? (
+                  <input type="checkbox" className="h-4 w-4 flex-shrink-0" aria-label="Select this task"
+                    checked={sel.has(b.batch_id!)} onChange={() => sel.toggle(b.batch_id!)} />
+                ) : <span className="w-4 flex-shrink-0" />}
                 <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-gold-pale text-gold-deep"><Icon name="checkCircle" className="h-4 w-4" /></span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-bold text-ink">{b.title}</p>
                   <p className="text-xs text-ink/50">{new Date(b.created_at).toLocaleDateString("en-NG", { dateStyle: "medium" })} · <span className="font-semibold text-emerald-600">{b.done}</span>/{b.total} done</p>
                 </div>
-                {b.done < b.total && b.batch_id && (
+                {canWithdraw && (
                   <button onClick={() => withdraw(b.batch_id)} className="flex-shrink-0 rounded-lg px-2 py-1.5 text-xs font-bold text-red-500 hover:bg-red-50">Withdraw</button>
                 )}
               </div>
-            ))}
+              );
+            })}
           </div>
         ) : <p className="p-6 text-center text-sm text-ink/40">No tasks posted yet.</p>}
       </div>
