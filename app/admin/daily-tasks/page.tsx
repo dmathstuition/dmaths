@@ -1,5 +1,6 @@
 import DailyTasksClient from "@/components/admin/DailyTasksClient";
 import { supabaseServer } from "@/lib/supabase/server";
+import { normalizeSubjects } from "@/lib/subjects";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +15,7 @@ export default async function AdminDailyTasksPage() {
   ]);
 
   const levels = Array.from(new Set((students ?? []).map((s: any) => s.level).filter(Boolean))).sort() as string[];
-  const subjects = Array.from(new Set((students ?? []).flatMap((s: any) => s.subjects ?? []).filter(Boolean))).sort() as string[];
+  const subjects = normalizeSubjects((students ?? []).flatMap((s: any) => s.subjects ?? [])) as string[];
 
   // Group task rows into batches (title + done/total).
   const byBatch = new Map<string, { title: string; created_at: string; done: number; total: number; batch_id: string | null }>();

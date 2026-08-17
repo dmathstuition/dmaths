@@ -9,6 +9,7 @@ import { waNumber } from "@/lib/whatsapp";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { fileHref } from "@/lib/storageUrls";
 import { regionByCode } from "@/lib/regions";
+import { normalizeSubjects } from "@/lib/subjects";
 
 export default function StudentDetailClient({ student, initialNotes, initialRewards, subs, behaviorTypes, initialBehaviorLogs, referredByName, initialParents = [] }: {
   student: any; initialNotes: any[]; initialRewards: any[]; subs: any[];
@@ -415,7 +416,7 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
               <Icon name="reports" className="h-3.5 w-3.5" /> Account statement (PDF)
             </Link>
             <div className="mt-2 flex flex-wrap gap-1.5">
-              {(student.subjects ?? []).map((s: string) => <span key={s} className="pill-blue">{s}</span>)}
+              {normalizeSubjects(student.subjects).map((s: string) => <span key={s} className="pill-blue">{s}</span>)}
             </div>
             {(student.country || student.exam_target) && (
               <div className="mt-2 flex flex-wrap gap-1.5 text-xs">

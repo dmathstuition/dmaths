@@ -2,6 +2,7 @@ import DailyTasksClient from "@/components/admin/DailyTasksClient";
 import { getUser } from "@/lib/auth";
 import { getRoster } from "@/lib/authRole";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { normalizeSubjects } from "@/lib/subjects";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +21,7 @@ export default async function TutorDailyTasksPage() {
   ]);
 
   const levels = Array.from(new Set((students ?? []).map((s: any) => s.level).filter(Boolean))).sort() as string[];
-  const subjects = Array.from(new Set((students ?? []).flatMap((s: any) => s.subjects ?? []).filter(Boolean))).sort() as string[];
+  const subjects = normalizeSubjects((students ?? []).flatMap((s: any) => s.subjects ?? [])) as string[];
 
   const byBatch = new Map<string, any>();
   for (const t of tasks ?? []) {

@@ -29,13 +29,13 @@ describe("sanitizeProfileEdit", () => {
     });
   });
 
-  it("keeps only canonical academy subjects, de-duplicated", () => {
-    const { patch } = sanitizeProfileEdit({ ...base, subjects: ["Maths", "Algebra", "Maths", "A.I and Automation"] });
-    expect(patch!.subjects).toEqual(["Maths", "A.I and Automation"]);
+  it("maps legacy subjects onto the academy set, de-duplicated", () => {
+    const { patch } = sanitizeProfileEdit({ ...base, subjects: ["Maths", "Algebra", "Calculus", "A.I and Automation"] });
+    expect(patch!.subjects).toEqual(["Maths", "A.I and Automation"]); // Algebra + Calculus → Maths
   });
 
-  it("rejects when no valid subject is chosen", () => {
-    const { patch, error } = sanitizeProfileEdit({ level: "SS 2", subjects: ["Algebra"] });
+  it("rejects when nothing maps to an academy subject", () => {
+    const { patch, error } = sanitizeProfileEdit({ level: "SS 2", subjects: ["External Examinations"] });
     expect(patch).toBeNull();
     expect(error).toMatch(/subject/i);
   });

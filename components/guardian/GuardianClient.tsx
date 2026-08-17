@@ -1,10 +1,12 @@
 import Link from "next/link";
 import ProgressRing from "@/components/ui/ProgressRing";
 import { Icon } from "@/components/Icons";
+import { normalizeSubjects } from "@/lib/subjects";
 
 interface ReportCard { id: string; term: string; issued_at: string; }
 interface Student {
   first_name: string; last_name: string; student_code: string; level: string;
+  subjects?: string[] | null;
   avg_score: number; attendance: number; reward_points: number; sanction_points: number;
   grade_target: number | null;
 }
@@ -36,10 +38,17 @@ export default function GuardianClient({
           <span className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-white/10 font-display text-lg font-bold text-gold-soft">
             {student.first_name?.[0]}{student.last_name?.[0]}
           </span>
-          <div>
+          <div className="min-w-0">
             <p className="text-[11px] font-bold uppercase tracking-wider text-white/40">Your child's progress</p>
             <h1 className="font-display text-2xl font-semibold">{student.first_name} {student.last_name}</h1>
             <p className="mt-0.5 text-sm text-white/55">{student.student_code} · {student.level}</p>
+            {normalizeSubjects(student.subjects).length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {normalizeSubjects(student.subjects).map((s) => (
+                  <span key={s} className="rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] font-bold text-white/80 ring-1 ring-white/15">{s}</span>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

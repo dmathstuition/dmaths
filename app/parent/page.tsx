@@ -57,7 +57,7 @@ export default async function ParentPage() {
       ] = await Promise.all([
         admin
           .from("profiles")
-          .select("first_name, last_name, student_code, level, avg_score, attendance, reward_points, sanction_points, grade_target, streak_count")
+          .select("first_name, last_name, student_code, level, subjects, avg_score, attendance, reward_points, sanction_points, grade_target, streak_count")
           .eq("id", student_id)
           .single(),
         admin

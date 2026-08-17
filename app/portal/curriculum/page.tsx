@@ -1,5 +1,6 @@
 import { supabaseServer } from "@/lib/supabase/server";
 import { getProfile } from "@/lib/auth";
+import { contentMatchesSubjects } from "@/lib/subjects";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +14,7 @@ export default async function StudentCurriculum() {
   const mySubjects = profile?.subjects ?? [];
   const myLevel = profile?.level ?? "";
   const filtered = (curricula ?? []).filter(c =>
-    (mySubjects.length === 0 || mySubjects.includes(c.subject)) &&
+    contentMatchesSubjects(c.subject, mySubjects) &&
     (!myLevel || c.level === myLevel)
   );
 

@@ -106,7 +106,7 @@ export default function ProfileClient({ me }: { me: any }) {
           </div>
         </div>
         <div className="mt-4 flex flex-wrap justify-center gap-1.5">
-          {(me.subjects ?? []).map((s: string) => <span key={s} className="pill-blue">{s}</span>)}
+          {normalizeSubjects(me.subjects).map((s: string) => <span key={s} className="pill-blue">{s}</span>)}
         </div>
       </div>
 

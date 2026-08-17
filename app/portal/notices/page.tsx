@@ -1,5 +1,6 @@
 import { supabaseServer } from "@/lib/supabase/server";
 import { getProfile } from "@/lib/auth";
+import { contentMatchesSubjects } from "@/lib/subjects";
 import EmptyState from "@/components/ui/EmptyState";
 
 export const dynamic = "force-dynamic";
@@ -10,7 +11,7 @@ export default async function StudentNotices() {
     getProfile(),
     supa.from("notices").select("*").order("created_at", { ascending: false }),
   ]);
-  const mine = (notices ?? []).filter(n => n.target === "all" || (me?.subjects ?? []).includes(n.target));
+  const mine = (notices ?? []).filter(n => n.target === "all" || contentMatchesSubjects(n.target, me?.subjects ?? []));
 
   return (
     <div className="space-y-5">
