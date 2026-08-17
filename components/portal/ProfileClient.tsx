@@ -6,6 +6,7 @@ import { useToast } from "@/components/Toast";
 import { Icon } from "@/components/Icons";
 import ProgressRing from "@/components/ui/ProgressRing";
 import { EDITABLE_LEVELS } from "@/lib/profileEdit";
+import { ACADEMY_SUBJECTS, normalizeSubjects } from "@/lib/subjects";
 
 const DETAIL_FIELDS: { key: string; label: string; type?: string; placeholder?: string }[] = [
   { key: "school", label: "School", placeholder: "Your school" },
@@ -30,6 +31,7 @@ export default function ProfileClient({ me }: { me: any }) {
   const [savingDetails, setSavingDetails] = useState(false);
   const [form, setForm] = useState(() => ({
     level: me.level ?? "",
+    subjects: normalizeSubjects(me.subjects) as string[],
     school: me.school ?? "",
     phone: me.phone ?? "",
     dob: me.dob ?? "",
@@ -40,11 +42,15 @@ export default function ProfileClient({ me }: { me: any }) {
 
   function startEdit() {
     setForm({
-      level: me.level ?? "", school: me.school ?? "", phone: me.phone ?? "",
+      level: me.level ?? "", subjects: normalizeSubjects(me.subjects), school: me.school ?? "", phone: me.phone ?? "",
       dob: me.dob ?? "", address: me.address ?? "", guardian_name: me.guardian_name ?? "",
       guardian_contact: me.guardian_contact ?? "",
     });
     setEditing(true);
+  }
+
+  function toggleSubject(s: string) {
+    setForm((f) => ({ ...f, subjects: f.subjects.includes(s) ? f.subjects.filter((x) => x !== s) : [...f.subjects, s] }));
   }
 
   async function saveDetails() {
@@ -146,6 +152,22 @@ export default function ProfileClient({ me }: { me: any }) {
                       value={(form as any)[f.key]} onChange={(e) => setForm({ ...form, [f.key]: e.target.value })} />
                   </div>
                 ))}
+              </div>
+
+              {/* Subjects — chosen from the academy's list */}
+              <div>
+                <span className="flabel">My subjects <span className="font-normal text-ink/40">(pick the ones you take)</span></span>
+                <div className="flex flex-wrap gap-2">
+                  {ACADEMY_SUBJECTS.map((s) => {
+                    const on = form.subjects.includes(s);
+                    return (
+                      <button type="button" key={s} onClick={() => toggleSubject(s)} aria-pressed={on}
+                        className={`rounded-full border px-3.5 py-1.5 text-sm font-bold transition ${on ? "border-gold bg-gold-pale text-gold-deep" : "border-line bg-white text-ink/55 hover:border-gold/40"}`}>
+                        {on ? "✓ " : ""}{s}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
               <div className="flex flex-wrap gap-2 pt-1">
                 <button onClick={saveDetails} disabled={savingDetails} className="btn-gold">{savingDetails ? "Saving…" : "Save details"}</button>

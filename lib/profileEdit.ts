@@ -1,8 +1,9 @@
 // What a learner may change about their own profile. Deliberately a safe subset:
-// their class/year group (the motivating case — someone picked the wrong one),
-// school and contact/guardian details. Never their email, code, marks, rewards,
-// role or active status. Pure so the validation is unit-testable; the API applies
-// the returned patch with the service role.
+// their class/year group, subjects, school and contact/guardian details. Never
+// their email, code, marks, rewards, role or active status. Pure so the
+// validation is unit-testable; the API applies the returned patch with the
+// service role.
+import { normalizeSubjects, type AcademySubject } from "@/lib/subjects";
 
 export const EDITABLE_LEVELS = ["Primary", "JSS 1", "JSS 2", "JSS 3", "SS 1", "SS 2", "SS 3"];
 
@@ -12,6 +13,7 @@ export function isValidLevel(level: string): boolean {
 
 export type ProfileEdit = {
   level: string;
+  subjects: AcademySubject[];
   school: string;
   phone: string;
   dob: string | null;
@@ -21,10 +23,14 @@ export type ProfileEdit = {
 };
 
 // Validate + trim a learner's submitted edits. Returns { patch } on success or
-// { error } with a friendly message. `dob` is normalised to null when blank.
+// { error } with a friendly message. `dob` is normalised to null when blank;
+// subjects are constrained to the academy's canonical list.
 export function sanitizeProfileEdit(input: any): { patch: ProfileEdit | null; error?: string } {
   const level = String(input?.level ?? "").trim();
   if (!isValidLevel(level)) return { patch: null, error: "Pick a valid class / year group." };
+
+  const subjects = normalizeSubjects(input?.subjects);
+  if (!subjects.length) return { patch: null, error: "Pick at least one subject." };
 
   const dobRaw = String(input?.dob ?? "").trim();
   if (dobRaw && !/^\d{4}-\d{2}-\d{2}$/.test(dobRaw)) {
@@ -35,6 +41,7 @@ export function sanitizeProfileEdit(input: any): { patch: ProfileEdit | null; er
   return {
     patch: {
       level,
+      subjects,
       school: s(input?.school, 120),
       phone: s(input?.phone, 40),
       dob: dobRaw || null,
