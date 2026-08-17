@@ -95,10 +95,16 @@ export async function POST(req: Request) {
   if (action === "approve") {
     const id = String(body?.id ?? "");
     const scheduledFor = body?.scheduledFor ? new Date(body.scheduledFor).toISOString() : null;
+    const group_name = String(body?.group_name ?? "").trim().slice(0, 80);
     const { data: r } = await admin.from("mock_requests").select("student_id, subject").eq("id", id).maybeSingle();
     if (!r) return NextResponse.json({ error: "Request not found." }, { status: 404 });
-    const { error } = await admin.from("mock_requests")
-      .update({ status: "approved", scheduled_for: scheduledFor, resolved_at: stamp(), resolved_by: staff.id }).eq("id", id);
+    const patch: Record<string, any> = { status: "approved", scheduled_for: scheduledFor, resolved_at: stamp(), resolved_by: staff.id, group_name };
+    let { error } = await admin.from("mock_requests").update(patch).eq("id", id);
+    // Save without the set if the column isn't migrated yet.
+    if (error && /column .*group_name/i.test(error.message)) {
+      delete patch.group_name;
+      ({ error } = await admin.from("mock_requests").update(patch).eq("id", id));
+    }
     if (error) return NextResponse.json({ error: explain(error.message) }, { status: 500 });
     await notifyUser(admin, r.student_id, {
       title: "✅ Mock exam approved",
@@ -133,21 +139,27 @@ export async function POST(req: Request) {
     }
     const subject = String(body?.subject ?? "").trim().slice(0, 80);
     const preset = presetByKey(String(body?.preset ?? "")).key;
+    const group_name = String(body?.group_name ?? "").trim().slice(0, 80);
     const scheduledFor = body?.scheduledFor ? new Date(body.scheduledFor).toISOString() : null;
     if (!studentIds.length) return NextResponse.json({ error: "Pick at least one learner." }, { status: 400 });
 
     const { data: studs } = await admin.from("profiles").select("id, level").in("id", studentIds).eq("role", "student");
     const rows = (studs ?? []).map((s: any) => ({
       student_id: s.id, subject, preset, level: s.level ?? "", status: "approved",
-      scheduled_for: scheduledFor, resolved_at: stamp(), resolved_by: staff.id,
+      group_name, scheduled_for: scheduledFor, resolved_at: stamp(), resolved_by: staff.id,
     }));
     if (!rows.length) return NextResponse.json({ error: "None of those learners were found." }, { status: 400 });
 
-    const { error } = await admin.from("mock_requests").insert(rows);
+    let { error } = await admin.from("mock_requests").insert(rows);
+    // Save without the set if the column isn't migrated yet.
+    if (error && /column .*group_name/i.test(error.message)) {
+      ({ error } = await admin.from("mock_requests").insert(rows.map(({ group_name: _g, ...r }) => r)));
+    }
     if (error) return NextResponse.json({ error: explain(error.message) }, { status: 500 });
+    const label = group_name || subject || "mock";
     await Promise.allSettled(rows.map((r) => notifyUser(admin, r.student_id, {
       title: "📝 A mock exam was set for you",
-      body: scheduledFor ? `A ${subject || "mock"} exam opens ${fmt(scheduledFor)}.` : `Your teacher set you a ${subject || "mock"} exam — start it now.`,
+      body: scheduledFor ? `A ${label} exam opens ${fmt(scheduledFor)}.` : `Your teacher set you a ${label} exam — start it now.`,
       link: "/portal/mock-exam",
     })));
     return NextResponse.json({ ok: true, count: rows.length });
