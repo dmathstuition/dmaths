@@ -4,6 +4,7 @@ import { supabaseBrowser } from "@/lib/supabase/client";
 import ConfirmModal from "@/components/ConfirmModal";
 import { useToast } from "@/components/Toast";
 import { Icon, type IconName } from "@/components/Icons";
+import { assignmentColor } from "@/lib/assignmentColors";
 import EmptyState from "@/components/ui/EmptyState";
 import { fmtWAT } from "@/lib/time";
 import PythonIde from "@/components/code/PythonIde";
@@ -165,6 +166,7 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
 
       {visible.map(s => {
         const a = s.assignment;
+        const c = assignmentColor(a.subject);
         const st = STATUS_ICON[s.status] ?? STATUS_ICON.pending;
         const now = new Date();
         // Deadline: due_at is the exact WAT deadline; legacy rows may only have due_date.
@@ -177,7 +179,8 @@ export default function AssignmentsClient({ initial }: { initial: any[] }) {
         const hasExternalCBT = a.cbt_link;
 
         return (
-          <article key={s.id} className="card p-6">
+          <article key={s.id} className="card overflow-hidden p-6">
+            <div className="-mx-6 -mt-6 mb-4 h-1.5" style={{ background: `linear-gradient(90deg, ${c.from}, ${c.to})` }} />
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="flex items-start gap-3">
                 <span className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl ${st.cls}`}>
