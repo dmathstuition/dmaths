@@ -6,6 +6,7 @@ import { watToUtcISO } from "@/lib/time";
 import { codeDisplay } from "@/lib/codeSubmission";
 import PageHero from "@/components/portal/PageHero";
 import { Icon } from "@/components/Icons";
+import { assignmentColor } from "@/lib/assignmentColors";
 
 export default function TutorAssignmentsClient({ students, initialSubs }: { students: any[]; initialSubs: any[] }) {
   const router = useRouter();
@@ -174,20 +175,29 @@ export default function TutorAssignmentsClient({ students, initialSubs }: { stud
         {initialSubs.length === 0 && students.length > 0 && (
           <div className="card p-8 text-center text-sm text-ink/45">No assignments yet — create one above.</div>
         )}
-        {initialSubs.map((sub) => (
-          <div key={sub.id} className="card p-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="min-w-0">
-                <p className="truncate text-sm font-bold">{sub.assignment?.title ?? "Assignment"}
-                  <span className="ml-2 font-normal text-ink/45">{sub.assignment?.subject}</span>
-                </p>
-                <p className="text-xs text-ink/45">
-                  {sub.student?.first_name} {sub.student?.last_name}
-                  {" · "}
-                  {sub.status === "graded" ? <span className="font-bold text-emerald-600">{sub.grade}/100</span>
-                    : sub.status === "submitted" ? <span className="font-bold text-gold-deep">Submitted</span>
-                    : <span className="text-ink/40">Pending</span>}
-                </p>
+        {initialSubs.map((sub) => {
+          const c = assignmentColor(sub.assignment?.subject ?? "");
+          return (
+          <div key={sub.id} className="card overflow-hidden">
+            <div className="h-1.5" style={{ background: `linear-gradient(90deg, ${c.from}, ${c.to})` }} />
+            <div className="flex flex-wrap items-center justify-between gap-3 p-4">
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl text-white shadow-sm"
+                  style={{ background: `linear-gradient(135deg, ${c.from}, ${c.to})` }}>
+                  <Icon name={c.icon as any} className="h-5 w-5" />
+                </span>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-bold">{sub.assignment?.title ?? "Assignment"}
+                    <span className="ml-2 font-normal text-ink/45">{sub.assignment?.subject}</span>
+                  </p>
+                  <p className="text-xs text-ink/45">
+                    {sub.student?.first_name} {sub.student?.last_name}
+                    {" · "}
+                    {sub.status === "graded" ? <span className="font-bold text-emerald-600">{sub.grade}/100</span>
+                      : sub.status === "submitted" ? <span className="font-bold text-gold-deep">Submitted</span>
+                      : <span className="text-ink/40">Pending</span>}
+                  </p>
+                </div>
               </div>
               {sub.status !== "graded" && (
                 <button className="btn-ghost !min-h-[36px] !px-3 !text-sm"
@@ -196,27 +206,32 @@ export default function TutorAssignmentsClient({ students, initialSubs }: { stud
                 </button>
               )}
             </div>
-            {sub.code && sub.assignment?.type === "code" && (
-              <details className="mt-2">
-                <summary className="cursor-pointer text-xs font-semibold text-gold-deep">View submitted {sub.assignment?.code_language === "web" ? "web" : "Python"} code</summary>
-                <pre className="mt-2 max-h-72 overflow-auto whitespace-pre-wrap rounded-xl bg-[#0b2036] p-3 font-mono text-[12px] text-slate-100">{codeDisplay(sub.code, sub.assignment?.code_language)}</pre>
-              </details>
-            )}
-            {gradeFor === sub.id && (
-              <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-line pt-3">
-                <input className="field w-24" type="number" min={0} max={100} placeholder="/100"
-                  value={gradeVal} onChange={(e) => setGradeVal(e.target.value)} />
-                <input className="field min-w-0 flex-1" placeholder="Feedback (optional)"
-                  value={feedback} onChange={(e) => setFeedback(e.target.value)} />
-                <button type="button" onClick={() => draftFeedback(sub)} disabled={drafting}
-                  title="Draft feedback with A.I" className="btn !min-h-[40px] !px-3 !text-sm border border-gold/50 bg-white text-gold-deep hover:bg-gold-pale disabled:opacity-50">
-                  <span className="inline-flex items-center gap-1.5"><Icon name="sparkles" className="h-4 w-4" /> {drafting ? "…" : "Draft"}</span>
-                </button>
-                <button className="btn-gold !min-h-[40px] !px-4 !text-sm" disabled={busy} onClick={() => grade(sub)}>Save grade</button>
+            {((sub.code && sub.assignment?.type === "code") || gradeFor === sub.id) && (
+              <div className="px-4 pb-4">
+                {sub.code && sub.assignment?.type === "code" && (
+                  <details>
+                    <summary className="cursor-pointer text-xs font-semibold text-gold-deep">View submitted {sub.assignment?.code_language === "web" ? "web" : "Python"} code</summary>
+                    <pre className="mt-2 max-h-72 overflow-auto whitespace-pre-wrap rounded-xl bg-[#0b2036] p-3 font-mono text-[12px] text-slate-100">{codeDisplay(sub.code, sub.assignment?.code_language)}</pre>
+                  </details>
+                )}
+                {gradeFor === sub.id && (
+                  <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-line pt-3">
+                    <input className="field w-24" type="number" min={0} max={100} placeholder="/100"
+                      value={gradeVal} onChange={(e) => setGradeVal(e.target.value)} />
+                    <input className="field min-w-0 flex-1" placeholder="Feedback (optional)"
+                      value={feedback} onChange={(e) => setFeedback(e.target.value)} />
+                    <button type="button" onClick={() => draftFeedback(sub)} disabled={drafting}
+                      title="Draft feedback with A.I" className="btn !min-h-[40px] !px-3 !text-sm border border-gold/50 bg-white text-gold-deep hover:bg-gold-pale disabled:opacity-50">
+                      <span className="inline-flex items-center gap-1.5"><Icon name="sparkles" className="h-4 w-4" /> {drafting ? "…" : "Draft"}</span>
+                    </button>
+                    <button className="btn-gold !min-h-[40px] !px-4 !text-sm" disabled={busy} onClick={() => grade(sub)}>Save grade</button>
+                  </div>
+                )}
               </div>
             )}
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

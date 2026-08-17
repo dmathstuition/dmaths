@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { Icon } from "@/components/Icons";
+import { assignmentColor } from "@/lib/assignmentColors";
 import CBTPreview from "@/components/admin/CBTPreview";
 import ConfirmModal from "@/components/ConfirmModal";
 import GradeModal from "@/components/GradeModal";
@@ -14,22 +15,6 @@ import { toCbtQuestions, validateQuestion, type BankRow } from "@/lib/questionBa
 
 const SUBJECTS = ["Algebra","Calculus","Statistics","Geometry","Further Mathematics","Core Maths Revision","Physics","JavaScript","Python","Python Practice Challenge","External Examinations"];
 
-// A stable, cheerful colour per assignment (keyed by subject) so the list reads
-// as a wall of colourful cards.
-const CARD_COLORS = [
-  { from: "#1A60AB", to: "#0A2A4F", icon: "assignments" as const },
-  { from: "#7C3AED", to: "#4C1D95", icon: "book" as const },
-  { from: "#0E9488", to: "#0B4A44", icon: "sigma" as const },
-  { from: "#EA580C", to: "#7C2D12", icon: "code" as const },
-  { from: "#DC2626", to: "#7F1D1D", icon: "target" as const },
-  { from: "#059669", to: "#064E3B", icon: "checkCircle" as const },
-  { from: "#C8881F", to: "#8A5E12", icon: "graduationCap" as const },
-];
-function colorFor(s: string) {
-  let h = 0;
-  for (const ch of String(s || "")) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
-  return CARD_COLORS[h % CARD_COLORS.length];
-}
 function ChevronDown({ open }: { open: boolean }) {
   return (
     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5"
@@ -452,7 +437,7 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
       )}
 
       {Object.values(grouped).map((g: any) => {
-        const c = colorFor(g.assignment.subject);
+        const c = assignmentColor(g.assignment.subject);
         const isOpen = open.has(g.assignment.id);
         const done = g.rows.filter((r: any) => r.status !== "pending").length;
         const pct = g.rows.length ? Math.round((done / g.rows.length) * 100) : 0;
@@ -465,7 +450,7 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
               className="flex min-w-0 flex-1 items-center gap-3 text-left">
               <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl text-white shadow-sm"
                 style={{ background: `linear-gradient(135deg, ${c.from}, ${c.to})` }}>
-                <Icon name={c.icon} className="h-5 w-5" />
+                <Icon name={c.icon as any} className="h-5 w-5" />
               </span>
               <div className="min-w-0 flex-1">
                 <h2 className="flex flex-wrap items-center gap-1.5 font-extrabold text-ink">
