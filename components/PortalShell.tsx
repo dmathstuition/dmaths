@@ -21,7 +21,7 @@ import { useDialog } from "@/lib/useDialog";
 export type NavItem = { href: string; label: string; icon: IconName };
 
 export default function PortalShell({
-  nav, name, subtitle, children, bell, search, tabs, idleMinutes = 30, avatarSrc, avatarTitle,
+  nav, name, subtitle, children, bell, search, tabs, idleMinutes = 30, avatarSrc, avatarTitle, avatarHref,
 }: {
   nav: NavItem[]; name: string; subtitle: string; children: React.ReactNode;
   bell?: { mode: "student" | "admin"; subjects?: string[]; noticesHref: string };
@@ -30,6 +30,7 @@ export default function PortalShell({
   idleMinutes?: number;
   avatarSrc?: string;
   avatarTitle?: string;
+  avatarHref?: string;
 }) {
   // Equipped cosmetic TITLE (Avatar Studio) → a small gold flair shown next to
   // the learner's name in the sidebar. "" = no title.
@@ -122,7 +123,14 @@ export default function PortalShell({
           <span className="hidden lg:block"><TourButton light /></span>
           {search && <span data-tour="search" className="hidden lg:block"><AdminSearch /></span>}
           {bell && <span data-tour="bell"><NotificationBell mode={bell.mode} subjects={bell.subjects} noticesHref={bell.noticesHref} /></span>}
-          <Avatar name={name} size="sm" ring src={avatarSrc} />
+          {avatarHref ? (
+            <Link href={avatarHref} aria-label="Account settings" title="Account settings"
+              className="rounded-full transition hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold">
+              <Avatar name={name} size="sm" ring src={avatarSrc} />
+            </Link>
+          ) : (
+            <Avatar name={name} size="sm" ring src={avatarSrc} />
+          )}
         </div>
       </header>
 
