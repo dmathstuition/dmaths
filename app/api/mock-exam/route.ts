@@ -59,6 +59,22 @@ export async function GET(req: Request) {
     const examTarget = (exRow as any)?.exam ?? "";
 
     const p = presetByKey(rq.preset);
+
+    // A named set on the request → the whole paper is that set's questions,
+    // in a shuffled order. (Column is best-effort; absent → fall through.)
+    const { data: grpRow } = await admin.from("mock_requests").select("group_name").eq("id", requestId).maybeSingle();
+    const groupName = (grpRow as any)?.group_name ?? "";
+    if (groupName) {
+      const sel = async (cols: string) => admin.from("question_bank").select(cols).eq("group_name", groupName).limit(600);
+      let { data, error }: { data: any; error: any } = await sel("id, question, code, image_url, options");
+      if (error && /column .*image_url/i.test(error.message)) ({ data, error } = await sel("id, question, code, options"));
+      if (error) return NextResponse.json({ error: explain(error.message), questions: [] }, { status: 200 });
+      const all = data ?? [];
+      if (!all.length) return NextResponse.json({ error: "That set has no questions yet — add some to the bank.", questions: [] }, { status: 200 });
+      const questions = pickRandom(all, all.length).map((r: any) => ({ id: r.id, question: r.question, code: r.code ?? "", image_url: r.image_url ?? "", options: r.options ?? [] }));
+      return NextResponse.json({ questions, preset: p.key, minutes: p.minutes, subject: rq.subject, level: rq.level, set: groupName });
+    }
+
     const filtered = (cols: string) => {
       let q = admin.from("question_bank").select(cols).limit(600);
       if (rq.subject) q = q.eq("subject", rq.subject);

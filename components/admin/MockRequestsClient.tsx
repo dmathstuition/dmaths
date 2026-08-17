@@ -28,6 +28,12 @@ export default function MockRequestsClient({ students }: { students: Student[] }
   const [lSubject, setLSubject] = useState("");
   const [lPreset, setLPreset] = useState("quick");
   const [lSched, setLSched] = useState("");
+  const [lGroup, setLGroup] = useState("");
+
+  // Named question sets (e.g. "S.S 3 Maths — Binary Operations") to build a paper
+  // from, and the set chosen per pending request when approving.
+  const [groups, setGroups] = useState<{ name: string; count: number }[]>([]);
+  const [approveGroup, setApproveGroup] = useState<Record<string, string>>({});
 
   async function load() {
     try {
@@ -37,7 +43,14 @@ export default function MockRequestsClient({ students }: { students: Student[] }
       setRequests(j.requests ?? []);
     } catch { setErr("Couldn't load requests."); }
   }
-  useEffect(() => { load(); }, []);
+  async function loadGroups() {
+    try {
+      const r = await fetch("/api/question-bank?groups=1", { cache: "no-store" });
+      const j = await r.json();
+      if (Array.isArray(j.groups)) setGroups(j.groups);
+    } catch { /* keep */ }
+  }
+  useEffect(() => { load(); loadGroups(); }, []);
 
   async function act(payload: any, key: string) {
     setBusy(key); setErr(""); setMsg("");
@@ -71,8 +84,8 @@ export default function MockRequestsClient({ students }: { students: Student[] }
 
   async function launch() {
     if (!picked.size) { setErr("Pick at least one learner."); return; }
-    const ok = await act({ action: "launch", studentIds: [...picked], subject: lSubject.trim(), preset: lPreset, scheduledFor: toIso(lSched) }, "launch");
-    if (ok) { setMsg(`Mock launched to ${picked.size} learner${picked.size === 1 ? "" : "s"}.`); setPicked(new Set()); setLSubject(""); setLSched(""); }
+    const ok = await act({ action: "launch", studentIds: [...picked], subject: lSubject.trim(), preset: lPreset, scheduledFor: toIso(lSched), group_name: lGroup }, "launch");
+    if (ok) { setMsg(`Mock launched to ${picked.size} learner${picked.size === 1 ? "" : "s"}${lGroup ? ` from “${lGroup}”` : ""}.`); setPicked(new Set()); setLSubject(""); setLSched(""); setLGroup(""); }
   }
 
   return (
@@ -109,11 +122,20 @@ export default function MockRequestsClient({ students }: { students: Student[] }
                     </div>
                   </div>
                   <div className="mt-3 flex flex-wrap items-end gap-2">
+                    {groups.length > 0 && (
+                      <label className="block">
+                        <span className="mb-1 block text-[11px] font-bold text-ink/50">From set (optional)</span>
+                        <select className="field !py-2 !text-[13px]" value={approveGroup[r.id] ?? ""} onChange={(e) => setApproveGroup((g) => ({ ...g, [r.id]: e.target.value }))}>
+                          <option value="">Match their class</option>
+                          {groups.map((g) => <option key={g.name} value={g.name}>{g.name} ({g.count})</option>)}
+                        </select>
+                      </label>
+                    )}
                     <label className="block">
                       <span className="mb-1 block text-[11px] font-bold text-ink/50">Open at (optional)</span>
                       <input type="datetime-local" className="field !py-2 !text-[13px]" value={sched[r.id] ?? ""} onChange={(e) => setSched((s) => ({ ...s, [r.id]: e.target.value }))} />
                     </label>
-                    <button onClick={() => act({ action: "approve", id: r.id, scheduledFor: toIso(sched[r.id] ?? "") }, `a:${r.id}`)} disabled={busy === `a:${r.id}`}
+                    <button onClick={() => act({ action: "approve", id: r.id, scheduledFor: toIso(sched[r.id] ?? ""), group_name: approveGroup[r.id] ?? "" }, `a:${r.id}`)} disabled={busy === `a:${r.id}`}
                       className="btn-gold !min-h-[38px] !rounded-xl">{busy === `a:${r.id}` ? "…" : "Approve"}</button>
                     <button onClick={() => act({ action: "decline", id: r.id }, `d:${r.id}`)} disabled={busy === `d:${r.id}`}
                       className="btn-ghost !min-h-[38px] !rounded-xl">Decline</button>
@@ -130,11 +152,20 @@ export default function MockRequestsClient({ students }: { students: Student[] }
       {/* Launch a mock to learners */}
       <div className="card p-6">
         <h2 className="mb-1 flex items-center gap-2 font-display text-lg font-semibold text-ink"><Icon name="notices" className="h-5 w-5 text-gold-deep" /> Launch a mock</h2>
-        <p className="mb-4 text-[13px] text-ink/50">Set a mock for chosen learners — they&apos;re notified and it opens (at the scheduled time, if set), filtered to each learner&apos;s class.</p>
+        <p className="mb-4 text-[13px] text-ink/50">Set a mock for chosen learners. Pick a <strong>set</strong> to send that exact batch of questions (e.g. &ldquo;S.S 3 Maths — Binary Operations&rdquo;), or leave it to pull from each learner&apos;s class.</p>
+        {groups.length > 0 && (
+          <label className="mb-3 block">
+            <span className="flabel">Question set / batch <span className="font-normal text-ink/40">(optional — sends this whole batch)</span></span>
+            <select className="field" value={lGroup} onChange={(e) => setLGroup(e.target.value)}>
+              <option value="">No set — match each learner&apos;s class</option>
+              {groups.map((g) => <option key={g.name} value={g.name}>{g.name} · {g.count} question{g.count === 1 ? "" : "s"}</option>)}
+            </select>
+          </label>
+        )}
         <div className="grid gap-3 sm:grid-cols-3">
-          <label className="block"><span className="flabel">Subject</span>
-            <input className="field" placeholder="Any subject" value={lSubject} onChange={(e) => setLSubject(e.target.value)} /></label>
-          <label className="block"><span className="flabel">Paper</span>
+          <label className="block"><span className="flabel">Subject {lGroup && <span className="font-normal text-ink/40">(set overrides)</span>}</span>
+            <input className="field" placeholder="Any subject" value={lSubject} onChange={(e) => setLSubject(e.target.value)} disabled={!!lGroup} /></label>
+          <label className="block"><span className="flabel">Paper {lGroup && <span className="font-normal text-ink/40">(timer only)</span>}</span>
             <select className="field" value={lPreset} onChange={(e) => setLPreset(e.target.value)}>{EXAM_PRESETS.map((p) => <option key={p.key} value={p.key}>{p.label}</option>)}</select></label>
           <label className="block"><span className="flabel">Open at (optional)</span>
             <input type="datetime-local" className="field" value={lSched} onChange={(e) => setLSched(e.target.value)} /></label>
