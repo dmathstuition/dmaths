@@ -76,6 +76,7 @@ export default async function PortalLayout({ children }: { children: React.React
       subtitle={p.student_code ?? "Student"}
       avatarSrc={learnerAvatarFor(p.id, (p as any).avatar_choice)}
       avatarTitle={titleLabel((p as any).avatar_title)}
+      avatarHref="/portal/profile"
       bell={{ mode: "student", subjects, noticesHref: "/portal/notices" }}>
       <AuthGuard />
       <StreakHeartbeat />
