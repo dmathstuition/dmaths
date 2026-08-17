@@ -14,6 +14,32 @@ import { toCbtQuestions, validateQuestion, type BankRow } from "@/lib/questionBa
 
 const SUBJECTS = ["Algebra","Calculus","Statistics","Geometry","Further Mathematics","Core Maths Revision","Physics","JavaScript","Python","Python Practice Challenge","External Examinations"];
 
+// A stable, cheerful colour per assignment (keyed by subject) so the list reads
+// as a wall of colourful cards.
+const CARD_COLORS = [
+  { from: "#1A60AB", to: "#0A2A4F", icon: "assignments" as const },
+  { from: "#7C3AED", to: "#4C1D95", icon: "book" as const },
+  { from: "#0E9488", to: "#0B4A44", icon: "sigma" as const },
+  { from: "#EA580C", to: "#7C2D12", icon: "code" as const },
+  { from: "#DC2626", to: "#7F1D1D", icon: "target" as const },
+  { from: "#059669", to: "#064E3B", icon: "checkCircle" as const },
+  { from: "#C8881F", to: "#8A5E12", icon: "graduationCap" as const },
+];
+function colorFor(s: string) {
+  let h = 0;
+  for (const ch of String(s || "")) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return CARD_COLORS[h % CARD_COLORS.length];
+}
+function ChevronDown({ open }: { open: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5"
+      strokeLinecap="round" strokeLinejoin="round" aria-hidden
+      className={`flex-shrink-0 text-ink/40 transition-transform duration-200 ${open ? "rotate-180" : ""}`}>
+      <path d="M6 9l6 6 6-6" />
+    </svg>
+  );
+}
+
 type CBTQuestion = { id: number; question: string; code?: string; options: string[]; answer: number };
 
 type ConfirmState = {
@@ -35,6 +61,8 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
   const push = useToast();
   const [subs, setSubs] = useState<any[]>(initialSubs);
   const [students] = useState<any[]>(initialStudents);
+  const [open, setOpen] = useState<Set<string>>(new Set());
+  const toggleOpen = (id: string) => setOpen((prev) => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
   const [showForm, setShowForm] = useState(false);
   const [f, setF] = useState<any>({ subject: "Algebra", type: "written", roster: [] as string[], cbt_mode: "link" });
   const [questions, setQuestions] = useState<CBTQuestion[]>([]);
@@ -423,28 +451,48 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
         </div>
       )}
 
-      {Object.values(grouped).map((g: any) => (
-        <div key={g.assignment.id} className="card overflow-hidden">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line px-6 py-4">
-            <div>
-              <h2 className="font-extrabold">
-                {g.assignment.title}
-                {g.assignment.type === "cbt" && <span className="pill-blue ml-1">CBT</span>}
-                {g.assignment.cbt_questions?.length > 0 && <span className="pill ml-1 bg-purple-100 text-purple-800">Inline</span>}
-                {g.assignment.file_url && <span className="pill ml-1 bg-cyan-100 text-cyan-800">PDF</span>}
-              </h2>
-              <p className="text-xs text-ink/45">
-                {g.assignment.subject} · due {g.assignment.due_at ? `${fmtWAT(g.assignment.due_at)} WAT` : (g.assignment.due_date ?? "TBD")}
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
+      {Object.values(grouped).map((g: any) => {
+        const c = colorFor(g.assignment.subject);
+        const isOpen = open.has(g.assignment.id);
+        const done = g.rows.filter((r: any) => r.status !== "pending").length;
+        const pct = g.rows.length ? Math.round((done / g.rows.length) * 100) : 0;
+        return (
+        <div key={g.assignment.id} className="card overflow-hidden transition-shadow hover:shadow-lift">
+          <div className="h-1.5" style={{ background: `linear-gradient(90deg, ${c.from}, ${c.to})` }} />
+          <div className="flex flex-wrap items-center gap-3 px-4 py-3.5 sm:px-5">
+            {/* clickable header → expands the details */}
+            <button onClick={() => toggleOpen(g.assignment.id)} aria-expanded={isOpen}
+              className="flex min-w-0 flex-1 items-center gap-3 text-left">
+              <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl text-white shadow-sm"
+                style={{ background: `linear-gradient(135deg, ${c.from}, ${c.to})` }}>
+                <Icon name={c.icon} className="h-5 w-5" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <h2 className="flex flex-wrap items-center gap-1.5 font-extrabold text-ink">
+                  <span className="truncate">{g.assignment.title}</span>
+                  {g.assignment.type === "cbt" && <span className="pill-blue">CBT</span>}
+                  {g.assignment.cbt_questions?.length > 0 && <span className="pill bg-purple-100 text-purple-800">Inline</span>}
+                  {g.assignment.file_url && <span className="pill bg-cyan-100 text-cyan-800">PDF</span>}
+                </h2>
+                <p className="truncate text-xs text-ink/45">
+                  {g.assignment.subject} · due {g.assignment.due_at ? `${fmtWAT(g.assignment.due_at)} WAT` : (g.assignment.due_date ?? "TBD")}
+                </p>
+              </div>
+              {/* progress ring-ish mini bar + count */}
+              <span className="hidden flex-shrink-0 items-center gap-2 sm:flex">
+                <span className="h-1.5 w-16 overflow-hidden rounded-full bg-line">
+                  <span className="block h-full rounded-full" style={{ width: `${pct}%`, background: c.from }} />
+                </span>
+                <span className="text-xs font-bold text-ink/50">{done}/{g.rows.length}</span>
+              </span>
+              <ChevronDown open={isOpen} />
+            </button>
+            {/* actions (don't toggle) */}
+            <div className="flex flex-shrink-0 items-center gap-3">
               {g.assignment.file_url && (
                 <a href={g.assignment.file_url} target="_blank" rel="noopener noreferrer"
                   className="text-xs font-bold text-gold-deep hover:underline">View PDF</a>
               )}
-              <p className="text-xs font-bold text-ink/45">
-                {g.rows.filter((r: any) => r.status !== "pending").length}/{g.rows.length} done
-              </p>
               {g.assignment.type === "cbt" && g.assignment.cbt_questions?.length > 0 && (
                 <button className="text-xs font-bold text-gold-deep hover:underline"
                   onClick={() => setPreviewCBT(g.assignment)}>Preview / test</button>
@@ -455,7 +503,8 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
                 onClick={() => deleteAssignment(g.assignment.id, g.assignment.title, g.rows.length)}>Delete</button>
             </div>
           </div>
-          <div className="divide-y divide-line/60">
+          {isOpen && (
+          <div className="divide-y divide-line/60 border-t border-line">
             {g.rows.map((r: any) => (
               <div key={r.id} className="flex flex-wrap items-center justify-between gap-2 px-6 py-3 text-sm">
                 <div>
@@ -491,8 +540,10 @@ export default function AssignmentsClient({ initialSubs, initialStudents }: { in
               </div>
             ))}
           </div>
+          )}
         </div>
-      ))}
+        );
+      })}
       {!subs.length && <div className="card p-12 text-center text-ink/40">No assignments yet.</div>}
 
       {previewCBT && (

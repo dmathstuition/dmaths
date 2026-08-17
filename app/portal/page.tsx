@@ -89,12 +89,12 @@ export default async function StudentDashboard() {
   const rewardPts: number = (me as any)?.reward_points ?? 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Hero + progress overview */}
-      <div className="grid gap-5 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-3">
         {/* Today's focus hero */}
         <Reveal className="min-w-0 lg:col-span-2">
-          <div data-tour="hero" className="relative flex min-h-[250px] items-center overflow-hidden rounded-3xl bg-gradient-to-br from-[#EEF2FE] via-[#E2ECFB] to-[#DCE7F6] p-7 dark:from-[#10406F] dark:via-[#0A2A4F] dark:to-[#071C36] sm:min-h-[270px] sm:p-9">
+          <div data-tour="hero" className="relative flex min-h-[200px] items-center overflow-hidden rounded-3xl bg-gradient-to-br from-[#EEF2FE] via-[#E2ECFB] to-[#DCE7F6] p-6 dark:from-[#10406F] dark:via-[#0A2A4F] dark:to-[#071C36] sm:min-h-[230px] sm:p-8">
             {/* soft drifting colour wash + faint maths glyphs for depth */}
             <div aria-hidden className="aurora pointer-events-none absolute inset-0 z-0" />
             <div aria-hidden className="pointer-events-none absolute inset-0 z-0 select-none font-display font-bold text-ink/[0.05] dark:text-white/[0.06]">
@@ -228,7 +228,7 @@ export default async function StudentDashboard() {
       )}
 
       {/* Classes · Assignments · Notices */}
-      <div className="grid gap-5 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-3">
         {/* My classes */}
         <Reveal delay={80}>
           <div data-tour="classes" className="card neu-card h-full p-6">
