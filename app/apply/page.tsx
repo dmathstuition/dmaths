@@ -7,15 +7,21 @@ import { Icon } from "@/components/Icons";
 import PaystackButton from "@/components/PaystackButton";
 import { SUMMER_CAMP_TIERS, PHYSICAL_TIERS, PHYSICAL_CAMP, findTier, fmtUsd, fmtNgn, DISCOUNT_PCT, discountedUsd, discountedNgn, depositNgn, balanceNgn, tierModules, type CampTier } from "@/lib/summerCamp";
 import { REGIONS, levelsFor, examsFor, DEFAULT_REGION } from "@/lib/regions";
-
-const SUBJECTS = ["Algebra","Calculus","Statistics","Geometry","Further Mathematics","Core Maths Revision","Physics","JavaScript","Python","Python Practice Challenge","External Examinations"];
+import { ACADEMY_SUBJECTS } from "@/lib/subjects";
 
 // ── FREE ENROLMENT SWITCH ──────────────────────────────────────────
 // When true, applicants whose ONLY paid concern is the free subject below
-// skip the payment step entirely. Set to false (or remove the subject from
-// FREE_SUBJECTS) to turn the promotion off. No other code changes needed.
+// skip the payment step entirely. Set to false (or empty FREE_SUBJECTS) to
+// turn the promotion off. No other code changes needed.
 const FREE_ENROLMENT_OPEN = true;
 const FREE_SUBJECTS = ["Python Practice Challenge"];
+
+// New sign-ups pick from the academy's canonical subjects — plus the free-promo
+// subject while the promotion is running, so that offer keeps working.
+const SUBJECTS = [
+  ...ACADEMY_SUBJECTS,
+  ...(FREE_ENROLMENT_OPEN ? FREE_SUBJECTS.filter((s) => !(ACADEMY_SUBJECTS as readonly string[]).includes(s)) : []),
+];
 
 function isFreeApplication(subjects: string[]) {
   return FREE_ENROLMENT_OPEN
