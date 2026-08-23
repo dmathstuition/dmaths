@@ -4,11 +4,9 @@ import { DotsScatter } from "@/components/illustrations";
 import Reveal from "@/components/landing/Reveal";
 import CountUp from "@/components/landing/CountUp";
 import LandingNav from "@/components/landing/LandingNav";
-import SummerCampBanner from "@/components/landing/SummerCampBanner";
 import FloatingMath from "@/components/landing/FloatingMath";
 import Tilt3D from "@/components/landing/Tilt3D";
 import Parallax from "@/components/landing/Parallax";
-import FlyerPopup from "@/components/landing/FlyerPopup";
 import SocialLinks from "@/components/landing/SocialLinks";
 import PortalShowcase from "@/components/landing/PortalShowcase";
 import AppLauncher from "@/components/AppLauncher";
@@ -64,10 +62,8 @@ export default function Landing() {
     <main className="overflow-hidden bg-white font-body text-ink">
       {/* First stop for a keyboard user: jump past the nav to the hero. */}
       <a href="#main" className="skip-link">Skip to main content</a>
-      <FlyerPopup />
       <AppLauncher />
       <InstallPrompt />
-      <SummerCampBanner />
       <LandingNav />
 
       {/* HERO */}
@@ -553,16 +549,6 @@ print("Hello from D-Maths!")`}</code></pre>
           © {new Date().getFullYear()} D-Maths Tuition Centre · support@dmaths.academy · Asaba, Delta State
         </div>
       </footer>
-
-      {/* FLOATING SUMMER CAMP CTA */}
-      <Link
-        href="/summer-camp"
-        aria-label="Register for the D-Maths Summer Camp"
-        className="btn-gold badge-pulse fixed bottom-6 left-6 z-50 flex items-center gap-2 !rounded-full !px-5 shadow-xl transition hover:scale-105 hover:shadow-2xl"
-      >
-        <span aria-hidden="true">☀️</span>
-        <span className="text-sm font-bold">Summer Camp</span>
-      </Link>
 
       {/* FLOATING WHATSAPP BUTTON */}
       <a
