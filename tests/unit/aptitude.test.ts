@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { scoreAptitude, bandFor, cleanQuestions, canLearnerStart, isAwaitingSchedule, validAptitudeQuestion } from "@/lib/aptitude";
+import { scoreAptitude, bandFor, cleanQuestions, canLearnerStart, isAwaitingSchedule, validAptitudeQuestion, segmentsOf, segmentScores } from "@/lib/aptitude";
 
 const QS = [
   { question: "2+2?", options: ["3", "4", "5", "6"], answer: 1 },
@@ -41,6 +41,32 @@ describe("cleanQuestions", () => {
     ]);
     expect(cleaned).toHaveLength(1);
     expect(validAptitudeQuestion(cleaned[0])).toBe(true);
+  });
+});
+
+describe("segments", () => {
+  const SEG = [
+    { question: "eng1", options: ["a", "b"], answer: 0, segment: "English · Comprehension" },
+    { question: "sci1", options: ["a", "b"], answer: 1, segment: "Science · Forces" },
+    { question: "eng2", options: ["a", "b"], answer: 0, segment: "English · Comprehension" },
+  ];
+  it("cleanQuestions keeps the segment label", () => {
+    expect(cleanQuestions(SEG)[0].segment).toBe("English · Comprehension");
+  });
+  it("groups in first-appearance order, preserving original indices", () => {
+    const groups = segmentsOf(SEG as any);
+    expect(groups.map(g => g.segment)).toEqual(["English · Comprehension", "Science · Forces"]);
+    expect(groups[0].items.map(i => i.index)).toEqual([0, 2]); // indices, not renumbered
+  });
+  it("scores each segment against original-index answers", () => {
+    const scores = segmentScores(SEG as any, { "0": 0, "1": 0, "2": 0 }); // eng both right, sci wrong
+    const eng = scores.find(s => s.segment.startsWith("English"))!;
+    const sci = scores.find(s => s.segment.startsWith("Science"))!;
+    expect(eng.score).toBe(2); expect(eng.total).toBe(2); expect(eng.percent).toBe(100);
+    expect(sci.score).toBe(0); expect(sci.percent).toBe(0);
+  });
+  it("puts unlabelled questions under General", () => {
+    expect(segmentsOf([{ question: "q", options: ["a", "b"], answer: 0 }] as any)[0].segment).toBe("General");
   });
 });
 

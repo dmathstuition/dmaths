@@ -6,7 +6,7 @@ import { useToast } from "@/components/Toast";
 import { statusLabel } from "@/lib/aptitude";
 
 type Student = { id: string; first_name: string | null; last_name: string | null; student_code: string | null; level: string | null };
-type Q = { question: string; options: string[]; answer: number };
+type Q = { question: string; options: string[]; answer: number; segment?: string };
 type Test = {
   id: string; student_id: string; student_name: string; level: string; exam_target: string;
   questions: Q[]; status: string; scheduled_at: string | null; score: number | null; total: number | null;
@@ -162,6 +162,8 @@ export default function AptitudeAdminClient({ students, initialTests, needsMigra
             <div className="mt-4 space-y-3">
               {t.questions.map((q, qi) => (
                 <div key={qi} className="rounded-xl border border-line bg-chalk/30 p-4">
+                  <input className="field mb-2 !h-8 text-[12px] font-bold text-ink/60" placeholder="Segment (e.g. English · Comprehension)"
+                    value={q.segment ?? ""} onChange={e => editQ(t, qi, q => ({ ...q, segment: e.target.value }))} />
                   <div className="flex items-start gap-2">
                     <span className="mt-2 text-xs font-bold text-ink/40">{qi + 1}.</span>
                     <textarea className="field min-h-[52px] flex-1" value={q.question}

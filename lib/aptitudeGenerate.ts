@@ -13,29 +13,35 @@ type StudentInfo = { level?: string | null; subjects?: string[] | null; first_na
 // approval.
 export function buildAptitudePrompt(opts: { count: number; student: StudentInfo; intake: Intake }): string {
   const { count, student, intake } = opts;
-  const subjects = Array.isArray(student.subjects) && student.subjects.length ? student.subjects.join(", ") : "Mathematics";
+  const subjectList = Array.isArray(student.subjects) && student.subjects.length ? student.subjects : ["Mathematics"];
+  const subjects = subjectList.join(", ");
   const level = student.level || "";
   const examTarget = intake.exam_target || "";
   return `You are an assessment designer for D-Maths, an online tuition service for Nigerian primary/secondary learners (WAEC/JAMB/NECO/BECE aligned where relevant).
 
-Design a DIAGNOSTIC aptitude test of exactly ${count} multiple-choice questions to gauge a new learner's true working level. Judge the right pitch yourself from the learner's details, and spread difficulty from foundational to stretch so the score locates their level.
+Design a DIAGNOSTIC aptitude test of about ${count} multiple-choice questions to gauge a new learner's true working level across EVERY subject they take. Judge the right pitch yourself from the learner's details, and spread difficulty from foundational to stretch so the score locates their level.
 
 Learner details:
 - Class / year: ${level || "unknown"}
-- Classes taking: ${subjects}
+- Subjects to assess (cover ALL of these): ${subjects}
 ${examTarget ? `- Preparing for: ${examTarget}${intake.target_grade ? ` (target ${intake.target_grade})` : ""}` : ""}
 ${intake.strengths ? `- Strengths noted: ${intake.strengths}` : ""}
 ${intake.challenges ? `- Challenges noted: ${intake.challenges}` : ""}
 ${intake.weak_points ? `- Weak points noted: ${intake.weak_points}` : ""}
 
+SEGMENTS:
+- Cover EVERY subject listed above, split into segments. Give each question a "segment" label of "<Subject> · <Topic>" (e.g. "English · Comprehension", "Science · Forces", "Maths · Algebra").
+- Split each subject into 2–3 topic segments where sensible, and share the total questions roughly evenly across the subjects.
+${examTarget ? `- Pitch the difficulty, style and topic choice to the standard of ${examTarget} — this is the exam the learner is preparing for.` : "- Pitch the difficulty to the learner's class/year."}
+
 RULES:
 - Each question has exactly 4 options with ONE correct answer.
 - "answer" is the 0-based index (0–3) of the correct option.
-- Probe the weak points and, where relevant, the exam's style.
+- Probe the weak points, and mirror the exam's question style where relevant.
 - Age-appropriate, clear, correct. British/Nigerian spelling. No letter labels or explanations inside the text.
 
 Return ONLY strict JSON, no prose:
-{"questions":[{"question":"...","options":["...","...","...","..."],"answer":0}]}`;
+{"questions":[{"segment":"Subject · Topic","question":"...","options":["...","...","...","..."],"answer":0}]}`;
 }
 
 // Generate a leveled aptitude test and store it as a DRAFT for the learner.
