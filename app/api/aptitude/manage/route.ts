@@ -5,7 +5,7 @@ import { notifyUser } from "@/lib/notify";
 import { sendEmail } from "@/lib/email";
 import { loginUrl } from "@/lib/siteUrl";
 import { aiChat, aiErrorResponse } from "@/lib/ai";
-import { cleanQuestions, scoreAptitude, type AptitudeQuestion } from "@/lib/aptitude";
+import { cleanQuestions, scoreAptitude, segmentScores, type AptitudeQuestion } from "@/lib/aptitude";
 
 // Admin-only lifecycle actions on an aptitude test.
 //   save     — replace the draft's questions (after editing the AI draft)
@@ -70,22 +70,27 @@ export async function POST(req: Request) {
     const questions = (test.questions ?? []) as AptitudeQuestion[];
     const answers = (test.answers ?? {}) as Record<string, number>;
     const s = scoreAptitude(questions, answers);
+    const segs = segmentScores(questions, answers);
+    const segLine = segs.map((x) => `- ${x.segment}: ${x.score}/${x.total} (${x.percent}%)`).join("\n");
     const missed = questions
       .map((q, i) => ({ q, i }))
       .filter(({ q, i }) => answers[String(i)] !== q.answer)
-      .map(({ q }) => `- ${q.question}`)
-      .slice(0, 12)
+      .map(({ q }) => `- [${q.segment ?? "General"}] ${q.question}`)
+      .slice(0, 16)
       .join("\n");
 
     const { data: stu } = await admin.from("profiles").select("first_name, level, subjects").eq("id", test.student_id).maybeSingle();
     const system = `You are a head tutor at D-Maths writing a short performance analysis of a new learner's diagnostic aptitude test, for the learner's parent. Warm, specific, encouraging and honest.
 
-Learner: ${stu?.first_name || "The learner"} · Class: ${stu?.level || test.level || "unknown"} · Classes: ${Array.isArray(stu?.subjects) ? stu!.subjects.join(", ") : ""}
-Result: ${s.score}/${s.total} (${s.percent}%) — band: ${s.band}.
+Learner: ${stu?.first_name || "The learner"} · Class: ${stu?.level || test.level || "unknown"} · Subjects: ${Array.isArray(stu?.subjects) ? stu!.subjects.join(", ") : ""}
+${test.exam_target ? `Preparing for: ${test.exam_target}.` : ""}
+Overall: ${s.score}/${s.total} (${s.percent}%) — band: ${s.band}.
+Score by segment (subject · topic):
+${segLine || "(single segment)"}
 Questions answered incorrectly:
 ${missed || "(none — a clean sweep)"}
 
-Write 120–180 words covering: how they performed overall, the specific strengths and gaps the answers reveal, and a concrete plan for how D-Maths will help (topics to target, and the kind of support). Plain paragraphs, no headings, no markdown.`;
+Write 140–220 words covering: how they performed overall AND subject by subject (call out the strongest and weakest segments by name), the specific gaps the answers reveal, and a concrete plan for how D-Maths will help — the topics to target per subject${test.exam_target ? `, and how it maps to ${test.exam_target} readiness` : ""}. Plain paragraphs, no headings, no markdown.`;
 
     let analysis: string;
     try { analysis = await aiChat({ system, user: "Write the analysis now.", maxTokens: 700 }); }

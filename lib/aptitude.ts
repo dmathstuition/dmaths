@@ -3,7 +3,10 @@
 // learner sits in the portal so the academy can pitch teaching at the right
 // level. Kept dependency-free so the scoring/levelling is unit-testable.
 
-export type AptitudeQuestion = { question: string; options: string[]; answer: number };
+// `segment` groups the test into sections — one per subject, and per topic
+// within a subject where useful (e.g. "English · Comprehension"). Optional, so
+// older single-subject tests still validate.
+export type AptitudeQuestion = { question: string; options: string[]; answer: number; segment?: string };
 
 // Lifecycle:
 //   draft      — AI generated, admin previewing/editing (not visible to family)
@@ -36,12 +39,45 @@ export function validAptitudeQuestion(q: any): q is AptitudeQuestion {
 
 export function cleanQuestions(list: unknown): AptitudeQuestion[] {
   return (Array.isArray(list) ? list : [])
-    .map((q: any) => ({
-      question: String(q?.question ?? "").trim(),
-      options: (Array.isArray(q?.options) ? q.options : []).slice(0, 6).map((o: any) => String(o ?? "").trim()),
-      answer: Number(q?.answer) || 0,
-    }))
+    .map((q: any) => {
+      const segment = String(q?.segment ?? "").trim().slice(0, 80);
+      return {
+        question: String(q?.question ?? "").trim(),
+        options: (Array.isArray(q?.options) ? q.options : []).slice(0, 6).map((o: any) => String(o ?? "").trim()),
+        answer: Number(q?.answer) || 0,
+        ...(segment ? { segment } : {}),
+      };
+    })
     .filter(validAptitudeQuestion);
+}
+
+// Group questions into their segments, in first-appearance order, keeping each
+// question's ORIGINAL index (answers are keyed by original index, so grouping
+// must never renumber). Questions with no segment fall under "General".
+export type AptitudeSegment = { segment: string; items: { q: AptitudeQuestion; index: number }[] };
+export function segmentsOf(questions: AptitudeQuestion[]): AptitudeSegment[] {
+  const order: string[] = [];
+  const map = new Map<string, AptitudeSegment>();
+  questions.forEach((q, index) => {
+    const key = (q.segment ?? "").trim() || "General";
+    if (!map.has(key)) { map.set(key, { segment: key, items: [] }); order.push(key); }
+    map.get(key)!.items.push({ q, index });
+  });
+  return order.map((k) => map.get(k)!);
+}
+
+// Per-segment score, so the analysis can call out strengths/gaps by topic.
+export type SegmentScore = { segment: string; score: number; total: number; percent: number };
+export function segmentScores(questions: AptitudeQuestion[], answers: Record<string, number> | null | undefined): SegmentScore[] {
+  return segmentsOf(questions).map(({ segment, items }) => {
+    let score = 0;
+    for (const { q, index } of items) {
+      const chosen = answers?.[String(index)];
+      if (Number.isInteger(chosen) && chosen === q.answer) score++;
+    }
+    const total = items.length;
+    return { segment, score, total, percent: total ? Math.round((score / total) * 100) : 0 };
+  });
 }
 
 export type AptitudeScore = { score: number; total: number; percent: number; band: string; summary: string };

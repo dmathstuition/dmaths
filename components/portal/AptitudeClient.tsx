@@ -3,8 +3,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/Icons";
 import { useToast } from "@/components/Toast";
+import { segmentsOf } from "@/lib/aptitude";
 
-type SafeQuestion = { question: string; options: string[] };
+type SafeQuestion = { question: string; options: string[]; segment?: string };
 type Test = {
   id: string;
   status: string;
@@ -87,28 +88,38 @@ export default function AptitudeClient({ test }: { test: Test | null }) {
       ) : test.status === "scheduled" && test.scheduled_at && !open ? (
         card("calendar", "Test scheduled", `Your aptitude test opens on ${fmt(test.scheduled_at)}. Come back then — good luck!`)
       ) : open ? (
-        <div className="space-y-4">
+        <div className="space-y-5">
           <p className="rounded-xl border border-gold/40 bg-gold-pale/50 px-4 py-3 text-sm font-semibold text-ink/70">
-            Answer all {test.questions.length} questions, then submit. Take your time — this just helps us pitch your lessons.
+            Answer all {test.questions.length} questions across the sections below, then submit. Take your time — this just helps us pitch your lessons.
           </p>
-          {test.questions.map((q, i) => (
-            <div key={i} className="card p-5">
-              <p className="font-semibold text-ink">{i + 1}. {q.question}</p>
-              <div className="mt-3 space-y-2">
-                {q.options.map((o, j) => {
-                  const on = answers[i] === j;
-                  return (
-                    <button key={j} type="button" onClick={() => setAnswers(a => ({ ...a, [i]: j }))}
-                      className={`flex w-full items-center gap-3 rounded-xl border px-4 py-2.5 text-left text-sm transition
-                        ${on ? "border-gold bg-gold-pale font-semibold text-gold-deep" : "border-line bg-white text-ink/70 hover:border-gold/40"}`}>
-                      <span className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border text-[11px] font-bold ${on ? "border-gold bg-gold text-white" : "border-line text-ink/40"}`}>
-                        {String.fromCharCode(65 + j)}
-                      </span>
-                      {o}
-                    </button>
-                  );
-                })}
-              </div>
+          {segmentsOf(test.questions as any).map((seg) => (
+            <div key={seg.segment} className="space-y-3">
+              {seg.segment !== "General" && (
+                <div className="flex items-center gap-2 pt-1">
+                  <span className="rounded-full bg-board px-3 py-1 text-[12px] font-extrabold uppercase tracking-wide text-white">{seg.segment}</span>
+                  <span className="text-xs text-ink/40">{seg.items.length} question{seg.items.length === 1 ? "" : "s"}</span>
+                </div>
+              )}
+              {seg.items.map(({ q, index }) => (
+                <div key={index} className="card p-5">
+                  <p className="font-semibold text-ink">{index + 1}. {(q as SafeQuestion).question}</p>
+                  <div className="mt-3 space-y-2">
+                    {(q as SafeQuestion).options.map((o, j) => {
+                      const on = answers[index] === j;
+                      return (
+                        <button key={j} type="button" onClick={() => setAnswers(a => ({ ...a, [index]: j }))}
+                          className={`flex w-full items-center gap-3 rounded-xl border px-4 py-2.5 text-left text-sm transition
+                            ${on ? "border-gold bg-gold-pale font-semibold text-gold-deep" : "border-line bg-white text-ink/70 hover:border-gold/40"}`}>
+                          <span className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border text-[11px] font-bold ${on ? "border-gold bg-gold text-white" : "border-line text-ink/40"}`}>
+                            {String.fromCharCode(65 + j)}
+                          </span>
+                          {o}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
           ))}
           <button onClick={submit} disabled={busy} className="btn-gold w-full">{busy ? "Submitting…" : "Submit aptitude test"}</button>

@@ -27,7 +27,7 @@ export default async function AptitudePage() {
     scheduled_at: test.scheduled_at,
     score: test.score, total: test.total,
     report: test.status === "reported" ? test.report : null,
-    questions: (test.questions ?? []).map((q: any) => ({ question: q.question, options: q.options })),
+    questions: (test.questions ?? []).map((q: any) => ({ question: q.question, options: q.options, segment: q.segment ?? "" })),
   } : null;
 
   return <AptitudeClient test={safe} />;
