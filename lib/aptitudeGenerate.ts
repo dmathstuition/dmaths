@@ -50,7 +50,7 @@ Return ONLY strict JSON, no prose:
 // callers decide whether that's fatal (the admin console) or ignorable (approval).
 export async function createAptitudeTest(
   admin: SupabaseClient,
-  opts: { studentId: string; count?: number; createdBy?: string | null; student?: StudentInfo; intake?: Intake },
+  opts: { studentId: string; count?: number; createdBy?: string | null; student?: StudentInfo; intake?: Intake; scheduledAt?: string | null },
 ): Promise<{ test?: any; error?: string; status?: number }> {
   const count = Math.min(15, Math.max(5, Number(opts.count) || 10));
 
@@ -80,11 +80,16 @@ export async function createAptitudeTest(
   const questions = cleanQuestions(parsed?.questions ?? (Array.isArray(parsed) ? parsed : []));
   if (!questions.length) return { error: "The A.I didn't return usable questions — try again.", status: 502 };
 
+  // The preferred time is chosen at registration; carry it onto the test so the
+  // admin just follows it (no separate scheduling step needed).
+  const scheduledAt = opts.scheduledAt && !isNaN(new Date(opts.scheduledAt).getTime())
+    ? new Date(opts.scheduledAt).toISOString() : null;
   const { data: row, error } = await admin.from("aptitude_tests").insert({
     student_id: opts.studentId,
     level: student.level || "",
     exam_target: intake.exam_target || "",
     questions, status: "draft", created_by: opts.createdBy ?? null,
+    ...(scheduledAt ? { scheduled_at: scheduledAt } : {}),
   }).select("*").maybeSingle();
   if (error) {
     return {

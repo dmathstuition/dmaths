@@ -200,11 +200,11 @@ export default function AptitudeAdminClient({ students, initialTests, needsMigra
           {t.status === "scheduled" && (
             <div className="mt-4 space-y-2">
               {t.scheduled_at
-                ? <p className="text-sm text-ink/70">Scheduled for <strong>{fmt(t.scheduled_at)}</strong> — it opens in the learner's portal then.</p>
-                : <p className="text-sm text-ink/60">Waiting for the parent to pick a time. You can also set one:</p>}
+                ? <p className="text-sm text-ink/70">Scheduled for <strong>{fmt(t.scheduled_at)}</strong> (chosen at registration) — it opens in the learner's portal then.</p>
+                : <p className="text-sm text-ink/60">No time was recorded at registration — set one below.</p>}
               <div className="flex flex-wrap items-center gap-2">
                 <input type="datetime-local" className="field !w-auto" value={schedAt[t.id] ?? ""} onChange={e => setSchedAt(d => ({ ...d, [t.id]: e.target.value }))} />
-                <button onClick={() => setTime(t)} disabled={busy === t.id} className="btn border border-line bg-white text-ink/70 hover:bg-chalk">{t.scheduled_at ? "Change time" : "Set time"}</button>
+                <button onClick={() => setTime(t)} disabled={busy === t.id} className="btn border border-line bg-white text-ink/70 hover:bg-chalk">{t.scheduled_at ? "Adjust time" : "Set time"}</button>
                 <button onClick={() => remove(t)} disabled={busy === t.id} className="btn border border-red-200 bg-red-50 text-red-700 hover:bg-red-100">Delete</button>
               </div>
             </div>

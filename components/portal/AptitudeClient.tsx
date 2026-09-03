@@ -84,7 +84,7 @@ export default function AptitudeClient({ test }: { test: Test | null }) {
       ) : ["submitted", "analyzed", "reported"].includes(test.status) ? (
         card("clock", "Submitted — thank you!", "Your tutor is preparing your report. Your parent will receive it soon.")
       ) : test.status === "scheduled" && !test.scheduled_at ? (
-        card("calendar", "Waiting to be scheduled", "An adult will pick a time for your test from the parent portal. It'll open here at that time.")
+        card("calendar", "Waiting to be scheduled", "Your test time is being confirmed. It'll open here at that time.")
       ) : test.status === "scheduled" && test.scheduled_at && !open ? (
         card("calendar", "Test scheduled", `Your aptitude test opens on ${fmt(test.scheduled_at)}. Come back then — good luck!`)
       ) : open ? (

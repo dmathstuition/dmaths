@@ -40,6 +40,7 @@ export async function POST(req: Request) {
   }
 
   const clip = (v: unknown, n: number) => String(v ?? "").slice(0, n);
+  const toISO = (v: unknown) => { const d = v ? new Date(String(v)) : null; return d && !isNaN(d.getTime()) ? d.toISOString() : null; };
 
   const admin = supabaseAdmin();
   const row: Record<string, any> = {
@@ -52,6 +53,7 @@ export async function POST(req: Request) {
     package_tier: isPackageId(body.package) ? String(body.package) : "",
     school: clip(body.school, 160),
     availability: clip(body.availability, 200),
+    aptitude_at: toISO(body.aptitude_at),
     // Payment is no longer collected at sign-up — tuition is billed monthly from
     // attendance. These stay defaulted for backward compatibility with the columns.
     camp: "", plan: "",
@@ -72,8 +74,8 @@ export async function POST(req: Request) {
   let { error } = await insert();
   // If newer columns aren't migrated yet, don't fail a real signup — drop the
   // unmigrated ones and retry so registrations keep working.
-  if (error && /column .*(country|exam_target|strengths|challenges|weak_points|exam_date|target_grade|package_tier|school|availability)/i.test(error.message)) {
-    for (const c of ["country", "exam_target", "strengths", "challenges", "weak_points", "exam_date", "target_grade", "package_tier", "school", "availability"]) delete row[c];
+  if (error && /column .*(country|exam_target|strengths|challenges|weak_points|exam_date|target_grade|package_tier|school|availability|aptitude_at)/i.test(error.message)) {
+    for (const c of ["country", "exam_target", "strengths", "challenges", "weak_points", "exam_date", "target_grade", "package_tier", "school", "availability", "aptitude_at"]) delete row[c];
     ({ error } = await insert());
   }
 
