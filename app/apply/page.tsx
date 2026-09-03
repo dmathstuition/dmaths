@@ -97,6 +97,7 @@ export default function Apply() {
         country: f.country || DEFAULT_REGION, exam_target: f.exam_target || "",
         package: f.package || "", subjects,
         school: f.school || "", availability: f.availability || "",
+        aptitude_at: f.aptitude_at ? new Date(f.aptitude_at).toISOString() : null,
         guardian_name: f.guardian_name, guardian_contact: f.guardian_contact, guardian_email: f.guardian_email || "",
         notes: f.notes || "",
         strengths: f.strengths || "", challenges: f.challenges || "", weak_points: f.weak_points || "",
@@ -294,6 +295,18 @@ export default function Apply() {
               <Field label="Current school" value={f.school} onChange={v => set("school", v)} placeholder="e.g. Unity College" />
               <Field label="Preferred days / times" value={f.availability} onChange={v => set("availability", v)} placeholder="e.g. Weekday evenings, Sat mornings" />
             </Row>
+
+            <div className="rounded-2xl border border-gold/40 bg-gold-pale/40 p-4">
+              <label htmlFor="page-aptitude-at" className="flabel flex items-center gap-2">
+                <Icon name="calendar" className="h-4 w-4 text-gold-deep" /> Aptitude test — preferred date &amp; time
+              </label>
+              <input id="page-aptitude-at" type="datetime-local" className="field mt-1"
+                value={f.aptitude_at || ""} onChange={e => set("aptitude_at", e.target.value)} />
+              <p className="mt-1.5 text-[12px] text-ink/55">
+                Every new learner sits a short aptitude test in their portal so we can pitch teaching at the right level.
+                Pick a time that suits — it opens in the learner&apos;s portal then. You can change it with us later if needed.
+              </p>
+            </div>
 
             <div className="rounded-2xl border border-line bg-chalk/40 p-4">
               <p className="flex items-center gap-2 text-sm font-bold text-ink">

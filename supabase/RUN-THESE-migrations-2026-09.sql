@@ -32,6 +32,10 @@ alter table applications
 alter table profiles
   add column if not exists package_tier text;
 
+-- ── 3b. Aptitude test time chosen at registration ───────────────────
+alter table applications
+  add column if not exists aptitude_at timestamptz;
+
 -- ── 4. Aptitude tests ───────────────────────────────────────────────
 create table if not exists aptitude_tests (
   id            uuid primary key default gen_random_uuid(),

@@ -299,6 +299,7 @@ export async function POST(req: Request) {
     const r = await createAptitudeTest(admin, {
       studentId: created.user.id,
       createdBy: user.id,
+      scheduledAt: (app as any).aptitude_at ?? null, // the time picked at registration
       student: { level: app.level, subjects: app.subjects, first_name: app.first_name },
       intake: {
         strengths: (app as any).strengths, challenges: (app as any).challenges,

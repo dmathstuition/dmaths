@@ -178,6 +178,11 @@ export default function ApplicationsClient({ initial }: { initial: App[] }) {
                   {a.availability ? <>Availability: <span className="font-semibold text-ink/70">{a.availability}</span></> : null}
                 </p>
               )}
+              {a.aptitude_at && (
+                <p className="mt-1 text-[12px] text-ink/50">
+                  Aptitude test requested: <span className="font-semibold text-ink/70">{new Date(a.aptitude_at).toLocaleString("en-NG", { dateStyle: "medium", timeStyle: "short" })}</span>
+                </p>
+              )}
             </div>
             <div className="flex items-center gap-3">
               {a.camp && <span className="pill-amber inline-flex items-center gap-1"><Icon name="sun" className="h-3 w-3" /> Summer Camp</span>}

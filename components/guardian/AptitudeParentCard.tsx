@@ -1,62 +1,36 @@
 "use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Icon } from "@/components/Icons";
-import { useToast } from "@/components/Toast";
 
 type Test = {
   id: string; status: string; scheduled_at: string | null;
   score: number | null; total: number | null; report: string | null;
 };
 
-// Shown in the parent portal for one child. Lets a parent pick the time their
-// child sits the aptitude test, and read the report once it's released.
+// Parent view of a child's aptitude test. The test TIME is chosen during
+// registration and the learner sits it in their OWN portal — so this card only
+// keeps the parent informed and shows the report once released. There is no
+// scheduling here.
 export default function AptitudeParentCard({ test, childName }: { test: Test | null; childName: string }) {
-  const router = useRouter();
-  const push = useToast();
-  const [when, setWhen] = useState("");
-  const [busy, setBusy] = useState(false);
-
   if (!test) return null;
-
   const fmt = (s: string) => new Date(s).toLocaleString("en-NG", { dateStyle: "medium", timeStyle: "short" });
-
-  async function schedule() {
-    if (!when) { push("Pick a date and time.", "error"); return; }
-    setBusy(true);
-    const res = await fetch("/api/aptitude/schedule", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ testId: test!.id, scheduledAt: new Date(when).toISOString() }),
-    });
-    const j = await res.json().catch(() => ({}));
-    setBusy(false);
-    if (!res.ok) { push(j.error || "Could not schedule.", "error"); return; }
-    push("Test scheduled — thank you.", "success");
-    router.refresh();
-  }
-
-  // Awaiting a time from the parent.
-  if (test.status === "scheduled" && !test.scheduled_at) {
-    return (
-      <div className="card neu-card border-l-4 border-l-gold p-5">
-        <p className="flex items-center gap-2 font-display text-base font-bold text-ink">
-          <Icon name="calendar" className="h-5 w-5 text-gold-deep" /> Schedule {childName}&apos;s aptitude test
-        </p>
-        <p className="mt-1 text-sm text-ink/55">Pick a time that suits you — the test opens in {childName}&apos;s portal then.</p>
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <input type="datetime-local" className="field !w-auto" value={when} onChange={e => setWhen(e.target.value)} />
-          <button onClick={schedule} disabled={busy} className="btn-gold">{busy ? "Saving…" : "Schedule test"}</button>
-        </div>
-      </div>
-    );
-  }
 
   if (test.status === "scheduled" && test.scheduled_at) {
     return (
       <div className="card neu-card p-5">
         <p className="flex items-center gap-2 text-sm font-semibold text-ink/75">
           <Icon name="calendar" className="h-5 w-5 text-gold-deep" />
-          {childName}&apos;s aptitude test is booked for <strong>{fmt(test.scheduled_at)}</strong>.
+          {childName}&apos;s aptitude test is booked for <strong>{fmt(test.scheduled_at)}</strong> — they&apos;ll sit it in their own portal.
+        </p>
+      </div>
+    );
+  }
+
+  if (test.status === "scheduled" && !test.scheduled_at) {
+    return (
+      <div className="card neu-card p-5">
+        <p className="flex items-center gap-2 text-sm font-semibold text-ink/75">
+          <Icon name="clock" className="h-5 w-5 text-gold-deep" />
+          {childName}&apos;s aptitude test is being scheduled — we&apos;ll confirm the time with you.
         </p>
       </div>
     );
