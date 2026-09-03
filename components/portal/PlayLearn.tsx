@@ -20,7 +20,10 @@ export default function PlayLearn() {
       <div className="mb-3 flex items-center gap-2">
         <Icon name="sparkles" className="h-4 w-4 text-gold-deep" />
         <h2 className="font-display text-lg font-semibold text-ink">Play &amp; learn</h2>
-        <span className="text-sm text-ink/45">— pick one and go</span>
+        <span className="hidden text-sm text-ink/45 sm:inline">— pick one and go</span>
+        <Link href="/portal/games" className="ml-auto inline-flex items-center gap-1 text-sm font-bold text-gold-deep hover:underline">
+          Game Center <span aria-hidden>→</span>
+        </Link>
       </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {TILES.map((t, i) => (
