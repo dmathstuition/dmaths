@@ -49,16 +49,16 @@ describe("CRON_JOBS", () => {
     }
   });
 
-  // The keep-alive is declared in vercel.json and authenticates by header, so
-  // it must never be presented as something to wire up on cron-job.org — doing
-  // that returns 401 forever on a job that was already working.
-  it("marks the keep-alive as Vercel-triggered, and nothing else", () => {
-    const vercel = CRON_JOBS.filter((j) => triggerOf(j) === "vercel").map((j) => j.key);
-    expect(vercel).toEqual(["keepalive"]);
+  // Vercel-declared jobs (vercel.json) authenticate by header, so they must
+  // never be presented as something to wire up on cron-job.org — doing that
+  // returns 401 forever on a job that was already working.
+  it("marks exactly the Vercel-scheduled jobs as Vercel-triggered", () => {
+    const vercel = CRON_JOBS.filter((j) => triggerOf(j) === "vercel").map((j) => j.key).sort();
+    expect(vercel).toEqual(["keepalive", "monthly-billing"]);
   });
 
-  it("defaults every other job to cron-job.org", () => {
-    const external = CRON_JOBS.filter((j) => j.key !== "keepalive");
+  it("defaults every non-Vercel job to cron-job.org", () => {
+    const external = CRON_JOBS.filter((j) => triggerOf(j) !== "vercel");
     expect(external).not.toHaveLength(0);
     for (const j of external) expect(triggerOf(j)).toBe("cron-job.org");
   });

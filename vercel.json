@@ -1,5 +1,6 @@
 {
   "crons": [
-    { "path": "/api/cron/keepalive", "schedule": "0 6 * * *" }
+    { "path": "/api/cron/keepalive", "schedule": "0 6 * * *" },
+    { "path": "/api/cron/monthly-billing", "schedule": "30 6 * * *" }
   ]
 }
