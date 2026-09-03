@@ -1,6 +1,7 @@
 import AptitudeClient from "@/components/portal/AptitudeClient";
 import { getUser } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { segmentScores } from "@/lib/aptitude";
 import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
@@ -15,18 +16,21 @@ export default async function AptitudePage() {
   let test: any = null;
   try {
     const { data } = await admin.from("aptitude_tests")
-      .select("id, status, scheduled_at, questions, score, total, report, submitted_at")
+      .select("id, status, scheduled_at, questions, answers, score, total, report, submitted_at")
       .eq("student_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle();
     test = data ?? null;
   } catch { test = null; }
 
   // Never send the answer key to the browser — strip it for the taking view.
+  // The per-segment breakdown is computed here (server-side) so it can be shown
+  // without exposing the answers.
   const safe = test ? {
     id: test.id,
     status: test.status,
     scheduled_at: test.scheduled_at,
     score: test.score, total: test.total,
     report: test.status === "reported" ? test.report : null,
+    segments: test.answers ? segmentScores(test.questions ?? [], test.answers) : [],
     questions: (test.questions ?? []).map((q: any) => ({ question: q.question, options: q.options, segment: q.segment ?? "" })),
   } : null;
 

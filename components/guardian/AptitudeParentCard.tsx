@@ -1,9 +1,11 @@
 "use client";
 import { Icon } from "@/components/Icons";
 
+type SegScore = { segment: string; score: number; total: number; percent: number };
 type Test = {
   id: string; status: string; scheduled_at: string | null;
   score: number | null; total: number | null; report: string | null;
+  segments?: SegScore[];
 };
 
 // Parent view of a child's aptitude test. The test TIME is chosen during
@@ -56,7 +58,23 @@ export default function AptitudeParentCard({ test, childName }: { test: Test | n
         {test.score != null && test.total != null && (
           <p className="mt-1 text-sm font-bold text-gold-deep">Score: {test.score}/{test.total}</p>
         )}
-        <p className="mt-3 whitespace-pre-wrap text-[15px] leading-relaxed text-ink/75">{test.report}</p>
+        {test.segments && test.segments.length > 1 && (
+          <div className="mt-4 space-y-1.5">
+            <p className="text-[11px] font-bold uppercase tracking-wide text-ink/40">By section</p>
+            {test.segments.map((s) => (
+              <div key={s.segment}>
+                <div className="flex items-center justify-between text-[13px]">
+                  <span className="font-semibold text-ink/70">{s.segment}</span>
+                  <span className="font-bold text-ink">{s.score}/{s.total} · {s.percent}%</span>
+                </div>
+                <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-ink/10">
+                  <div className="h-full rounded-full bg-gold" style={{ width: `${s.percent}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        <p className="mt-4 whitespace-pre-wrap text-[15px] leading-relaxed text-ink/75">{test.report}</p>
       </div>
     );
   }
