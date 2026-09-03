@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { rateLimit, clientKey } from "@/lib/ratelimit";
+import { isPackageId } from "@/lib/packages";
 
 // Public enrolment submission. Rate-limited per IP and field-whitelisted on the
 // server so the browser can't spam the table or inject arbitrary columns.
@@ -47,6 +48,10 @@ export async function POST(req: Request) {
     guardian_name: body.guardian_name || "", guardian_contact: body.guardian_contact || "",
     guardian_email: body.guardian_email || "",
     subjects: body.subjects, notes: body.notes || "",
+    // Chosen enrolment package (Tier 1/2/3) + a couple of extra intake details.
+    package_tier: isPackageId(body.package) ? String(body.package) : "",
+    school: clip(body.school, 160),
+    availability: clip(body.availability, 200),
     // Payment is no longer collected at sign-up — tuition is billed monthly from
     // attendance. These stay defaulted for backward compatibility with the columns.
     camp: "", plan: "",
@@ -67,8 +72,8 @@ export async function POST(req: Request) {
   let { error } = await insert();
   // If newer columns aren't migrated yet, don't fail a real signup — drop the
   // unmigrated ones and retry so registrations keep working.
-  if (error && /column .*(country|exam_target|strengths|challenges|weak_points|exam_date|target_grade)/i.test(error.message)) {
-    for (const c of ["country", "exam_target", "strengths", "challenges", "weak_points", "exam_date", "target_grade"]) delete row[c];
+  if (error && /column .*(country|exam_target|strengths|challenges|weak_points|exam_date|target_grade|package_tier|school|availability)/i.test(error.message)) {
+    for (const c of ["country", "exam_target", "strengths", "challenges", "weak_points", "exam_date", "target_grade", "package_tier", "school", "availability"]) delete row[c];
     ({ error } = await insert());
   }
 

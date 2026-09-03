@@ -5,15 +5,13 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Icon } from "@/components/Icons";
 import { REGIONS, levelsFor, examsFor, DEFAULT_REGION } from "@/lib/regions";
-import { ACADEMY_SUBJECTS } from "@/lib/subjects";
+import { PACKAGES, findPackage, packageSubjects, packageRate, type EnrolPackage } from "@/lib/packages";
+import { fmtNgn } from "@/lib/pricing";
 
-// New sign-ups pick from the academy's canonical subjects. Tuition is billed
-// automatically per month from attendance (see /pricing), so no payment is
-// collected at sign-up — enrolment just captures who the learner is, what they
-// need, and a short intake profile the tutors use to plan.
-const SUBJECTS = [...ACADEMY_SUBJECTS];
-
-// Tab-scoped draft so leaving to read a policy page and pressing Back restores progress.
+// New sign-ups choose a PACKAGE (Tier 1/2/3), not loose subjects. Tuition is
+// billed automatically per month from attendance (see /pricing), so no payment
+// is collected at sign-up — enrolment captures who the learner is, their
+// package, and a short intake profile the tutors use to plan.
 const DRAFT_KEY = "dmaths-apply-draft";
 
 type Form = Record<string, any>;
@@ -25,20 +23,27 @@ export default function Apply() {
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
   const [consent, setConsent] = useState(false);
-  // Referral code from the URL (?ref=DM-2026-0001) — the referring student's ID.
   const [ref, setRef] = useState("");
-  // Bot protection (no CAPTCHA): a hidden honeypot field bots fill but humans
-  // don't, plus a mount timestamp so the server can reject instant submissions.
   const [hp, setHp] = useState("");
   const [loadedAt] = useState(() => Date.now());
 
   const set = (k: string, v: any) => setF(p => ({ ...p, [k]: v }));
-  const toggleSubject = (s: string) =>
-    set("subjects", f.subjects.includes(s) ? f.subjects.filter((x: string) => x !== s) : [...f.subjects, s]);
+  const pkg: EnrolPackage | undefined = findPackage(f.package);
 
-  // On mount: restore an in-progress draft (so leaving to read a policy page and
-  // pressing Back returns to the same step with data intact). Otherwise read the
-  // referral param from the URL.
+  const toggleSubject = (s: string) => {
+    const has = f.subjects.includes(s);
+    const cap = pkg?.maxSelectable ?? 99;
+    if (!has && f.subjects.length >= cap) { setError(`Tier 2 covers up to ${cap} subjects.`); return; }
+    setError("");
+    set("subjects", has ? f.subjects.filter((x: string) => x !== s) : [...f.subjects, s]);
+  };
+
+  function pickPackage(p: EnrolPackage) {
+    setError("");
+    // Switching package clears any Tier-2 sub-selection.
+    setF(prev => ({ ...prev, package: p.id, subjects: [] }));
+  }
+
   useEffect(() => {
     try {
       const raw = sessionStorage.getItem(DRAFT_KEY);
@@ -51,36 +56,37 @@ export default function Apply() {
         return;
       }
     } catch { /* ignore malformed draft */ }
-
     const params = new URLSearchParams(window.location.search);
     const r = (params.get("ref") || "").trim().slice(0, 40);
     if (r) setRef(r);
   }, []);
 
-  // Persist progress so a same-tab navigation (e.g. to a policy page) can be
-  // restored on Back. Stops once the application is submitted.
   useEffect(() => {
     if (done) return;
-    try {
-      sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ f, step, ref, consent }));
-    } catch { /* storage unavailable — non-fatal */ }
+    try { sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ f, step, ref, consent })); } catch { /* non-fatal */ }
   }, [f, step, ref, consent, done]);
 
   const specialisedExam = !!(f.exam_target && f.exam_target.trim());
 
   function next() {
     setError("");
-    if (step === 1 && !(f.first_name && f.last_name && f.email && f.phone))
-      return setError("Please fill in all required fields.");
+    if (step === 1) {
+      if (!(f.first_name && f.last_name && f.email && f.phone)) return setError("Please fill in all required fields.");
+    }
+    if (step === 2) {
+      if (!f.level) return setError("Please choose the learner's current class / year.");
+      if (!pkg) return setError("Please choose a package.");
+      if (pkg.selectableSubjects && f.subjects.length === 0) return setError("Pick at least one subject for Tier 2.");
+    }
     setStep(s => s + 1);
   }
 
   async function submit() {
     setError("");
-    if (!f.level) return setError("Please choose the learner's current class / year.");
-    if (!f.subjects.length) return setError("Select at least one subject.");
     if (!(f.guardian_name && f.guardian_contact)) return setError("Please provide guardian details.");
     if (!consent) return setError("Please confirm you have read and agree to the policies before submitting.");
+    const subjects = pkg ? packageSubjects(pkg, f.subjects) : [];
+    if (!subjects.length) return setError("Please choose a package on the previous step.");
     setBusy(true);
     const res = await fetch("/api/applications/submit", {
       method: "POST", headers: { "Content-Type": "application/json" },
@@ -89,14 +95,14 @@ export default function Apply() {
         dob: f.dob || null, address: f.address || "",
         level: f.level || levelsFor(f.country || DEFAULT_REGION)[0],
         country: f.country || DEFAULT_REGION, exam_target: f.exam_target || "",
-        guardian_name: f.guardian_name, guardian_contact: f.guardian_contact,
-        guardian_email: f.guardian_email || "",
-        subjects: f.subjects, notes: f.notes || "",
-        // Intake profile — the tutors use this to plan and to level the aptitude test.
+        package: f.package || "", subjects,
+        school: f.school || "", availability: f.availability || "",
+        guardian_name: f.guardian_name, guardian_contact: f.guardian_contact, guardian_email: f.guardian_email || "",
+        notes: f.notes || "",
         strengths: f.strengths || "", challenges: f.challenges || "", weak_points: f.weak_points || "",
         exam_date: f.exam_date || null, target_grade: f.target_grade || "",
         ref: ref || "",
-        website: hp, loadedAt, // honeypot + time-trap (bot protection)
+        website: hp, loadedAt,
       }),
     });
     const json = await res.json().catch(() => ({}));
@@ -145,7 +151,7 @@ export default function Apply() {
 
       {/* Step bar */}
       <ol className="mx-auto mb-8 flex max-w-2xl items-center gap-3">
-        {["Personal info", "Academic details & needs"].map((t, i) => {
+        {["Personal info", "Choose a package", "Details"].map((t, i) => {
           const n = i + 1, active = step === n, doneStep = step > n;
           return (
             <li key={t} className="flex flex-1 items-center gap-2.5">
@@ -154,18 +160,17 @@ export default function Apply() {
                 {doneStep ? "✓" : n}
               </span>
               <span className={`hidden text-[13px] font-bold sm:block ${active ? "text-ink" : "text-ink/40"}`}>{t}</span>
-              {i < 1 && <span className={`h-0.5 flex-1 ${doneStep ? "bg-emerald-400" : "bg-line"}`} />}
+              {i < 2 && <span className={`h-0.5 flex-1 ${doneStep ? "bg-emerald-400" : "bg-line"}`} />}
             </li>
           );
         })}
       </ol>
 
       <div className="card mx-auto max-w-2xl p-7">
-        {/* Honeypot — off-screen, not for humans. */}
+        {/* Honeypot */}
         <span aria-hidden style={{ position: "absolute", left: "-9999px", top: 0, width: 1, height: 1, overflow: "hidden", opacity: 0 }}>
           <label htmlFor="company_url">Company website (leave blank)</label>
-          <input id="company_url" name="company_url" type="text" tabIndex={-1} autoComplete="off"
-            value={hp} onChange={e => setHp(e.target.value)} />
+          <input id="company_url" name="company_url" type="text" tabIndex={-1} autoComplete="off" value={hp} onChange={e => setHp(e.target.value)} />
         </span>
 
         {error && <p role="alert" className="mb-5 rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-800">{error}</p>}
@@ -189,8 +194,8 @@ export default function Apply() {
         )}
 
         {step === 2 && (
-          <div className="space-y-4">
-            <h2 className="font-display text-xl font-semibold">Academic details &amp; needs</h2>
+          <div className="space-y-5">
+            <h2 className="font-display text-xl font-semibold">Choose a package</h2>
             <Row>
               <div>
                 <label htmlFor="page-country" className="flabel">Where do you study? <Req /></label>
@@ -208,42 +213,58 @@ export default function Apply() {
               </div>
             </Row>
 
-            <div>
-              <p className="flabel">Classes / subjects needed <Req /></p>
-              <div className="flex flex-wrap gap-2">
-                {SUBJECTS.map(s => {
-                  const on = f.subjects.includes(s);
-                  return (
-                    <button type="button" key={s} onClick={() => toggleSubject(s)}
-                      className={`rounded-full border px-3.5 py-1.5 text-[13px] font-semibold transition
-                        ${on ? "border-gold bg-gold-pale text-gold-deep" : "border-line bg-white text-ink/70 hover:border-gold/40"}`}>
-                      {s}
+            <div className="space-y-3">
+              {PACKAGES.map(p => {
+                const on = f.package === p.id;
+                return (
+                  <div key={p.id}>
+                    <button type="button" onClick={() => pickPackage(p)}
+                      className={`w-full rounded-2xl border p-4 text-left transition ${on ? "border-gold bg-gold-pale ring-1 ring-gold/40" : "border-line bg-white hover:border-gold/40"}`}>
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="font-display text-base font-bold text-ink">{p.name}</p>
+                          <p className="text-[12px] font-semibold text-ink/50">{p.tagline}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-display text-lg font-extrabold text-gold-deep">{fmtNgn(packageRate(p))}</p>
+                          <p className="text-[11px] font-semibold text-ink/40">/ hour</p>
+                        </div>
+                      </div>
+                      <ul className="mt-2 space-y-1">
+                        {p.bullets.map(bl => (
+                          <li key={bl} className="flex items-start gap-2 text-[12.5px] text-ink/60">
+                            <svg className="mt-0.5 h-3 w-3 flex-shrink-0 text-gold-deep" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                            {bl}
+                          </li>
+                        ))}
+                      </ul>
                     </button>
-                  );
-                })}
-              </div>
-              <p className="mt-2 text-[12px] text-ink/45">
-                Tuition is charged per hour and billed monthly from attendance — see our <Link href="/pricing" className="font-semibold text-gold-deep underline">pricing</Link>.
-              </p>
-            </div>
 
-            {/* Intake profile — helps tutors plan and levels the aptitude test. */}
-            <div className="rounded-2xl border border-line bg-chalk/40 p-4">
-              <p className="flex items-center gap-2 text-sm font-bold text-ink">
-                <Icon name="lightbulb" className="h-4 w-4 text-gold-deep" /> Tell us about the learner
-              </p>
-              <p className="mt-0.5 text-[12px] text-ink/50">Based on the classes you picked — this shapes how we teach and levels the aptitude test.</p>
-              <div className="mt-3 space-y-3">
-                <TextArea label="Strengths observed" placeholder="e.g. Strong at arithmetic and quick to grasp new ideas"
-                  value={f.strengths} onChange={v => set("strengths", v)} />
-                <TextArea label="Challenges faced" placeholder="e.g. Struggles with word problems and staying focused in long sessions"
-                  value={f.challenges} onChange={v => set("challenges", v)} />
-                <TextArea label="Weak points observed" placeholder="e.g. Fractions, algebra and exam timing"
-                  value={f.weak_points} onChange={v => set("weak_points", v)} />
-              </div>
+                    {/* Tier 2 — choose up to 3 subjects */}
+                    {on && p.selectableSubjects && (
+                      <div className="mt-2 rounded-2xl border border-line bg-chalk/40 p-4">
+                        <p className="text-[13px] font-bold text-ink">Pick up to {p.maxSelectable} subjects <span className="font-normal text-ink/45">({f.subjects.length}/{p.maxSelectable})</span></p>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {p.selectableSubjects.map(s => {
+                            const sel = f.subjects.includes(s);
+                            return (
+                              <button type="button" key={s} onClick={() => toggleSubject(s)}
+                                className={`rounded-full border px-3.5 py-1.5 text-[13px] font-semibold transition ${sel ? "border-gold bg-gold-pale text-gold-deep" : "border-line bg-white text-ink/70 hover:border-gold/40"}`}>
+                                {s}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
+            <p className="text-[12px] text-ink/45">
+              Tuition is charged per hour and billed monthly from attendance — see our <Link href="/pricing" className="font-semibold text-gold-deep underline">pricing</Link>.
+            </p>
 
-            {/* Specialised exam preparation */}
             <div>
               <label htmlFor="page-exam-target" className="flabel">Preparing for a specialised exam?</label>
               <select id="page-exam-target" className="field" value={f.exam_target || ""} onChange={e => set("exam_target", e.target.value)}>
@@ -257,6 +278,34 @@ export default function Apply() {
                 <Field label="Target grade / score" placeholder="e.g. A1, or 300+ in JAMB" value={f.target_grade} onChange={v => set("target_grade", v)} />
               </Row>
             )}
+          </div>
+        )}
+
+        {step === 3 && (
+          <div className="space-y-4">
+            <h2 className="font-display text-xl font-semibold">A few more details</h2>
+            {pkg && (
+              <p className="rounded-xl border border-gold/40 bg-gold-pale/50 px-4 py-2.5 text-[13px] font-semibold text-ink/70">
+                Selected: <strong className="text-ink">{pkg.name}</strong>
+                {packageSubjects(pkg, f.subjects).length ? ` · ${packageSubjects(pkg, f.subjects).join(", ")}` : ""}
+              </p>
+            )}
+            <Row>
+              <Field label="Current school" value={f.school} onChange={v => set("school", v)} placeholder="e.g. Unity College" />
+              <Field label="Preferred days / times" value={f.availability} onChange={v => set("availability", v)} placeholder="e.g. Weekday evenings, Sat mornings" />
+            </Row>
+
+            <div className="rounded-2xl border border-line bg-chalk/40 p-4">
+              <p className="flex items-center gap-2 text-sm font-bold text-ink">
+                <Icon name="lightbulb" className="h-4 w-4 text-gold-deep" /> Tell us about the learner
+              </p>
+              <p className="mt-0.5 text-[12px] text-ink/50">This shapes how we teach and levels the aptitude test.</p>
+              <div className="mt-3 space-y-3">
+                <TextArea label="Strengths observed" placeholder="e.g. Strong at arithmetic, quick to grasp new ideas" value={f.strengths} onChange={v => set("strengths", v)} />
+                <TextArea label="Challenges faced" placeholder="e.g. Word problems, staying focused in long sessions" value={f.challenges} onChange={v => set("challenges", v)} />
+                <TextArea label="Weak points observed" placeholder="e.g. Fractions, algebra, exam timing" value={f.weak_points} onChange={v => set("weak_points", v)} />
+              </div>
+            </div>
 
             <Row>
               <Field label="Guardian name" required value={f.guardian_name} onChange={v => set("guardian_name", v)} />
@@ -266,13 +315,12 @@ export default function Apply() {
 
             <div>
               <label htmlFor="page-notes-goals" className="flabel">Anything else / goals</label>
-              <textarea id="page-notes-goals" className="field min-h-20" placeholder="e.g. Preferred class times, other goals…"
+              <textarea id="page-notes-goals" className="field min-h-20" placeholder="e.g. Other goals, prior tutoring, learning needs…"
                 value={f.notes || ""} onChange={e => set("notes", e.target.value)} />
             </div>
 
             <label className="mt-2 flex items-start gap-3 rounded-xl border border-line bg-chalk/50 p-4 text-sm text-ink/70">
-              <input type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)}
-                className="mt-0.5 h-4 w-4 accent-gold" />
+              <input type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)} className="mt-0.5 h-4 w-4 accent-gold" />
               <span>
                 I am the student or their parent/guardian, the information provided is accurate, and I
                 have read and agree to the{" "}
@@ -287,7 +335,7 @@ export default function Apply() {
 
         <div className="mt-7 flex items-center justify-between">
           {step > 1 ? <button className="btn-ghost" onClick={() => setStep(s => s - 1)}>← Previous</button> : <span />}
-          {step < 2
+          {step < 3
             ? <button className="btn-gold" onClick={next} disabled={busy}>Next step →</button>
             : <button className="btn-gold" onClick={submit} disabled={busy}>{busy ? "Submitting…" : "Submit registration"}</button>}
         </div>
