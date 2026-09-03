@@ -7,6 +7,7 @@ import { Icon } from "@/components/Icons";
 import ProgressRing from "@/components/ui/ProgressRing";
 import { EDITABLE_LEVELS } from "@/lib/profileEdit";
 import { ACADEMY_SUBJECTS, normalizeSubjects } from "@/lib/subjects";
+import { packageLabel } from "@/lib/packages";
 
 const DETAIL_FIELDS: { key: string; label: string; type?: string; placeholder?: string }[] = [
   { key: "school", label: "School", placeholder: "Your school" },
@@ -106,7 +107,8 @@ export default function ProfileClient({ me }: { me: any }) {
           </div>
         </div>
         <div className="mt-4 flex flex-wrap justify-center gap-1.5">
-          {normalizeSubjects(me.subjects).map((s: string) => <span key={s} className="pill-blue">{s}</span>)}
+          {packageLabel((me as any).package_tier) && <span className="pill-gold">{packageLabel((me as any).package_tier)}</span>}
+          {((me as any).package_tier ? (me.subjects ?? []) : normalizeSubjects(me.subjects)).map((s: string) => <span key={s} className="pill-blue">{s}</span>)}
         </div>
       </div>
 

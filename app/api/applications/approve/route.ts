@@ -108,11 +108,12 @@ export async function POST(req: Request) {
     guardian_name: app.guardian_name, guardian_contact: app.guardian_contact,
     subjects: app.subjects,
     country: (app as any).country ?? "NG", exam_target: (app as any).exam_target ?? "",
+    package_tier: (app as any).package_tier ?? "",
   };
   let { error: profErr } = await admin.from("profiles").insert(profileRow);
-  // Tolerate the international columns not being migrated yet.
-  if (profErr && /column .*(country|exam_target)/i.test(profErr.message)) {
-    delete profileRow.country; delete profileRow.exam_target;
+  // Tolerate newer columns not being migrated yet.
+  if (profErr && /column .*(country|exam_target|package_tier)/i.test(profErr.message)) {
+    delete profileRow.country; delete profileRow.exam_target; delete profileRow.package_tier;
     ({ error: profErr } = await admin.from("profiles").insert(profileRow));
   }
   if (profErr) {

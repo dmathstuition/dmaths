@@ -2,6 +2,7 @@ import Link from "next/link";
 import JoinClassButton from "@/components/portal/JoinClassButton";
 import { supabaseServer } from "@/lib/supabase/server";
 import { getUser, getProfile } from "@/lib/auth";
+import { packageLabel } from "@/lib/packages";
 import CountUp from "@/components/landing/CountUp";
 import Reveal from "@/components/landing/Reveal";
 import { Icon, type IconName } from "@/components/Icons";
@@ -116,6 +117,11 @@ export default async function StudentDashboard() {
               </p>
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 <span className="pill-gold inline-flex items-center gap-1"><Icon name="graduationCap" className="h-3 w-3" /> {me?.level || "Student"}</span>
+                {packageLabel((me as any)?.package_tier) && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-white/70 px-3 py-1 text-sm font-bold text-ink/70 ring-1 ring-line dark:bg-white/10 dark:text-white/80">
+                    <Icon name="award" className="h-3.5 w-3.5 text-gold-deep" /> {packageLabel((me as any)?.package_tier)}
+                  </span>
+                )}
                 {streak > 0 && (
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-white/70 px-3 py-1 text-sm font-bold text-gold-deep ring-1 ring-gold/30 dark:bg-white/10 dark:text-gold">
                     <Icon name="flame" className="h-3.5 w-3.5" /> {streak}-day streak

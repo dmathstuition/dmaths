@@ -6,6 +6,7 @@ import PromptModal from "@/components/PromptModal";
 import { useToast } from "@/components/Toast";
 import { Icon } from "@/components/Icons";
 import { findTier, discountedNgn, fmtNgn } from "@/lib/summerCamp";
+import { packageLabel } from "@/lib/packages";
 
 type App = Record<string, any>;
 const FILTERS = ["all", "pending", "approved", "rejected"] as const;
@@ -166,9 +167,17 @@ export default function ApplicationsClient({ initial }: { initial: App[] }) {
             <div>
               <h2 className="text-base font-extrabold">{a.first_name} {a.last_name}</h2>
               <p className="text-sm text-ink/50">{a.email} · {a.phone} · {a.level}</p>
-              <div className="mt-2 flex flex-wrap gap-1.5">
+              <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                {packageLabel(a.package_tier) && <span className="pill-gold">{packageLabel(a.package_tier)}</span>}
                 {(a.subjects ?? []).map((s: string) => <span key={s} className="pill-blue">{s}</span>)}
               </div>
+              {(a.school || a.availability) && (
+                <p className="mt-1.5 text-[12px] text-ink/50">
+                  {a.school ? <>School: <span className="font-semibold text-ink/70">{a.school}</span></> : null}
+                  {a.school && a.availability ? " · " : null}
+                  {a.availability ? <>Availability: <span className="font-semibold text-ink/70">{a.availability}</span></> : null}
+                </p>
+              )}
             </div>
             <div className="flex items-center gap-3">
               {a.camp && <span className="pill-amber inline-flex items-center gap-1"><Icon name="sun" className="h-3 w-3" /> Summer Camp</span>}
