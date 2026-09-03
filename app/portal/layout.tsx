@@ -21,6 +21,7 @@ const NAV: NavItem[] = [
   { href: "/portal/solve", label: "Question solver", icon: "sigma" },
   { href: "/portal/check", label: "Check my work", icon: "checkCircle" },
   { href: "/portal/classes", label: "My classes", icon: "classes" },
+  { href: "/portal/aptitude", label: "Aptitude test", icon: "graduationCap" },
   { href: "/portal/assignments", label: "Assignments", icon: "assignments" },
   { href: "/portal/plan", label: "My plan", icon: "checkCircle" },
   { href: "/portal/messages", label: "Messages", icon: "messages" },
