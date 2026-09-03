@@ -35,8 +35,10 @@ export async function POST(req: Request) {
     }
   }
   if (!Array.isArray(body.subjects) || body.subjects.length === 0) {
-    return NextResponse.json({ error: "Select at least one subject or a package." }, { status: 400 });
+    return NextResponse.json({ error: "Select at least one subject." }, { status: 400 });
   }
+
+  const clip = (v: unknown, n: number) => String(v ?? "").slice(0, n);
 
   const admin = supabaseAdmin();
   const row: Record<string, any> = {
@@ -45,23 +47,29 @@ export async function POST(req: Request) {
     guardian_name: body.guardian_name || "", guardian_contact: body.guardian_contact || "",
     guardian_email: body.guardian_email || "",
     subjects: body.subjects, notes: body.notes || "",
-    camp: body.camp || "", plan: body.plan || "",
-    pay_plan: body.pay_plan === "part" ? "part" : "full",
-    payment_ref: body.payment_ref || "", payment_method: body.payment_method || "",
-    payment_amount: Number(body.payment_amount) || 0,
-    payment_date: body.payment_date || null,
+    // Payment is no longer collected at sign-up — tuition is billed monthly from
+    // attendance. These stay defaulted for backward compatibility with the columns.
+    camp: "", plan: "",
+    pay_plan: "full", payment_ref: "", payment_method: "", payment_amount: 0, payment_date: null,
     referred_by_code: String(body.ref || "").trim().slice(0, 40) || null,
-    country: String(body.country || "NG").slice(0, 4),
-    exam_target: String(body.exam_target || "").slice(0, 80),
+    country: clip(body.country || "NG", 4),
+    exam_target: clip(body.exam_target, 80),
+    // Intake profile (used to plan teaching and to level the aptitude test).
+    strengths: clip(body.strengths, 2000),
+    challenges: clip(body.challenges, 2000),
+    weak_points: clip(body.weak_points, 2000),
+    exam_date: body.exam_date || null,
+    target_grade: clip(body.target_grade, 120),
     consented_at: new Date().toISOString(),
   };
 
-  let { error } = await admin.from("applications").insert(row);
-  // If the international columns aren't migrated yet, don't fail a real signup —
-  // drop them and retry so registrations keep working.
-  if (error && /column .*(country|exam_target)/i.test(error.message)) {
-    delete row.country; delete row.exam_target;
-    ({ error } = await admin.from("applications").insert(row));
+  const insert = () => admin.from("applications").insert({ ...row });
+  let { error } = await insert();
+  // If newer columns aren't migrated yet, don't fail a real signup — drop the
+  // unmigrated ones and retry so registrations keep working.
+  if (error && /column .*(country|exam_target|strengths|challenges|weak_points|exam_date|target_grade)/i.test(error.message)) {
+    for (const c of ["country", "exam_target", "strengths", "challenges", "weak_points", "exam_date", "target_grade"]) delete row[c];
+    ({ error } = await insert());
   }
 
   if (error) return NextResponse.json({ error: "Could not submit — please try again." }, { status: 500 });

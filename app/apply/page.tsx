@@ -4,31 +4,15 @@ import HeroMascot from "@/components/HeroMascot";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Icon } from "@/components/Icons";
-import PaystackButton from "@/components/PaystackButton";
-import { SUMMER_CAMP_TIERS, PHYSICAL_TIERS, PHYSICAL_CAMP, findTier, fmtUsd, fmtNgn, DISCOUNT_PCT, discountedUsd, discountedNgn, depositNgn, balanceNgn, tierModules, type CampTier } from "@/lib/summerCamp";
 import { REGIONS, levelsFor, examsFor, DEFAULT_REGION } from "@/lib/regions";
 import { ACADEMY_SUBJECTS } from "@/lib/subjects";
 
-// ── FREE ENROLMENT SWITCH ──────────────────────────────────────────
-// When true, applicants whose ONLY paid concern is the free subject below
-// skip the payment step entirely. Set to false (or empty FREE_SUBJECTS) to
-// turn the promotion off. No other code changes needed.
-const FREE_ENROLMENT_OPEN = true;
-const FREE_SUBJECTS = ["Python Practice Challenge"];
+// New sign-ups pick from the academy's canonical subjects. Tuition is billed
+// automatically per month from attendance (see /pricing), so no payment is
+// collected at sign-up — enrolment just captures who the learner is, what they
+// need, and a short intake profile the tutors use to plan.
+const SUBJECTS = [...ACADEMY_SUBJECTS];
 
-// New sign-ups pick from the academy's canonical subjects — plus the free-promo
-// subject while the promotion is running, so that offer keeps working.
-const SUBJECTS = [
-  ...ACADEMY_SUBJECTS,
-  ...(FREE_ENROLMENT_OPEN ? FREE_SUBJECTS.filter((s) => !(ACADEMY_SUBJECTS as readonly string[]).includes(s)) : []),
-];
-
-function isFreeApplication(subjects: string[]) {
-  return FREE_ENROLMENT_OPEN
-    && subjects.length > 0
-    && subjects.every((s) => FREE_SUBJECTS.includes(s));
-}
-const METHODS = ["Access Bank Transfer","Opay Bank Transfer","Cash"];
 // Tab-scoped draft so leaving to read a policy page and pressing Back restores progress.
 const DRAFT_KEY = "dmaths-apply-draft";
 
@@ -41,12 +25,8 @@ export default function Apply() {
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
   const [consent, setConsent] = useState(false);
-  // Summer-camp tag from the URL (?camp=summer-2026&plan=<id>)
-  const [camp, setCamp] = useState("");
   // Referral code from the URL (?ref=DM-2026-0001) — the referring student's ID.
   const [ref, setRef] = useState("");
-  // Part payment: pay the full discounted price, or a 50% deposit now.
-  const [payHalf, setPayHalf] = useState(false);
   // Bot protection (no CAPTCHA): a hidden honeypot field bots fill but humans
   // don't, plus a mount timestamp so the server can reject instant submissions.
   const [hp, setHp] = useState("");
@@ -56,21 +36,9 @@ export default function Apply() {
   const toggleSubject = (s: string) =>
     set("subjects", f.subjects.includes(s) ? f.subjects.filter((x: string) => x !== s) : [...f.subjects, s]);
 
-  // When a tier is chosen, lock in its naira price (full or 50% deposit) and use
-  // its name as the "subject" so the existing ≥1-subject validation passes.
-  const selectTier = (t: CampTier) =>
-    setF(p => ({ ...p, plan: t.id, payment_amount: payHalf ? depositNgn(t) : discountedNgn(t), subjects: tierModules(t) }));
-
-  // Switch between paying in full and paying the 50% deposit.
-  function setPayOption(half: boolean, t?: CampTier) {
-    setPayHalf(half);
-    if (t) set("payment_amount", half ? depositNgn(t) : discountedNgn(t));
-  }
-
   // On mount: restore an in-progress draft (so leaving to read a policy page and
-  // pressing Back returns to the same step with data intact). If there's no
-  // draft, read campaign params from the URL. We read window.location.search
-  // directly (instead of useSearchParams) to avoid the Next 14 CSR-bailout rule.
+  // pressing Back returns to the same step with data intact). Otherwise read the
+  // referral param from the URL.
   useEffect(() => {
     try {
       const raw = sessionStorage.getItem(DRAFT_KEY);
@@ -78,23 +46,15 @@ export default function Apply() {
         const d = JSON.parse(raw);
         if (d.f) setF(d.f);
         if (typeof d.step === "number") setStep(d.step);
-        if (typeof d.camp === "string") setCamp(d.camp);
         if (typeof d.ref === "string") setRef(d.ref);
-        setPayHalf(!!d.payHalf);
         setConsent(!!d.consent);
-        return; // restored — don't let URL params overwrite the chosen tier/amount
+        return;
       }
     } catch { /* ignore malformed draft */ }
 
     const params = new URLSearchParams(window.location.search);
-    // A referral link can accompany any enrolment (camp or regular).
     const r = (params.get("ref") || "").trim().slice(0, 40);
     if (r) setRef(r);
-    const c = params.get("camp") || "";
-    if (!c) return;
-    setCamp(c);
-    const tier = findTier(params.get("plan"));
-    if (tier) selectTier(tier);
   }, []);
 
   // Persist progress so a same-tab navigation (e.g. to a policy page) can be
@@ -102,43 +62,26 @@ export default function Apply() {
   useEffect(() => {
     if (done) return;
     try {
-      sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ f, step, camp, ref, payHalf, consent }));
+      sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ f, step, ref, consent }));
     } catch { /* storage unavailable — non-fatal */ }
-  }, [f, step, camp, ref, payHalf, consent, done]);
+  }, [f, step, ref, consent, done]);
 
-  const selectedTier = camp ? findTier(f.plan) : undefined;
+  const specialisedExam = !!(f.exam_target && f.exam_target.trim());
 
   function next() {
     setError("");
     if (step === 1 && !(f.first_name && f.last_name && f.email && f.phone))
       return setError("Please fill in all required fields.");
-    if (step === 2) {
-      if (camp && !f.plan) return setError("Please choose a camp package.");
-      if (!f.subjects.length) return setError("Select at least one subject.");
-      if (!(f.guardian_name && f.guardian_contact)) return setError("Please provide guardian details.");
-      // Free enrolment: skip the payment step and submit straight away.
-      if (isFreeApplication(f.subjects)) { submitFree(); return; }
-    }
     setStep(s => s + 1);
   }
 
-  async function submitFree() {
-    // Free-enrolment path: no payment, consent auto-accepted at submit.
-    await doSubmit(true);
-  }
-
   async function submit() {
+    setError("");
+    if (!f.level) return setError("Please choose the learner's current class / year.");
+    if (!f.subjects.length) return setError("Select at least one subject.");
+    if (!(f.guardian_name && f.guardian_contact)) return setError("Please provide guardian details.");
     if (!consent) return setError("Please confirm you have read and agree to the policies before submitting.");
-    setError("");
-    if (!(f.payment_ref && f.payment_method && f.payment_amount))
-      return setError("Please fill in all payment details.");
-    await doSubmit(false);
-  }
-
-  async function doSubmit(free: boolean) {
-    setError("");
     setBusy(true);
-    // Submit through a rate-limited, server-validated route (not a direct insert).
     const res = await fetch("/api/applications/submit", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -149,14 +92,11 @@ export default function Apply() {
         guardian_name: f.guardian_name, guardian_contact: f.guardian_contact,
         guardian_email: f.guardian_email || "",
         subjects: f.subjects, notes: f.notes || "",
-        camp: camp || "", plan: f.plan || "",
+        // Intake profile — the tutors use this to plan and to level the aptitude test.
+        strengths: f.strengths || "", challenges: f.challenges || "", weak_points: f.weak_points || "",
+        exam_date: f.exam_date || null, target_grade: f.target_grade || "",
         ref: ref || "",
-        website: hp, loadedAt,          // honeypot + time-trap (bot protection)
-        pay_plan: selectedTier && payHalf ? "part" : "full",
-        payment_ref: free ? "FREE-ENROLMENT" : f.payment_ref,
-        payment_method: free ? "Free promotion" : f.payment_method,
-        payment_amount: free ? 0 : Number(f.payment_amount),
-        payment_date: f.payment_date || null,
+        website: hp, loadedAt, // honeypot + time-trap (bot protection)
       }),
     });
     const json = await res.json().catch(() => ({}));
@@ -169,16 +109,17 @@ export default function Apply() {
   if (done) return (
     <Shell>
       <div className="card mx-auto max-w-lg p-9 text-center">
-        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-amber-700"><Icon name="clock" className="h-8 w-8" /></div>
-        <h1 className="font-display text-2xl font-semibold">Application submitted</h1>
+        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-700"><Icon name="checkCircle" className="h-8 w-8" /></div>
+        <h1 className="font-display text-2xl font-semibold">Registration submitted</h1>
         <p className="mt-3 text-sm leading-relaxed text-ink/55">
-          {isFreeApplication(f.subjects)
-            ? <>Your registration is confirmed. Your Student ID and password will arrive at <strong>{f.email}</strong> shortly after we review it.</>
-            : <>We verify payments within <strong>24 hours</strong>. Your Student ID and password will arrive at <strong>{f.email}</strong>.</>}
+          Thank you! We&apos;ll review the registration and create the learner&apos;s account —
+          the Student ID and password will arrive at <strong>{f.email}</strong> shortly.
         </p>
         <p className="mt-3 rounded-xl bg-gold-pale px-4 py-3 text-sm font-semibold text-ink/70">
-          📞 Our team will also contact you shortly to confirm your place.
+          🎯 An aptitude test will be waiting in the portal so we can pitch teaching at the right level.
+          Tuition is billed monthly from attendance — see <Link href="/pricing" className="underline">pricing</Link>.
         </p>
+        <p className="mt-3 text-sm text-ink/55">📞 Our team will also contact you shortly to confirm the place.</p>
         <Link href="/" className="btn-ink mt-7 w-full">Return to D-Maths</Link>
       </div>
     </Shell>
@@ -197,14 +138,14 @@ export default function Apply() {
         {ref && (
           <p className="mt-3 flex items-center gap-2 rounded-2xl bg-gold-pale px-4 py-3 text-sm font-semibold text-ink/75">
             <Icon name="gift" className="h-4 w-4 shrink-0 text-gold-deep" />
-            You&apos;re joining through a friend&apos;s invite — you&apos;ll both earn bonus reward points once your enrolment is approved.
+            You&apos;re joining through a friend&apos;s invite — you&apos;ll both earn bonus reward points once the enrolment is approved.
           </p>
         )}
       </div>
 
       {/* Step bar */}
       <ol className="mx-auto mb-8 flex max-w-2xl items-center gap-3">
-        {["Personal info","Academic details","Payment"].map((t, i) => {
+        {["Personal info", "Academic details & needs"].map((t, i) => {
           const n = i + 1, active = step === n, doneStep = step > n;
           return (
             <li key={t} className="flex flex-1 items-center gap-2.5">
@@ -213,15 +154,14 @@ export default function Apply() {
                 {doneStep ? "✓" : n}
               </span>
               <span className={`hidden text-[13px] font-bold sm:block ${active ? "text-ink" : "text-ink/40"}`}>{t}</span>
-              {i < 2 && <span className={`h-0.5 flex-1 ${doneStep ? "bg-emerald-400" : "bg-line"}`} />}
+              {i < 1 && <span className={`h-0.5 flex-1 ${doneStep ? "bg-emerald-400" : "bg-line"}`} />}
             </li>
           );
         })}
       </ol>
 
       <div className="card mx-auto max-w-2xl p-7">
-        {/* Honeypot — off-screen, not for humans. Bots that fill every field
-            trip it and the submission is silently dropped server-side. */}
+        {/* Honeypot — off-screen, not for humans. */}
         <span aria-hidden style={{ position: "absolute", left: "-9999px", top: 0, width: 1, height: 1, overflow: "hidden", opacity: 0 }}>
           <label htmlFor="company_url">Company website (leave blank)</label>
           <input id="company_url" name="company_url" type="text" tabIndex={-1} autoComplete="off"
@@ -250,7 +190,7 @@ export default function Apply() {
 
         {step === 2 && (
           <div className="space-y-4">
-            <h2 className="font-display text-xl font-semibold">Academic details</h2>
+            <h2 className="font-display text-xl font-semibold">Academic details &amp; needs</h2>
             <Row>
               <div>
                 <label htmlFor="page-country" className="flabel">Where do you study? <Req /></label>
@@ -267,242 +207,89 @@ export default function Apply() {
                 </select>
               </div>
             </Row>
-            <Row>
-              <div>
-                <label htmlFor="page-exam-target" className="flabel">Preparing for an exam?</label>
-                <select id="page-exam-target" className="field" value={f.exam_target || ""} onChange={e => set("exam_target", e.target.value)}>
-                  <option value="">Not sure yet / general study</option>
-                  {examsFor(f.country || DEFAULT_REGION).map(x => <option key={x}>{x}</option>)}
-                </select>
-              </div>
-              <Field label="Guardian name" required value={f.guardian_name} onChange={v => set("guardian_name", v)} />
-            </Row>
-            <Row>
-              <Field label="Guardian contact" type="tel" required value={f.guardian_contact} onChange={v => set("guardian_contact", v)} />
-              <Field label="Guardian email" type="email" placeholder="parent@example.com" value={f.guardian_email} onChange={v => set("guardian_email", v)} />
-            </Row>
-            {camp ? (
-              <div>
-                <p className="flabel">
-                  Summer camp package <Req />
-                </p>
 
-                {/* In-person (Asaba) — flat naira */}
-                <p className="mb-2 mt-1 flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-gold-deep">
-                  <Icon name="school" className="h-4 w-4" /> In-person · {PHYSICAL_CAMP.address} · {PHYSICAL_CAMP.frequency}
-                </p>
-                <div className="grid gap-2.5 sm:grid-cols-3">
-                  {PHYSICAL_TIERS.map(t => {
-                    const on = f.plan === t.id;
-                    return (
-                      <button type="button" key={t.id} onClick={() => selectTier(t)}
-                        className={`rounded-2xl border p-3.5 text-left transition
-                          ${on ? "border-gold bg-gold-pale ring-1 ring-gold/40" : "border-line bg-white hover:border-gold/40"}`}>
-                        <span className="text-[13px] font-bold text-ink">{t.name}</span>
-                        <p className="mt-1 font-display text-lg font-extrabold text-gold-deep">{fmtNgn(t.ngn)}</p>
-                        <p className="text-[11px] font-semibold text-ink/40">in person · 4×/week</p>
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Online packages */}
-                <p className="mb-2 mt-5 flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-ink/45">
-                  <Icon name="monitor" className="h-4 w-4" /> Online
-                  {DISCOUNT_PCT > 0 && <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-extrabold text-emerald-700">{DISCOUNT_PCT}% off applied</span>}
-                </p>
-                <div className="grid gap-2.5 sm:grid-cols-2">
-                  {SUMMER_CAMP_TIERS.map(t => {
-                    const on = f.plan === t.id;
-                    return (
-                      <button type="button" key={t.id} onClick={() => selectTier(t)}
-                        className={`rounded-2xl border p-3.5 text-left transition
-                          ${on ? "border-gold bg-gold-pale ring-1 ring-gold/40" : "border-line bg-white hover:border-gold/40"}`}>
-                        <div className="flex items-baseline justify-between gap-2">
-                          <span className="text-[13px] font-bold text-ink">{t.name}</span>
-                          <span className="flex items-baseline gap-1.5">
-                            <span className="font-display text-sm font-extrabold text-gold-deep">{fmtUsd(discountedUsd(t))}</span>
-                            {DISCOUNT_PCT > 0 && <span className="text-[11px] font-semibold text-ink/30 line-through">{fmtUsd(t.usd)}</span>}
-                          </span>
-                        </div>
-                        <p className="mt-1 text-[12px] leading-snug text-ink/55">{t.blurb}</p>
-                        <p className="mt-1.5 text-[11px] font-semibold text-ink/40">
-                          {fmtNgn(discountedNgn(t))}
-                          {DISCOUNT_PCT > 0 && <span className="ml-1 text-ink/25 line-through">{fmtNgn(t.ngn)}</span>}
-                          {" "}· whole summer
-                        </p>
-                      </button>
-                    );
-                  })}
-                </div>
-                {selectedTier && (
-                  <div className="mt-4 rounded-2xl border border-line bg-chalk/40 p-4">
-                    <p className="text-[11px] font-bold uppercase tracking-wide text-ink/40">Included in your plan</p>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {tierModules(selectedTier).map(m => (
-                        <span key={m} className="inline-flex items-center gap-1.5 rounded-full bg-gold-pale px-3 py-1 text-[12px] font-semibold text-gold-deep">
-                          <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12" /></svg>
-                          {m}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div>
-                <p className="flabel">Subjects needed <Req /></p>
-                <div className="flex flex-wrap gap-2">
-                  {SUBJECTS.map(s => {
-                    const on = f.subjects.includes(s);
-                    return (
-                      <button type="button" key={s} onClick={() => toggleSubject(s)}
-                        className={`rounded-full border px-3.5 py-1.5 text-[13px] font-semibold transition
-                          ${on ? "border-gold bg-gold-pale text-gold-deep" : "border-line bg-white text-ink/70 hover:border-gold/40"}`}>
-                        {s}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
             <div>
-              <label htmlFor="page-notes-goals" className="flabel">Notes / goals</label>
-              <textarea id="page-notes-goals" className="field min-h-24" placeholder="e.g. Preparing for BECE, weak in integration…"
+              <p className="flabel">Classes / subjects needed <Req /></p>
+              <div className="flex flex-wrap gap-2">
+                {SUBJECTS.map(s => {
+                  const on = f.subjects.includes(s);
+                  return (
+                    <button type="button" key={s} onClick={() => toggleSubject(s)}
+                      className={`rounded-full border px-3.5 py-1.5 text-[13px] font-semibold transition
+                        ${on ? "border-gold bg-gold-pale text-gold-deep" : "border-line bg-white text-ink/70 hover:border-gold/40"}`}>
+                      {s}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="mt-2 text-[12px] text-ink/45">
+                Tuition is charged per hour and billed monthly from attendance — see our <Link href="/pricing" className="font-semibold text-gold-deep underline">pricing</Link>.
+              </p>
+            </div>
+
+            {/* Intake profile — helps tutors plan and levels the aptitude test. */}
+            <div className="rounded-2xl border border-line bg-chalk/40 p-4">
+              <p className="flex items-center gap-2 text-sm font-bold text-ink">
+                <Icon name="lightbulb" className="h-4 w-4 text-gold-deep" /> Tell us about the learner
+              </p>
+              <p className="mt-0.5 text-[12px] text-ink/50">Based on the classes you picked — this shapes how we teach and levels the aptitude test.</p>
+              <div className="mt-3 space-y-3">
+                <TextArea label="Strengths observed" placeholder="e.g. Strong at arithmetic and quick to grasp new ideas"
+                  value={f.strengths} onChange={v => set("strengths", v)} />
+                <TextArea label="Challenges faced" placeholder="e.g. Struggles with word problems and staying focused in long sessions"
+                  value={f.challenges} onChange={v => set("challenges", v)} />
+                <TextArea label="Weak points observed" placeholder="e.g. Fractions, algebra and exam timing"
+                  value={f.weak_points} onChange={v => set("weak_points", v)} />
+              </div>
+            </div>
+
+            {/* Specialised exam preparation */}
+            <div>
+              <label htmlFor="page-exam-target" className="flabel">Preparing for a specialised exam?</label>
+              <select id="page-exam-target" className="field" value={f.exam_target || ""} onChange={e => set("exam_target", e.target.value)}>
+                <option value="">Not sure yet / general study</option>
+                {examsFor(f.country || DEFAULT_REGION).map(x => <option key={x}>{x}</option>)}
+              </select>
+            </div>
+            {specialisedExam && (
+              <Row>
+                <Field label="Target exam date" type="date" value={f.exam_date} onChange={v => set("exam_date", v)} />
+                <Field label="Target grade / score" placeholder="e.g. A1, or 300+ in JAMB" value={f.target_grade} onChange={v => set("target_grade", v)} />
+              </Row>
+            )}
+
+            <Row>
+              <Field label="Guardian name" required value={f.guardian_name} onChange={v => set("guardian_name", v)} />
+              <Field label="Guardian contact" type="tel" required value={f.guardian_contact} onChange={v => set("guardian_contact", v)} />
+            </Row>
+            <Field label="Guardian email" type="email" placeholder="parent@example.com" value={f.guardian_email} onChange={v => set("guardian_email", v)} />
+
+            <div>
+              <label htmlFor="page-notes-goals" className="flabel">Anything else / goals</label>
+              <textarea id="page-notes-goals" className="field min-h-20" placeholder="e.g. Preferred class times, other goals…"
                 value={f.notes || ""} onChange={e => set("notes", e.target.value)} />
             </div>
+
+            <label className="mt-2 flex items-start gap-3 rounded-xl border border-line bg-chalk/50 p-4 text-sm text-ink/70">
+              <input type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)}
+                className="mt-0.5 h-4 w-4 accent-gold" />
+              <span>
+                I am the student or their parent/guardian, the information provided is accurate, and I
+                have read and agree to the{" "}
+                <a href="/privacy" className="font-semibold text-gold-deep underline">Privacy Policy</a>,{" "}
+                <a href="/terms" className="font-semibold text-gold-deep underline">Terms of Service</a>, and{" "}
+                <a href="/refunds" className="font-semibold text-gold-deep underline">Payment &amp; Refund Policy</a>.
+                I consent to the processing of the student&apos;s information for the purpose of providing tuition.
+              </span>
+            </label>
           </div>
-        )}
-
-        {step === 3 && (
-          <div className="space-y-4">
-            <h2 className="font-display text-xl font-semibold">Payment information</h2>
-
-            {selectedTier && (
-              <div className="flex items-center justify-between gap-3 rounded-xl border border-gold bg-gold-pale px-4 py-3">
-                <div>
-                  <p className="text-[11px] font-bold uppercase tracking-wide text-gold-deep">
-                    {selectedTier.physical ? "In-person · Asaba" : `Summer camp package${DISCOUNT_PCT > 0 ? ` · ${DISCOUNT_PCT}% off` : ""}`}
-                  </p>
-                  <p className="text-sm font-bold text-ink">{selectedTier.name}</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-display text-xl font-extrabold text-ink">
-                    {fmtNgn(discountedNgn(selectedTier))}
-                    {!selectedTier.physical && DISCOUNT_PCT > 0 && <span className="ml-1.5 text-sm font-semibold text-ink/35 line-through">{fmtNgn(selectedTier.ngn)}</span>}
-                  </p>
-                  <p className="text-[11px] font-semibold text-ink/45">
-                    {selectedTier.physical ? `${PHYSICAL_CAMP.frequency} · whole camp` : `${fmtUsd(discountedUsd(selectedTier))} · whole summer`}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Part payment option (camp only) */}
-            {selectedTier && (
-              <div>
-                <p className="flabel">Payment option</p>
-                <div className="grid gap-2.5 sm:grid-cols-2">
-                  <button type="button" onClick={() => setPayOption(false, selectedTier)}
-                    className={`rounded-2xl border p-3.5 text-left transition ${!payHalf ? "border-gold bg-gold-pale ring-1 ring-gold/40" : "border-line bg-white hover:border-gold/40"}`}>
-                    <p className="text-[13px] font-bold text-ink">Pay in full</p>
-                    <p className="mt-0.5 font-display text-lg font-extrabold text-gold-deep">{fmtNgn(discountedNgn(selectedTier))}</p>
-                    <p className="text-[11px] text-ink/45">One payment · done</p>
-                  </button>
-                  <button type="button" onClick={() => setPayOption(true, selectedTier)}
-                    className={`rounded-2xl border p-3.5 text-left transition ${payHalf ? "border-gold bg-gold-pale ring-1 ring-gold/40" : "border-line bg-white hover:border-gold/40"}`}>
-                    <p className="text-[13px] font-bold text-ink">Pay half now</p>
-                    <p className="mt-0.5 font-display text-lg font-extrabold text-gold-deep">{fmtNgn(depositNgn(selectedTier))}</p>
-                    <p className="text-[11px] text-ink/45">Balance {fmtNgn(balanceNgn(selectedTier))} later</p>
-                  </button>
-                </div>
-                {payHalf && (
-                  <p className="mt-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] font-semibold text-amber-900">
-                    You'll pay <strong>{fmtNgn(depositNgn(selectedTier))}</strong> now to secure your place. The remaining <strong>{fmtNgn(balanceNgn(selectedTier))}</strong> can be paid later — our team will arrange it with you.
-                  </p>
-                )}
-              </div>
-            )}
-
-            <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900">
-              Send payment to <strong>Opay: 7025674894</strong> or <strong>Access Bank: 1534530227</strong>.
-              Use your full name as the reference.
-            </p>
-
-            {f.payment_verified && (
-              <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-900">
-                ✓ Payment verified online — reference {f.payment_ref}. You can submit now.
-              </p>
-            )}
-
-            {!f.payment_verified && (
-              <div className="rounded-xl border border-line bg-white p-4">
-                <p className="mb-3 text-sm font-semibold text-ink/70">
-                  Option 1 — Pay online now (instant, optional):
-                </p>
-                <PaystackButton
-                  email={f.email}
-                  amount={Number(f.payment_amount) || 0}
-                  plan={f.plan || ""}
-                  camp={camp || ""}
-                  onVerified={(ref, amt) => {
-                    set("payment_ref", ref);
-                    set("payment_amount", amt);
-                    set("payment_method", "Paystack (verified)");
-                    set("payment_verified", true);
-                  }}
-                />
-                <p className="mt-3 text-center text-xs text-ink/40">— or pay by transfer and fill the details below —</p>
-              </div>
-            )}
-            <Row>
-              <Field label="Payment reference" required placeholder="e.g. PAY-8821" value={f.payment_ref} onChange={v => set("payment_ref", v)} />
-              <div>
-                <label htmlFor="page-payment-method" className="flabel">Payment method <Req /></label>
-                <select id="page-payment-method" className="field" value={f.payment_method || ""} onChange={e => set("payment_method", e.target.value)}>
-                  <option value="" disabled>Select method</option>
-                  {METHODS.map(m => <option key={m}>{m}</option>)}
-                </select>
-              </div>
-            </Row>
-            <Row>
-              {selectedTier ? (
-                <div>
-                  <label htmlFor="page-amount-due-now-payhalf-h" className="flabel">Amount due now (₦){payHalf ? " · half" : DISCOUNT_PCT > 0 ? ` · ${DISCOUNT_PCT}% off` : ""}</label>
-                  <input id="page-amount-due-now-payhalf-h" className="field bg-chalk/60 font-bold" value={fmtNgn(payHalf ? depositNgn(selectedTier) : discountedNgn(selectedTier))} readOnly />
-                </div>
-              ) : (
-                <Field label="Amount paid (₦)" type="number" required value={f.payment_amount} onChange={v => set("payment_amount", v)} />
-              )}
-              <Field label="Payment date" type="date" value={f.payment_date} onChange={v => set("payment_date", v)} />
-            </Row>
-          </div>
-        )}
-
-        {step === 3 && (
-          <label className="mt-6 flex items-start gap-3 rounded-xl border border-line bg-chalk/50 p-4 text-sm text-ink/70">
-            <input type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)}
-              className="mt-0.5 h-4 w-4 accent-gold" />
-            <span>
-              I am the student or their parent/guardian, the information provided is accurate, and I
-              have read and agree to the{" "}
-              <a href="/privacy" className="font-semibold text-gold-deep underline">Privacy Policy</a>,{" "}
-              <a href="/terms" className="font-semibold text-gold-deep underline">Terms of Service</a>, and{" "}
-              <a href="/refunds" className="font-semibold text-gold-deep underline">Payment &amp; Refund Policy</a>.
-              I consent to the processing of the student's information for the purpose of providing tuition.
-            </span>
-          </label>
         )}
 
         <div className="mt-7 flex items-center justify-between">
           {step > 1 ? <button className="btn-ghost" onClick={() => setStep(s => s - 1)}>← Previous</button> : <span />}
-          {step < 3
-            ? <button className="btn-gold" onClick={next} disabled={busy}>
-                {step === 2 && isFreeApplication(f.subjects)
-                  ? (busy ? "Submitting…" : "Submit registration →")
-                  : "Next step →"}
-              </button>
-            : <button className="btn-gold" onClick={submit} disabled={busy}>{busy ? "Submitting…" : "Submit application"}</button>}
+          {step < 2
+            ? <button className="btn-gold" onClick={next} disabled={busy}>Next step →</button>
+            : <button className="btn-gold" onClick={submit} disabled={busy}>{busy ? "Submitting…" : "Submit registration"}</button>}
         </div>
       </div>
     </Shell>
@@ -520,7 +307,6 @@ function Shell({ children }: { children: React.ReactNode }) {
           <Link href="/"><Logo light /></Link>
           <Link href="/login" className="text-sm font-semibold text-white/80 hover:text-white">Already enrolled? Sign in</Link>
         </div>
-        {/* curved base into the light content area */}
         <svg className="absolute inset-x-0 bottom-[-1px] h-10 w-full" viewBox="0 0 500 40" preserveAspectRatio="none" aria-hidden="true">
           <path d="M0,40 L0,14 C160,40 340,40 500,14 L500,40 Z" fill="#EEF2FE" />
         </svg>
@@ -540,6 +326,15 @@ function Field({ label, required, type = "text", placeholder, value, onChange }:
       <label htmlFor="page-field" className="flabel">{label} {required && <Req />}</label>
       <input id="page-field" className="field" type={type} placeholder={placeholder} value={value || ""}
         onChange={e => onChange(e.target.value)} required={required} />
+    </div>
+  );
+}
+function TextArea({ label, placeholder, value, onChange }:
+  { label: string; placeholder?: string; value: any; onChange: (v: string) => void }) {
+  return (
+    <div>
+      <label className="flabel">{label}</label>
+      <textarea className="field min-h-16" placeholder={placeholder} value={value || ""} onChange={e => onChange(e.target.value)} />
     </div>
   );
 }

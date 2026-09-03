@@ -197,6 +197,25 @@ export default function ApplicationsClient({ initial }: { initial: App[] }) {
           </dl>
           {a.notes && <p className="mt-3 rounded-xl bg-chalk px-4 py-2.5 text-[13px] text-ink/60">"{a.notes}"</p>}
 
+          {(a.strengths || a.challenges || a.weak_points || a.exam_target || a.exam_date || a.target_grade) && (
+            <div className="mt-3 space-y-2 rounded-xl border border-line bg-white px-4 py-3">
+              <p className="text-[11px] font-bold uppercase tracking-wide text-gold-deep">Intake profile</p>
+              <div className="grid gap-2 sm:grid-cols-3">
+                {a.strengths && <IntakeNote k="Strengths" v={a.strengths} />}
+                {a.challenges && <IntakeNote k="Challenges" v={a.challenges} />}
+                {a.weak_points && <IntakeNote k="Weak points" v={a.weak_points} />}
+              </div>
+              {(a.exam_target || a.exam_date || a.target_grade) && (
+                <p className="text-[12px] text-ink/60">
+                  <span className="font-bold text-ink/70">Specialised exam:</span>{" "}
+                  {[a.exam_target, a.target_grade && `target ${a.target_grade}`,
+                    a.exam_date && `by ${new Date(a.exam_date).toLocaleDateString("en-NG", { dateStyle: "medium" })}`]
+                    .filter(Boolean).join(" · ")}
+                </p>
+              )}
+            </div>
+          )}
+
           {balanceFor(a) > 0 && (
             <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5">
               <p className="text-[13px] font-bold text-red-900">
@@ -255,6 +274,15 @@ function Info({ k, v }: { k: string; v: string }) {
     <div>
       <dt className="text-[11px] font-bold uppercase tracking-wide text-ink/35">{k}</dt>
       <dd className="font-semibold text-ink/75">{v || "—"}</dd>
+    </div>
+  );
+}
+
+function IntakeNote({ k, v }: { k: string; v: string }) {
+  return (
+    <div>
+      <p className="text-[11px] font-bold uppercase tracking-wide text-ink/35">{k}</p>
+      <p className="whitespace-pre-wrap text-[13px] text-ink/70">{v}</p>
     </div>
   );
 }
