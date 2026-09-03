@@ -48,7 +48,7 @@ export const CRON_JOBS: CronJob[] = [
   },
   {
     key: "monthly-billing", label: "Monthly attendance billing", path: "/api/cron/monthly-billing",
-    everyMinutes: 1440,
+    everyMinutes: 1440, via: "vercel",
     what: "3 days before month-end, bills each learner for the hours they attended and notifies their parent.",
   },
   {

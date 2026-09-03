@@ -118,17 +118,17 @@ On cron-job.org create/repair these. Every URL ends with `?key=<CRON_SECRET>`:
 | Class reminders | every 15 min | `<HOST>/api/reminders/classes?key=…` |
 | Scheduled broadcasts | every 5–15 min | `<HOST>/api/cron/broadcasts?key=…` |
 | Engagement nudges | **daily** (evening WAT) | `<HOST>/api/reminders/nudges?key=…` |
-| Monthly attendance billing | daily | `<HOST>/api/cron/monthly-billing?key=…` |
 | Subscription reminders | daily | `<HOST>/api/reminders/subscriptions?key=…` |
 | Assignment reminders | daily | `<HOST>/api/reminders/assignments?key=…` |
 | Guardian digest *(optional)* | weekly | `<HOST>/api/reminders/guardian-digest?key=…` |
 | Weekly digest *(optional)* | weekly | `<HOST>/api/reminders/weekly-digest?key=…` |
 
-> **🚫 Do NOT add the database keep-alive here.** `/api/cron/keepalive` is already scheduled
-> by Vercel itself (declared in `vercel.json`, daily at 06:00 UTC) and authenticates by
-> **header**, not by `?key=`. A cron-job.org job pointed at it returns **401** forever, on a
-> job that was working fine. It starts running on its own once Step 3 promotes a build to
-> Production.
+> **🚫 Do NOT add the database keep-alive OR the monthly attendance billing here.** Both
+> `/api/cron/keepalive` (daily 06:00 UTC) and `/api/cron/monthly-billing` (daily 06:30 UTC) are
+> already scheduled by Vercel itself (declared in `vercel.json`) and authenticate by **header**,
+> not by `?key=`. A cron-job.org job pointed at either returns **401** forever, on a job that was
+> working fine. They start running on their own once Step 3 promotes a build to Production.
+> (The billing job only acts in the last 3 days of each month; add `?force=1` to test it early.)
 
 > **⚠️ Check every job's schedule.** cron-job.org defaults to **every minute**. That's fine for
 > nothing here — set **nudges, subscriptions, assignments and the guardian digest to once daily
