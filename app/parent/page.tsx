@@ -1,6 +1,7 @@
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import GuardianClient from "@/components/guardian/GuardianClient";
+import AptitudeParentCard from "@/components/guardian/AptitudeParentCard";
 import WeeklySummary from "@/components/guardian/WeeklySummary";
 import RateCard from "@/components/portal/RateCard";
 import DeleteAccountCard from "@/components/portal/DeleteAccountCard";
@@ -94,6 +95,15 @@ export default async function ParentPage() {
         admin.from("attendance_records").select("present, session_date").eq("student_id", student_id).gte("session_date", weekAgoDate),
       ]);
 
+      // Latest aptitude test for this child (null before the migration is run).
+      let aptitude: any = null;
+      try {
+        const { data } = await admin.from("aptitude_tests")
+          .select("id, status, scheduled_at, score, total, report")
+          .eq("student_id", student_id).order("created_at", { ascending: false }).limit(1).maybeSingle();
+        aptitude = data ?? null;
+      } catch { aptitude = null; }
+
       const typeMap = new Map((behaviorTypes ?? []).map((t: any) => [t.id, t]));
       const logs = (behaviorLogs ?? []).map((l: any) => ({
         ...l,
@@ -118,19 +128,21 @@ export default async function ParentPage() {
         pendingCount: pendingSubs?.length ?? 0,
         reportCards: reportCards ?? [],
         weekSummary,
+        aptitude,
       };
     }),
   );
 
   return (
     <div className="space-y-10">
-      {students.map(({ id, student, logs, gradedSubs, pendingCount, reportCards, weekSummary }, i) =>
+      {students.map(({ id, student, logs, gradedSubs, pendingCount, reportCards, weekSummary, aptitude }, i) =>
         student ? (
           <div key={i} className="space-y-4">
             <WeeklySummary
               name={`${(student as any).first_name ?? ""}`.trim() || "Your child"}
               summary={weekSummary}
             />
+            <AptitudeParentCard test={aptitude} childName={`${(student as any).first_name ?? ""}`.trim() || "your child"} />
             <a href={`/report/${id}`}
               className="card flex items-center gap-3 border-l-4 border-l-gold bg-gold-pale/40 p-4 transition hover:bg-gold-pale/70">
               <Icon name="reports" className="h-5 w-5 flex-shrink-0 text-gold-deep" />
