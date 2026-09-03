@@ -10,8 +10,13 @@ import { learnerAvatarFor } from "@/lib/avatars";
 import { titleLabel } from "@/lib/cosmetics";
 import { redirect } from "next/navigation";
 
+// Portal navigation is focused on learning — classes, attendance, reports and
+// tracks. Everything playful (games, challenges, leaderboards, rewards, avatar
+// studio, labs) lives together in the Game Center (/portal/games), sourced from
+// lib/gameCenter.ts.
 const NAV: NavItem[] = [
   { href: "/portal", label: "Dashboard", icon: "dashboard" },
+  { href: "/portal/games", label: "Game Center", icon: "trophy" },
   { href: "/portal/assistant", label: "D-Maths A.I", icon: "compass" },
   { href: "/portal/solve", label: "Question solver", icon: "sigma" },
   { href: "/portal/check", label: "Check my work", icon: "checkCircle" },
@@ -21,31 +26,18 @@ const NAV: NavItem[] = [
   { href: "/portal/messages", label: "Messages", icon: "messages" },
   { href: "/portal/materials", label: "Materials", icon: "materials" },
   { href: "/portal/curriculum", label: "Curriculum", icon: "curriculum" },
-  { href: "/portal/code", label: "Code playground", icon: "code" },
-  { href: "/portal/math-lab", label: "Math Lab", icon: "sigma" },
-  { href: "/portal/focus", label: "Focus mode", icon: "zap" },
-  { href: "/portal/sprint", label: "Math Sprint", icon: "trophy" },
-  { href: "/portal/boss", label: "Boss Battle", icon: "trophy" },
-  { href: "/portal/mathle", label: "Mathle", icon: "sigma" },
-  { href: "/portal/duel", label: "Quiz Duel", icon: "zap" },
   { href: "/portal/practice", label: "Practice", icon: "target" },
   { href: "/portal/mock-exam", label: "Mock exam", icon: "graduationCap" },
-  { href: "/portal/style", label: "Avatar Studio", icon: "sparkles" },
   { href: "/portal/flashcards", label: "Revision cards", icon: "book" },
   { href: "/portal/progress", label: "My progress", icon: "progress" },
   { href: "/portal/report", label: "My report", icon: "reports" },
-  { href: "/portal/skills", label: "Knowledge map", icon: "sigma" },
   { href: "/portal/calendar", label: "Calendar", icon: "calendar" },
   { href: "/portal/notices", label: "Notices", icon: "notices" },
   { href: "/portal/notifications", label: "Notifications", icon: "bell" },
   { href: "/portal/behavior", label: "My behaviour", icon: "checkCircle" },
-  { href: "/portal/badges", label: "Badges", icon: "trophy" },
-  { href: "/portal/shop", label: "Rewards shop", icon: "payments" },
   { href: "/portal/certificates", label: "Certificates", icon: "graduationCap" },
   { href: "/portal/report-cards", label: "Report cards", icon: "reports" },
   { href: "/portal/payments", label: "My payments", icon: "payments" },
-  { href: "/portal/leagues", label: "Leagues", icon: "trophy" },
-  { href: "/portal/leaderboard", label: "Leaderboard", icon: "students" },
   { href: "/portal/attendance", label: "Attendance", icon: "calendar" },
   { href: "/portal/profile", label: "Profile", icon: "profile" },
   { href: "/portal/help", label: "Help & support", icon: "helpCircle" },
@@ -55,7 +47,7 @@ const NAV: NavItem[] = [
 const TABS = [
   { href: "/portal", label: "Home", icon: "home" as const },
   { href: "/portal/classes", label: "Learn", icon: "book" as const },
-  { href: "/portal/progress", label: "Progress", icon: "progress" as const },
+  { href: "/portal/games", label: "Games", icon: "trophy" as const },
   { href: "/portal/messages", label: "Messages", icon: "messages" as const },
   { href: "/portal/profile", label: "Profile", icon: "profile" as const },
 ];
