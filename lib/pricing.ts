@@ -64,6 +64,17 @@ export const PORTAL_BENEFITS: string[] = [
 export const findTier = (id: string | null | undefined): PricingTier | undefined =>
   id ? PRICING_TIERS.find((t) => t.id === id) : undefined;
 
+export const isTierId = (id: string | null | undefined): boolean => !!findTier(id);
+
+// Sensible default rate tier for a class from its subject: anything that
+// includes coding (Python, Web dev, A.I) bills at the coding rate; everything
+// else defaults to core subjects. KS2 prep is always chosen explicitly.
+export function defaultTierForSubject(subject: string | null | undefined): string {
+  const s = String(subject ?? "").toLowerCase();
+  if (/(pyth|web|coding|code|javascript|a\.?i|automation|program)/.test(s)) return "coding";
+  return "standard";
+}
+
 // The hourly rate for a tier id, falling back to the core-subjects rate for an
 // unknown/unset tier so billing never multiplies by zero by accident.
 export const ratePerHour = (tierId: string | null | undefined): number =>

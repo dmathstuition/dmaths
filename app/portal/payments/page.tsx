@@ -5,7 +5,9 @@ import PaymentsSummary from "@/components/PaymentsSummary";
 import PayBalanceButton from "@/components/PayBalanceButton";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
-import { owingSummary, fmtNaira } from "@/lib/payments";
+import { owingSummary, fmtNaira, monthLabel } from "@/lib/payments";
+import { loadMonthlyBill } from "@/lib/attendanceBillQuery";
+import { findTier } from "@/lib/pricing";
 import { fmtWATDate } from "@/lib/time";
 
 export const dynamic = "force-dynamic";
@@ -43,6 +45,10 @@ export default async function PortalPaymentsPage() {
     : { data: [] as any[] };
   const receiptFor = new Map((receipts ?? []).map((r: any) => [r.payment_reference, r]));
 
+  // Live attendance-based tally for the current month — auto-calculated from the
+  // hours the learner has attended, so they can see the bill building up.
+  const bill = await loadMonthlyBill(admin, user.id);
+
   return (
     <div className="space-y-6">
       <div className="boardgrid relative flex items-center gap-4 overflow-hidden rounded-2xl bg-board p-7 text-white">
@@ -56,6 +62,36 @@ export default async function PortalPaymentsPage() {
           </p>
         </div>
       </div>
+
+      {/* Live per-hour tally for the current month */}
+      {bill.sessions > 0 && (
+        <div className="card neu-card p-5">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wide text-ink/40">Attendance this month · {monthLabel()}</p>
+              <p className="mt-1 font-display text-2xl font-semibold text-ink">
+                {bill.hours} hour{bill.hours === 1 ? "" : "s"} <span className="text-ink/40">·</span> {fmtNaira(bill.amount)}
+              </p>
+            </div>
+            <span className="rounded-full bg-gold-pale px-3 py-1 text-xs font-bold text-gold-deep">
+              {bill.sessions} session{bill.sessions === 1 ? "" : "s"}
+            </span>
+          </div>
+          {bill.lines.length > 0 && (
+            <ul className="mt-3 space-y-1.5 border-t border-line/60 pt-3">
+              {bill.lines.map((l) => (
+                <li key={l.tier} className="flex items-center justify-between text-[13px]">
+                  <span className="text-ink/60">{findTier(l.tier)?.name ?? l.tier} · {l.hours} hr × {fmtNaira(l.rate)}</span>
+                  <span className="font-semibold text-ink">{fmtNaira(l.amount)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+          <p className="mt-3 text-[12px] text-ink/45">
+            Charged per hour from your attendance. The invoice is sent to your parent about 3 days before the month ends.
+          </p>
+        </div>
+      )}
 
       <PaymentsSummary summary={summary} dueLabel={summary.dueDate ? fmtWATDate(summary.dueDate) : undefined}
         action={<PayBalanceButton email={me?.email ?? ""} amount={summary.owing} studentId={user.id} />} />

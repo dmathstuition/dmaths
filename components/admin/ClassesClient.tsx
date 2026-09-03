@@ -7,6 +7,7 @@ import ConfirmModal from "@/components/ConfirmModal";
 import ClashWarning, { type ClashItem } from "@/components/ClashWarning";
 import { useToast } from "@/components/Toast";
 import { fmtWAT, watToUtcISO, utcToWatParts } from "@/lib/time";
+import { PRICING_TIERS, defaultTierForSubject, fmtNgn } from "@/lib/pricing";
 
 type ConfirmState = {
   title: string; message: string; confirmLabel?: string; danger?: boolean; onConfirm: () => void;
@@ -84,13 +85,16 @@ export default function ClassesClient({ initialClasses, initialStudents, initial
 
       const payload = { subject: f.subject, tutor: f.tutor, platform: f.platform, starts_at,
         duration_minutes: Number(f.duration_minutes) || 60, link: f.link || "",
+        rate_tier: f.rate_tier || defaultTierForSubject(f.subject), // hourly billing tier
         tutor_id: f.tutor_id || null, // link to a tutor account (optional; null = my own class)
         // Only reference the physical columns when actually in-person, so online
         // class creation still works before migration-physical-classes.sql is run.
         ...(f.mode === "physical" ? { mode: "physical", location: f.location || null } : {}) };
+      const stripTier = ({ rate_tier, ...rest }: any) => rest;
 
       if (editId) {
-        const { error } = await supabase.from("classes").update(payload).eq("id", editId);
+        let { error } = await supabase.from("classes").update(payload).eq("id", editId);
+        if (error && /rate_tier/i.test(error.message)) ({ error } = await supabase.from("classes").update(stripTier(payload)).eq("id", editId));
         if (error) { setFormError("Could not update class."); return; }
         setEditId(null);
       } else {
@@ -104,7 +108,8 @@ export default function ClassesClient({ initialClasses, initialStudents, initial
           starts_at: new Date(baseMs + i * 7 * 86_400_000).toISOString(),
           ...(seriesId ? { series_id: seriesId } : {}),
         }));
-        const { data: created, error } = await supabase.from("classes").insert(rows).select();
+        let { data: created, error } = await supabase.from("classes").insert(rows).select();
+        if (error && /rate_tier/i.test(error.message)) ({ data: created, error } = await supabase.from("classes").insert(rows.map(stripTier)).select());
         if (error || !created?.length) {
           setFormError(/mode|location/i.test(error?.message ?? "") ? "In-person classes need migration-physical-classes.sql — run it in Supabase first." : "Could not create class.");
           return;
@@ -129,6 +134,7 @@ export default function ClassesClient({ initialClasses, initialStudents, initial
       subject: c.subject, tutor: c.tutor, platform: c.platform,
       date, time,
       duration_minutes: c.duration_minutes, link: c.link || "", roster: [],
+      rate_tier: c.rate_tier || defaultTierForSubject(c.subject),
       tutor_id: c.tutor_id || undefined,
       mode: c.mode || "online", location: c.location || "",
     });
@@ -234,6 +240,9 @@ export default function ClassesClient({ initialClasses, initialStudents, initial
               </select>
             )}
             <input className="field" type="number" min={15} step={15} placeholder="Duration (minutes)" value={f.duration_minutes} onChange={e => setF({ ...f, duration_minutes: e.target.value })} />
+            <select className="field" value={f.rate_tier || defaultTierForSubject(f.subject)} onChange={e => setF({ ...f, rate_tier: e.target.value })} title="Hourly billing rate for this class">
+              {PRICING_TIERS.map(t => <option key={t.id} value={t.id}>{t.name} — {fmtNgn(t.ngnPerHour)}/hr</option>)}
+            </select>
             <select className="field" value={f.mode || "online"} onChange={e => setF({ ...f, mode: e.target.value })} title="Online or in-person?">
               <option value="online">Online</option>
               <option value="physical">In-person</option>

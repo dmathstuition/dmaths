@@ -118,6 +118,7 @@ On cron-job.org create/repair these. Every URL ends with `?key=<CRON_SECRET>`:
 | Class reminders | every 15 min | `<HOST>/api/reminders/classes?key=…` |
 | Scheduled broadcasts | every 5–15 min | `<HOST>/api/cron/broadcasts?key=…` |
 | Engagement nudges | **daily** (evening WAT) | `<HOST>/api/reminders/nudges?key=…` |
+| Monthly attendance billing | daily | `<HOST>/api/cron/monthly-billing?key=…` |
 | Subscription reminders | daily | `<HOST>/api/reminders/subscriptions?key=…` |
 | Assignment reminders | daily | `<HOST>/api/reminders/assignments?key=…` |
 | Guardian digest *(optional)* | weekly | `<HOST>/api/reminders/guardian-digest?key=…` |

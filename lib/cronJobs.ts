@@ -47,6 +47,11 @@ export const CRON_JOBS: CronJob[] = [
     what: "Nudges a learner whose streak is about to break, or who has gone quiet.",
   },
   {
+    key: "monthly-billing", label: "Monthly attendance billing", path: "/api/cron/monthly-billing",
+    everyMinutes: 1440,
+    what: "3 days before month-end, bills each learner for the hours they attended and notifies their parent.",
+  },
+  {
     key: "subscriptions", label: "Subscription reminders", path: "/api/reminders/subscriptions",
     everyMinutes: 1440,
     what: "Reminds parents that a subscription is about to expire.",

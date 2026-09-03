@@ -3,6 +3,7 @@ import crypto from "crypto";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { requireStaff, getRoster, staffCanAccessClass } from "@/lib/authRole";
 import { detectClashes } from "@/lib/clashLookup";
+import { isTierId, defaultTierForSubject } from "@/lib/pricing";
 
 // Staff create/update a class. Tutors may only schedule their OWN classes and
 // may only add learners already in their roster — the admin still decides who a
@@ -21,6 +22,9 @@ export async function POST(req: Request) {
   const platform = String(b?.platform ?? "Zoom").trim().slice(0, 40);
   const location = String(b?.location ?? "").trim().slice(0, 200);
   const link = String(b?.link ?? "").trim().slice(0, 500);
+  // Hourly billing tier for this class (standard / ks2 / coding). Falls back to
+  // a sensible default from the subject when the client doesn't send a valid one.
+  const rateTier = isTierId(b?.rateTier) ? String(b.rateTier) : defaultTierForSubject(subject);
   const studentIds: string[] = Array.isArray(b?.studentIds) ? b.studentIds.map(String) : [];
 
   if (!subject || !startsAt) {
@@ -49,10 +53,11 @@ export async function POST(req: Request) {
 
   const base = {
     subject, tutor: tutorName, platform: mode === "physical" ? "In-person" : platform,
-    duration_minutes: duration, link: mode === "physical" ? "" : link,
+    duration_minutes: duration, link: mode === "physical" ? "" : link, rate_tier: rateTier,
     ...(tutorId ? { tutor_id: tutorId } : {}),
     ...(mode === "physical" ? { mode, location } : { mode }),
   };
+  const stripTier = <T extends Record<string, any>>({ rate_tier, ...rest }: T) => rest;
 
   const explain = (m: string) =>
     /tutor_id|mode|location/i.test(m) ? "This needs the tutor/physical-class migrations — run them in Supabase." : m;
@@ -86,7 +91,10 @@ export async function POST(req: Request) {
     if (!(await staffCanAccessClass(staff, classId))) {
       return NextResponse.json({ error: "That class isn't yours." }, { status: 403 });
     }
-    const { error } = await admin.from("classes").update({ ...base, starts_at: start.toISOString() }).eq("id", classId);
+    let { error } = await admin.from("classes").update({ ...base, starts_at: start.toISOString() }).eq("id", classId);
+    if (error && /column .*rate_tier/i.test(error.message)) {
+      ({ error } = await admin.from("classes").update({ ...stripTier(base), starts_at: start.toISOString() }).eq("id", classId));
+    }
     if (error) return NextResponse.json({ error: explain(error.message) }, { status: 500 });
 
     await admin.from("class_students").delete().eq("class_id", classId);
@@ -104,7 +112,10 @@ export async function POST(req: Request) {
     ...(seriesId ? { series_id: seriesId } : {}),
   }));
 
-  const { data: created, error } = await admin.from("classes").insert(rows).select("id");
+  let { data: created, error } = await admin.from("classes").insert(rows).select("id");
+  if (error && /column .*rate_tier/i.test(error.message)) {
+    ({ data: created, error } = await admin.from("classes").insert(rows.map(stripTier)).select("id"));
+  }
   if (error) return NextResponse.json({ error: explain(error.message) }, { status: 500 });
 
   if (studentIds.length && created?.length) {
