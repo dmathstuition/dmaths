@@ -7,6 +7,11 @@ import { loginUrl } from "@/lib/siteUrl";
 import { findTier, fmtNgn } from "@/lib/summerCamp";
 import { notifyUser } from "@/lib/notify";
 import { REFERRAL_REWARD, REFERRAL_WELCOME } from "@/lib/rewards";
+import { createAptitudeTest } from "@/lib/aptitudeGenerate";
+
+// A.I generation can take a little while — give the approval room so it can
+// draft the aptitude test inline without risking a timeout.
+export const maxDuration = 60;
 
 // POST { id } — approve an application: create login, profile, email credentials.
 export async function POST(req: Request) {
@@ -283,10 +288,33 @@ export async function POST(req: Request) {
     }
   }
 
+  // 8. Auto-draft the learner's aptitude test from their intake profile. It
+  //    lands as a DRAFT in Admin → Aptitude tests for the admin to preview and
+  //    approve for scheduling. Best-effort and last, so a slow/failed A.I call
+  //    (or the table not being migrated yet) never affects the approval that has
+  //    already succeeded — the admin can always generate it from the console.
+  let aptitude: { ok: boolean; error?: string } = { ok: false };
+  try {
+    const r = await createAptitudeTest(admin, {
+      studentId: created.user.id,
+      createdBy: user.id,
+      student: { level: app.level, subjects: app.subjects, first_name: app.first_name },
+      intake: {
+        strengths: (app as any).strengths, challenges: (app as any).challenges,
+        weak_points: (app as any).weak_points, exam_target: (app as any).exam_target,
+        target_grade: (app as any).target_grade,
+      },
+    });
+    aptitude = r.error ? { ok: false, error: r.error } : { ok: true };
+  } catch (err: any) {
+    aptitude = { ok: false, error: err?.message || "aptitude generation failed" };
+  }
+
   return NextResponse.json({
     ok: true,
     studentCode: code,
     emailed: emailResult.ok,
     emailError: emailResult.ok ? undefined : emailResult.error,
+    aptitudeDrafted: aptitude.ok,
   });
 }
