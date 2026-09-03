@@ -65,10 +65,18 @@ export default function LandingNav() {
               {l}
             </a>
           ))}
+          <Link href="/pricing" className="rounded-full px-4 py-2 text-sm font-medium text-ink/60 transition hover:bg-chalk hover:text-ink">
+            Pricing
+          </Link>
         </div>
-        <Link href="/apply" className="btn-gold !min-h-[40px] !rounded-full !px-5">
-          Sign up
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href="/pricing" className="hidden rounded-full px-4 py-2 text-sm font-semibold text-gold-deep transition hover:bg-gold-pale sm:inline-flex md:hidden">
+            Pricing
+          </Link>
+          <Link href="/apply" className="btn-gold !min-h-[40px] !rounded-full !px-5">
+            Sign up
+          </Link>
+        </div>
       </div>
     </nav>
   );

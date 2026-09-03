@@ -97,6 +97,9 @@ export default function Landing() {
               <Link href="/apply" className="btn-gold group !min-h-[50px] !rounded-full !px-7 !text-base shadow-lg shadow-gold/30">
                 Get started <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
               </Link>
+              <Link href="/pricing" className="btn group !min-h-[50px] !rounded-full border border-gold/50 bg-white !px-7 !text-base text-gold-deep hover:bg-gold-pale">
+                See pricing <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+              </Link>
               <a href="#how" className="group flex items-center gap-3 text-sm font-semibold text-ink/70">
                 <span className="flex h-11 w-11 items-center justify-center rounded-full border border-line bg-white shadow-sm transition group-hover:border-gold group-hover:shadow-md">
                   <svg className="float h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="#1A60AB" strokeWidth="2.5"><path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -517,7 +520,7 @@ print("Hello from D-Maths!")`}</code></pre>
             </p>
           </div>
           <FooterCol title="Centre" links={[["About","#agency"],["Founder","#founder"],["Services","#services"],["Results","#results"],["Apply","/apply"]]} />
-          <FooterCol title="Learn" links={[["Login","/login"],["How it works","#how"],["Help & FAQ","/help"]]} />
+          <FooterCol title="Learn" links={[["Pricing","/pricing"],["Login","/login"],["How it works","#how"],["Help & FAQ","/help"]]} />
           <FooterCol title="Legal" links={[["Privacy Policy","/privacy"],["Terms of Service","/terms"],["Refund Policy","/refunds"],["Delete account","/delete-account"]]} />
           <div>
             <h4 className="font-display text-sm font-bold text-ink">Contact</h4>
