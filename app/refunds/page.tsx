@@ -1,69 +1,66 @@
 import LegalPage, { H2 } from "@/components/LegalPage";
-import { campStartLabel } from "@/lib/summerCamp";
 
 export const metadata = { title: "Payment & Refund Policy — D-Maths Tuition Centre", alternates: { canonical: "/refunds" } };
 
 export default function RefundsPage() {
   return (
-    <LegalPage title="Payment & Refund Policy" updated="June 2026">
+    <LegalPage title="Payment & Refund Policy" updated="September 2026">
       <p>
         This policy explains how payments and refunds work for D-Maths Tuition Centre. Please read
-        it before making any payment.
+        it before enrolling.
       </p>
 
-      <H2>Making payments</H2>
+      <H2>How tuition is charged</H2>
       <p>
-        You can pay by bank transfer or Opay to the accounts we provide at enrolment, or online by
-        card or bank through our payment processor, Paystack. For bank/Opay transfers, include the
-        payment reference we ask for so we can match your payment to your application. Always
-        confirm the account details with us directly — we are not responsible for funds sent to
-        incorrect or fraudulent accounts.
+        Tuition is charged <strong>per hour</strong>, at the rate for the learner&apos;s class (see
+        our <a href="/pricing" className="underline">pricing page</a>). We record the hours a
+        learner actually attends each month and total them automatically. There is no payment at
+        sign-up — billing begins once classes start.
       </p>
 
-      <H2>Part payment (deposit)</H2>
+      <H2>Monthly billing &amp; when payment is due</H2>
       <p>
-        Some programmes let you pay a deposit (for example 50%) to secure a place, with the balance
-        due as arranged with us. A deposit is <strong>non-refundable</strong>: if you cancel, the
-        deposit is not returned, and the balance only becomes payable if you proceed. Access may
-        begin once the deposit is confirmed.
+        Around three days before each month ends, we raise that month&apos;s invoice (hours
+        attended × the hourly rate) and send it to the learner and their parent/guardian. Payment
+        is due <strong>on or before the last day of the month</strong>. You can pay securely from
+        the portal (card or bank via our processor, Paystack) or by bank transfer/Opay to the
+        accounts we provide, using the reference we ask for. Always confirm account details with us
+        directly — we are not responsible for funds sent to incorrect or fraudulent accounts.
+      </p>
+
+      <H2>Late or missed payments</H2>
+      <p>
+        If an invoice is not settled by the last day of the month, access to classes and portal
+        features may be paused until the balance is cleared. We&apos;ll always remind you before
+        the due date and are happy to discuss arrangements — contact us at support@dmaths.academy.
       </p>
 
       <H2>When access begins</H2>
       <p>
-        Once we confirm your payment (online card/bank payments are verified automatically;
-        transfers are confirmed by us), your account is created and login details are sent by
-        email. Access to classes and materials begins from that point.
+        Once we approve a registration, the learner&apos;s account is created and login details are
+        sent by email. Access to classes and materials begins from that point; charges apply only
+        for hours actually attended thereafter.
       </p>
 
-      <H2>Summer Camp &amp; fixed programmes</H2>
+      <H2>Refunds</H2>
       <p>
-        For fixed programmes such as the D-Maths Online Summer Camp (starts{" "}
-        <strong>{campStartLabel()}</strong>): if you cancel
-        <strong> before the programme's start date</strong>, you receive a full refund of amounts
-        paid, less any non-refundable deposit. <strong>Once the programme has started, fees are
-        non-refundable</strong>, as your place can no longer be offered to someone else.
-      </p>
-
-      <H2>Ongoing tuition refunds</H2>
-      <p>
-        For rolling/ongoing tuition (outside a fixed programme), contact us at
-        support@dmaths.academy. Refunds, where granted, are calculated on a pro-rata basis for
-        unused tuition and exclude any non-refundable deposit or administrative charges disclosed
-        at sign-up. Refunds are not available once a substantial portion of a paid tuition period
-        has been delivered.
+        Because tuition is billed in arrears for hours already attended, there is normally nothing
+        to refund. If you are charged for a session the learner did not attend, or an invoice looks
+        wrong, contact us at support@dmaths.academy with the details and we will verify and correct
+        it promptly. Any refund granted excludes administrative charges disclosed at sign-up.
       </p>
 
       <H2>Cancellation</H2>
       <p>
-        A guardian may cancel enrolment at any time by contacting us. Cancellation stops future
-        billing; any refund for the current period is handled as described above.
+        A guardian may stop tuition at any time by contacting us. You are only billed for hours
+        attended up to that point; no future charges are raised once tuition is stopped.
       </p>
 
       <H2>Failed or duplicate payments</H2>
       <p>
         If you are charged twice or a payment fails after funds leave your account, contact us with
         the transaction reference and we will verify and resolve it promptly. Online payments are
-        verified with Paystack before any enrolment is confirmed.
+        verified with Paystack before a receipt is issued.
       </p>
 
       <H2>Contact</H2>

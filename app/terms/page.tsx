@@ -21,14 +21,16 @@ export default function TermsPage() {
 
       <H2>Fees and payment</H2>
       <p>
-        Tuition and programme fees are communicated at the point of enrolment. You may pay by
-        bank transfer or Opay to the accounts we specify, or online by card or bank through our
-        payment processor, Paystack. Some programmes allow you to pay a part deposit (for example
-        50%) to secure a place, with the balance due as arranged with us. Access to classes and
-        portal features is conditional on payment. Promotional prices and discounts are
-        time-limited and may be changed or withdrawn at any time. We are not responsible for
-        payments made to any account other than those we officially provide — always confirm
-        account details directly with us before paying.
+        Tuition is charged <strong>per hour</strong> at the rate for the learner&apos;s class,
+        published on our <a href="/pricing" className="underline">pricing page</a>. No payment is
+        taken at sign-up. We record the hours a learner attends each month and total them
+        automatically; that month&apos;s invoice is raised about three days before month-end and is
+        due <strong>on or before the last day of the month</strong>. You may pay from the portal by
+        card or bank through our payment processor, Paystack, or by bank transfer/Opay to the
+        accounts we specify. Access to classes and portal features may be paused if an invoice is
+        not settled by its due date. Prices may be changed with reasonable notice. We are not
+        responsible for payments made to any account other than those we officially provide —
+        always confirm account details directly with us before paying.
       </p>
 
       <H2>Programmes and camps</H2>
