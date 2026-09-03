@@ -6,6 +6,7 @@ import { useToast } from "@/components/Toast";
 import { segmentsOf } from "@/lib/aptitude";
 
 type SafeQuestion = { question: string; options: string[]; segment?: string };
+type SegScore = { segment: string; score: number; total: number; percent: number };
 type Test = {
   id: string;
   status: string;
@@ -13,15 +14,37 @@ type Test = {
   score: number | null;
   total: number | null;
   report: string | null;
+  segments: SegScore[];
   questions: SafeQuestion[];
 };
+
+// A small per-segment (subject · topic) score breakdown.
+function SegmentBreakdown({ segments }: { segments: SegScore[] }) {
+  if (!segments || segments.length < 2) return null;
+  return (
+    <div className="mt-4 space-y-1.5">
+      <p className="text-[11px] font-bold uppercase tracking-wide text-ink/40">By section</p>
+      {segments.map((s) => (
+        <div key={s.segment}>
+          <div className="flex items-center justify-between text-[13px]">
+            <span className="font-semibold text-ink/70">{s.segment}</span>
+            <span className="font-bold text-ink">{s.score}/{s.total} · {s.percent}%</span>
+          </div>
+          <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-ink/10">
+            <div className="h-full rounded-full bg-gold" style={{ width: `${s.percent}%` }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function AptitudeClient({ test }: { test: Test | null }) {
   const router = useRouter();
   const push = useToast();
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [busy, setBusy] = useState(false);
-  const [result, setResult] = useState<{ score: number; total: number; percent: number; band: string } | null>(null);
+  const [result, setResult] = useState<{ score: number; total: number; percent: number; band: string; segments?: SegScore[] } | null>(null);
 
   const Hero = (
     <div className="boardgrid relative flex items-center gap-4 overflow-hidden rounded-2xl bg-board p-7 text-white">
@@ -60,7 +83,7 @@ export default function AptitudeClient({ test }: { test: Test | null }) {
     const j = await res.json().catch(() => ({}));
     setBusy(false);
     if (!res.ok) { push(j.error || "Could not submit — try again.", "error"); return; }
-    setResult({ score: j.score, total: j.total, percent: j.percent, band: j.band });
+    setResult({ score: j.score, total: j.total, percent: j.percent, band: j.band, segments: j.segments });
     router.refresh();
   }
 
@@ -69,8 +92,16 @@ export default function AptitudeClient({ test }: { test: Test | null }) {
       {Hero}
 
       {result ? (
-        card("checkCircle", "All done — well done!",
-          `You scored ${result.score}/${result.total}. Your tutor will review it and your parent will get a full report shortly.`)
+        <div className="card neu-card p-8">
+          <div className="text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gold-pale text-gold-deep"><Icon name="checkCircle" className="h-7 w-7" /></div>
+            <h2 className="font-display text-lg font-semibold text-ink">All done — well done!</h2>
+            <p className="mx-auto mt-2 max-w-md text-sm text-ink/55">You scored {result.score}/{result.total}. Your tutor will review it and your parent will get a full report shortly.</p>
+          </div>
+          {result.segments && result.segments.length > 1 && (
+            <div className="mx-auto mt-4 max-w-md"><SegmentBreakdown segments={result.segments} /></div>
+          )}
+        </div>
       ) : !test ? (
         card("clock", "No aptitude test yet", "When one is assigned, it'll appear here. We'll let you know.")
       ) : test.status === "reported" && test.report ? (
@@ -79,7 +110,8 @@ export default function AptitudeClient({ test }: { test: Test | null }) {
           {test.score != null && test.total != null && (
             <p className="mt-1 text-sm font-bold text-gold-deep">Score: {test.score}/{test.total}</p>
           )}
-          <p className="mt-3 whitespace-pre-wrap text-[15px] leading-relaxed text-ink/75">{test.report}</p>
+          <SegmentBreakdown segments={test.segments} />
+          <p className="mt-4 whitespace-pre-wrap text-[15px] leading-relaxed text-ink/75">{test.report}</p>
         </div>
       ) : ["submitted", "analyzed", "reported"].includes(test.status) ? (
         card("clock", "Submitted — thank you!", "Your tutor is preparing your report. Your parent will receive it soon.")

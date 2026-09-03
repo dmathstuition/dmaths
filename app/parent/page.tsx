@@ -8,6 +8,7 @@ import DeleteAccountCard from "@/components/portal/DeleteAccountCard";
 import Tour from "@/components/tour/Tour";
 import { parentTour } from "@/components/tour/steps";
 import { summariseWeek } from "@/lib/weeklySummary";
+import { segmentScores } from "@/lib/aptitude";
 import { Icon } from "@/components/Icons";
 
 export const dynamic = "force-dynamic";
@@ -96,12 +97,18 @@ export default async function ParentPage() {
       ]);
 
       // Latest aptitude test for this child (null before the migration is run).
+      // The per-segment breakdown is computed here (server-side) so the parent
+      // sees it without the answer key ever reaching the browser.
       let aptitude: any = null;
       try {
         const { data } = await admin.from("aptitude_tests")
-          .select("id, status, scheduled_at, score, total, report")
+          .select("id, status, scheduled_at, score, total, report, questions, answers")
           .eq("student_id", student_id).order("created_at", { ascending: false }).limit(1).maybeSingle();
-        aptitude = data ?? null;
+        aptitude = data ? {
+          id: data.id, status: data.status, scheduled_at: data.scheduled_at,
+          score: data.score, total: data.total, report: data.report,
+          segments: data.answers ? segmentScores(data.questions ?? [], data.answers) : [],
+        } : null;
       } catch { aptitude = null; }
 
       const typeMap = new Map((behaviorTypes ?? []).map((t: any) => [t.id, t]));
