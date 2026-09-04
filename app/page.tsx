@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import MarketingShell from "@/components/landing/MarketingShell";
+import Reveal from "@/components/landing/Reveal";
 import AppLauncher from "@/components/AppLauncher";
 import InstallPrompt from "@/components/InstallPrompt";
 
@@ -83,14 +84,14 @@ export default function Home() {
       {/* HIGHLIGHTS */}
       <section className="mx-auto max-w-6xl px-5 py-14">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {HIGHLIGHTS.map(h => (
-            <div key={h.t} className="glass-card p-5">
+          {HIGHLIGHTS.map((h, i) => (
+            <Reveal key={h.t} delay={i * 70} className="glass-card p-5">
               <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gold-pale text-gold-deep">
                 <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
               </span>
               <h3 className="mt-3 font-display text-base font-bold text-ink">{h.t}</h3>
               <p className="mt-1 text-[13px] leading-relaxed text-ink/55">{h.d}</p>
-            </div>
+            </Reveal>
           ))}
         </div>
       </section>
@@ -106,11 +107,11 @@ export default function Home() {
             <Link href="/programmes" className="text-sm font-bold text-gold-deep hover:underline">See all programmes →</Link>
           </div>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {SUBJECTS.map(s => (
-              <div key={s.t} className="glass-card p-6">
+            {SUBJECTS.map((s, i) => (
+              <Reveal key={s.t} delay={i * 70} className="glass-card p-6">
                 <h3 className="font-display text-lg font-bold text-ink">{s.t}</h3>
                 <p className="mt-2 text-[13px] leading-relaxed text-ink/55">{s.d}</p>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -118,14 +119,14 @@ export default function Home() {
 
       {/* STATS */}
       <section className="mx-auto max-w-6xl px-5 py-14">
-        <div className="grid gap-6 rounded-3xl border border-line bg-board px-6 py-10 text-center sm:grid-cols-3 sm:px-12">
+        <Reveal className="grid gap-6 rounded-3xl border border-line bg-board px-6 py-10 text-center sm:grid-cols-3 sm:px-12">
           {STATS.map(s => (
             <div key={s.l}>
               <p className="font-display text-4xl font-extrabold text-gold md:text-5xl">{s.v}</p>
               <p className="mt-1 text-sm font-semibold uppercase tracking-wide text-white/60">{s.l}</p>
             </div>
           ))}
-        </div>
+        </Reveal>
       </section>
 
       {/* TESTIMONIALS */}
@@ -133,15 +134,15 @@ export default function Home() {
         <div className="mx-auto max-w-6xl px-5 py-14">
           <h2 className="text-center font-display text-2xl font-bold text-ink md:text-3xl">What families say</h2>
           <div className="mt-8 grid gap-5 md:grid-cols-3">
-            {TESTIMONIALS.map(t => (
-              <figure key={t.n} className="glass-card p-6">
+            {TESTIMONIALS.map((t, i) => (
+              <Reveal as="figure" key={t.n} delay={i * 80} className="glass-card p-6">
                 <div className="text-gold">{"★".repeat(5)}</div>
                 <blockquote className="mt-3 text-[14px] leading-relaxed text-ink/70">&ldquo;{t.t}&rdquo;</blockquote>
                 <figcaption className="mt-4 border-t border-line pt-3">
                   <p className="text-sm font-bold text-ink">{t.n}</p>
                   <p className="text-xs text-ink/45">{t.r}</p>
                 </figcaption>
-              </figure>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -149,13 +150,13 @@ export default function Home() {
 
       {/* CTA */}
       <section className="mx-auto max-w-6xl px-5 py-16">
-        <div className="flex flex-col items-center justify-between gap-5 rounded-3xl bg-board px-8 py-10 text-center sm:flex-row sm:px-12 sm:text-left">
+        <Reveal className="flex flex-col items-center justify-between gap-5 rounded-3xl bg-board px-8 py-10 text-center sm:flex-row sm:px-12 sm:text-left">
           <div>
             <p className="font-display text-2xl font-bold text-white md:text-3xl">Ready to get started?</p>
             <p className="mt-1.5 text-sm text-white/60">100% online — study from home, anywhere in the world. Setup takes minutes.</p>
           </div>
           <Link href="/apply" className="btn-gold !min-h-[48px] !rounded-full !px-8 !text-base">Register now</Link>
-        </div>
+        </Reveal>
       </section>
     </MarketingShell>
   );
