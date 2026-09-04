@@ -2,20 +2,20 @@
 import { useEffect, useRef, useState } from "react";
 import { PACKAGES, packageRate } from "@/lib/packages";
 import { fmtNgn } from "@/lib/pricing";
+import { FAQS as FAQ_SOURCE } from "@/lib/faq";
 
 type Msg = { role: "bot" | "user"; text: string };
 
 const WHATSAPP = "https://wa.me/2347025674894";
-const GREETING = "Hi! 👋 I'm the D-Maths assistant. Ask me anything about enrolling, subjects, pricing or how it all works.";
+const GREETING = "Hi! 👋 I'm the D-Maths assistant. Ask me anything about enrolling, subjects, pricing or how it all works — or pick a question below.";
 
-// A few quick answers so common questions are instant (no AI round-trip).
-const FAQS: { q: string; a: string }[] = [
-  { q: "How do I enrol my child?", a: "Tap “Enrol your child” (the Register button) and complete the short form — it takes a few minutes and there's no payment at sign-up. Once approved, your child gets a portal login and a short aptitude test." },
-  { q: "What do you teach?", a: "Maths, English, Sciences and Coding (Python, web & beginner A.I), with exam preparation for WAEC, JAMB, IGCSE, SAT, A-Levels and KS2/KS3." },
-  { q: "How much does it cost?", a: `Tuition is charged per hour: ${PACKAGES.map(p => `${p.name.replace(/^Tier \d+ — /, "")} — ${fmtNgn(packageRate(p))}/hr`).join("; ")}. See the Pricing page for full details.` },
-  { q: "How does payment work?", a: "You're billed monthly for the hours your child actually attends. The invoice arrives about 3 days before month-end and is due on or before the last day of the month, paid securely from the portal." },
-  { q: "Can I register more than one child?", a: "Yes — just complete the registration once for each child. Each learner gets their own portal." },
-];
+// The shared FAQ powers the quick-question buttons (instant answers, no AI
+// round-trip). The pricing answer gets the live per-hour rates appended.
+const PRICE_LINE = PACKAGES.map(p => `${p.name.replace(/^Tier \d+ — /, "")} — ${fmtNgn(packageRate(p))}/hr`).join("; ");
+const FAQS = FAQ_SOURCE.map(f => ({
+  q: f.q,
+  a: f.id === "pricing" ? `Tuition is charged per hour: ${PRICE_LINE}. See the Pricing page for full details.` : f.a,
+}));
 
 export default function ChatWidget() {
   const [open, setOpen] = useState(false);

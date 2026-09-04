@@ -3,6 +3,7 @@ import { rateLimit, clientKey } from "@/lib/ratelimit";
 import { aiChat, aiConfigured } from "@/lib/ai";
 import { PACKAGES, packageRate } from "@/lib/packages";
 import { fmtNgn } from "@/lib/pricing";
+import { FAQS } from "@/lib/faq";
 
 // Public help chatbot for the marketing site. Answers questions about D-Maths
 // using a tightly-scoped system prompt, rate-limited per IP. No auth — but it
@@ -27,6 +28,9 @@ ${tiers}
 - Classes are live and online — never pre-recorded. Learners get a portal with classes, assignments, grades, attendance, practice, games and progress tracking. Parents get their own view.
 - To register: the "Enrol your child" / "Register" button (the /apply page). To sign in: "Portal Access" / the login page.
 - Contact: support@dmaths.academy or WhatsApp ${WHATSAPP}. Fully online; centre based in Asaba, Delta State.
+
+Official FAQ answers — prefer this wording when it fits the question:
+${FAQS.map(f => `Q: ${f.q}\nA: ${f.a}`).join("\n\n")}
 
 Rules:
 - Be warm, concise and helpful. 1–4 short sentences. British/Nigerian spelling.
