@@ -43,39 +43,38 @@ export default function Home() {
       <AppLauncher />
       <InstallPrompt />
 
-      {/* HERO */}
-      <section className="border-b border-line bg-gradient-to-b from-chalk/60 to-white">
-        <div className="mx-auto grid max-w-6xl items-center gap-10 px-5 py-16 md:grid-cols-2 md:py-20">
-          <div>
-            <p className="text-[12px] font-bold uppercase tracking-[0.18em] text-gold-deep">D-Maths Tuition Centre</p>
-            <h1 className="mt-3 font-display text-4xl font-bold leading-[1.1] tracking-tight text-ink md:text-5xl">
-              Solutions for your child&apos;s <span className="text-gold-deep">academic success</span>
+      {/* HERO — full-bleed image with overlaid content */}
+      <section className="relative isolate flex min-h-[80vh] items-center overflow-hidden bg-board">
+        <Image src="/camp-hero.png" alt="" fill priority sizes="100vw"
+          className="object-cover object-center opacity-90 md:object-right" />
+        {/* Legibility overlay — darker on the left where the text sits */}
+        <div className="absolute inset-0 bg-gradient-to-r from-board/95 via-board/75 to-board/30" />
+        <div className="absolute inset-0 bg-gradient-to-t from-board/80 via-transparent to-board/20" />
+
+        <div className="relative mx-auto w-full max-w-6xl px-5 py-24">
+          <div className="max-w-2xl text-white">
+            <p className="text-[13px] font-bold uppercase tracking-[0.2em] text-gold">Supporting every learner, everywhere</p>
+            <h1 className="mt-4 font-display text-4xl font-extrabold leading-[1.08] tracking-tight sm:text-5xl md:text-6xl">
+              A modern online academy for <span className="text-gold">today&apos;s learners</span>
             </h1>
-            <p className="mt-5 max-w-md text-[15px] leading-relaxed text-ink/60">
-              A virtual learning community for students across Nigeria. Our tutors keep a close eye on
-              every learner&apos;s progress in maths, sciences and coding — through live online sessions,
-              personalised feedback and a portal built for results.
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-white/75 sm:text-lg">
+              Structured teaching, expert tutors and a supportive learning environment — in maths,
+              sciences and coding, anywhere in Nigeria.
             </p>
-            <div className="mt-7 flex flex-wrap items-center gap-3">
-              <Link href="/apply" className="btn-gold !min-h-[48px] !rounded-full !px-7">Register now</Link>
-              <Link href="/programmes" className="btn !min-h-[48px] !rounded-full border border-line bg-white !px-7 text-ink/70 hover:bg-chalk">Explore programmes</Link>
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <Link href="/apply" className="btn-gold !min-h-[52px] !rounded-full !px-8 !text-base shadow-lg shadow-black/20">Enrol your child</Link>
+              <a href="https://wa.me/2347025674894" target="_blank" rel="noopener noreferrer"
+                className="btn !min-h-[52px] !rounded-full border border-white/30 bg-white/10 !px-7 !text-base font-bold text-white backdrop-blur transition hover:bg-white/20">
+                Chat on WhatsApp
+              </a>
             </div>
-            <div className="mt-8">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-ink/40">Preparation for</p>
-              <div className="mt-2 flex flex-wrap gap-2">
+            <div className="mt-9">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-white/50">Preparation for</p>
+              <div className="mt-2.5 flex flex-wrap gap-2">
                 {EXAMS.map(e => (
-                  <span key={e} className="rounded-md border border-line bg-white px-2.5 py-1 text-[12px] font-bold text-ink/60">{e}</span>
+                  <span key={e} className="rounded-md border border-white/20 bg-white/10 px-2.5 py-1 text-[12px] font-bold text-white/80 backdrop-blur">{e}</span>
                 ))}
               </div>
-            </div>
-          </div>
-
-          <div className="relative">
-            <div className="overflow-hidden rounded-3xl border border-line bg-white shadow-sm">
-              <Image src="/camp-hero.png" alt="A D-Maths student learning online"
-                width={900} height={760} quality={90} priority
-                sizes="(max-width: 768px) 100vw, 50vw"
-                className="h-auto w-full object-contain" />
             </div>
           </div>
         </div>
