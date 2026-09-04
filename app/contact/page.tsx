@@ -1,5 +1,6 @@
 import Link from "next/link";
 import MarketingShell, { PageHeader } from "@/components/landing/MarketingShell";
+import Reveal from "@/components/landing/Reveal";
 
 export const metadata = {
   title: "Contact — D-Maths Tuition",
@@ -14,7 +15,7 @@ export default function ContactPage() {
         lead="Questions about programmes, pricing or getting started? We're happy to help." />
 
       <section className="mx-auto max-w-6xl px-5 py-14">
-        <div className="grid gap-4 sm:grid-cols-3">
+        <Reveal className="grid gap-4 sm:grid-cols-3">
           <a href="mailto:support@dmaths.academy" className="glass-card p-6 transition hover:border-gold/50 hover:shadow-sm">
             <p className="text-[12px] font-bold uppercase tracking-wider text-ink/40">Email</p>
             <p className="mt-2 font-display text-base font-bold text-ink">support@dmaths.academy</p>
@@ -31,9 +32,9 @@ export default function ContactPage() {
             <p className="mt-2 font-display text-base font-bold text-ink">Asaba, Delta State</p>
             <p className="mt-1 text-[13px] text-ink/55">Fully online — study from anywhere in the world.</p>
           </div>
-        </div>
+        </Reveal>
 
-        <div className="mt-10 flex flex-col items-center justify-between gap-5 rounded-3xl bg-board px-8 py-10 text-center sm:flex-row sm:px-12 sm:text-left">
+        <Reveal className="mt-10 flex flex-col items-center justify-between gap-5 rounded-3xl bg-board px-8 py-10 text-center sm:flex-row sm:px-12 sm:text-left">
           <div>
             <p className="font-display text-2xl font-bold text-white">Ready to enrol?</p>
             <p className="mt-1.5 text-sm text-white/60">Register online in a few minutes — no payment needed to start.</p>
@@ -42,7 +43,7 @@ export default function ContactPage() {
             <Link href="/apply" className="btn-gold !min-h-[48px] !rounded-full !px-7">Register now</Link>
             <Link href="/pricing" className="btn !min-h-[48px] !rounded-full border border-white/25 bg-white/10 !px-6 text-white hover:bg-white/15">View pricing</Link>
           </div>
-        </div>
+        </Reveal>
       </section>
     </MarketingShell>
   );

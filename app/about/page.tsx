@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import MarketingShell, { PageHeader } from "@/components/landing/MarketingShell";
+import Reveal from "@/components/landing/Reveal";
 
 export const metadata = {
   title: "About — D-Maths Tuition",
@@ -21,7 +22,7 @@ export default function AboutPage() {
         lead="We believe in the power of personalised teaching. As a fully virtual community, we reach learners anywhere in the world and prepare them for the exams that shape their future." />
 
       <section className="mx-auto max-w-6xl px-5 py-14">
-        <div className="grid items-center gap-12 md:grid-cols-2">
+        <Reveal className="grid items-center gap-12 md:grid-cols-2">
           <div>
             <h2 className="font-display text-2xl font-bold text-ink md:text-3xl">Turning effort into achievement</h2>
             <p className="mt-4 text-[15px] leading-relaxed text-ink/60">
@@ -45,13 +46,13 @@ export default function AboutPage() {
             <Image src="/camp-about.png" alt="A D-Maths learner" width={900} height={760} quality={90}
               sizes="(max-width: 768px) 100vw, 50vw" className="h-auto w-full object-contain" />
           </div>
-        </div>
+        </Reveal>
       </section>
 
       {/* Founder */}
       <section className="border-t border-line bg-chalk/40">
         <div className="mx-auto max-w-6xl px-5 py-16">
-          <div className="grid items-start gap-12 md:grid-cols-[320px_1fr]">
+          <Reveal className="grid items-start gap-12 md:grid-cols-[320px_1fr]">
             <div className="mx-auto w-full max-w-xs">
               <div className="overflow-hidden rounded-3xl border border-line bg-white shadow-sm">
                 <Image src="/founder.jpg" alt="Bakare Oladapo E., founder of D-Maths"
@@ -96,7 +97,7 @@ export default function AboutPage() {
                 </p>
               </div>
             </div>
-          </div>
+          </Reveal>
         </div>
       </section>
     </MarketingShell>
