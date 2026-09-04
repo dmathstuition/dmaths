@@ -1,9 +1,10 @@
 import type { ReactNode } from "react";
 import LandingNav from "@/components/landing/LandingNav";
 import MarketingFooter from "@/components/landing/MarketingFooter";
+import ChatWidget from "@/components/landing/ChatWidget";
 
 // Shared frame for every public marketing page: the branded nav on top, the
-// page content, and the footer. Keeps the site consistent and professional.
+// page content, the footer, and the help chatbot.
 export default function MarketingShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-white font-body text-ink">
@@ -11,6 +12,7 @@ export default function MarketingShell({ children }: { children: ReactNode }) {
       <LandingNav />
       <main id="main" tabIndex={-1} className="pt-16">{children}</main>
       <MarketingFooter />
+      <ChatWidget />
     </div>
   );
 }
