@@ -115,7 +115,7 @@ export async function GET() {
             fontWeight: "700",
             color: "#06152B",
           }}>
-            Trusted by 200+ students across Nigeria
+            Trusted by 200+ students worldwide
           </span>
         </div>
 

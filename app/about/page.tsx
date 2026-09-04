@@ -4,7 +4,7 @@ import MarketingShell, { PageHeader } from "@/components/landing/MarketingShell"
 
 export const metadata = {
   title: "About — D-Maths Tuition",
-  description: "D-Maths is a fully virtual tuition community preparing learners across Nigeria for WAEC, JAMB, IGCSE, SAT and A-Levels through personalised online teaching.",
+  description: "D-Maths is a fully virtual tuition community preparing learners worldwide for WAEC, JAMB, IGCSE, SAT and A-Levels through personalised online teaching.",
   alternates: { canonical: "/about" },
 };
 
@@ -18,7 +18,7 @@ export default function AboutPage() {
   return (
     <MarketingShell>
       <PageHeader eyebrow="About us" title="Our Centre"
-        lead="We believe in the power of personalised teaching. As a fully virtual community, we reach learners anywhere in Nigeria and prepare them for the exams that shape their future." />
+        lead="We believe in the power of personalised teaching. As a fully virtual community, we reach learners anywhere in the world and prepare them for the exams that shape their future." />
 
       <section className="mx-auto max-w-6xl px-5 py-14">
         <div className="grid items-center gap-12 md:grid-cols-2">

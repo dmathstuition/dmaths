@@ -25,7 +25,7 @@ export default function StructuredData() {
       logo: `${base}/dmathslogo.png`,
       image: `${base}/dmathslogo.png`,
       description:
-        "A virtual learning community for students across Nigeria — expert online tuition in maths, sciences and coding, with exam prep for WAEC, JAMB, IGCSE, SAT and A-Levels. Live classes, personalised feedback and a portal built for results.",
+        "A virtual learning community for students worldwide — expert online tuition in maths, sciences and coding, with exam prep for WAEC, JAMB, IGCSE, SAT and A-Levels. Live classes, personalised feedback and a portal built for results.",
       email: "support@dmaths.academy",
       telephone: "+2347025674894",
       address: {
@@ -34,7 +34,7 @@ export default function StructuredData() {
         addressRegion: "Delta State",
         addressCountry: "NG",
       },
-      areaServed: { "@type": "Country", name: "Nigeria" },
+      areaServed: "Worldwide",
       knowsAbout: [
         "Mathematics",
         "Sciences",

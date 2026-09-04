@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteBaseUrl()),
   title: "D-Maths Tuition Centre — Online Maths, Science & Coding Tuition",
   description:
-    "A virtual learning community for students across Nigeria — expert online tuition in maths, sciences & coding, with exam prep for WAEC, JAMB, IGCSE, SAT & A-Levels.",
+    "A virtual learning community for students worldwide — expert online tuition in maths, sciences & coding, with exam prep for WAEC, JAMB, IGCSE, SAT & A-Levels.",
   keywords: [
     "online tuition Nigeria",
     "virtual tutoring Nigeria",
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: "D-Maths Tuition Centre — Online Maths, Science & Coding Tuition",
-    description: "A virtual learning community for students across Nigeria — online tuition in maths, sciences & coding, with prep for WAEC, JAMB, IGCSE, SAT & A-Levels. Live classes and a results-focused portal.",
+    description: "A virtual learning community for students worldwide — online tuition in maths, sciences & coding, with prep for WAEC, JAMB, IGCSE, SAT & A-Levels. Live classes and a results-focused portal.",
     url: "/",
     siteName: "D-Maths Tuition Centre",
     images: [{ url: "/api/og", width: 1200, height: 630, alt: "D-Maths Tuition Centre" }],
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "D-Maths Tuition Centre — Online Maths, Science & Coding Tuition",
-    description: "A virtual learning community for students across Nigeria — maths, sciences & coding, with prep for WAEC, JAMB, IGCSE, SAT & A-Levels.",
+    description: "A virtual learning community for students worldwide — maths, sciences & coding, with prep for WAEC, JAMB, IGCSE, SAT & A-Levels.",
     images: ["/api/og"],
   },
   alternates: { canonical: "/" },

@@ -20,7 +20,7 @@ export default function MarketingFooter() {
           <p className="font-display text-lg font-bold text-ink">D-Maths</p>
           <p className="mt-3 max-w-xs text-[13px] leading-relaxed text-ink/55">
             A virtual learning community delivering world-class online tuition in maths, sciences
-            and coding across Nigeria — with prep for WAEC, JAMB, IGCSE, SAT and A-Levels.
+            and coding worldwide — with prep for WAEC, JAMB, IGCSE, SAT and A-Levels.
           </p>
         </div>
         <Col title="Explore" links={[["About", "/about"], ["Programmes", "/programmes"], ["Pricing", "/pricing"], ["Contact", "/contact"]]} />

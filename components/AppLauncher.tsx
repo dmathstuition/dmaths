@@ -13,7 +13,7 @@ const SLIDES: Slide[] = [
     img: "/camp-hero.png",
     icon: "home",
     title: "Welcome to D-Maths",
-    body: "A virtual learning community for students across Nigeria.",
+    body: "A virtual learning community for students worldwide.",
   },
   {
     img: "/summer-camp-banner.png",

@@ -7,9 +7,10 @@ export default function PrivacyPage() {
     <LegalPage title="Privacy Policy" updated="June 2026">
       <p>
         D-Maths Tuition Centre ("we", "us") operates an online mathematics tuition service for
-        students in Nigeria. This policy explains what personal information we collect, why we
-        collect it, and how we protect it. It is written to comply with the Nigeria Data
-        Protection Act 2023 (NDPA) and the Nigeria Data Protection Regulation (NDPR).
+        students worldwide. This policy explains what personal information we collect, why we
+        collect it, and how we protect it. As a Nigeria-based provider, it is written to comply
+        with the Nigeria Data Protection Act 2023 (NDPA) and the Nigeria Data Protection
+        Regulation (NDPR).
       </p>
 
       <H2>Who this policy covers</H2>
