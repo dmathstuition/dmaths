@@ -46,29 +46,29 @@ export default function Home() {
       {/* HERO — full-bleed image with overlaid content */}
       <section className="relative isolate flex min-h-[80vh] items-center overflow-hidden bg-board">
         <Image src="/camp-hero.png" alt="" fill priority sizes="100vw"
-          className="object-cover object-center opacity-90 md:object-right" />
+          className="hero-zoom object-cover object-center opacity-90 md:object-right" />
         {/* Legibility overlay — darker on the left where the text sits */}
         <div className="absolute inset-0 bg-gradient-to-r from-board/95 via-board/75 to-board/30" />
         <div className="absolute inset-0 bg-gradient-to-t from-board/80 via-transparent to-board/20" />
 
         <div className="relative mx-auto w-full max-w-6xl px-5 py-24">
           <div className="max-w-2xl text-white">
-            <p className="text-[13px] font-bold uppercase tracking-[0.2em] text-gold">Supporting every learner, everywhere</p>
-            <h1 className="mt-4 font-display text-4xl font-extrabold leading-[1.08] tracking-tight sm:text-5xl md:text-6xl">
+            <p className="hero-rise text-[13px] font-bold uppercase tracking-[0.2em] text-gold">Supporting every learner, everywhere</p>
+            <h1 className="hero-rise mt-4 font-display text-4xl font-extrabold leading-[1.08] tracking-tight sm:text-5xl md:text-6xl" style={{ animationDelay: ".08s" }}>
               A modern online academy for <span className="text-gold">today&apos;s learners</span>
             </h1>
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-white/75 sm:text-lg">
+            <p className="hero-rise mt-5 max-w-xl text-base leading-relaxed text-white/75 sm:text-lg" style={{ animationDelay: ".16s" }}>
               Structured teaching, expert tutors and a supportive learning environment — in maths,
               sciences and coding — anywhere in the world.
             </p>
-            <div className="mt-8 flex flex-wrap items-center gap-3">
+            <div className="hero-rise mt-8 flex flex-wrap items-center gap-3" style={{ animationDelay: ".24s" }}>
               <Link href="/apply" className="btn-gold !min-h-[52px] !rounded-full !px-8 !text-base shadow-lg shadow-black/20">Enrol your child</Link>
               <a href="https://wa.me/2347025674894" target="_blank" rel="noopener noreferrer"
                 className="btn !min-h-[52px] !rounded-full border border-white/30 bg-white/10 !px-7 !text-base font-bold text-white backdrop-blur transition hover:bg-white/20">
                 Chat on WhatsApp
               </a>
             </div>
-            <div className="mt-9">
+            <div className="hero-rise mt-9" style={{ animationDelay: ".32s" }}>
               <p className="text-[11px] font-bold uppercase tracking-wider text-white/50">Preparation for</p>
               <div className="mt-2.5 flex flex-wrap gap-2">
                 {EXAMS.map(e => (
