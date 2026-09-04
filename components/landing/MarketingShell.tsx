@@ -7,7 +7,7 @@ import ChatWidget from "@/components/landing/ChatWidget";
 // page content, the footer, and the help chatbot.
 export default function MarketingShell({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen bg-white font-body text-ink">
+    <div className="marketing-bg min-h-screen font-body text-ink">
       <a href="#main" className="skip-link">Skip to main content</a>
       <LandingNav />
       <main id="main" tabIndex={-1} className="pt-16">{children}</main>

@@ -84,7 +84,7 @@ export default function Home() {
       <section className="mx-auto max-w-6xl px-5 py-14">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {HIGHLIGHTS.map(h => (
-            <div key={h.t} className="rounded-2xl border border-line bg-white p-5">
+            <div key={h.t} className="glass-card p-5">
               <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gold-pale text-gold-deep">
                 <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
               </span>
@@ -107,7 +107,7 @@ export default function Home() {
           </div>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {SUBJECTS.map(s => (
-              <div key={s.t} className="rounded-2xl border border-line bg-white p-6">
+              <div key={s.t} className="glass-card p-6">
                 <h3 className="font-display text-lg font-bold text-ink">{s.t}</h3>
                 <p className="mt-2 text-[13px] leading-relaxed text-ink/55">{s.d}</p>
               </div>
@@ -134,7 +134,7 @@ export default function Home() {
           <h2 className="text-center font-display text-2xl font-bold text-ink md:text-3xl">What families say</h2>
           <div className="mt-8 grid gap-5 md:grid-cols-3">
             {TESTIMONIALS.map(t => (
-              <figure key={t.n} className="rounded-2xl border border-line bg-white p-6">
+              <figure key={t.n} className="glass-card p-6">
                 <div className="text-gold">{"★".repeat(5)}</div>
                 <blockquote className="mt-3 text-[14px] leading-relaxed text-ink/70">&ldquo;{t.t}&rdquo;</blockquote>
                 <figcaption className="mt-4 border-t border-line pt-3">

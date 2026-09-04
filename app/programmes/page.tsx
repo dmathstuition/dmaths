@@ -30,7 +30,7 @@ export default function ProgrammesPage() {
       <section className="mx-auto max-w-6xl px-5 py-14">
         <div className="grid gap-4 sm:grid-cols-2">
           {SERVICES.map(s => (
-            <div key={s.t} className="rounded-2xl border border-line bg-white p-6">
+            <div key={s.t} className="glass-card p-6">
               <h2 className="font-display text-lg font-bold text-ink">{s.t}</h2>
               <p className="mt-2 text-[14px] leading-relaxed text-ink/60">{s.d}</p>
             </div>
@@ -47,7 +47,7 @@ export default function ProgrammesPage() {
           <h2 className="text-center font-display text-2xl font-bold text-ink md:text-3xl">How it works</h2>
           <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {STEPS.map((s, i) => (
-              <div key={s.t} className="rounded-2xl border border-line bg-white p-6">
+              <div key={s.t} className="glass-card p-6">
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gold font-display text-sm font-bold text-white">{i + 1}</span>
                 <h3 className="mt-4 font-display text-base font-bold text-ink">{s.t}</h3>
                 <p className="mt-1.5 text-[13px] leading-relaxed text-ink/55">{s.d}</p>

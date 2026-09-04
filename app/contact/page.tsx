@@ -15,18 +15,18 @@ export default function ContactPage() {
 
       <section className="mx-auto max-w-6xl px-5 py-14">
         <div className="grid gap-4 sm:grid-cols-3">
-          <a href="mailto:support@dmaths.academy" className="rounded-2xl border border-line bg-white p-6 transition hover:border-gold/50 hover:shadow-sm">
+          <a href="mailto:support@dmaths.academy" className="glass-card p-6 transition hover:border-gold/50 hover:shadow-sm">
             <p className="text-[12px] font-bold uppercase tracking-wider text-ink/40">Email</p>
             <p className="mt-2 font-display text-base font-bold text-ink">support@dmaths.academy</p>
             <p className="mt-1 text-[13px] text-ink/55">We reply within 24 hours.</p>
           </a>
           <a href="https://wa.me/2347025674894" target="_blank" rel="noopener noreferrer"
-            className="rounded-2xl border border-line bg-white p-6 transition hover:border-gold/50 hover:shadow-sm">
+            className="glass-card p-6 transition hover:border-gold/50 hover:shadow-sm">
             <p className="text-[12px] font-bold uppercase tracking-wider text-ink/40">WhatsApp</p>
             <p className="mt-2 font-display text-base font-bold text-ink">+234 70 2567 4894</p>
             <p className="mt-1 text-[13px] text-ink/55">Chat with our team directly.</p>
           </a>
-          <div className="rounded-2xl border border-line bg-white p-6">
+          <div className="glass-card p-6">
             <p className="text-[12px] font-bold uppercase tracking-wider text-ink/40">Centre</p>
             <p className="mt-2 font-display text-base font-bold text-ink">Asaba, Delta State</p>
             <p className="mt-1 text-[13px] text-ink/55">Fully online — study from anywhere in Nigeria.</p>

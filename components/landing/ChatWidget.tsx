@@ -83,7 +83,7 @@ export default function ChatWidget() {
 
           {view === "home" ? (
             <div className="flex-1 overflow-y-auto bg-chalk/40 p-4">
-              <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-line">
+              <div className="glass-card p-4">
                 <p className="text-[15px] font-semibold text-ink">Hi, how can we help?</p>
                 <p className="mt-1 text-[13px] text-ink/55">Ask a question or pick one below.</p>
                 <button onClick={() => { setView("chat"); }}
@@ -93,7 +93,7 @@ export default function ChatWidget() {
                 </button>
               </div>
 
-              <div className="mt-4 rounded-2xl bg-white shadow-sm ring-1 ring-line">
+              <div className="glass-card mt-4">
                 <p className="border-b border-line px-4 py-3 text-[13px] font-bold text-ink/70">Frequently asked</p>
                 {FAQS.map((f) => (
                   <button key={f.q} onClick={() => ask(f.q, f.a)}
