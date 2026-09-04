@@ -1,5 +1,6 @@
 import Link from "next/link";
 import MarketingShell, { PageHeader } from "@/components/landing/MarketingShell";
+import Reveal from "@/components/landing/Reveal";
 import { PRICING_TIERS, PORTAL_BENEFITS, NGN_PER_USD, fmtNgn, fmtUsd, usdFromNgn } from "@/lib/pricing";
 
 export const metadata = {
@@ -24,8 +25,8 @@ export default function PricingPage() {
       {/* Pricing cards */}
       <section className="mx-auto max-w-6xl px-5 py-14">
         <div className="grid gap-5 md:grid-cols-3">
-          {PRICING_TIERS.map((t) => (
-            <div key={t.id} className={`glass-card relative flex h-full flex-col !rounded-3xl p-7 ${t.highlight ? "ring-2 ring-gold" : ""}`}>
+          {PRICING_TIERS.map((t, i) => (
+            <Reveal key={t.id} delay={i * 80} className={`glass-card relative flex h-full flex-col !rounded-3xl p-7 ${t.highlight ? "ring-2 ring-gold" : ""}`}>
               {t.highlight && (
                 <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gold px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white">Popular</span>
               )}
@@ -51,7 +52,7 @@ export default function PricingPage() {
               <Link href="/apply" className={`mt-7 inline-flex items-center justify-center !rounded-full !px-6 ${t.highlight ? "btn-gold" : "btn border border-gold/50 bg-white text-gold-deep hover:bg-gold-pale"}`}>
                 Register
               </Link>
-            </div>
+            </Reveal>
           ))}
         </div>
         <p className="mx-auto mt-6 max-w-2xl text-center text-[13px] text-ink/45">
@@ -64,12 +65,12 @@ export default function PricingPage() {
         <div className="mx-auto max-w-6xl px-5 py-14">
           <h2 className="text-center font-display text-2xl font-bold text-ink md:text-3xl">How billing works</h2>
           <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {BILLING.map((s) => (
-              <div key={s.n} className="glass-card p-6">
+            {BILLING.map((s, i) => (
+              <Reveal key={s.n} delay={i * 70} className="glass-card p-6">
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gold font-display text-sm font-bold text-white">{s.n}</span>
                 <h3 className="mt-4 font-display text-base font-bold text-ink">{s.t}</h3>
                 <p className="mt-1.5 text-[13px] leading-relaxed text-ink/55">{s.d}</p>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
