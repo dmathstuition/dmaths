@@ -30,7 +30,7 @@ export default function LandingNav() {
   const isActive = (href: string) => (href === "/" ? path === "/" : path === href || path.startsWith(href + "/"));
 
   return (
-    <nav className={`fixed inset-x-0 top-0 z-50 border-b bg-white/95 backdrop-blur transition-shadow ${scrolled ? "border-line shadow-sm" : "border-transparent"}`}>
+    <nav className={`fixed inset-x-0 top-0 z-50 border-b bg-white/70 backdrop-blur-xl backdrop-saturate-150 transition-shadow ${scrolled ? "border-white/60 shadow-sm" : "border-transparent"}`}>
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
         <Link href="/" className="flex items-center" aria-label="D-Maths home"><Logo size="lg" /></Link>
 

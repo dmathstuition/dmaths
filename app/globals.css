@@ -79,6 +79,17 @@ body { @apply bg-chalk text-ink font-body antialiased; }
   box-shadow: 0 2px 4px rgba(26,96,171,.06), 0 14px 36px rgba(26,96,171,.12);
 }
 
+/* ── Soft tinted backdrop for the marketing site ────────── */
+/* Gives glass cards something to frost over instead of flat white. */
+.marketing-bg {
+  background:
+    radial-gradient(1100px 480px at 88% -6%, rgba(239,174,86,.12), transparent 60%),
+    radial-gradient(900px 460px at -8% 10%, rgba(26,96,171,.08), transparent 55%),
+    radial-gradient(820px 520px at 55% 118%, rgba(239,174,86,.07), transparent 60%),
+    #F7F8FB;
+}
+.glass-card:hover { box-shadow: 0 2px 6px rgba(26,96,171,.07), 0 16px 44px rgba(26,96,171,.13); }
+
 /* ── Soft gradient backdrop for portal pages ────────────── */
 .portal-bg {
   background:

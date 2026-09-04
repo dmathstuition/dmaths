@@ -25,7 +25,7 @@ export default function PricingPage() {
       <section className="mx-auto max-w-6xl px-5 py-14">
         <div className="grid gap-5 md:grid-cols-3">
           {PRICING_TIERS.map((t) => (
-            <div key={t.id} className={`relative flex h-full flex-col rounded-3xl border bg-white p-7 ${t.highlight ? "border-gold shadow-md" : "border-line"}`}>
+            <div key={t.id} className={`glass-card relative flex h-full flex-col !rounded-3xl p-7 ${t.highlight ? "ring-2 ring-gold" : ""}`}>
               {t.highlight && (
                 <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gold px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white">Popular</span>
               )}
@@ -65,7 +65,7 @@ export default function PricingPage() {
           <h2 className="text-center font-display text-2xl font-bold text-ink md:text-3xl">How billing works</h2>
           <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {BILLING.map((s) => (
-              <div key={s.n} className="rounded-2xl border border-line bg-white p-6">
+              <div key={s.n} className="glass-card p-6">
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gold font-display text-sm font-bold text-white">{s.n}</span>
                 <h3 className="mt-4 font-display text-base font-bold text-ink">{s.t}</h3>
                 <p className="mt-1.5 text-[13px] leading-relaxed text-ink/55">{s.d}</p>
