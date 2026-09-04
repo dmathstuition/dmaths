@@ -186,7 +186,7 @@ export default function Login() {
           <div className="flex items-center gap-0.5 text-gold">
             {[0, 1, 2, 3, 4].map((n) => <Icon key={n} name="star" className="h-4 w-4" />)}
           </div>
-          <p className="mt-1.5 text-xs leading-relaxed text-white/70">Loved by students &amp; parents across Nigeria — secure, private, and always in sync.</p>
+          <p className="mt-1.5 text-xs leading-relaxed text-white/70">Loved by students &amp; parents worldwide — secure, private, and always in sync.</p>
         </div>
         {/* soft ambient glow behind the mascot */}
         <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-[54%] w-[46%] rounded-full bg-[radial-gradient(circle,rgba(203,223,247,0.28),transparent_62%)] blur-2xl" />

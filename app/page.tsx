@@ -34,7 +34,7 @@ const TESTIMONIALS = [
 
 export const metadata = {
   title: "D-Maths Tuition — online maths, science & coding tuition",
-  description: "A virtual learning community delivering world-class online tuition in maths, sciences and coding across Nigeria, with preparation for WAEC, JAMB, IGCSE, SAT and A-Levels.",
+  description: "A virtual learning community delivering world-class online tuition in maths, sciences and coding worldwide, with preparation for WAEC, JAMB, IGCSE, SAT and A-Levels.",
 };
 
 export default function Home() {
@@ -59,7 +59,7 @@ export default function Home() {
             </h1>
             <p className="mt-5 max-w-xl text-base leading-relaxed text-white/75 sm:text-lg">
               Structured teaching, expert tutors and a supportive learning environment — in maths,
-              sciences and coding, anywhere in Nigeria.
+              sciences and coding — anywhere in the world.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Link href="/apply" className="btn-gold !min-h-[52px] !rounded-full !px-8 !text-base shadow-lg shadow-black/20">Enrol your child</Link>
@@ -152,7 +152,7 @@ export default function Home() {
         <div className="flex flex-col items-center justify-between gap-5 rounded-3xl bg-board px-8 py-10 text-center sm:flex-row sm:px-12 sm:text-left">
           <div>
             <p className="font-display text-2xl font-bold text-white md:text-3xl">Ready to get started?</p>
-            <p className="mt-1.5 text-sm text-white/60">100% online — study from home, anywhere in Nigeria. Setup takes minutes.</p>
+            <p className="mt-1.5 text-sm text-white/60">100% online — study from home, anywhere in the world. Setup takes minutes.</p>
           </div>
           <Link href="/apply" className="btn-gold !min-h-[48px] !rounded-full !px-8 !text-base">Register now</Link>
         </div>

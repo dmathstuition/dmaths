@@ -29,7 +29,7 @@ export default function ContactPage() {
           <div className="glass-card p-6">
             <p className="text-[12px] font-bold uppercase tracking-wider text-ink/40">Centre</p>
             <p className="mt-2 font-display text-base font-bold text-ink">Asaba, Delta State</p>
-            <p className="mt-1 text-[13px] text-ink/55">Fully online — study from anywhere in Nigeria.</p>
+            <p className="mt-1 text-[13px] text-ink/55">Fully online — study from anywhere in the world.</p>
           </div>
         </div>
 

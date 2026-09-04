@@ -100,7 +100,7 @@ export default function PricingPage() {
         <div className="flex flex-col items-center justify-between gap-5 rounded-3xl border border-line bg-chalk/50 px-8 py-10 text-center sm:flex-row sm:px-12 sm:text-left">
           <div>
             <p className="font-display text-2xl font-bold text-ink">Ready to start learning?</p>
-            <p className="mt-1.5 text-sm text-ink/55">Register in minutes — 100% online, anywhere in Nigeria.</p>
+            <p className="mt-1.5 text-sm text-ink/55">Register in minutes — 100% online, anywhere in the world.</p>
           </div>
           <Link href="/apply" className="btn-gold !min-h-[48px] !rounded-full !px-8">Register now</Link>
         </div>
