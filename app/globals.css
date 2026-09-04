@@ -79,6 +79,15 @@ body { @apply bg-chalk text-ink font-body antialiased; }
   box-shadow: 0 2px 4px rgba(26,96,171,.06), 0 14px 36px rgba(26,96,171,.12);
 }
 
+/* ── Small, tasteful landing-hero motion ────────────────── */
+@keyframes heroRise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+.hero-rise { animation: heroRise .7s cubic-bezier(.2,.7,.2,1) both; }
+@keyframes heroZoom { from { transform: scale(1.05); } to { transform: scale(1.13); } }
+.hero-zoom { animation: heroZoom 20s ease-out both; }
+@media (prefers-reduced-motion: reduce) {
+  .hero-rise, .hero-zoom { animation: none; }
+}
+
 /* ── Soft tinted backdrop for the marketing site ────────── */
 /* Gives glass cards something to frost over instead of flat white. */
 .marketing-bg {
