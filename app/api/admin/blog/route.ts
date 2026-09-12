@@ -16,6 +16,11 @@ async function allPosts(admin: ReturnType<typeof supabaseAdmin>) {
   return data ?? [];
 }
 
+async function allComments(admin: ReturnType<typeof supabaseAdmin>) {
+  const { data } = await admin.from("blog_comments").select("*").order("created_at", { ascending: false });
+  return data ?? [];
+}
+
 // Find a slug that's free (ignoring the post we're editing).
 async function uniqueSlug(admin: ReturnType<typeof supabaseAdmin>, base: string, ignoreId?: string): Promise<string> {
   let slug = slugify(base);
@@ -72,6 +77,20 @@ export async function POST(req: Request) {
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     }
     return NextResponse.json({ ok: true, posts: await allPosts(admin) });
+  }
+
+  // Comment moderation (targets a comment by id).
+  if (action === "comment_approve" || action === "comment_delete") {
+    const commentId = String(b?.commentId ?? "");
+    if (!commentId) return NextResponse.json({ error: "commentId required" }, { status: 400 });
+    if (action === "comment_approve") {
+      const { error } = await admin.from("blog_comments").update({ status: "approved" }).eq("id", commentId);
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    } else {
+      const { error } = await admin.from("blog_comments").delete().eq("id", commentId);
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ ok: true, comments: await allComments(admin) });
   }
 
   // Actions that target one existing post by id.

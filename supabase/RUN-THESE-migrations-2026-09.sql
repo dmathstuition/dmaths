@@ -8,6 +8,7 @@
 --    • Aptitude tests                         (aptitude_tests table)  ← fixes "no draft after approval"
 --    • Enrolment packages                     (package_tier, school, availability)
 --    • Blog + newsletter                       (blog_posts, blog_subscribers)
+--    • Blog engagement                        (blog_comments, blog_reactions)
 --  Mirrors the individual files in this folder; keep them in sync if edited.
 -- ════════════════════════════════════════════════════════════════════
 
@@ -97,3 +98,31 @@ create table if not exists blog_subscribers (
 create index if not exists blog_subscribers_created_idx on blog_subscribers(created_at desc);
 alter table blog_subscribers enable row level security;
 -- Subscribing and reading the list both go through the service-role API.
+
+-- ── Blog engagement: reactions + comments ───────────────────────────
+create table if not exists blog_comments (
+  id           uuid primary key default gen_random_uuid(),
+  post_id      uuid not null references blog_posts(id) on delete cascade,
+  author_name  text not null default 'Anonymous',
+  body         text not null,
+  status       text not null default 'pending',  -- pending|approved
+  client_id    text,
+  created_at   timestamptz not null default now()
+);
+create index if not exists blog_comments_post_idx   on blog_comments(post_id);
+create index if not exists blog_comments_status_idx on blog_comments(status);
+alter table blog_comments enable row level security;
+drop policy if exists "approved comments are public" on blog_comments;
+create policy "approved comments are public" on blog_comments for select using (status = 'approved');
+
+create table if not exists blog_reactions (
+  id          uuid primary key default gen_random_uuid(),
+  post_id     uuid not null references blog_posts(id) on delete cascade,
+  client_id   text not null,
+  emoji       text not null,
+  created_at  timestamptz not null default now(),
+  unique (post_id, client_id, emoji)
+);
+create index if not exists blog_reactions_post_idx on blog_reactions(post_id);
+alter table blog_reactions enable row level security;
+-- Reactions and comment submission/moderation all go through the service-role API.
