@@ -1,6 +1,6 @@
 "use client";
 import { useMemo, useRef, useState } from "react";
-import { LAYOUTS, ACCENTS, accentOf, slugify, formatDate, type BlogPost, type BlogSubscriber } from "@/lib/blog";
+import { LAYOUTS, ACCENTS, accentOf, slugify, formatDate, type BlogPost, type BlogSubscriber, type BlogComment } from "@/lib/blog";
 
 type Draft = {
   id: string | null;
@@ -14,19 +14,22 @@ const EMPTY: Draft = {
   cover_url: "", category: "", tags: "", layout: "standard", accent: "gold", author: "D-Maths",
 };
 
-export default function BlogAdminClient({ initialPosts, subscribers }: { initialPosts: BlogPost[]; subscribers: BlogSubscriber[] }) {
+export default function BlogAdminClient({ initialPosts, subscribers, initialComments }: { initialPosts: BlogPost[]; subscribers: BlogSubscriber[]; initialComments: BlogComment[] }) {
   const [posts, setPosts] = useState<BlogPost[]>(initialPosts);
+  const [comments, setComments] = useState<BlogComment[]>(initialComments);
   const [d, setD] = useState<Draft>(EMPTY);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const [ok, setOk] = useState("");
-  const [tab, setTab] = useState<"posts" | "subscribers">("posts");
+  const [tab, setTab] = useState<"posts" | "comments" | "subscribers">("posts");
 
   const [coverBusy, setCoverBusy] = useState(false);
   const [bodyImgBusy, setBodyImgBusy] = useState(false);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
 
   const active = subscribers.filter((s) => !s.unsubscribed_at);
+  const pending = comments.filter((c) => c.status === "pending");
+  const postTitle = (id: string) => posts.find((p) => p.id === id)?.title ?? "(deleted post)";
   const editing = !!d.id;
 
   const previewSlug = useMemo(() => slugify(d.slug || d.title), [d.slug, d.title]);
@@ -83,6 +86,7 @@ export default function BlogAdminClient({ initialPosts, subscribers }: { initial
       const json = await res.json().catch(() => ({}));
       if (!res.ok) { setErr(json.error || "Something went wrong."); return false; }
       if (json.posts) setPosts(json.posts as BlogPost[]);
+      if (json.comments) setComments(json.comments as BlogComment[]);
       return true;
     } catch { setErr("Network error — please try again."); return false; }
     finally { setBusy(false); }
@@ -123,6 +127,9 @@ export default function BlogAdminClient({ initialPosts, subscribers }: { initial
         <h1 className="font-display text-3xl font-semibold">Blog</h1>
         <div className="flex rounded-full border border-line bg-white p-1 text-sm font-bold">
           <button onClick={() => setTab("posts")} className={`rounded-full px-4 py-1.5 transition ${tab === "posts" ? "bg-gold text-white" : "text-ink/60"}`}>Posts ({posts.length})</button>
+          <button onClick={() => setTab("comments")} className={`relative rounded-full px-4 py-1.5 transition ${tab === "comments" ? "bg-gold text-white" : "text-ink/60"}`}>
+            Comments{pending.length > 0 && <span className={`ml-1.5 rounded-full px-1.5 py-0.5 text-[11px] ${tab === "comments" ? "bg-white/25" : "bg-red-500 text-white"}`}>{pending.length}</span>}
+          </button>
           <button onClick={() => setTab("subscribers")} className={`rounded-full px-4 py-1.5 transition ${tab === "subscribers" ? "bg-gold text-white" : "text-ink/60"}`}>Subscribers ({active.length})</button>
         </div>
       </div>
@@ -265,6 +272,33 @@ export default function BlogAdminClient({ initialPosts, subscribers }: { initial
             );
           })}
         </>
+      )}
+
+      {tab === "comments" && (
+        <div className="space-y-4">
+          {comments.length === 0 && <div className="card p-12 text-center text-ink/40">No comments yet.</div>}
+          {pending.length > 0 && (
+            <p className="text-sm font-semibold text-ink/60">{pending.length} comment{pending.length === 1 ? "" : "s"} awaiting approval.</p>
+          )}
+          {comments.map((c) => (
+            <article key={c.id} className={`card p-5 ${c.status === "pending" ? "border-l-4 border-l-amber-400" : ""}`}>
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-bold text-ink">{c.author_name || "Anonymous"}</span>
+                    <span className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${c.status === "approved" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>{c.status === "approved" ? "Approved" : "Pending"}</span>
+                    <span className="text-[12px] text-ink/40">on “{postTitle(c.post_id)}” · {formatDate(c.created_at)}</span>
+                  </div>
+                  <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-ink/70">{c.body}</p>
+                </div>
+                <div className="flex items-center gap-3 text-sm font-bold">
+                  {c.status === "pending" && <button className="text-emerald-700 hover:underline" onClick={() => call({ action: "comment_approve", commentId: c.id })} disabled={busy}>Approve</button>}
+                  <button className="text-red-600 hover:underline" onClick={() => { if (confirm("Delete this comment permanently?")) call({ action: "comment_delete", commentId: c.id }); }} disabled={busy}>Delete</button>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
       )}
 
       {tab === "subscribers" && (

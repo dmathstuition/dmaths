@@ -30,6 +30,38 @@ export type BlogSubscriber = {
   created_at: string;
 };
 
+export type BlogComment = {
+  id: string;
+  post_id: string;
+  author_name: string;
+  body: string;
+  status: "pending" | "approved";
+  client_id: string | null;
+  created_at: string;
+};
+
+// The emoji reactions a visitor can leave on a post.
+export const REACTIONS = [
+  { emoji: "👍", label: "Helpful" },
+  { emoji: "❤️", label: "Love it" },
+  { emoji: "🎉", label: "Celebrate" },
+  { emoji: "💡", label: "Insightful" },
+] as const;
+
+// A stable per-browser id (anonymous), used to let a visitor toggle their own
+// reactions and to lightly dedupe. Browser-only; returns "" on the server.
+export function getClientId(): string {
+  if (typeof window === "undefined") return "";
+  try {
+    let id = localStorage.getItem("dmaths_cid");
+    if (!id) {
+      id = (crypto?.randomUUID?.() ?? `c${Date.now()}${Math.random().toString(36).slice(2)}`);
+      localStorage.setItem("dmaths_cid", id);
+    }
+    return id;
+  } catch { return ""; }
+}
+
 // The layouts an admin can pick per post — this is what lets each post be
 // "designed in a different form".
 export const LAYOUTS = [

@@ -3,8 +3,10 @@ import { notFound } from "next/navigation";
 import MarketingShell from "@/components/landing/MarketingShell";
 import BlogContent from "@/components/blog/BlogContent";
 import NewsletterSignup from "@/components/blog/NewsletterSignup";
+import ReactionBar from "@/components/blog/ReactionBar";
+import Comments from "@/components/blog/Comments";
 import { supabaseServer } from "@/lib/supabase/server";
-import { accentOf, previewOf, readingTime, formatDate, type BlogPost } from "@/lib/blog";
+import { accentOf, previewOf, readingTime, formatDate, type BlogPost, type BlogComment } from "@/lib/blog";
 
 export const dynamic = "force-dynamic";
 
@@ -38,6 +40,12 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
   const p = await getPost(params.slug);
   if (!p) notFound();
   const a = accentOf(p.accent);
+
+  // Approved comments only (public RLS enforces this too).
+  const { data: commentRows } = await supabaseServer()
+    .from("blog_comments").select("*").eq("post_id", p.id).eq("status", "approved")
+    .order("created_at", { ascending: false });
+  const comments = (commentRows ?? []) as BlogComment[];
   const wide = p.layout === "wide";
   const minimal = p.layout === "minimal";
 
@@ -88,6 +96,16 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
             ))}
           </div>
         )}
+
+        {/* Reactions */}
+        <div className="mt-8 border-t border-line pt-6">
+          <ReactionBar postId={p.id} />
+        </div>
+
+        {/* Comments */}
+        <div className="mt-10 border-t border-line pt-8">
+          <Comments postId={p.id} initial={comments} />
+        </div>
       </article>
 
       {/* Newsletter */}
