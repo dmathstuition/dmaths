@@ -87,6 +87,7 @@ export default function BlogAdminClient({ initialPosts, subscribers, initialComm
       if (!res.ok) { setErr(json.error || "Something went wrong."); return false; }
       if (json.posts) setPosts(json.posts as BlogPost[]);
       if (json.comments) setComments(json.comments as BlogComment[]);
+      if (json.message) setOk(json.message);
       return true;
     } catch { setErr("Network error — please try again."); return false; }
     finally { setBusy(false); }
@@ -250,6 +251,7 @@ export default function BlogAdminClient({ initialPosts, subscribers, initialComm
                     <div className="flex flex-wrap items-center gap-2">
                       <span className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${p.status === "published" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>{p.status === "published" ? "Published" : "Draft"}</span>
                       {p.featured && <span className="rounded-full bg-gold/15 px-2 py-0.5 text-[11px] font-bold text-gold-deep">★ Featured</span>}
+                      {p.announced_at && <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-bold text-sky-700">✉ Emailed</span>}
                       <span className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${cls.softBg} ${cls.text}`}>{p.layout} · {p.accent}</span>
                       {p.category && <span className="text-[11px] font-semibold text-ink/40">{p.category}</span>}
                     </div>
@@ -263,6 +265,11 @@ export default function BlogAdminClient({ initialPosts, subscribers, initialComm
                     {p.status === "published"
                       ? <button className="text-amber-700 hover:underline" onClick={() => call({ action: "unpublish", id: p.id })} disabled={busy}>Unpublish</button>
                       : <button className="text-emerald-700 hover:underline" onClick={() => call({ action: "publish", id: p.id })} disabled={busy}>Publish</button>}
+                    {p.status === "published" && (
+                      <button className="text-sky-700 hover:underline"
+                        onClick={() => { if (confirm(p.announced_at ? "Re-send this post to all subscribers?" : "Email this post to all subscribers now?")) call({ action: "notify", id: p.id }); }}
+                        disabled={busy}>Email subscribers</button>
+                    )}
                     <button className="text-ink/60 hover:underline" onClick={() => call({ action: "feature", id: p.id, featured: !p.featured })} disabled={busy}>{p.featured ? "Unfeature" : "Feature"}</button>
                     <button className="text-gold-deep hover:underline" onClick={() => edit(p)}>Edit</button>
                     <button className="text-red-600 hover:underline" onClick={() => del(p.id)} disabled={busy}>Delete</button>
