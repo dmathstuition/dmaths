@@ -23,7 +23,7 @@ export default function MarketingFooter() {
             and coding worldwide — with prep for WAEC, JAMB, IGCSE, SAT and A-Levels.
           </p>
         </div>
-        <Col title="Explore" links={[["About", "/about"], ["Programmes", "/programmes"], ["Pricing", "/pricing"], ["Contact", "/contact"]]} />
+        <Col title="Explore" links={[["About", "/about"], ["Programmes", "/programmes"], ["Pricing", "/pricing"], ["Blog", "/blog"], ["Contact", "/contact"]]} />
         <Col title="Get started" links={[["Register", "/apply"], ["Sign in", "/login"], ["Help & FAQ", "/help"]]} />
         <Col title="Legal" links={[["Privacy Policy", "/privacy"], ["Terms of Service", "/terms"], ["Payment & Refunds", "/refunds"], ["Delete account", "/delete-account"]]} />
       </div>
