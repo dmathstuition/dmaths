@@ -126,3 +126,6 @@ create table if not exists blog_reactions (
 create index if not exists blog_reactions_post_idx on blog_reactions(post_id);
 alter table blog_reactions enable row level security;
 -- Reactions and comment submission/moderation all go through the service-role API.
+
+-- Blog: track subscriber announcement to prevent duplicate email blasts.
+alter table blog_posts add column if not exists announced_at timestamptz;

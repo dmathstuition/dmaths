@@ -52,3 +52,6 @@ create index if not exists blog_subscribers_created_idx on blog_subscribers(crea
 alter table blog_subscribers enable row level security;
 -- No public policies: subscribing and reading the list both go through the
 -- service-role API (public subscribe route / admin-only list).
+
+-- Track when subscribers were emailed about a post (prevents duplicate blasts).
+alter table blog_posts add column if not exists announced_at timestamptz;
