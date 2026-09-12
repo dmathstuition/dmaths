@@ -4,8 +4,8 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { rateLimit, clientKey } from "@/lib/ratelimit";
 
 const MAX_SIZE = 10 * 1024 * 1024; // 10 MB — protects your 1GB free-tier storage
-const ALLOWED_EXT = ["pdf", "doc", "docx", "ppt", "pptx", "jpg", "jpeg", "png"];
-const ALLOWED_BUCKETS = ["materials", "curricula", "assignments", "submissions", "question-images"];
+const ALLOWED_EXT = ["pdf", "doc", "docx", "ppt", "pptx", "jpg", "jpeg", "png", "webp", "gif"];
+const ALLOWED_BUCKETS = ["materials", "curricula", "assignments", "submissions", "question-images", "blog"];
 
 export async function POST(req: Request) {
   if (!rateLimit(clientKey(req, "upload"), 15, 60_000)) {
