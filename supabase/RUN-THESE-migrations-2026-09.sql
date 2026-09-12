@@ -7,6 +7,7 @@
 --    • Application intake profile             (applications.strengths/…)
 --    • Aptitude tests                         (aptitude_tests table)  ← fixes "no draft after approval"
 --    • Enrolment packages                     (package_tier, school, availability)
+--    • Blog + newsletter                       (blog_posts, blog_subscribers)
 --  Mirrors the individual files in this folder; keep them in sync if edited.
 -- ════════════════════════════════════════════════════════════════════
 
@@ -59,3 +60,40 @@ create index if not exists aptitude_tests_student_idx on aptitude_tests(student_
 create index if not exists aptitude_tests_status_idx  on aptitude_tests(status);
 alter table aptitude_tests enable row level security;
 -- All access is via service-role API routes, so no policies are needed.
+
+-- ── Blog + newsletter ────────────────────────────────────────────────
+create table if not exists blog_posts (
+  id            uuid primary key default gen_random_uuid(),
+  title         text not null,
+  slug          text not null unique,
+  excerpt       text default '',
+  body          text default '',
+  cover_url     text default '',
+  category      text default '',
+  tags          text[] not null default '{}',
+  layout        text not null default 'standard',  -- standard|wide|minimal
+  accent        text not null default 'gold',      -- gold|navy|green|plum
+  status        text not null default 'draft',     -- draft|published
+  author        text default 'D-Maths',
+  featured      boolean not null default false,
+  published_at  timestamptz,
+  created_by    uuid references profiles(id),
+  created_at    timestamptz not null default now(),
+  updated_at    timestamptz not null default now()
+);
+create index if not exists blog_posts_status_idx   on blog_posts(status);
+create index if not exists blog_posts_published_idx on blog_posts(published_at desc);
+alter table blog_posts enable row level security;
+drop policy if exists "published posts are public" on blog_posts;
+create policy "published posts are public" on blog_posts for select using (status = 'published');
+
+create table if not exists blog_subscribers (
+  id              uuid primary key default gen_random_uuid(),
+  email           text not null unique,
+  source          text default 'blog',
+  unsubscribed_at timestamptz,
+  created_at      timestamptz not null default now()
+);
+create index if not exists blog_subscribers_created_idx on blog_subscribers(created_at desc);
+alter table blog_subscribers enable row level security;
+-- Subscribing and reading the list both go through the service-role API.

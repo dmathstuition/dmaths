@@ -148,8 +148,20 @@ export default function Home() {
         </div>
       </section>
 
+      {/* BLOG */}
+      <section className="mx-auto max-w-6xl px-5 py-14">
+        <Reveal className="glass-card flex flex-col items-center justify-between gap-5 !rounded-3xl p-8 text-center sm:flex-row sm:p-10 sm:text-left">
+          <div className="max-w-xl">
+            <p className="text-[12px] font-bold uppercase tracking-[0.18em] text-gold-deep">From the blog</p>
+            <h2 className="mt-2 font-display text-2xl font-bold text-ink md:text-3xl">Study tips, exam guidance & news</h2>
+            <p className="mt-2 text-sm leading-relaxed text-ink/55">Read our tutors&apos; articles on getting the most from every subject — and subscribe to hear about new posts.</p>
+          </div>
+          <Link href="/blog" className="btn-gold !min-h-[48px] flex-shrink-0 !rounded-full !px-8">Read the blog</Link>
+        </Reveal>
+      </section>
+
       {/* CTA */}
-      <section className="mx-auto max-w-6xl px-5 py-16">
+      <section className="mx-auto max-w-6xl px-5 pb-16">
         <Reveal className="flex flex-col items-center justify-between gap-5 rounded-3xl bg-board px-8 py-10 text-center sm:flex-row sm:px-12 sm:text-left">
           <div>
             <p className="font-display text-2xl font-bold text-white md:text-3xl">Ready to get started?</p>

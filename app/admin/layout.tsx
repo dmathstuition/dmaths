@@ -34,6 +34,7 @@ const NAV: NavItem[] = [
   { href: "/admin/lesson-log", label: "Lesson log", icon: "book" },
   { href: "/admin/calendar", label: "Calendar", icon: "calendar" },
   { href: "/admin/notices", label: "Announcements", icon: "notices" },
+  { href: "/admin/blog", label: "Blog", icon: "book" },
   { href: "/admin/broadcast", label: "Broadcast", icon: "messages" },
   { href: "/admin/activity", label: "Activity", icon: "reports" },
   { href: "/admin/behavior", label: "Behaviour", icon: "checkCircle" },
