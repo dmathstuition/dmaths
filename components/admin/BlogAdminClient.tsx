@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { LAYOUTS, ACCENTS, accentOf, slugify, formatDate, type BlogPost, type BlogSubscriber } from "@/lib/blog";
 
 type Draft = {
@@ -22,10 +22,57 @@ export default function BlogAdminClient({ initialPosts, subscribers }: { initial
   const [ok, setOk] = useState("");
   const [tab, setTab] = useState<"posts" | "subscribers">("posts");
 
+  const [coverBusy, setCoverBusy] = useState(false);
+  const [bodyImgBusy, setBodyImgBusy] = useState(false);
+  const bodyRef = useRef<HTMLTextAreaElement>(null);
+
   const active = subscribers.filter((s) => !s.unsubscribed_at);
   const editing = !!d.id;
 
   const previewSlug = useMemo(() => slugify(d.slug || d.title), [d.slug, d.title]);
+
+  // Upload a picture to the blog storage bucket and return its public URL.
+  async function uploadImage(file: File, folder: string): Promise<string | null> {
+    if (file.size > 10 * 1024 * 1024) { setErr("Image too large — 10 MB maximum."); return null; }
+    const form = new FormData();
+    form.append("file", file);
+    form.append("bucket", "blog");
+    form.append("folder", folder);
+    const res = await fetch("/api/upload", { method: "POST", body: form });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) { setErr(`Upload failed: ${json.error || "please try again"}`); return null; }
+    return json.url as string;
+  }
+
+  async function onCoverFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]; e.target.value = "";
+    if (!file) return;
+    setCoverBusy(true); setErr(""); setOk("");
+    const url = await uploadImage(file, "covers");
+    setCoverBusy(false);
+    if (url) setD((prev) => ({ ...prev, cover_url: url }));
+  }
+
+  async function onBodyImage(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]; e.target.value = "";
+    if (!file) return;
+    setBodyImgBusy(true); setErr(""); setOk("");
+    const url = await uploadImage(file, "posts");
+    setBodyImgBusy(false);
+    if (!url) return;
+    // Insert an image tag at the cursor (or append), on its own line.
+    const el = bodyRef.current;
+    const snippet = `\n\n![](${url})\n\n`;
+    if (el) {
+      const start = el.selectionStart ?? el.value.length;
+      const end = el.selectionEnd ?? el.value.length;
+      const next = el.value.slice(0, start) + snippet + el.value.slice(end);
+      setD((prev) => ({ ...prev, body: next }));
+      requestAnimationFrame(() => { const pos = start + snippet.length; el.focus(); el.setSelectionRange(pos, pos); });
+    } else {
+      setD((prev) => ({ ...prev, body: prev.body + snippet }));
+    }
+  }
 
   async function call(payload: Record<string, any>) {
     setBusy(true); setErr(""); setOk("");
@@ -100,15 +147,47 @@ export default function BlogAdminClient({ initialPosts, subscribers }: { initial
             <textarea className="field min-h-16" placeholder="Short excerpt / summary (shown on cards and at the top of the post)"
               value={d.excerpt} onChange={(e) => setD({ ...d, excerpt: e.target.value })} />
 
-            <textarea className="field min-h-64 font-mono text-[13px]" placeholder={"Write the post here.\n\n## A heading\n\nParagraphs are separated by a blank line. You can use **bold**, *italic*, `code`, [links](https://example.com), and lists:\n\n- point one\n- point two"}
+            <div className="flex items-center justify-between gap-2">
+              <label className="text-[13px] font-semibold text-ink/70" htmlFor="blog-body">Post content</label>
+              <label className={`btn-ghost !min-h-0 cursor-pointer !px-3 !py-1.5 !text-[13px] ${bodyImgBusy ? "pointer-events-none opacity-60" : ""}`}>
+                {bodyImgBusy ? "Uploading…" : "🖼 Insert image"}
+                <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" className="hidden" onChange={onBodyImage} disabled={bodyImgBusy} />
+              </label>
+            </div>
+            <textarea id="blog-body" ref={bodyRef} className="field min-h-64 font-mono text-[13px]" placeholder={"Write the post here.\n\n## A heading\n\nParagraphs are separated by a blank line. You can use **bold**, *italic*, `code`, [links](https://example.com), images, and lists:\n\n- point one\n- point two"}
               value={d.body} onChange={(e) => setD({ ...d, body: e.target.value })} />
-            <p className="text-[12px] text-ink/40">Formatting: <code>## Heading</code>, <code>### Subheading</code>, <code>- bullet</code>, <code>1. numbered</code>, <code>&gt; quote</code>, <code>**bold**</code>, <code>*italic*</code>, <code>`code`</code>, <code>[text](https://link)</code>.</p>
+            <p className="text-[12px] text-ink/40">Formatting: <code>## Heading</code>, <code>### Subheading</code>, <code>- bullet</code>, <code>1. numbered</code>, <code>&gt; quote</code>, <code>**bold**</code>, <code>*italic*</code>, <code>`code`</code>, <code>[text](https://link)</code>, <code>![](image)</code>. Use <strong>Insert image</strong> to upload a picture straight into the post.</p>
+
+            {/* Cover image — upload or paste a link */}
+            <div className="rounded-2xl border border-line bg-chalk/40 p-4">
+              <p className="text-[13px] font-semibold text-ink/70">Cover image <span className="font-normal text-ink/40">(optional)</span></p>
+              <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-start">
+                {d.cover_url ? (
+                  <div className="relative w-full sm:w-56">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={d.cover_url} alt="Cover preview" className="aspect-[16/9] w-full rounded-xl border border-line object-cover" />
+                    <button type="button" onClick={() => setD({ ...d, cover_url: "" })}
+                      className="absolute right-1.5 top-1.5 rounded-full bg-black/60 px-2 py-0.5 text-[11px] font-bold text-white hover:bg-black/80">Remove</button>
+                  </div>
+                ) : (
+                  <label className={`flex aspect-[16/9] w-full cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-line bg-white text-center transition hover:border-gold/50 sm:w-56 ${coverBusy ? "pointer-events-none opacity-60" : ""}`}>
+                    <span className="text-2xl">🖼</span>
+                    <span className="text-[13px] font-semibold text-ink/60">{coverBusy ? "Uploading…" : "Upload a picture"}</span>
+                    <span className="text-[11px] text-ink/40">PNG, JPG, WEBP or GIF · 10 MB max</span>
+                    <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" className="hidden" onChange={onCoverFile} disabled={coverBusy} />
+                  </label>
+                )}
+                <div className="flex-1">
+                  <input className="field" placeholder="…or paste an image URL" value={d.cover_url} onChange={(e) => setD({ ...d, cover_url: e.target.value })} />
+                  <p className="mt-1 text-[12px] text-ink/40">Upload straight from your device, or paste a link if the image already lives online.</p>
+                </div>
+              </div>
+            </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
-              <input className="field" placeholder="Cover image URL (optional)" value={d.cover_url} onChange={(e) => setD({ ...d, cover_url: e.target.value })} />
               <input className="field" placeholder="Category (e.g. Exam tips)" value={d.category} onChange={(e) => setD({ ...d, category: e.target.value })} />
               <input className="field" placeholder="Tags, comma separated" value={d.tags} onChange={(e) => setD({ ...d, tags: e.target.value })} />
-              <input className="field" placeholder="Author" value={d.author} onChange={(e) => setD({ ...d, author: e.target.value })} />
+              <input className="field sm:col-span-2" placeholder="Author" value={d.author} onChange={(e) => setD({ ...d, author: e.target.value })} />
             </div>
 
             {/* Presentation — "designed in a different form" */}

@@ -29,6 +29,7 @@ values
   ('materials',   'materials',   true,  10485760),  -- lesson materials (10 MB)
   ('curricula',   'curricula',   true,  10485760),  -- curriculum documents
   ('assignments', 'assignments', true,  10485760),  -- assignment question sheets
+  ('blog',        'blog',        true,  10485760),  -- blog cover + in-post images
   ('submissions', 'submissions', false, 10485760),  -- PRIVATE: students' submitted photos/files
   ('voice-notes', 'voice-notes', false,  5242880)   -- PRIVATE: chat voice notes (5 MB)
 on conflict (id) do update set
