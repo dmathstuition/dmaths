@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { supabaseServer } from "@/lib/supabase/server";
-import { getProfile } from "@/lib/auth";
 import { Icon, type IconName } from "@/components/Icons";
 import Avatar from "@/components/Avatar";
 import Mascot from "@/components/Mascot";
@@ -35,13 +34,11 @@ export default async function AdminDashboard() {
   // Start of last month — enough history to trend this month vs last month.
   const trendFrom = new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1).toISOString();
   const [
-    me,
     { count: students }, { count: pending }, { count: classes },
     { count: activeStudents }, { data: recent }, { data: allStudents }, { count: assignments },
     { data: payments }, { data: subs }, { data: schedule },
     { data: assignmentDates }, { data: classDates },
   ] = await Promise.all([
-    getProfile(),
     supa.from("profiles").select("*", { count: "exact", head: true }).eq("role", "student"),
     supa.from("applications").select("*", { count: "exact", head: true }).eq("status", "pending"),
     supa.from("classes").select("*", { count: "exact", head: true }).gte("starts_at", now),
@@ -61,7 +58,8 @@ export default async function AdminDashboard() {
     supa.from("classes").select("created_at").gte("created_at", trendFrom),
   ]);
 
-  const firstName = me?.first_name?.trim() || "there";
+  // The admin dashboard greets the role generically rather than by personal name.
+  const firstName = "Admin";
 
   const avgScore = allStudents?.length ? Math.round(allStudents.reduce((a, s) => a + (s.avg_score || 0), 0) / allStudents.length) : 0;
   const avgAttend = allStudents?.length ? Math.round(allStudents.reduce((a, s) => a + (s.attendance || 0), 0) / allStudents.length) : 0;
