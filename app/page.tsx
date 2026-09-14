@@ -2,6 +2,8 @@ import Link from "next/link";
 import Image from "next/image";
 import MarketingShell from "@/components/landing/MarketingShell";
 import Reveal from "@/components/landing/Reveal";
+import FloatingMath from "@/components/landing/FloatingMath";
+import CountUp from "@/components/landing/CountUp";
 import AppLauncher from "@/components/AppLauncher";
 import InstallPrompt from "@/components/InstallPrompt";
 
@@ -21,10 +23,10 @@ const SUBJECTS = [
   { t: "Coding & technology", d: "Python, web development and beginner-friendly artificial intelligence." },
 ];
 
-const STATS = [
-  { v: "200+", l: "Students taught" },
-  { v: "98%", l: "Pass rate" },
-  { v: "6", l: "Expert tutors" },
+const STATS: { to: number; suffix?: string; l: string }[] = [
+  { to: 200, suffix: "+", l: "Students taught" },
+  { to: 98, suffix: "%", l: "Pass rate" },
+  { to: 6, l: "Expert tutors" },
 ];
 
 const TESTIMONIALS = [
@@ -51,6 +53,8 @@ export default function Home() {
         {/* Legibility overlay — darker on the left where the text sits */}
         <div className="absolute inset-0 bg-gradient-to-r from-board/95 via-board/75 to-board/30" />
         <div className="absolute inset-0 bg-gradient-to-t from-board/80 via-transparent to-board/20" />
+        {/* Drifting maths glyphs for a lively, on-brand backdrop */}
+        <FloatingMath className="opacity-80" />
 
         <div className="relative mx-auto w-full max-w-6xl px-5 py-24">
           <div className="max-w-2xl text-white">
@@ -73,11 +77,18 @@ export default function Home() {
               <p className="text-[11px] font-bold uppercase tracking-wider text-white/50">Preparation for</p>
               <div className="mt-2.5 flex flex-wrap gap-2">
                 {EXAMS.map(e => (
-                  <span key={e} className="rounded-md border border-white/20 bg-white/10 px-2.5 py-1 text-[12px] font-bold text-white/80 backdrop-blur">{e}</span>
+                  <span key={e} className="rounded-md border border-white/20 bg-white/10 px-2.5 py-1 text-[12px] font-bold text-white/80 backdrop-blur transition duration-200 hover:-translate-y-0.5 hover:border-gold/50 hover:bg-white/20">{e}</span>
                 ))}
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Scroll cue */}
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-5 flex justify-center">
+          <span className="motion-safe:animate-bounce text-white/45">
+            <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+          </span>
         </div>
       </section>
 
@@ -122,7 +133,7 @@ export default function Home() {
         <Reveal className="grid gap-6 rounded-3xl border border-line bg-board px-6 py-10 text-center sm:grid-cols-3 sm:px-12">
           {STATS.map(s => (
             <div key={s.l}>
-              <p className="font-display text-4xl font-extrabold text-gold md:text-5xl">{s.v}</p>
+              <CountUp to={s.to} suffix={s.suffix} className="font-display text-4xl font-extrabold text-gold md:text-5xl" />
               <p className="mt-1 text-sm font-semibold uppercase tracking-wide text-white/60">{s.l}</p>
             </div>
           ))}
