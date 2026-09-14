@@ -672,3 +672,25 @@ html { scroll-behavior: smooth; }
 /* Placeholders follow the same floor. */
 .placeholder\:text-ink\/35::placeholder { color: #64758C; }
 .placeholder\:text-ink\/40::placeholder { color: #5C6E88; }
+
+/* ── Novelia app splash — animated launch overlay (installed app) ─────── */
+@keyframes noveliaPop {
+  0%   { opacity: 0; transform: scale(.82) translateY(6px); }
+  60%  { opacity: 1; transform: scale(1.04) translateY(0); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes noveliaBreathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.035); } }
+@keyframes noveliaGlow {
+  0%, 100% { opacity: .30; transform: scale(1); }
+  50%      { opacity: .60; transform: scale(1.15); }
+}
+@keyframes noveliaBar { 0% { transform: translateX(-100%); } 100% { transform: translateX(300%); } }
+@keyframes noveliaDot { 0%, 80%, 100% { transform: scale(.5); opacity: .4; } 40% { transform: scale(1); opacity: 1; } }
+.novelia-splash-logo { animation: noveliaPop .7s cubic-bezier(.2,.8,.2,1) both, noveliaBreathe 2.6s ease-in-out 1s infinite; }
+.novelia-splash-glow { animation: noveliaGlow 2.6s ease-in-out infinite; }
+.novelia-splash-track { position: relative; overflow: hidden; }
+.novelia-splash-track > span { position: absolute; inset: 0; width: 40%; animation: noveliaBar 1.15s ease-in-out infinite; }
+.novelia-splash-dot { animation: noveliaDot 1.2s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .novelia-splash-logo, .novelia-splash-glow, .novelia-splash-track > span, .novelia-splash-dot { animation: none !important; }
+}
