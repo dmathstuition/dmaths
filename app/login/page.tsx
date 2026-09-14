@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import { useToast } from "@/components/Toast";
@@ -34,7 +33,6 @@ export default function Login() {
     }
   }, []);
 
-  const router = useRouter();
   const supabase = supabaseBrowser();
   const push = useToast();
   const [identifier, setIdentifier] = useState("");
@@ -73,11 +71,19 @@ export default function Login() {
       setBusy(false);
       return;
     }
-    fetch("/api/auth/touch", { method: "POST" }).catch(() => {});
     try { localStorage.setItem(IDLE_ACTIVITY_KEY, String(Date.now())); } catch {}
 
+    // Make sure the (possibly just-elevated to aal2) session is flushed to
+    // cookies before we hand off to the server.
+    await supabase.auth.getSession();
+    fetch("/api/auth/touch", { method: "POST" }).catch(() => {}); // record last-seen (non-blocking)
+
     const dest = profile?.role === "admin" ? "/admin" : profile?.role === "tutor" ? "/tutor" : profile?.role === "parent" ? "/parent" : "/portal";
-    router.replace(dest);
+    // A FULL-PAGE navigation (not router.replace): guarantees the server sees the
+    // fresh aal2 cookies on the very next request, instead of a prefetched/cached
+    // render made while the session was still aal1 — which caused the 2FA sign-in
+    // to bounce back to the login screen in a loop.
+    window.location.assign(dest);
   }
 
   async function signIn(e: React.FormEvent) {
