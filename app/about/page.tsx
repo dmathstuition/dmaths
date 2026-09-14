@@ -43,7 +43,7 @@ export default function AboutPage() {
             <Link href="/apply" className="btn-gold mt-7 inline-flex !rounded-full !px-6">Register now</Link>
           </div>
           <div className="overflow-hidden rounded-3xl border border-line bg-white shadow-sm">
-            <Image src="/camp-about.png" alt="A Novelia learner" width={900} height={760} quality={90}
+            <Image src="/about.jpg" alt="A Novelia learner" width={900} height={760} quality={90}
               sizes="(max-width: 768px) 100vw, 50vw" className="h-auto w-full object-contain" />
           </div>
         </Reveal>

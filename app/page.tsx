@@ -46,7 +46,7 @@ export default function Home() {
 
       {/* HERO — full-bleed image with overlaid content */}
       <section className="relative isolate flex min-h-[80vh] items-center overflow-hidden bg-board">
-        <Image src="/camp-hero.png" alt="" fill priority sizes="100vw"
+        <Image src="/hero.jpg" alt="" fill priority sizes="100vw"
           className="hero-zoom object-cover object-center opacity-90 md:object-right" />
         {/* Legibility overlay — darker on the left where the text sits */}
         <div className="absolute inset-0 bg-gradient-to-r from-board/95 via-board/75 to-board/30" />
