@@ -4,7 +4,7 @@ import Logo from "@/components/Logo";
 import MathLab from "@/components/math/MathLab";
 
 export const metadata: Metadata = {
-  title: "Math Lab — D-Maths Online",
+  title: "Math Lab — Novelia Online",
   alternates: { canonical: "/math-lab" },
   description: "Type any formula and watch it render and solve live — powers, roots, trig, and even units and conversions. Free, right in your browser.",
 };
@@ -49,7 +49,7 @@ export default function MathLabPublic() {
       </section>
 
       <footer className="bg-gold py-4 text-center text-xs font-semibold text-white">
-        © {new Date().getFullYear()} D-Maths Tuition Centre · Learn maths with us
+        © {new Date().getFullYear()} Novelia Academy · Learn maths with us
       </footer>
     </main>
   );

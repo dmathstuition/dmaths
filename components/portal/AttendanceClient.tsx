@@ -60,7 +60,7 @@ export default function AttendanceClient({
       <div className="relative overflow-hidden rounded-3xl p-7 text-white sm:p-8"
         style={{ background: "linear-gradient(135deg, #10406F 0%, #0A2A4F 55%, #071C36 100%)" }}>
         <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(239,174,86,.4), transparent 70%)" }} />
+          style={{ background: "radial-gradient(circle, rgba(245,149,30,.4), transparent 70%)" }} />
         <div aria-hidden className="pointer-events-none absolute right-6 top-6 text-gold/30 float"><Icon name="calendar" className="h-6 w-6" /></div>
         <div className="relative flex flex-wrap items-center gap-5">
           <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gold/15 text-gold ring-1 ring-gold/25">

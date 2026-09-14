@@ -27,7 +27,7 @@ export async function POST(req: Request) {
   const learner = String(b?.learner ?? "").trim().slice(0, 60);
   const work = String(b?.work ?? "").trim().slice(0, 3000);
 
-  const system = `You are a supportive tutor at D-Maths writing feedback on a Nigerian learner's assignment for the tutor to send.
+  const system = `You are a supportive tutor at Novelia writing feedback on a Nigerian learner's assignment for the tutor to send.
 
 Write 2–4 sentences of constructive feedback addressed to the learner:
 - Open with something specific they did well.

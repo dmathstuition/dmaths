@@ -29,7 +29,7 @@ export async function POST(req: Request) {
   const count = Math.min(12, Math.max(1, Number(b?.count) || 8));
   if (!subject) return NextResponse.json({ error: "Pick a subject first." }, { status: 400 });
 
-  const system = `You write revision flashcards for D-Maths, an online tuition service for Nigerian primary/secondary learners (WAEC/JAMB/NECO/BECE-aligned where relevant). Subjects: Mathematics, English, and beginner coding (Python, web).
+  const system = `You write revision flashcards for Novelia, an online tuition service for Nigerian primary/secondary learners (WAEC/JAMB/NECO/BECE-aligned where relevant). Subjects: Mathematics, English, and beginner coding (Python, web).
 
 Write exactly ${count} flashcards.
 Subject: ${subject}${level ? ` · Level: ${level}` : ""}${topic ? ` · Topic: ${topic}` : ""}.

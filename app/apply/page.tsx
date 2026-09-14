@@ -127,7 +127,7 @@ export default function Apply() {
           Tuition is billed monthly from attendance — see <Link href="/pricing" className="underline">pricing</Link>.
         </p>
         <p className="mt-3 text-sm text-ink/55">📞 Our team will also contact you shortly to confirm the place.</p>
-        <Link href="/" className="btn-ink mt-7 w-full">Return to D-Maths</Link>
+        <Link href="/" className="btn-ink mt-7 w-full">Return to Novelia</Link>
       </div>
     </Shell>
   );
@@ -137,7 +137,7 @@ export default function Apply() {
       <div className="mx-auto mb-6 max-w-2xl">
         <div className="relative flex min-h-[136px] items-center overflow-hidden rounded-3xl bg-gradient-to-br from-[#EEF2FE] via-[#E2ECFB] to-[#DCE7F6] p-6 sm:p-7">
           <div className="relative z-10 max-w-[58%] sm:max-w-md">
-            <h1 className="font-display text-2xl font-bold text-ink sm:text-3xl">Register with D-Maths</h1>
+            <h1 className="font-display text-2xl font-bold text-ink sm:text-3xl">Register with Novelia</h1>
             <p className="mt-1 text-sm text-ink/55">Enrol in online maths, science &amp; coding tuition — it only takes a few minutes.</p>
           </div>
           <HeroMascot src="/avatars/student-book.png" className="absolute bottom-0 right-0 top-0 w-[42%] sm:right-2 sm:w-[38%]" />

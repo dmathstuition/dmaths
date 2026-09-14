@@ -10,7 +10,7 @@ export type VipTier = { key: string; name: string; min: number; discountPct: num
 export const VIP_TIERS: VipTier[] = [
   { key: "bronze",   name: "Bronze",   min: 0,    discountPct: 0,  color: "#B87333" },
   { key: "silver",   name: "Silver",   min: 300,  discountPct: 3,  color: "#AEB6C4" },
-  { key: "gold",     name: "Gold",     min: 800,  discountPct: 6,  color: "#EFAE56" },
+  { key: "gold",     name: "Gold",     min: 800,  discountPct: 6,  color: "#F5951E" },
   { key: "platinum", name: "Platinum", min: 1800, discountPct: 9,  color: "#7BA3CA" },
   { key: "diamond",  name: "Diamond",  min: 3500, discountPct: 12, color: "#4FC3F7" },
 ];

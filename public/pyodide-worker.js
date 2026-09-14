@@ -1,4 +1,4 @@
-/* D-Maths Python playground — execution worker.
+/* Novelia Python playground — execution worker.
  *
  * Runs learner Python entirely in the browser via Pyodide (CPython → WebAssembly).
  * Nothing touches the server. The worker loads the engine once, then executes

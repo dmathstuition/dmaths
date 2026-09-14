@@ -111,7 +111,7 @@ export default async function AdminDashboard() {
             <h1 className="font-display text-3xl font-bold text-ink sm:text-4xl">
               {greeting()}, {firstName}! <span className="align-middle">👋</span>
             </h1>
-            <p className="mt-1 text-sm text-ink/50">Here&apos;s what&apos;s happening at D-Maths today.</p>
+            <p className="mt-1 text-sm text-ink/50">Here&apos;s what&apos;s happening at Novelia today.</p>
             <p className="mt-2 hidden font-mono text-[11px] uppercase tracking-[.2em] text-ink/35 sm:block">{today}</p>
           </div>
           {/* the suited admin mascot — large, with the soft halo */}
@@ -213,7 +213,7 @@ export default async function AdminDashboard() {
                             <div className="bar-animate h-full rounded-full"
                               style={{
                                 width: `${s.avg_score}%`,
-                                backgroundColor: s.avg_score >= 70 ? "#059669" : s.avg_score >= 50 ? "#C8881F" : "#EF4444",
+                                backgroundColor: s.avg_score >= 70 ? "#059669" : s.avg_score >= 50 ? "#C56A12" : "#EF4444",
                               }} />
                           </div>
                         </td>
@@ -301,7 +301,7 @@ export default async function AdminDashboard() {
             </Reveal>
           )}
 
-          {/* D-Maths Buddy */}
+          {/* Novelia Buddy */}
           <Reveal delay={160}>
             <div className="relative overflow-hidden rounded-2xl p-6 text-white shadow-lift"
               style={{ background: "linear-gradient(135deg, #4F46E5 0%, #312E81 100%)" }}>
@@ -311,7 +311,7 @@ export default async function AdminDashboard() {
               </div>
               <div className="relative max-w-[70%]">
                 <p className="text-[11px] font-bold uppercase tracking-wider text-white/60">Meet your AI assistant</p>
-                <h3 className="mt-1 font-display text-xl font-bold">D-Maths Buddy 🤖</h3>
+                <h3 className="mt-1 font-display text-xl font-bold">Novelia Buddy 🤖</h3>
                 <p className="mt-1 text-xs leading-relaxed text-white/70">
                   I&apos;m here to help you manage students and classes better.
                 </p>

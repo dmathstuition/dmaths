@@ -6,7 +6,7 @@ import { AssistantProvider } from "@/components/portal/AssistantContext";
 import { getProfile } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
-export const metadata = { title: "Tutor Portal · D-Maths Tuition" };
+export const metadata = { title: "Tutor Portal · Novelia Academy" };
 
 const NAV: NavItem[] = [
   { href: "/tutor", label: "Dashboard", icon: "dashboard" },

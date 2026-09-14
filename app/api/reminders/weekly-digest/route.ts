@@ -64,7 +64,7 @@ export async function GET(req: Request) {
       streak > 0 ? `🔥 ${streak}-day streak` : null,
     ].filter(Boolean);
     await notifyUser(admin, st.id, {
-      title: "Your week at D-Maths 📊",
+      title: "Your week at Novelia 📊",
       body: parts.join(" · "),
       link: "/portal/progress",
     });

@@ -54,7 +54,7 @@ export default function GuardianClient({
 
         <div data-tour="rings" className="relative mt-6 flex flex-wrap items-center gap-6">
           <div className="flex flex-col items-center gap-1.5">
-            <ProgressRing value={student.avg_score} size={84} stroke={8} color="#EFAE56" track="rgba(255,255,255,.14)">
+            <ProgressRing value={student.avg_score} size={84} stroke={8} color="#F5951E" track="rgba(255,255,255,.14)">
               <span className="font-display text-lg font-bold text-white">{student.avg_score}%</span>
             </ProgressRing>
             <p className="text-[11px] font-bold uppercase tracking-wider text-white/45">Avg grade</p>
@@ -176,7 +176,7 @@ export default function GuardianClient({
       )}
 
       <p className="text-center text-xs text-ink/30">
-        This is a read-only parent view · D-Maths Tuition
+        This is a read-only parent view · Novelia Academy
       </p>
     </div>
   );

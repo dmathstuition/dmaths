@@ -23,8 +23,8 @@ export default function ReferShare({ link }: { link: string }) {
     if (nav.share) {
       try {
         await nav.share({
-          title: "Join me at D-Maths",
-          text: "I learn maths, science & coding with D-Maths — join with my link and enrol:",
+          title: "Join me at Novelia",
+          text: "I learn maths, science & coding with Novelia — join with my link and enrol:",
           url: link,
         });
       } catch { /* user dismissed the share sheet */ }

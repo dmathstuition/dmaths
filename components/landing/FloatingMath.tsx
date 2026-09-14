@@ -4,8 +4,8 @@
 // The .drift animation is disabled under prefers-reduced-motion (globals.css),
 // leaving the symbols sitting statically at low opacity.
 
-const GOLD = "#EFAE56";
-const BLUE = "#1A60AB";
+const GOLD = "#F5951E";
+const BLUE = "#1657C9";
 
 type Glyph = {
   s: string;   // the symbol

@@ -39,7 +39,7 @@ export default async function AdminRatings() {
       <Reveal>
         <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-board to-boardDeep p-7 text-white sm:p-9">
           <div className="pointer-events-none absolute right-0 top-0 h-full w-1/2 opacity-20"
-            style={{ background: "radial-gradient(circle at 80% 20%, #EFAE56, transparent 60%)" }} />
+            style={{ background: "radial-gradient(circle at 80% 20%, #F5951E, transparent 60%)" }} />
           <div className="relative">
             <p className="font-mono text-[11px] uppercase tracking-[.2em] text-white/40">Feedback</p>
             <h1 className="mt-2 font-display text-3xl font-semibold sm:text-4xl">Ratings &amp; comments</h1>

@@ -4,9 +4,9 @@ import Logo from "@/components/Logo";
 import Playground from "@/components/code/Playground";
 
 export const metadata: Metadata = {
-  title: "Code Playground — D-Maths Online",
+  title: "Code Playground — Novelia Online",
   alternates: { canonical: "/playground" },
-  description: "Write and run real Python, or build a live web page with HTML, CSS & JavaScript — right in your browser, no install, no sign-up. A free taste of coding at D-Maths.",
+  description: "Write and run real Python, or build a live web page with HTML, CSS & JavaScript — right in your browser, no install, no sign-up. A free taste of coding at Novelia.",
 };
 
 export default function PlaygroundPage() {
@@ -33,7 +33,7 @@ export default function PlaygroundPage() {
           </h1>
           <p className="mt-2 max-w-xl text-[15px] leading-relaxed text-ink/55">
             Write real Python, or build a live web page with HTML, CSS &amp; JavaScript — instantly, with
-            nothing to install and no account needed. A taste of the coding learners do at D-Maths. Want to
+            nothing to install and no account needed. A taste of the coding learners do at Novelia. Want to
             save your work and learn properly?{" "}
             <Link href="/apply" className="font-semibold text-gold-deep hover:underline">Enroll here</Link>.
           </p>
@@ -50,7 +50,7 @@ export default function PlaygroundPage() {
       </section>
 
       <footer className="bg-gold py-4 text-center text-xs font-semibold text-white">
-        © {new Date().getFullYear()} D-Maths Tuition Centre · Learn to code with us
+        © {new Date().getFullYear()} Novelia Academy · Learn to code with us
       </footer>
     </main>
   );

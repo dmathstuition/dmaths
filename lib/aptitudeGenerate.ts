@@ -17,7 +17,7 @@ export function buildAptitudePrompt(opts: { count: number; student: StudentInfo;
   const subjects = subjectList.join(", ");
   const level = student.level || "";
   const examTarget = intake.exam_target || "";
-  return `You are an assessment designer for D-Maths, an online tuition service for Nigerian primary/secondary learners (WAEC/JAMB/NECO/BECE aligned where relevant).
+  return `You are an assessment designer for Novelia, an online tuition service for Nigerian primary/secondary learners (WAEC/JAMB/NECO/BECE aligned where relevant).
 
 Design a DIAGNOSTIC aptitude test of about ${count} multiple-choice questions to gauge a new learner's true working level across EVERY subject they take. Judge the right pitch yourself from the learner's details, and spread difficulty from foundational to stretch so the score locates their level.
 

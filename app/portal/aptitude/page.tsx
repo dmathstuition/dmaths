@@ -5,7 +5,7 @@ import { segmentScores } from "@/lib/aptitude";
 import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Aptitude test · D-Maths" };
+export const metadata = { title: "Aptitude test · Novelia" };
 
 export default async function AptitudePage() {
   const user = await getUser();

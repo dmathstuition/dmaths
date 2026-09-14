@@ -121,7 +121,7 @@ export default function StyleClient({
       {/* ── Hero preview ────────────────────────────────────────── */}
       <div className="relative flex items-center gap-5 overflow-hidden rounded-3xl p-7 text-white sm:p-8"
         style={{ background: "linear-gradient(135deg, #10406F 0%, #0A2A4F 55%, #071C36 100%)" }}>
-        <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full" style={{ background: "radial-gradient(circle, rgba(239,174,86,.4), transparent 70%)" }} />
+        <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full" style={{ background: "radial-gradient(circle, rgba(245,149,30,.4), transparent 70%)" }} />
         <div aria-hidden className="pointer-events-none absolute right-6 top-6 text-gold/25 float"><Icon name="sparkles" className="h-5 w-5" /></div>
         {/* live avatar preview */}
         <span className="relative flex h-24 w-24 flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-ink to-board font-display text-2xl font-bold text-gold-soft shadow-lift ring-2 ring-gold/40">
@@ -145,9 +145,9 @@ export default function StyleClient({
       {/* ── Mystery Crate ───────────────────────────────────────── */}
       <div className="relative overflow-hidden rounded-3xl border border-gold/30 p-6 text-white"
         style={{ background: "linear-gradient(135deg, #2A1E4F 0%, #1A1436 60%, #10406F 100%)" }}>
-        <div aria-hidden className="loot-aura pointer-events-none absolute inset-0" style={{ ["--loot-glow" as any]: "rgba(239,174,86,.5)" }} />
+        <div aria-hidden className="loot-aura pointer-events-none absolute inset-0" style={{ ["--loot-glow" as any]: "rgba(245,149,30,.5)" }} />
         <div className="relative flex flex-wrap items-center gap-5">
-          <span className="loot-pulse flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-2xl bg-gold/15 text-gold ring-1 ring-gold/30" style={{ ["--loot-glow" as any]: "rgba(239,174,86,.7)" }}>
+          <span className="loot-pulse flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-2xl bg-gold/15 text-gold ring-1 ring-gold/30" style={{ ["--loot-glow" as any]: "rgba(245,149,30,.7)" }}>
             <Icon name="gift" className="h-10 w-10" />
           </span>
           <div className="min-w-0 flex-1">
@@ -273,7 +273,7 @@ export default function StyleClient({
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-board/80 p-6 backdrop-blur-sm">
           {!reveal ? (
             <div className="flex flex-col items-center gap-5 text-white">
-              <span className="loot-pulse flex h-28 w-28 items-center justify-center rounded-3xl bg-gold/15 text-gold ring-1 ring-gold/30" style={{ ["--loot-glow" as any]: "rgba(239,174,86,.85)" }}>
+              <span className="loot-pulse flex h-28 w-28 items-center justify-center rounded-3xl bg-gold/15 text-gold ring-1 ring-gold/30" style={{ ["--loot-glow" as any]: "rgba(245,149,30,.85)" }}>
                 <Icon name="gift" className="h-14 w-14 animate-bounce" />
               </span>
               <p className="font-display text-lg font-bold">Opening…</p>

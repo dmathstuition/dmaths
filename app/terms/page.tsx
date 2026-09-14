@@ -1,19 +1,19 @@
 import LegalPage, { H2 } from "@/components/LegalPage";
 
-export const metadata = { title: "Terms of Service — D-Maths Tuition Centre", alternates: { canonical: "/terms" } };
+export const metadata = { title: "Terms of Service — Novelia Academy", alternates: { canonical: "/terms" } };
 
 export default function TermsPage() {
   return (
     <LegalPage title="Terms of Service" updated="June 2026">
       <p>
-        These terms govern your use of the D-Maths Tuition Centre online portal and tuition
+        These terms govern your use of the Novelia Academy online portal and tuition
         services. By applying for enrolment or using the portal, the student and their
         parent/guardian agree to these terms.
       </p>
 
       <H2>Enrolment</H2>
       <p>
-        Enrolment is by application and is subject to approval by D-Maths. We may decline or
+        Enrolment is by application and is subject to approval by Novelia. We may decline or
         revoke enrolment at our discretion, including where information provided is inaccurate or
         where conduct disrupts the learning of others. A parent or guardian must consent to a
         minor's enrolment.
@@ -35,7 +35,7 @@ export default function TermsPage() {
 
       <H2>Programmes and camps</H2>
       <p>
-        From time to time we run fixed programmes such as the D-Maths Online Summer Camp. Each
+        From time to time we run fixed programmes such as the Novelia Online Summer Camp. Each
         programme is offered for a stated period and package, places may be limited, and the
         specific fee, dates and inclusions are shown at sign-up. Refunds for fixed programmes are
         governed by our Payment &amp; Refund Policy.
@@ -72,7 +72,7 @@ export default function TermsPage() {
 
       <H2>Limitation of liability</H2>
       <p>
-        To the fullest extent permitted by Nigerian law, D-Maths is not liable for indirect or
+        To the fullest extent permitted by Nigerian law, Novelia is not liable for indirect or
         consequential losses arising from use of the service, or for interruptions caused by
         third-party providers (internet, hosting, or payment platforms) outside our reasonable
         control.

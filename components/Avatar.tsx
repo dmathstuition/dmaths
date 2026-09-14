@@ -8,9 +8,9 @@ import { useState } from "react";
 // the same colour everywhere they appear (sidebar, headers, activity lists).
 
 const GRADIENTS = [
-  "from-[#1A60AB] to-[#0F3A6B]", // brand blue
-  "from-[#EFAE56] to-[#C8881F]", // gold
-  "from-[#7BA3CA] to-[#1A60AB]", // sky → blue
+  "from-[#1657C9] to-[#0F3A6B]", // brand blue
+  "from-[#F5951E] to-[#C56A12]", // gold
+  "from-[#7BA3CA] to-[#1657C9]", // sky → blue
   "from-[#2FB39B] to-[#0F766E]", // teal
   "from-[#8B5CF6] to-[#5B3FB0]", // violet
   "from-[#F0763B] to-[#C8501F]", // coral

@@ -27,7 +27,7 @@ describe("calendar helpers", () => {
     expect(ics).toContain("BEGIN:VEVENT");
     expect(ics).toContain("DTSTART:20260310T140000Z");
     expect(ics).toContain("DTEND:20260310T153000Z");
-    expect(ics).toContain("SUMMARY:Calculus — D-Maths");
+    expect(ics).toContain("SUMMARY:Calculus — Novelia");
     expect(ics).toContain("END:VCALENDAR");
   });
 

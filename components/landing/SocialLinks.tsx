@@ -1,6 +1,6 @@
 import React from "react";
 
-// D-Maths social + web presence. Rendered in the public footers. Each icon is a
+// Novelia social + web presence. Rendered in the public footers. Each icon is a
 // circular chip that tints to the platform's brand colour on hover.
 const IC = "h-[18px] w-[18px]";
 const stroke = { fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" } as const;

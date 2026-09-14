@@ -10,5 +10,5 @@ export const JITSI_DOMAIN = process.env.JITSI_DOMAIN || "meet.jit.si";
 export function roomNameFor(classId: string) {
   const salt = process.env.LIVE_ROOM_SECRET || "dmaths-live";
   const h = createHash("sha256").update(`${salt}:${classId}`).digest("hex").slice(0, 12);
-  return `DMaths-${classId.replace(/-/g, "").slice(0, 8)}-${h}`;
+  return `Novelia-${classId.replace(/-/g, "").slice(0, 8)}-${h}`;
 }

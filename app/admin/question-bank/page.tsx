@@ -2,7 +2,7 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import QuestionBankClient from "@/components/admin/QuestionBankClient";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Question bank · D-Maths" };
+export const metadata = { title: "Question bank · Novelia" };
 
 // Staff-only: the /admin layout already gates this to admins, and the API
 // re-checks on every write. Learners have no read path to this table at all.

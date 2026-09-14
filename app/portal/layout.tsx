@@ -17,7 +17,7 @@ import { redirect } from "next/navigation";
 const NAV: NavItem[] = [
   { href: "/portal", label: "Dashboard", icon: "dashboard" },
   { href: "/portal/games", label: "Game Center", icon: "trophy" },
-  { href: "/portal/assistant", label: "D-Maths A.I", icon: "compass" },
+  { href: "/portal/assistant", label: "Novelia A.I", icon: "compass" },
   { href: "/portal/solve", label: "Question solver", icon: "sigma" },
   { href: "/portal/check", label: "Check my work", icon: "checkCircle" },
   { href: "/portal/classes", label: "My classes", icon: "classes" },

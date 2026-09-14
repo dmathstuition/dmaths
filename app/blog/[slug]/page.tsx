@@ -18,10 +18,10 @@ async function getPost(slug: string): Promise<BlogPost | null> {
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   const p = await getPost(params.slug);
-  if (!p) return { title: "Post not found — D-Maths Blog" };
+  if (!p) return { title: "Post not found — Novelia Blog" };
   const desc = previewOf(p, 160);
   return {
-    title: `${p.title} — D-Maths Blog`,
+    title: `${p.title} — Novelia Blog`,
     description: desc,
     alternates: { canonical: `/blog/${p.slug}` },
     openGraph: { title: p.title, description: desc, images: p.cover_url ? [p.cover_url] : undefined, type: "article" },
@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 function Meta({ p }: { p: BlogPost }) {
   return (
     <p className="text-[13px] text-ink/50">
-      By <span className="font-semibold text-ink/70">{p.author || "D-Maths"}</span> · {formatDate(p.published_at)} · {readingTime(p.body)}
+      By <span className="font-semibold text-ink/70">{p.author || "Novelia"}</span> · {formatDate(p.published_at)} · {readingTime(p.body)}
     </p>
   );
 }
@@ -60,7 +60,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
           <div className="relative mx-auto w-full max-w-3xl px-5 py-12 text-white">
             {p.category && <span className={`inline-block rounded-full px-3 py-1 text-[12px] font-bold ${a.bg} text-white`}>{p.category}</span>}
             <h1 className="mt-3 font-display text-3xl font-extrabold leading-tight sm:text-4xl md:text-5xl">{p.title}</h1>
-            <p className="mt-3 text-[13px] text-white/70">By {p.author || "D-Maths"} · {formatDate(p.published_at)} · {readingTime(p.body)}</p>
+            <p className="mt-3 text-[13px] text-white/70">By {p.author || "Novelia"} · {formatDate(p.published_at)} · {readingTime(p.body)}</p>
           </div>
         </header>
       ) : (
@@ -112,7 +112,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
       <section className="border-t border-line bg-chalk/40">
         <div className="mx-auto max-w-2xl px-5 py-14 text-center">
           <h2 className="font-display text-xl font-bold text-ink md:text-2xl">Enjoyed this? Get the next one by email.</h2>
-          <p className="mx-auto mt-2 max-w-md text-sm text-ink/55">Subscribe for study tips, exam guidance and D-Maths news.</p>
+          <p className="mx-auto mt-2 max-w-md text-sm text-ink/55">Subscribe for study tips, exam guidance and Novelia news.</p>
           <div className="mt-6"><NewsletterSignup /></div>
         </div>
       </section>

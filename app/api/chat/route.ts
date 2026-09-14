@@ -5,9 +5,9 @@ import { PACKAGES, packageRate } from "@/lib/packages";
 import { fmtNgn } from "@/lib/pricing";
 import { FAQS } from "@/lib/faq";
 
-// Public help chatbot for the marketing site. Answers questions about D-Maths
+// Public help chatbot for the marketing site. Answers questions about Novelia
 // using a tightly-scoped system prompt, rate-limited per IP. No auth — but it
-// only ever talks about D-Maths and points people to WhatsApp for anything it
+// only ever talks about Novelia and points people to WhatsApp for anything it
 // can't handle.
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
@@ -16,7 +16,7 @@ const WHATSAPP = "https://wa.me/2347025674894";
 
 function knowledge(): string {
   const tiers = PACKAGES.map(p => `- ${p.name}: ${p.tagline}. ${fmtNgn(packageRate(p))}/hour.`).join("\n");
-  return `You are the friendly assistant for D-Maths Tuition (also styled "D-Maths Academy"), a fully online tuition service for learners across Nigeria and beyond.
+  return `You are the friendly assistant for Novelia Academy (also styled "Novelia Academy"), a fully online tuition service for learners across Nigeria and beyond.
 
 Facts you can rely on:
 - Subjects: Mathematics, English, Sciences and Coding (Python, web, beginner A.I).
@@ -34,7 +34,7 @@ ${FAQS.map(f => `Q: ${f.q}\nA: ${f.a}`).join("\n\n")}
 
 Rules:
 - Be warm, concise and helpful. 1–4 short sentences. British/Nigerian spelling.
-- Only answer about D-Maths. If asked something unrelated, gently steer back.
+- Only answer about Novelia. If asked something unrelated, gently steer back.
 - Never invent prices, dates or policies beyond the facts above. If you're unsure or the person needs a human, tell them to tap "Chat on WhatsApp" or email support@dmaths.academy.
 - Encourage registering when it's the natural next step.`;
 }

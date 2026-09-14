@@ -5,13 +5,13 @@
 export type AssignmentColor = { from: string; to: string; icon: string };
 
 export const ASSIGNMENT_CARD_COLORS: AssignmentColor[] = [
-  { from: "#1A60AB", to: "#0A2A4F", icon: "assignments" },
+  { from: "#1657C9", to: "#0A2A4F", icon: "assignments" },
   { from: "#7C3AED", to: "#4C1D95", icon: "book" },
   { from: "#0E9488", to: "#0B4A44", icon: "sigma" },
   { from: "#EA580C", to: "#7C2D12", icon: "code" },
   { from: "#DC2626", to: "#7F1D1D", icon: "target" },
   { from: "#059669", to: "#064E3B", icon: "checkCircle" },
-  { from: "#C8881F", to: "#8A5E12", icon: "graduationCap" },
+  { from: "#C56A12", to: "#8A5E12", icon: "graduationCap" },
 ];
 
 export function assignmentColor(subject: string): AssignmentColor {

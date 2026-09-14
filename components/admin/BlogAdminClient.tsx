@@ -11,7 +11,7 @@ type Draft = {
 
 const EMPTY: Draft = {
   id: null, title: "", slug: "", excerpt: "", body: "",
-  cover_url: "", category: "", tags: "", layout: "standard", accent: "gold", author: "D-Maths",
+  cover_url: "", category: "", tags: "", layout: "standard", accent: "gold", author: "Novelia",
 };
 
 export default function BlogAdminClient({ initialPosts, subscribers, initialComments }: { initialPosts: BlogPost[]; subscribers: BlogSubscriber[]; initialComments: BlogComment[] }) {
@@ -103,7 +103,7 @@ export default function BlogAdminClient({ initialPosts, subscribers, initialComm
     setD({
       id: p.id, title: p.title, slug: p.slug, excerpt: p.excerpt || "", body: p.body || "",
       cover_url: p.cover_url || "", category: p.category || "", tags: (p.tags || []).join(", "),
-      layout: p.layout || "standard", accent: p.accent || "gold", author: p.author || "D-Maths",
+      layout: p.layout || "standard", accent: p.accent || "gold", author: p.author || "Novelia",
     });
     setOk(""); setErr("");
     window.scrollTo({ top: 0, behavior: "smooth" });

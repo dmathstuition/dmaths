@@ -5,7 +5,7 @@ import { supabaseServer } from "@/lib/supabase/server";
 import { getUser, getProfile } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Certificate — D-Maths", robots: { index: false } };
+export const metadata = { title: "Certificate — Novelia", robots: { index: false } };
 
 export default async function CertificatePage({ params }: { params: { id: string } }) {
   const user = await getUser();
@@ -33,7 +33,7 @@ export default async function CertificatePage({ params }: { params: { id: string
       {/* The certificate — A4 landscape when printed */}
       <div className="cert-sheet mx-auto max-w-3xl bg-[#FDF9F0] px-6 py-8 shadow-2xl sm:px-12 sm:py-12 print:max-w-none print:shadow-none">
         <div className="relative border-[3px] border-gold-deep p-6 sm:p-10"
-          style={{ outline: "1px solid #C8881F", outlineOffset: "6px" }}>
+          style={{ outline: "1px solid #C56A12", outlineOffset: "6px" }}>
           {/* corner flourishes */}
           <span aria-hidden className="pointer-events-none absolute left-3 top-3 h-6 w-6 border-l-2 border-t-2 border-gold-deep" />
           <span aria-hidden className="pointer-events-none absolute right-3 top-3 h-6 w-6 border-r-2 border-t-2 border-gold-deep" />
@@ -42,7 +42,7 @@ export default async function CertificatePage({ params }: { params: { id: string
 
           <div className="flex flex-col items-center text-center">
             <Logo size="lg" />
-            <p className="mt-6 font-mono text-[11px] uppercase tracking-[.35em] text-gold-deep">D-Maths Tuition Centre</p>
+            <p className="mt-6 font-mono text-[11px] uppercase tracking-[.35em] text-gold-deep">Novelia Academy</p>
             <h1 className="mt-3 font-display text-3xl font-bold text-board sm:text-4xl">{cert.title}</h1>
             {cert.subtitle && <p className="mt-1 font-display text-lg font-semibold text-gold-deep">{cert.subtitle}</p>}
 
@@ -60,7 +60,7 @@ export default async function CertificatePage({ params }: { params: { id: string
                 <p className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-ink/40">Date issued</p>
               </div>
               <div className="text-right">
-                <p className="font-display text-lg font-bold text-board">D-Maths</p>
+                <p className="font-display text-lg font-bold text-board">Novelia</p>
                 <div className="mt-1 ml-auto w-40 border-t border-ink/30" />
                 <p className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-ink/40">Authorised signature</p>
               </div>

@@ -5,7 +5,7 @@ import DirectThread from "@/components/portal/DirectThread";
 
 type Tutor = { id: string; name: string };
 
-// Learner's messaging hub: the D-Maths team (admin) thread plus a tab per
+// Learner's messaging hub: the Novelia team (admin) thread plus a tab per
 // assigned tutor. The admin thread keeps its full MessagesClient (voice notes
 // etc.); tutor threads use the lighter DirectThread.
 export default function LearnerMessages({ meId, initialMessages, tutors }: {
@@ -17,7 +17,7 @@ export default function LearnerMessages({ meId, initialMessages, tutors }: {
     <div className="space-y-4">
       {tutors.length > 0 && (
         <div className="flex flex-wrap gap-2">
-          <TabButton active={tab === "admin"} onClick={() => setTab("admin")}>D-Maths team</TabButton>
+          <TabButton active={tab === "admin"} onClick={() => setTab("admin")}>Novelia team</TabButton>
           {tutors.map((t) => (
             <TabButton key={t.id} active={tab === t.id} onClick={() => setTab(t.id)}>{t.name}</TabButton>
           ))}

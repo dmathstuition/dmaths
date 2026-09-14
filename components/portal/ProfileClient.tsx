@@ -100,7 +100,7 @@ export default function ProfileClient({ me }: { me: any }) {
             <p className="text-[11px] font-bold text-ink/40">Avg score</p>
           </div>
           <div className="flex flex-col items-center gap-1.5">
-            <ProgressRing value={me.attendance} size={72} stroke={7} color="#1A60AB">
+            <ProgressRing value={me.attendance} size={72} stroke={7} color="#1657C9">
               <span className="font-display text-base font-bold text-ink">{me.attendance}%</span>
             </ProgressRing>
             <p className="text-[11px] font-bold text-ink/40">Attendance</p>

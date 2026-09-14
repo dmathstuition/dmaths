@@ -1,4 +1,4 @@
-// ── D-MATHS HOURLY TUITION PRICING — single source of truth ──────────
+// ── NOVELIA ACADEMY HOURLY TUITION PRICING — single source of truth ──────────
 // The per-hour rates for continuing (termly/monthly) tuition. These power
 // BOTH the public /pricing page and the attendance-based monthly billing, so
 // a rate is only ever edited here.

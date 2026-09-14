@@ -19,7 +19,7 @@ export default async function ReportCardsPage() {
       <div className="relative flex items-center gap-4 overflow-hidden rounded-3xl p-7 text-white"
         style={{ background: "linear-gradient(135deg, #10406F 0%, #0A2A4F 55%, #071C36 100%)" }}>
         <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(239,174,86,.4), transparent 70%)" }} />
+          style={{ background: "radial-gradient(circle, rgba(245,149,30,.4), transparent 70%)" }} />
         <div aria-hidden className="pointer-events-none absolute right-6 top-6 text-gold/30 float"><Icon name="reports" className="h-6 w-6" /></div>
         <div aria-hidden className="pointer-events-none absolute right-24 bottom-6 text-gold/25 float" style={{ animationDelay: "1.1s" }}><Icon name="sparkles" className="h-5 w-5" /></div>
         <span className="relative flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gold/15 text-gold ring-1 ring-gold/25">
@@ -42,13 +42,13 @@ export default async function ReportCardsPage() {
             <Reveal key={c.id} delay={i * 60}>
               <Link href={`/report-card/${c.id}`}
                 className="sheen group relative flex h-full items-center gap-4 overflow-hidden rounded-2xl bg-white p-5 shadow-lift ring-1 ring-gold/25 transition-all duration-300 hover:-translate-y-1 hover:ring-gold/50 dark:bg-[#0f2942]">
-                <span aria-hidden className="absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-[#F4C078] via-[#EFAE56] to-[#C8881F]" />
+                <span aria-hidden className="absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-[#F9B24E] via-[#F5951E] to-[#C56A12]" />
                 {score !== null ? (
                   <span className={`relative flex h-14 w-14 flex-shrink-0 flex-col items-center justify-center rounded-full bg-gradient-to-br ${scoreCls} font-display text-white shadow-lift transition-transform duration-300 group-hover:scale-110`}>
                     <span className="text-lg font-extrabold leading-none">{score}%</span>
                   </span>
                 ) : (
-                  <span className="relative flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#F4C078] to-[#C8881F] text-board shadow-lift transition-transform duration-300 group-hover:scale-110">
+                  <span className="relative flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#F9B24E] to-[#C56A12] text-board shadow-lift transition-transform duration-300 group-hover:scale-110">
                     <Icon name="reports" className="h-6 w-6" />
                   </span>
                 )}

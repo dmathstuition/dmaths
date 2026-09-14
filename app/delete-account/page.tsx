@@ -2,12 +2,12 @@ import Link from "next/link";
 import Logo from "@/components/Logo";
 
 export const metadata = {
-  title: "Delete your account · D-Maths Tuition",
-  description: "How to permanently delete your D-Maths account and data.",
+  title: "Delete your account · Novelia Academy",
+  description: "How to permanently delete your Novelia account and data.",
   alternates: { canonical: "/delete-account" },
 };
 
-// Public page (no login required) explaining how to delete a D-Maths account.
+// Public page (no login required) explaining how to delete a Novelia account.
 // Google Play's Data safety form requires a web link where users can request
 // account deletion — this is that link.
 export default function DeleteAccountPage() {
@@ -21,7 +21,7 @@ export default function DeleteAccountPage() {
       </header>
 
       <div className="mx-auto max-w-2xl px-5 pt-10">
-        <h1 className="font-display text-3xl font-bold">Delete your D-Maths account</h1>
+        <h1 className="font-display text-3xl font-bold">Delete your Novelia account</h1>
         <p className="mt-3 text-[15px] leading-relaxed text-ink/60">
           You can permanently delete your account and all data linked to it at any time.
           Deletion removes your login, profile, grades, attendance, messages, rewards,

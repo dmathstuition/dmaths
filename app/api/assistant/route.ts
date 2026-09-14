@@ -3,7 +3,7 @@ import OpenAI from "openai";
 import { supabaseServer } from "@/lib/supabase/server";
 import { rateLimit } from "@/lib/ratelimit";
 
-// The "D-Maths A.I" assistant, powered by DeepSeek (OpenAI-compatible API, so we
+// The "Novelia A.I" assistant, powered by DeepSeek (OpenAI-compatible API, so we
 // use the openai SDK pointed at DeepSeek's endpoint). Two modes:
 //  • learner (default) — gives *hints and guiding questions*, never the finished
 //    answer, so the learner still does the thinking (and it never just solves
@@ -20,7 +20,7 @@ export const maxDuration = 60;
 const MODEL = process.env.DEEPSEEK_MODEL || "deepseek-chat";
 const BASE_URL = process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com";
 
-const LEARNER_SYSTEM = `You are "D-Maths A.I", the friendly learning buddy for D-Maths — an online tuition service for primary and secondary school learners in Nigeria (ages ~8–18). Subjects: Mathematics, English, and beginner coding (Python and web / HTML-CSS-JavaScript).
+const LEARNER_SYSTEM = `You are "Novelia A.I", the friendly learning buddy for Novelia — an online tuition service for primary and secondary school learners in Nigeria (ages ~8–18). Subjects: Mathematics, English, and beginner coding (Python and web / HTML-CSS-JavaScript).
 
 Your job is to help a learner who is stuck, WITHOUT doing their work for them.
 
@@ -37,7 +37,7 @@ HARD RULES — follow these every time:
 
 You are talking to a young learner. Be patient, kind, and clear.`;
 
-const STAFF_SYSTEM = `You are "D-Maths A.I", the teaching assistant for D-Maths — an online tuition service for primary and secondary school learners in Nigeria (ages ~8–18). Subjects: Mathematics, English, and beginner coding (Python and web / HTML-CSS-JavaScript). You are talking to a tutor or the admin — a professional colleague, not a learner.
+const STAFF_SYSTEM = `You are "Novelia A.I", the teaching assistant for Novelia — an online tuition service for primary and secondary school learners in Nigeria (ages ~8–18). Subjects: Mathematics, English, and beginner coding (Python and web / HTML-CSS-JavaScript). You are talking to a tutor or the admin — a professional colleague, not a learner.
 
 Help them teach well. You CAN and SHOULD give complete answers here:
 - Full worked solutions and step-by-step explanations they can teach from.

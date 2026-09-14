@@ -3,7 +3,7 @@ import Reveal from "@/components/landing/Reveal";
 import { Icon, type IconName } from "@/components/Icons";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Help & Support — D-Maths" };
+export const metadata = { title: "Help & Support — Novelia" };
 
 // Quick-answer FAQ shown inside the portal. Kept in sync with the public
 // /help page but framed for a signed-in learner.

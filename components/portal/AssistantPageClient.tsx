@@ -7,7 +7,7 @@ type Msg = { role: "user" | "assistant"; content: string };
 type Convo = { id: string; title: string; updated_at: string };
 
 const GREETING =
-  "Hi, I'm D-Maths A.I — your learning buddy! Stuck on some maths, English or code? Tell me what you're working on and I'll help you figure it out (I give hints, not the finished answer 😉).";
+  "Hi, I'm Novelia A.I — your learning buddy! Stuck on some maths, English or code? Tell me what you're working on and I'll help you figure it out (I give hints, not the finished answer 😉).";
 const CHIPS = ["Explain this concept", "Give me a hint", "Where do I start?", "Check my thinking"];
 
 function since(iso: string): string {
@@ -108,9 +108,9 @@ export default function AssistantPageClient() {
         <div className="relative flex items-center gap-3 overflow-hidden px-4 py-3 text-white"
           style={{ background: "linear-gradient(120deg, #10406F 0%, #0A2A4F 60%, #071C36 100%)" }}>
           <div aria-hidden className="pointer-events-none absolute right-8 top-1 text-gold/25 float"><Icon name="sparkles" className="h-4 w-4" /></div>
-          <span className="relative flex h-9 w-9 items-center justify-center rounded-full bg-gold text-board shadow-[0_0_18px_-4px_rgba(239,174,86,.9)]"><Icon name="compass" className="h-5 w-5" /></span>
+          <span className="relative flex h-9 w-9 items-center justify-center rounded-full bg-gold text-board shadow-[0_0_18px_-4px_rgba(245,149,30,.9)]"><Icon name="compass" className="h-5 w-5" /></span>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-bold leading-tight">D-Maths A.I · Learning buddy</p>
+            <p className="text-sm font-bold leading-tight">Novelia A.I · Learning buddy</p>
             <p className="text-[11px] text-white/55">Hints to help you — not the answers</p>
           </div>
           <button onClick={() => setShowList(true)} className="rounded-lg p-1.5 text-white/70 hover:bg-white/10 lg:hidden" aria-label="Chat history"><Icon name="menu" className="h-5 w-5" /></button>

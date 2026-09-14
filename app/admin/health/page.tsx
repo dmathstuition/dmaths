@@ -3,7 +3,7 @@ import { CRON_JOBS } from "@/lib/cronJobs";
 import HealthClient from "@/components/admin/HealthClient";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "System health · D-Maths" };
+export const metadata = { title: "System health · Novelia" };
 
 // Feature tables and the migration that creates each. Probing them is the
 // honest way to answer "have I run everything?" — far more reliable than
@@ -30,7 +30,7 @@ function configured() {
     { key: "PAYSTACK_SECRET_KEY", set: !!process.env.PAYSTACK_SECRET_KEY, what: "Verifies payments and the webhook", critical: true },
     { key: "NEXT_PUBLIC_SITE_URL", set: !!process.env.NEXT_PUBLIC_SITE_URL, what: "The address used in email links", critical: true },
     { key: "NEXT_PUBLIC_SENTRY_DSN", set: !!process.env.NEXT_PUBLIC_SENTRY_DSN, what: "Error monitoring", critical: false },
-    { key: "DEEPSEEK_API_KEY", set: !!process.env.DEEPSEEK_API_KEY, what: "The D-Maths A.I helper", critical: false },
+    { key: "DEEPSEEK_API_KEY", set: !!process.env.DEEPSEEK_API_KEY, what: "The Novelia A.I helper", critical: false },
     { key: "VAPID_PRIVATE_KEY", set: !!process.env.VAPID_PRIVATE_KEY, what: "Push notifications", critical: false },
   ];
 }

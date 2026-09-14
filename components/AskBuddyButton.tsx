@@ -1,7 +1,7 @@
 "use client";
 import { useAssistantTask } from "@/components/portal/AssistantContext";
 
-// Opens the existing D-Maths Buddy assistant widget. Purely a second entry
+// Opens the existing Novelia Buddy assistant widget. Purely a second entry
 // point to the same panel — no new logic, it just flips the shared open state.
 export default function AskBuddyButton({
   label = "Ask me anything",

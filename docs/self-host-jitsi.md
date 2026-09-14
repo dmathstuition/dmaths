@@ -1,4 +1,4 @@
-# Self-hosting Jitsi for D-Maths live classes
+# Self-hosting Jitsi for Novelia live classes
 
 The in-portal live classroom runs on Jitsi. Out of the box it uses the **free public
 server** (`meet.jit.si`) — great for launching and testing, but it carries Jitsi
@@ -73,7 +73,7 @@ In `~/.jitsi-meet-cfg/web/custom-config.js` / `custom-interface_config.js`:
 
 ```js
 // custom-interface_config.js
-APP_NAME = 'D-Maths Live';
+APP_NAME = 'Novelia Live';
 DEFAULT_LOGO_URL = 'https://your-domain/logo.png';
 DEFAULT_BACKGROUND = '#0A2A4F';
 SHOW_JITSI_WATERMARK = false;

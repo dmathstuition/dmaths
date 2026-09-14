@@ -5,7 +5,7 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { gamesByGroup, liveGameCount, type GameEntry } from "@/lib/gameCenter";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Game Center · D-Maths" };
+export const metadata = { title: "Game Center · Novelia" };
 
 function nameOf(w: any) {
   const f = (w?.first_name ?? "").trim();

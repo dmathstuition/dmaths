@@ -60,7 +60,7 @@ export default function MomentumCard({
           <svg width={size} height={size} className="-rotate-90" aria-hidden>
             <defs>
               <linearGradient id="momentum-grad" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="#F4C078" />
+                <stop offset="0%" stopColor="#F9B24E" />
                 <stop offset="100%" stopColor={current.color} />
               </linearGradient>
             </defs>
@@ -92,7 +92,7 @@ export default function MomentumCard({
             </div>
             <div className="h-2 overflow-hidden rounded-full bg-white/10">
               <div className="h-full rounded-full transition-[width] duration-1000"
-                style={{ width: `${shown}%`, background: "linear-gradient(90deg, #F4C078, #EFAE56, #C8881F)" }} />
+                style={{ width: `${shown}%`, background: "linear-gradient(90deg, #F9B24E, #F5951E, #C56A12)" }} />
             </div>
           </div>
 

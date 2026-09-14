@@ -5,17 +5,17 @@ import type { MetadataRoute } from "next";
 // a custom domain later) with no change.
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "D-Maths Tuition Centre",
-    short_name: "D-Maths",
+    name: "Novelia Academy",
+    short_name: "Novelia",
     description:
-      "World-class online mathematics tuition for JSS & SSS students across Nigeria — live classes, progress tracking and a portal built for results.",
+      "Novelia Academy — world-class online tuition in maths, English, science and coding, with live classes, progress tracking and a portal built for results.",
     id: "/",
     start_url: "/",
     scope: "/",
     display: "standalone",
     orientation: "portrait",
     background_color: "#0A2A4F",
-    theme_color: "#1A60AB",
+    theme_color: "#1657C9",
     categories: ["education"],
     lang: "en-NG",
     dir: "ltr",

@@ -24,7 +24,7 @@ export async function POST() {
   }
 
   const stageSpec = SPRINT_STAGES.map((s) => `Stage ${s.stage} (${s.name}): ${s.hint}.`).join("\n");
-  const system = `You are the question setter for D-Maths' "Math Sprint", a fast mental-maths game for Nigerian primary/secondary learners. Produce quick questions a learner can answer in their head in a few seconds.
+  const system = `You are the question setter for Novelia' "Math Sprint", a fast mental-maths game for Nigerian primary/secondary learners. Produce quick questions a learner can answer in their head in a few seconds.
 
 Write exactly ${PER_STAGE} questions for EACH of these ${SPRINT_STAGES.length} stages, difficulty climbing stage by stage:
 ${stageSpec}

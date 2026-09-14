@@ -80,7 +80,7 @@ export async function POST(req: Request) {
       .join("\n");
 
     const { data: stu } = await admin.from("profiles").select("first_name, level, subjects").eq("id", test.student_id).maybeSingle();
-    const system = `You are a head tutor at D-Maths writing a short performance analysis of a new learner's diagnostic aptitude test, for the learner's parent. Warm, specific, encouraging and honest.
+    const system = `You are a head tutor at Novelia writing a short performance analysis of a new learner's diagnostic aptitude test, for the learner's parent. Warm, specific, encouraging and honest.
 
 Learner: ${stu?.first_name || "The learner"} · Class: ${stu?.level || test.level || "unknown"} · Subjects: ${Array.isArray(stu?.subjects) ? stu!.subjects.join(", ") : ""}
 ${test.exam_target ? `Preparing for: ${test.exam_target}.` : ""}
@@ -90,7 +90,7 @@ ${segLine || "(single segment)"}
 Questions answered incorrectly:
 ${missed || "(none — a clean sweep)"}
 
-Write 140–220 words covering: how they performed overall AND subject by subject (call out the strongest and weakest segments by name), the specific gaps the answers reveal, and a concrete plan for how D-Maths will help — the topics to target per subject${test.exam_target ? `, and how it maps to ${test.exam_target} readiness` : ""}. Plain paragraphs, no headings, no markdown.`;
+Write 140–220 words covering: how they performed overall AND subject by subject (call out the strongest and weakest segments by name), the specific gaps the answers reveal, and a concrete plan for how Novelia will help — the topics to target per subject${test.exam_target ? `, and how it maps to ${test.exam_target} readiness` : ""}. Plain paragraphs, no headings, no markdown.`;
 
     let analysis: string;
     try { analysis = await aiChat({ system, user: "Write the analysis now.", maxTokens: 700 }); }

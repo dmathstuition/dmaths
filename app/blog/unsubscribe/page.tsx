@@ -2,7 +2,7 @@ import Link from "next/link";
 import MarketingShell, { PageHeader } from "@/components/landing/MarketingShell";
 
 export const metadata = {
-  title: "Unsubscribed — D-Maths Blog",
+  title: "Unsubscribed — Novelia Blog",
   robots: { index: false },
   alternates: { canonical: "/blog/unsubscribe" },
 };

@@ -5,7 +5,7 @@ import LearnerMessages from "@/components/portal/LearnerMessages";
 
 export const dynamic = "force-dynamic";
 
-// Learner's messaging hub: the D-Maths team plus each of their tutors.
+// Learner's messaging hub: the Novelia team plus each of their tutors.
 export default async function StudentMessages() {
   const supa = supabaseServer();
   const me = await getProfile();
@@ -24,7 +24,7 @@ export default async function StudentMessages() {
     <div className="space-y-5">
       <div>
         <h1 className="font-display text-3xl font-semibold">Messages</h1>
-        <p className="text-sm text-ink/45">Chat with the D-Maths team{tutors.length ? " or your tutor" : ""}.</p>
+        <p className="text-sm text-ink/45">Chat with the Novelia team{tutors.length ? " or your tutor" : ""}.</p>
       </div>
       <LearnerMessages meId={meId} initialMessages={adminThread} tutors={tutors} />
     </div>

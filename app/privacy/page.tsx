@@ -1,12 +1,12 @@
 import LegalPage, { H2 } from "@/components/LegalPage";
 
-export const metadata = { title: "Privacy Policy — D-Maths Tuition Centre", alternates: { canonical: "/privacy" } };
+export const metadata = { title: "Privacy Policy — Novelia Academy", alternates: { canonical: "/privacy" } };
 
 export default function PrivacyPage() {
   return (
     <LegalPage title="Privacy Policy" updated="June 2026">
       <p>
-        D-Maths Tuition Centre ("we", "us") operates an online mathematics tuition service for
+        Novelia Academy ("we", "us") operates an online mathematics tuition service for
         students worldwide. This policy explains what personal information we collect, why we
         collect it, and how we protect it. As a Nigeria-based provider, it is written to comply
         with the Nigeria Data Protection Act 2023 (NDPA) and the Nigeria Data Protection
@@ -50,7 +50,7 @@ export default function PrivacyPage() {
         Data is stored with Supabase (our database provider) on encrypted infrastructure, with
         row-level security ensuring each student can only access their own records. Passwords are
         hashed with industry-standard algorithms and are never visible to staff. Access to
-        administrative functions is restricted to authorised D-Maths staff. Transport between
+        administrative functions is restricted to authorised Novelia staff. Transport between
         your device and our servers is encrypted (HTTPS).
       </p>
 

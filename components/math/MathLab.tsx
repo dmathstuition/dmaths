@@ -115,7 +115,7 @@ export default function MathLab({ persist = false, meId = "", initialSheets = []
             </div>
             <textarea value={text} onChange={(e) => setText(e.target.value)} spellCheck={false}
               className="code-editor-ta !min-h-[340px]" aria-label="Formula input"
-              style={{ color: "#e2e8f0", caretColor: "#EFAE56", background: "#0b2036" }} />
+              style={{ color: "#e2e8f0", caretColor: "#F5951E", background: "#0b2036" }} />
           </div>
           <div className="flex flex-wrap gap-1.5">
             {EXAMPLES.map((ex) => (

@@ -8,7 +8,7 @@ import { useAssistantTask } from "@/components/portal/AssistantContext";
 type Snippet = { id: string; title: string; code: string };
 type Line = { stream: "out" | "err" | "sys"; text: string };
 
-const STARTER = `# Welcome to the D-Maths Python playground!
+const STARTER = `# Welcome to the Novelia Python playground!
 # Write Python below, then press Run.
 
 name = input("What's your name? ")
@@ -147,7 +147,7 @@ export default function PythonIde({ persist = false, meId = "", initialSnippets 
           <button onClick={() => setOutput([])} className="btn-ghost !min-h-[42px]">Clear output</button>
           {available && (
             <button onClick={() => ask(`\`\`\`python\n${code}\n\`\`\``)} className="btn-ghost !min-h-[42px] gap-1.5">
-              🧭 Ask D-Maths A.I
+              🧭 Ask Novelia A.I
             </button>
           )}
           {onSubmit && (

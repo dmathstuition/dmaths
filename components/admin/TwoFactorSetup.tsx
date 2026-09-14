@@ -41,7 +41,7 @@ export default function TwoFactorSetup() {
       if (f.status !== "verified") await supabase.auth.mfa.unenroll({ factorId: f.id });
     }
     const { data, error: e } = await supabase.auth.mfa.enroll({
-      factorType: "totp", friendlyName: `D-Maths admin ${Date.now()}`,
+      factorType: "totp", friendlyName: `Novelia admin ${Date.now()}`,
     });
     setBusy(false);
     if (e || !data) { setError(e?.message || "Could not start 2FA setup."); return; }

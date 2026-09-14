@@ -186,8 +186,8 @@ export default function TutorLearnerView({ student, rewards: initialRewards, sub
                 formatter={(val: any, _: any, props: any) => [`${val}/100`, props.payload?.subject || "Grade"]}
                 labelFormatter={(_: any, payload: any[]) => payload?.[0]?.payload?.label ?? ""}
               />
-              <Line type="monotone" dataKey="grade" stroke="#EFAE56" strokeWidth={2.5}
-                dot={{ fill: "#EFAE56", r: 4, strokeWidth: 0 }} activeDot={{ r: 6 }} />
+              <Line type="monotone" dataKey="grade" stroke="#F5951E" strokeWidth={2.5}
+                dot={{ fill: "#F5951E", r: 4, strokeWidth: 0 }} activeDot={{ r: 6 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>

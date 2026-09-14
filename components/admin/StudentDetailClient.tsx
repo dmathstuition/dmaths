@@ -511,7 +511,7 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
                 phone={student.guardian_contact || student.phone}
                 label="Send fee reminder on WhatsApp"
                 className="inline-flex items-center gap-2 rounded-lg border border-[#25D366] px-3.5 py-2 text-sm font-bold text-[#128C4B] transition hover:bg-[#25D366]/10"
-                text={`Hello, a friendly reminder from D-Maths Tuition Centre.\n\n${student.first_name}'s monthly tuition of ₦${Number(sub.amount).toLocaleString("en-NG")} is due on ${new Date(sub.due).toLocaleDateString("en-NG", { dateStyle: "medium" })}.\n\nYou can pay by transfer — Opay 7025674894 or Access Bank 1534530227 (use ${student.first_name}'s name as the reference) — or reply here. Thank you!`}
+                text={`Hello, a friendly reminder from Novelia Academy.\n\n${student.first_name}'s monthly tuition of ₦${Number(sub.amount).toLocaleString("en-NG")} is due on ${new Date(sub.due).toLocaleDateString("en-NG", { dateStyle: "medium" })}.\n\nYou can pay by transfer — Opay 7025674894 or Access Bank 1534530227 (use ${student.first_name}'s name as the reference) — or reply here. Thank you!`}
               />
             </div>
           )}
@@ -620,8 +620,8 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
                 formatter={(val: any, _: any, props: any) => [`${val}/100`, props.payload?.subject || "Grade"]}
                 labelFormatter={(_: any, payload: any[]) => payload?.[0]?.payload?.label ?? ""}
               />
-              <Line type="monotone" dataKey="grade" stroke="#EFAE56" strokeWidth={2.5}
-                dot={{ fill: "#EFAE56", r: 4, strokeWidth: 0 }}
+              <Line type="monotone" dataKey="grade" stroke="#F5951E" strokeWidth={2.5}
+                dot={{ fill: "#F5951E", r: 4, strokeWidth: 0 }}
                 activeDot={{ r: 6 }} />
             </LineChart>
           </ResponsiveContainer>
@@ -802,7 +802,7 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
               <WhatsAppShare
                 phone={student.guardian_contact || student.phone}
                 label="Send login on WhatsApp"
-                text={`Hi, here is your D-Maths login.\n\nStudent ID: ${student.student_code}\nPassword: ${resetCreds.tempPassword}\n\nSign in: ${resetCreds.loginUrl}\n\nPlease change your password after you sign in (Profile → Change password).`}
+                text={`Hi, here is your Novelia login.\n\nStudent ID: ${student.student_code}\nPassword: ${resetCreds.tempPassword}\n\nSign in: ${resetCreds.loginUrl}\n\nPlease change your password after you sign in (Profile → Change password).`}
               />
             </div>
           </div>
@@ -820,7 +820,7 @@ export default function StudentDetailClient({ student, initialNotes, initialRewa
               phone={student.guardian_contact || student.phone}
               label="Message guardian on WhatsApp"
               className="inline-flex items-center gap-2 rounded-lg border border-[#25D366] px-3.5 py-2 text-sm font-bold text-[#128C4B] transition hover:bg-[#25D366]/10"
-              text={`Hello, this is D-Maths Tuition Centre regarding ${student.first_name} ${student.last_name}.`}
+              text={`Hello, this is Novelia Academy regarding ${student.first_name} ${student.last_name}.`}
             />
           </div>
         )}

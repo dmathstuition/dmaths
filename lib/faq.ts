@@ -1,4 +1,4 @@
-// ── D-MATHS FAQ — single source of truth ─────────────────────────────
+// ── NOVELIA ACADEMY FAQ — single source of truth ─────────────────────────────
 // Used by the /help page, the site chatbot's quick-question buttons, and the
 // chatbot's AI knowledge, so the answers are consistent everywhere. Plain text
 // (no markup) so it works in every surface. Edit here and all three update.

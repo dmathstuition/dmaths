@@ -2,7 +2,7 @@ import DuelClient from "@/components/portal/DuelClient";
 import { Icon } from "@/components/Icons";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Quiz Duel · D-Maths" };
+export const metadata = { title: "Quiz Duel · Novelia" };
 
 // Async head-to-head — everything server-owned via /api/duel; this page frames it.
 export default function DuelPage() {

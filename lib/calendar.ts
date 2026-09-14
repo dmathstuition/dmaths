@@ -34,7 +34,7 @@ export function googleCalUrl(c: CalEvent): string {
   const { start, end } = bounds(c);
   const params = new URLSearchParams({
     action: "TEMPLATE",
-    text: `${c.subject} — D-Maths`,
+    text: `${c.subject} — Novelia`,
     dates: `${toUtcStamp(start)}/${toUtcStamp(end)}`,
     details: description(c),
   });
@@ -52,11 +52,11 @@ export function icsText(c: CalEvent): string {
   const { start, end } = bounds(c);
   const loc = c.location || c.link;
   return [
-    "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//D-Maths//Portal//EN", "BEGIN:VEVENT",
+    "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Novelia//Portal//EN", "BEGIN:VEVENT",
     `UID:${toUtcStamp(start)}-${Math.random().toString(36).slice(2)}@dmaths`,
     `DTSTAMP:${toUtcStamp(new Date())}`,
     `DTSTART:${toUtcStamp(start)}`, `DTEND:${toUtcStamp(end)}`,
-    `SUMMARY:${escapeIcs(`${c.subject} — D-Maths`)}`,
+    `SUMMARY:${escapeIcs(`${c.subject} — Novelia`)}`,
     `DESCRIPTION:${escapeIcs(description(c))}`,
     ...(loc ? [`LOCATION:${escapeIcs(loc)}`] : []),
     "END:VEVENT", "END:VCALENDAR",

@@ -3,7 +3,7 @@ import PortalShell, { type NavItem } from "@/components/PortalShell";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { supabaseServer } from "@/lib/supabase/server";
 
-export const metadata = { title: "Parent Portal · D-Maths Tuition" };
+export const metadata = { title: "Parent Portal · Novelia Academy" };
 
 const NAV: NavItem[] = [
   { href: "/parent", label: "Overview", icon: "dashboard" },

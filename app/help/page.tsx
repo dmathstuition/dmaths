@@ -1,7 +1,7 @@
 import LegalPage, { H2 } from "@/components/LegalPage";
 import { FAQS } from "@/lib/faq";
 
-export const metadata = { title: "Help & FAQ — D-Maths Tuition Centre", alternates: { canonical: "/help" } };
+export const metadata = { title: "Help & FAQ — Novelia Academy", alternates: { canonical: "/help" } };
 
 export default function HelpPage() {
   return (

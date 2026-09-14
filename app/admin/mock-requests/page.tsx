@@ -4,7 +4,7 @@ import MockRequestsClient from "@/components/admin/MockRequestsClient";
 import { Icon } from "@/components/Icons";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Mock requests · D-Maths" };
+export const metadata = { title: "Mock requests · Novelia" };
 
 export default async function AdminMockRequestsPage() {
   const supa = supabaseServer();

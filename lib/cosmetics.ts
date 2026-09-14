@@ -18,7 +18,7 @@ export const RARITY: Record<Rarity, { label: string; weight: number; color: stri
   common:    { label: "Common",    weight: 60, color: "#10B981", glow: "rgba(16,185,129,.6)" },
   rare:      { label: "Rare",      weight: 28, color: "#3B82F6", glow: "rgba(59,130,246,.7)" },
   epic:      { label: "Epic",      weight: 10, color: "#8B5CF6", glow: "rgba(139,92,246,.75)" },
-  legendary: { label: "Legendary", weight: 2,  color: "#EFAE56", glow: "rgba(239,174,86,.85)" },
+  legendary: { label: "Legendary", weight: 2,  color: "#F5951E", glow: "rgba(245,149,30,.85)" },
 };
 
 // What one Mystery Crate costs to open.

@@ -9,7 +9,7 @@ import {
 } from "@/lib/engagementReport";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Engagement report — D-Maths", robots: { index: false } };
+export const metadata = { title: "Engagement report — Novelia", robots: { index: false } };
 
 export default async function ReportPage({ params }: { params: { studentId: string } }) {
   const user = await getUser();

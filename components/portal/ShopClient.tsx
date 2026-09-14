@@ -21,7 +21,7 @@ const STATUS: Record<string, { label: string; cls: string }> = {
 // Loot-style rarity tiers by point cost — the "high-end game" flavour.
 type Tier = { name: string; chip: string; grad: string; glow: string; ring: string; icon: IconName; glowColor: string; hot: boolean; legendary: boolean };
 function tier(cost: number): Tier {
-  if (cost >= 500) return { name: "Legendary", chip: "bg-gold text-board", grad: "from-[#F4C078] via-[#EFAE56] to-[#C8881F]", glow: "shadow-[0_0_46px_-10px_rgba(239,174,86,.85)]", ring: "ring-gold/50", icon: "crown", glowColor: "rgba(239,174,86,.8)", hot: true, legendary: true };
+  if (cost >= 500) return { name: "Legendary", chip: "bg-gold text-board", grad: "from-[#F9B24E] via-[#F5951E] to-[#C56A12]", glow: "shadow-[0_0_46px_-10px_rgba(245,149,30,.85)]", ring: "ring-gold/50", icon: "crown", glowColor: "rgba(245,149,30,.8)", hot: true, legendary: true };
   if (cost >= 300) return { name: "Epic", chip: "bg-[#8B5CF6] text-white", grad: "from-[#A78BFA] via-[#8B5CF6] to-[#5B3FB0]", glow: "shadow-[0_0_42px_-12px_rgba(139,92,246,.8)]", ring: "ring-[#8B5CF6]/40", icon: "gem", glowColor: "rgba(139,92,246,.75)", hot: true, legendary: false };
   if (cost >= 100) return { name: "Rare", chip: "bg-[#3B82F6] text-white", grad: "from-[#60A5FA] via-[#3B82F6] to-[#1D4ED8]", glow: "shadow-[0_0_38px_-14px_rgba(59,130,246,.75)]", ring: "ring-[#3B82F6]/40", icon: "medal", glowColor: "rgba(59,130,246,.7)", hot: false, legendary: false };
   return { name: "Common", chip: "bg-[#10B981] text-white", grad: "from-[#34D399] via-[#10B981] to-[#047857]", glow: "", ring: "ring-emerald-400/30", icon: "star", glowColor: "rgba(16,185,129,.6)", hot: false, legendary: false };
@@ -165,7 +165,7 @@ export default function ShopClient({
 
             {/* mascot companion */}
             <div aria-hidden className="pointer-events-none relative hidden h-32 w-28 flex-shrink-0 sm:block">
-              <span className="absolute inset-x-0 bottom-2 top-2 rounded-full bg-[radial-gradient(circle,rgba(239,174,86,.28),transparent_62%)] blur-xl" />
+              <span className="absolute inset-x-0 bottom-2 top-2 rounded-full bg-[radial-gradient(circle,rgba(245,149,30,.28),transparent_62%)] blur-xl" />
               {mascot
                 ? <Mascot src={mascot} className="float relative h-full w-full object-contain object-bottom drop-shadow-2xl" fallback={<HeroStudy className="h-full w-full object-contain object-bottom" />} />
                 : <HeroStudy className="float relative h-full w-full object-contain object-bottom" />}

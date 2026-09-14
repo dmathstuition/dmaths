@@ -4,7 +4,7 @@ import { getProfile } from "@/lib/auth";
 import { leagueWeek, weeklyPoints } from "@/lib/leagues";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Leagues · D-Maths" };
+export const metadata = { title: "Leagues · Novelia" };
 
 function nameOf(w: any) {
   const f = (w.first_name ?? "").trim();

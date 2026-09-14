@@ -8,7 +8,7 @@ import { fmtNaira } from "@/lib/payments";
 import { availableYears, buildStatement } from "@/lib/statement";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Account statement — D-Maths", robots: { index: false } };
+export const metadata = { title: "Account statement — Novelia", robots: { index: false } };
 
 // A printable payment statement for a learner over a period. Readable by the
 // learner, a linked parent, or staff — authorised here explicitly because the
@@ -130,14 +130,14 @@ export default async function StatementPage({
 
         <div className="mt-6 rounded-xl bg-chalk px-5 py-4 text-sm text-ink/60">
           <p>
-            This statement lists payments received by <strong>D-Maths Tuition</strong> for <strong>{name}</strong>
+            This statement lists payments received by <strong>Novelia Academy</strong> for <strong>{name}</strong>
             {allTime ? "" : <> during <strong>{periodLabel}</strong></>}. Keep it for your records.
           </p>
         </div>
 
         <div className="mt-8 flex flex-wrap items-end justify-between gap-4 border-t border-line pt-5">
           <div>
-            <p className="font-display text-base font-bold text-board">D-Maths Tuition</p>
+            <p className="font-display text-base font-bold text-board">Novelia Academy</p>
             <p className="text-[12px] text-ink/50">support@dmaths.academy</p>
           </div>
           <p className="text-[11px] text-ink/45">{lines.length} payment{lines.length === 1 ? "" : "s"} · {periodLabel}</p>

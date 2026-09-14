@@ -6,7 +6,7 @@ type Row = { id: string; title: string; subject: string; due_date: string | null
 type Subject = { subject: string; targeted: number; completed: number; completion: number; average: number | null };
 
 function barColor(pct: number) {
-  return pct >= 75 ? "#059669" : pct >= 40 ? "#C8881F" : "#EF4444";
+  return pct >= 75 ? "#059669" : pct >= 40 ? "#C56A12" : "#EF4444";
 }
 function gradeColor(g: number | null) {
   if (g === null) return "text-ink/30";

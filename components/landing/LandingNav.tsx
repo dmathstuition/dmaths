@@ -33,7 +33,7 @@ export default function LandingNav() {
   return (
     <nav className={`fixed inset-x-0 top-0 z-50 border-b bg-white/70 backdrop-blur-xl backdrop-saturate-150 transition-shadow ${scrolled ? "border-white/60 shadow-sm" : "border-transparent"}`}>
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
-        <Link href="/" className="flex items-center" aria-label="D-Maths home"><Logo size="lg" /></Link>
+        <Link href="/" className="flex items-center" aria-label="Novelia home"><Logo size="lg" /></Link>
 
         <div className="hidden items-center gap-1 md:flex">
           {LINKS.map(([href, label]) => (

@@ -19,11 +19,11 @@ export default async function ReferPage() {
       <Reveal>
         <div className="boardgrid relative overflow-hidden rounded-2xl bg-board p-7 text-white sm:p-9">
           <div className="pointer-events-none absolute right-0 top-0 h-full w-1/2 opacity-20"
-            style={{ background: "radial-gradient(circle at 80% 20%, #EFAE56, transparent 60%)" }} />
+            style={{ background: "radial-gradient(circle at 80% 20%, #F5951E, transparent 60%)" }} />
           <div className="relative">
             <p className="pill-gold mb-3 inline-flex items-center gap-1"><Icon name="gift" className="h-3 w-3" /> Refer a friend</p>
             <h1 className="font-display text-2xl font-semibold sm:text-3xl">
-              Invite friends to <span className="text-gold">D-Maths</span>
+              Invite friends to <span className="text-gold">Novelia</span>
             </h1>
             <p className="mt-2 max-w-md text-sm text-white/55">
               Share your personal link. When a friend enrols through it you both win —

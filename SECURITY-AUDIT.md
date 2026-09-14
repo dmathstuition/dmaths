@@ -1,4 +1,4 @@
-# D-Maths — Security Audit
+# Novelia — Security Audit
 
 _Full review of the app's attack surface. Overall posture: **strong.** Findings below
 were fixed in this pass; accepted risks are documented with rationale._

@@ -11,7 +11,7 @@ import { findTier } from "@/lib/pricing";
 import { fmtWATDate } from "@/lib/time";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "My payments · D-Maths" };
+export const metadata = { title: "My payments · Novelia" };
 
 export default async function PortalPaymentsPage() {
   const supa = supabaseServer();
