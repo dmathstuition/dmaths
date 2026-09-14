@@ -29,7 +29,7 @@ function Card({ p, featured = false }: { p: BlogPost; featured?: boolean }) {
       ) : (
         <div className={`relative ${a.softBg} ${featured ? "md:w-1/2" : ""}`}>
           <div className={`flex items-center justify-center ${featured ? "aspect-[16/10] md:h-full" : "aspect-[16/9]"}`}>
-            <span className={`font-display text-4xl font-extrabold ${a.text} opacity-40`}>D·M</span>
+            <span className={`font-display text-4xl font-extrabold ${a.text} opacity-40`}>N</span>
           </div>
         </div>
       )}
