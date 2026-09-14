@@ -93,27 +93,34 @@ export default function AboutPage() {
               </div>
             </Reveal>
 
-            {/* Co-founder 2 — PLACEHOLDER: replace name, role, photo and bio */}
+            {/* Co-founder 2 — Ojo Oluwatosin Samuel */}
             <Reveal delay={90} className="glass-card flex flex-col overflow-hidden !rounded-3xl">
-              <div className="flex aspect-[4/3] w-full items-center justify-center bg-gradient-to-br from-ink/10 to-gold/10">
-                <div className="flex flex-col items-center text-ink/40">
-                  <span className="flex h-20 w-20 items-center justify-center rounded-full bg-white/70 font-display text-2xl font-bold text-ink/50">N</span>
-                  <span className="mt-2 text-[12px] font-semibold">Photo coming soon</span>
-                </div>
+              <div className="aspect-[4/3] w-full overflow-hidden bg-white">
+                <Image src="/cofounder.jpg" alt="Ojo Oluwatosin Samuel, co-founder of Novelia Academy"
+                  width={1023} height={978} quality={90} sizes="(max-width: 768px) 100vw, 50vw"
+                  className="h-full w-full object-cover object-top" />
               </div>
               <div className="flex flex-1 flex-col p-6">
-                <p className="font-display text-lg font-bold text-ink">Co-founder&rsquo;s name</p>
-                <p className="text-[12px] font-semibold text-gold-deep">Co-Founder</p>
+                <p className="font-display text-lg font-bold text-ink">Ojo Oluwatosin Samuel</p>
+                <p className="text-[12px] font-semibold text-gold-deep">Co-Founder &amp; Lead Mathematics Educator</p>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {["Role", "Role"].map((role, i) => (
-                    <span key={i} className="rounded-full border border-line bg-white px-2.5 py-0.5 text-[11px] font-semibold text-ink/50">{role}</span>
+                  {["Mathematics Educator", "Academic Tutor", "Mentor"].map(role => (
+                    <span key={role} className="rounded-full border border-line bg-white px-2.5 py-0.5 text-[11px] font-semibold text-ink/70">{role}</span>
                   ))}
                 </div>
-                <div className="mt-4 space-y-3 text-[14px] leading-relaxed text-ink/50">
+                <div className="mt-4 space-y-3 text-[14px] leading-relaxed text-ink/60">
                   <p>
-                    A short bio for the second co-founder goes here — their background, expertise and what they
-                    bring to Novelia Academy. Replace this placeholder with their real details, and add their
-                    photo at <code className="rounded bg-chalk px-1 text-[12px]">/public/cofounder.jpg</code>.
+                    A Mathematics Educator, academic tutor, mentor and education entrepreneur with over 10 years
+                    of classroom teaching and extensive online-education experience. He holds a B.Ed. in
+                    Mathematics Education and an ND in Science Laboratory Technology, and has taught Mathematics
+                    and Sciences across Nigerian and international curricula — WAEC, NECO, JAMB, GCSE, IGCSE,
+                    A-Level and SAT preparation.
+                  </p>
+                  <p>
+                    His philosophy centres on making learning simple, engaging and accessible — helping students
+                    overcome fear, build confidence and develop genuine understanding. Passionate about the
+                    meeting point of education, technology and human development, he co-founded Novelia Academy
+                    to extend quality education far beyond the traditional classroom.
                   </p>
                 </div>
               </div>
