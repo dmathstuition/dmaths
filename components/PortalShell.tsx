@@ -53,7 +53,7 @@ export default function PortalShell({
   const sidebar = (
     <div className="flex h-full flex-col bg-board/95 text-white backdrop-blur-xl">
       <div className="border-b border-white/10 px-5 py-5">
-        <Link href="/"><Logo mark size="lg" /></Link>
+        <Link href="/"><Logo mark size="md" /></Link>
         <p className="mt-2 font-mono text-[10px] uppercase tracking-[.18em] text-white/30">{subtitle}</p>
       </div>
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
@@ -113,7 +113,7 @@ export default function PortalShell({
             </button>
           )}
           <Link href="/" className="flex flex-col justify-center leading-none">
-            <Logo mark size="sm" />
+            <Logo mark size="sm" className="!h-7" />
             <span className="mt-0.5 pl-0.5 font-mono text-[9px] uppercase tracking-[.16em] text-ink/40 dark:text-white/40">{subtitle}</span>
           </Link>
         </div>
