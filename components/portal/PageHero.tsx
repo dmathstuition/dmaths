@@ -16,7 +16,7 @@ export default function PageHero({
     <div className="relative flex flex-wrap items-center gap-4 overflow-hidden rounded-3xl p-7 text-white"
       style={{ background: "linear-gradient(135deg, #10406F 0%, #0A2A4F 55%, #071C36 100%)" }}>
       <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full"
-        style={{ background: "radial-gradient(circle, rgba(239,174,86,.4), transparent 70%)" }} />
+        style={{ background: "radial-gradient(circle, rgba(245,149,30,.4), transparent 70%)" }} />
       {decor[0] && <div aria-hidden className="pointer-events-none absolute right-6 top-6 text-gold/30 float"><Icon name={decor[0]} className="h-6 w-6" /></div>}
       {decor[1] && <div aria-hidden className="pointer-events-none absolute right-24 bottom-6 text-gold/25 float" style={{ animationDelay: "1.1s" }}><Icon name={decor[1]} className="h-5 w-5" /></div>}
 

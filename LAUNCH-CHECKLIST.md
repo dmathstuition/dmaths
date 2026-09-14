@@ -1,6 +1,6 @@
-# 🚀 D-Maths — Go-Live Checklist
+# 🚀 Novelia — Go-Live Checklist
 
-A plain-English guide to everything needed to run the D-Maths portal. **You can do all
+A plain-English guide to everything needed to run the Novelia portal. **You can do all
 of this yourself, for free, without any developer or AI subscription** — every code
 change is done in the GitHub web editor (pencil ✏️ icon → *Commit changes*) and Vercel
 redeploys automatically in ~1 minute.
@@ -45,7 +45,7 @@ Set these for **Production, Preview, Development**. 🔓 = safe to expose · �
 | `VAPID_PRIVATE_KEY` | 🔒 | Web-push private key |
 | `VAPID_SUBJECT` | 🔓 | `mailto:dmathstuition@gmail.com` |
 | `CRON_SECRET` | 🔒 | Random string protecting the cron endpoints |
-| `DEEPSEEK_API_KEY` | 🔒 | *(optional)* Powers the "D-Maths A.I" hint chat via DeepSeek (platform.deepseek.com + billing). Leave unset and the widget shows a friendly "not switched on yet" message. |
+| `DEEPSEEK_API_KEY` | 🔒 | *(optional)* Powers the "Novelia A.I" hint chat via DeepSeek (platform.deepseek.com + billing). Leave unset and the widget shows a friendly "not switched on yet" message. |
 | `DEEPSEEK_MODEL` | 🔓 | *(optional)* Chat model — defaults to `deepseek-chat` (use `deepseek-reasoner` for heavier reasoning). |
 | `NEXT_PUBLIC_SENTRY_DSN` | 🔓 | *(optional)* Sentry project DSN — turns on error monitoring (see section **7**). Leave unset to keep Sentry fully off. |
 | `SENTRY_AUTH_TOKEN` | 🔒 | *(optional)* Only for readable stack traces (source-map upload) at build time |

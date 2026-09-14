@@ -9,7 +9,7 @@ type Snippet = { id: string; title: string; code: string };
 type Doc = { html: string; css: string; js: string };
 
 const STARTER: Doc = {
-  html: `<h1 id="title">Hello, D-Maths!</h1>
+  html: `<h1 id="title">Hello, Novelia!</h1>
 <p>Edit the HTML, CSS and JS, then press Run.</p>
 <button onclick="cheer()">Click me</button>`,
   css: `body { font-family: system-ui, sans-serif; text-align: center; padding: 2rem; color: #0f3a6b; }
@@ -133,7 +133,7 @@ export default function WebIde({ persist = false, meId = "", initialSnippets = [
             {persist && <button onClick={save} disabled={saving} className="btn-ghost !min-h-[42px]">{saving ? "Saving…" : "Save"}</button>}
             {available && (
               <button onClick={() => ask(`HTML:\n${doc.html}\n\nCSS:\n${doc.css}\n\nJS:\n${doc.js}`)} className="btn-ghost !min-h-[42px] gap-1.5">
-                🧭 Ask D-Maths A.I
+                🧭 Ask Novelia A.I
               </button>
             )}
             {onSubmit && (

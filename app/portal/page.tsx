@@ -369,12 +369,12 @@ function SectionEmpty({ icon, title, body, cta, emoji }: {
 }
 
 // Distinct bar colours for the per-subject breakdown (cycled).
-const SUBJECT_COLORS = ["#1A60AB", "#8B5CF6", "#2563EB", "#059669", "#EFAE56"];
+const SUBJECT_COLORS = ["#1657C9", "#8B5CF6", "#2563EB", "#059669", "#F5951E"];
 
 const ACCENTS: Record<string, { icon: string; bar: string }> = {
   emerald: { icon: "bg-emerald-50 text-emerald-600", bar: "#059669" },
-  blue:    { icon: "bg-ink/10 text-ink",             bar: "#1A60AB" },
-  gold:    { icon: "bg-gold-pale text-gold-deep",    bar: "#C8881F" },
+  blue:    { icon: "bg-ink/10 text-ink",             bar: "#1657C9" },
+  gold:    { icon: "bg-gold-pale text-gold-deep",    bar: "#C56A12" },
 };
 
 function Progress({ icon, label, value, text, unit, suffix = "", accent = "blue", bar, flame }: {

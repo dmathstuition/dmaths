@@ -5,14 +5,14 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { getUser, getProfile } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Report card — D-Maths", robots: { index: false } };
+export const metadata = { title: "Report card — Novelia", robots: { index: false } };
 
 function grade(avg: number) {
   if (avg >= 90) return { band: "A*", label: "Distinction", color: "#059669" };
   if (avg >= 80) return { band: "A", label: "Excellent", color: "#059669" };
-  if (avg >= 70) return { band: "B", label: "Very good", color: "#1A60AB" };
-  if (avg >= 60) return { band: "C", label: "Good", color: "#1A60AB" };
-  if (avg >= 50) return { band: "D", label: "Fair", color: "#C8881F" };
+  if (avg >= 70) return { band: "B", label: "Very good", color: "#1657C9" };
+  if (avg >= 60) return { band: "C", label: "Good", color: "#1657C9" };
+  if (avg >= 50) return { band: "D", label: "Fair", color: "#C56A12" };
   return { band: "E", label: "Needs improvement", color: "#EF4444" };
 }
 
@@ -50,8 +50,8 @@ export default async function ReportCardPage({ params }: { params: { id: string 
 
   const stats = [
     { label: "Average score", value: `${card.avg_score ?? 0}%`, color: "#059669" },
-    { label: "Attendance", value: `${card.attendance ?? 0}%`, color: "#1A60AB" },
-    { label: "Reward points", value: `+${card.reward_points ?? 0}`, color: "#C8881F" },
+    { label: "Attendance", value: `${card.attendance ?? 0}%`, color: "#1657C9" },
+    { label: "Reward points", value: `+${card.reward_points ?? 0}`, color: "#C56A12" },
     { label: "Conduct (net)", value: `${net >= 0 ? "+" : ""}${net}`, color: net >= 0 ? "#059669" : "#EF4444" },
   ];
 
@@ -108,7 +108,7 @@ export default async function ReportCardPage({ params }: { params: { id: string 
             <p className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-ink/40">Date issued</p>
           </div>
           <div className="text-right">
-            <p className="font-display text-base font-bold text-board">D-Maths</p>
+            <p className="font-display text-base font-bold text-board">Novelia</p>
             <div className="mt-1 ml-auto w-40 border-t border-ink/30" />
             <p className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-ink/40">Authorised signature</p>
           </div>

@@ -4,7 +4,7 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import MockRequestsClient from "@/components/admin/MockRequestsClient";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Mock requests · D-Maths" };
+export const metadata = { title: "Mock requests · Novelia" };
 
 // Tutors get the same approve/launch screen, scoped to their own roster — the
 // API also filters reads/launches to the roster, so this is defence in depth.

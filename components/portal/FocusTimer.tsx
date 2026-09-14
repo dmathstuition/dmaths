@@ -89,13 +89,13 @@ export default function FocusTimer({ subjects = [] }: { subjects?: string[] }) {
         {/* Dial */}
         <div className="relative flex-shrink-0" style={{ width: 200, height: 200 }}>
           <svg width={200} height={200} className="-rotate-90" aria-hidden>
-            <circle cx={100} cy={100} r={86} fill="none" stroke="rgba(26,96,171,.10)" strokeWidth={14} />
+            <circle cx={100} cy={100} r={86} fill="none" stroke="rgba(22,87,201,.10)" strokeWidth={14} />
             <circle cx={100} cy={100} r={86} fill="none" stroke="url(#focusGrad)" strokeWidth={14}
               strokeLinecap="round" strokeDasharray={RING} strokeDashoffset={RING - progress * RING}
               style={{ transition: "stroke-dashoffset .3s linear" }} />
             <defs>
               <linearGradient id="focusGrad" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="#F4C078" /><stop offset="100%" stopColor="#1A60AB" />
+                <stop offset="0%" stopColor="#F9B24E" /><stop offset="100%" stopColor="#1657C9" />
               </linearGradient>
             </defs>
           </svg>

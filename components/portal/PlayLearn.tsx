@@ -6,7 +6,7 @@ type Tile = { href: string; label: string; sub: string; icon: IconName; from: st
 // A playful launcher for the fun ways to learn — surfaces the games & tools that
 // otherwise live deep in the nav, with a bit of colour and motion.
 const TILES: Tile[] = [
-  { href: "/portal/practice",  label: "Practice",    sub: "Earn points",    icon: "target",        from: "#1A60AB", to: "#0A2A4F", emoji: "🎯" },
+  { href: "/portal/practice",  label: "Practice",    sub: "Earn points",    icon: "target",        from: "#1657C9", to: "#0A2A4F", emoji: "🎯" },
   { href: "/portal/sprint",    label: "Math Sprint", sub: "Beat the clock", icon: "zap",           from: "#7C3AED", to: "#4C1D95", emoji: "⚡" },
   { href: "/portal/mathle",    label: "Mathle",      sub: "Daily puzzle",   icon: "sigma",         from: "#0E9488", to: "#0B4A44", emoji: "🧩" },
   { href: "/portal/duel",      label: "Quiz Duel",   sub: "Challenge a pal",icon: "students",      from: "#EA580C", to: "#7C2D12", emoji: "⚔️" },

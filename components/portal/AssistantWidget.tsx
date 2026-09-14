@@ -7,9 +7,9 @@ import { formatMessage } from "@/components/portal/chatFormat";
 type Msg = { role: "user" | "assistant"; content: string };
 
 const LEARNER_GREETING =
-  "Hi, I'm D-Maths A.I — your learning buddy! 🧭 Stuck on some maths, English or code? Tell me what you're working on and I'll help you figure it out (I give hints, not the finished answer 😉).";
+  "Hi, I'm Novelia A.I — your learning buddy! 🧭 Stuck on some maths, English or code? Tell me what you're working on and I'll help you figure it out (I give hints, not the finished answer 😉).";
 const STAFF_GREETING =
-  "Hi, I'm D-Maths A.I — your teaching assistant. 🧭 Ask me for worked solutions, lesson ideas, practice questions, marking help, or a concept explained a few ways.";
+  "Hi, I'm Novelia A.I — your teaching assistant. 🧭 Ask me for worked solutions, lesson ideas, practice questions, marking help, or a concept explained a few ways.";
 
 // A floating AI chat. In "learner" mode (default) it gives hints — never the full
 // answer — so it never does a learner's graded work for them. In "staff" mode
@@ -85,7 +85,7 @@ export default function AssistantWidget({ context, mode = "learner" }: { context
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          aria-label={`Open D-Maths A.I, the ${staff ? "teaching assistant" : "learning buddy"}`}
+          aria-label={`Open Novelia A.I, the ${staff ? "teaching assistant" : "learning buddy"}`}
           className="fixed bottom-24 right-4 z-[60] flex h-14 w-14 items-center justify-center rounded-full bg-gold text-board shadow-xl shadow-gold/40 transition hover:scale-105 active:scale-95 lg:bottom-6 lg:right-6"
         >
           <span><Icon name="compass" className="h-6 w-6" /></span>
@@ -98,15 +98,15 @@ export default function AssistantWidget({ context, mode = "learner" }: { context
 
       {/* Panel */}
       {open && (
-        <div role="dialog" aria-label="D-Maths A.I assistant"
+        <div role="dialog" aria-label="Novelia A.I assistant"
           className="chat-in fixed inset-x-3 bottom-24 z-[60] flex max-h-[72vh] flex-col overflow-hidden rounded-3xl border border-line bg-white shadow-2xl ring-1 ring-black/5 dark:border-white/10 dark:bg-board dark:ring-white/10 sm:inset-x-auto sm:right-6 sm:w-[400px] lg:bottom-6">
           {/* Header */}
           <div className="relative flex items-center gap-3 overflow-hidden px-4 py-3 text-white"
             style={{ background: "linear-gradient(120deg, #10406F 0%, #0A2A4F 60%, #071C36 100%)" }}>
             <div aria-hidden className="pointer-events-none absolute right-10 top-1 text-gold/25 float"><Icon name="sparkles" className="h-4 w-4" /></div>
-            <span className="relative flex h-9 w-9 items-center justify-center rounded-full bg-gold text-board shadow-[0_0_18px_-4px_rgba(239,174,86,.9)]"><Icon name="compass" className="h-5 w-5" /></span>
+            <span className="relative flex h-9 w-9 items-center justify-center rounded-full bg-gold text-board shadow-[0_0_18px_-4px_rgba(245,149,30,.9)]"><Icon name="compass" className="h-5 w-5" /></span>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-bold leading-tight">D-Maths A.I · {staff ? "Teaching assistant" : "Learning buddy"}</p>
+              <p className="text-sm font-bold leading-tight">Novelia A.I · {staff ? "Teaching assistant" : "Learning buddy"}</p>
               <p className="text-[11px] text-white/55">{staff ? "Solutions, lesson ideas & marking help" : "Hints to help you — not the answers"}</p>
             </div>
             {started && (

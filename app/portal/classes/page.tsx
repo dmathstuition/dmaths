@@ -10,7 +10,7 @@ import { fmtWAT } from "@/lib/time";
 export const dynamic = "force-dynamic";
 
 // A small palette so each subject gets a consistent coloured avatar.
-const AVATAR_COLORS = ["#1A60AB", "#EFAE56", "#7BA3CA", "#059669", "#8b5cf6", "#ec4899"];
+const AVATAR_COLORS = ["#1657C9", "#F5951E", "#7BA3CA", "#059669", "#8b5cf6", "#ec4899"];
 function avatarColor(subject: string) {
   let h = 0;
   for (let i = 0; i < subject.length; i++) h = (h * 31 + subject.charCodeAt(i)) >>> 0;

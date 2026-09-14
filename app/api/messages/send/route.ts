@@ -50,7 +50,7 @@ export async function POST(req: Request) {
     if (error) return NextResponse.json({ error: explain(error.message) }, { status: 500 });
     const { data: recipient } = await admin.from("profiles").select("role").eq("id", studentId).maybeSingle();
     await notifyUser(admin, studentId, {
-      title: "New message from D-Maths", body: preview,
+      title: "New message from Novelia", body: preview,
       link: recipient?.role === "tutor" ? "/tutor/messages" : "/portal/messages",
     });
     return NextResponse.json({ ok: true, message });

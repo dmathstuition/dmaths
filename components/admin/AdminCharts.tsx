@@ -11,13 +11,13 @@ type PaymentRow = { amount?: number | null; paid_at?: string | null; created_at?
 // Chart colours (validated against the light chart surface):
 //   students → brand blue, revenue → emerald, scores → gold-deep.
 // Gold-deep sits below 3:1 contrast, so its chart carries direct value labels.
-const BLUE = "#1A60AB";
+const BLUE = "#1657C9";
 const EMERALD = "#059669";
-const GOLD = "#C8881F";
+const GOLD = "#C56A12";
 const TICK = { fill: "#8A93A6", fontSize: 11 } as const;
 const TOOLTIP_STYLE = {
   borderRadius: 12, border: "1px solid #E5E5E0", fontSize: 12,
-  boxShadow: "0 8px 24px rgba(26,96,171,.12)",
+  boxShadow: "0 8px 24px rgba(22,87,201,.12)",
 } as const;
 
 // The last six calendar months, oldest → newest.

@@ -1,4 +1,4 @@
-// D-Maths serves learners in Nigeria, the UK and the US. Each region has its own
+// Novelia serves learners in Nigeria, the UK and the US. Each region has its own
 // class/level names and the exams learners prepare for (including UK external &
 // professional exams). Kept pure so the registration form, the submit API and
 // the approval flow share one taxonomy.

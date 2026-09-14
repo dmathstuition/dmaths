@@ -205,7 +205,7 @@ export default function MessagesClient({ meId, initialMessages, myRole = "studen
               <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm ${
                 mine ? "bg-gold text-board" : "bg-chalk text-ink"
               }`}>
-                {!mine && <p className="mb-0.5 text-[11px] font-bold text-gold-deep">D-Maths team</p>}
+                {!mine && <p className="mb-0.5 text-[11px] font-bold text-gold-deep">Novelia team</p>}
                 {m.audio_url
                   ? <audio controls preload="metadata" src={fileHref(m.audio_url)} className="max-w-full" style={{ height: 36 }} />
                   : <p className="whitespace-pre-wrap leading-relaxed">{m.body}</p>}
@@ -223,7 +223,7 @@ export default function MessagesClient({ meId, initialMessages, myRole = "studen
         {peerTyping && (
           <div className="flex justify-start">
             <div className="flex items-center gap-1.5 rounded-2xl bg-chalk px-4 py-3">
-              <span className="text-[11px] font-bold text-gold-deep">D-Maths team</span>
+              <span className="text-[11px] font-bold text-gold-deep">Novelia team</span>
               <span className="typing-dot h-1.5 w-1.5 rounded-full bg-ink/40" />
               <span className="typing-dot h-1.5 w-1.5 rounded-full bg-ink/40" />
               <span className="typing-dot h-1.5 w-1.5 rounded-full bg-ink/40" />

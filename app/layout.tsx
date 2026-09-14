@@ -22,7 +22,7 @@ const fira = Fira_Code({ subsets: ["latin"], variable: "--font-fira", weight: ["
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteBaseUrl()),
-  title: "D-Maths Tuition Centre — Online Maths, Science & Coding Tuition",
+  title: "Novelia Academy — Online Maths, Science & Coding Tuition",
   description:
     "A virtual learning community for students worldwide — expert online tuition in maths, sciences & coding, with exam prep for WAEC, JAMB, IGCSE, SAT & A-Levels.",
   keywords: [
@@ -34,20 +34,20 @@ export const metadata: Metadata = {
     "WAEC JAMB preparation",
     "coding classes for students",
     "science tutor online",
-    "D-Maths Tuition Centre",
+    "Novelia Academy",
   ],
   openGraph: {
-    title: "D-Maths Tuition Centre — Online Maths, Science & Coding Tuition",
+    title: "Novelia Academy — Online Maths, Science & Coding Tuition",
     description: "A virtual learning community for students worldwide — online tuition in maths, sciences & coding, with prep for WAEC, JAMB, IGCSE, SAT & A-Levels. Live classes and a results-focused portal.",
     url: "/",
-    siteName: "D-Maths Tuition Centre",
-    images: [{ url: "/api/og", width: 1200, height: 630, alt: "D-Maths Tuition Centre" }],
+    siteName: "Novelia Academy",
+    images: [{ url: "/api/og", width: 1200, height: 630, alt: "Novelia Academy" }],
     locale: "en_NG",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "D-Maths Tuition Centre — Online Maths, Science & Coding Tuition",
+    title: "Novelia Academy — Online Maths, Science & Coding Tuition",
     description: "A virtual learning community for students worldwide — maths, sciences & coding, with prep for WAEC, JAMB, IGCSE, SAT & A-Levels.",
     images: ["/api/og"],
   },
@@ -55,8 +55,8 @@ export const metadata: Metadata = {
   ...(Object.keys(verification).length ? { verification } : {}),
   // Installable-app (PWA) hints. The manifest link is emitted automatically
   // from app/manifest.ts; these add the iOS home-screen behaviour + icon.
-  applicationName: "D-Maths",
-  appleWebApp: { capable: true, statusBarStyle: "default", title: "D-Maths" },
+  applicationName: "Novelia",
+  appleWebApp: { capable: true, statusBarStyle: "default", title: "Novelia" },
   icons: {
     icon: "/icons/icon-192.png",
     apple: "/icons/apple-touch-icon.png",
@@ -64,7 +64,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#1A60AB",
+  themeColor: "#1657C9",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",

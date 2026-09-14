@@ -213,7 +213,7 @@ export default function CBTClient({
                   <div className="mt-2.5">
                     {explains[i] ? (
                       <div className="rounded-lg bg-white/70 p-2.5 text-[13px] leading-relaxed text-ink/75 ring-1 ring-black/5">
-                        <span className="mb-0.5 inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wide text-gold-deep"><Icon name="compass" className="h-3 w-3" /> D-Maths A.I</span>
+                        <span className="mb-0.5 inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wide text-gold-deep"><Icon name="compass" className="h-3 w-3" /> Novelia A.I</span>
                         <p>{explains[i]}</p>
                       </div>
                     ) : (

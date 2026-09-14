@@ -127,7 +127,7 @@ export default function LiveRoom({ domain, roomName, displayName, email, jwt, is
       <div className="flex items-center justify-between gap-3 bg-board px-4 py-2 text-white">
         <div className="min-w-0">
           <p className="flex items-center gap-1.5 truncate text-sm font-bold"><Icon name="radio" className="h-4 w-4 text-red-400" /> Live · {subject}</p>
-          <p className="text-[11px] text-white/50">{isModerator ? "You're the host" : "D-Maths live class"}</p>
+          <p className="text-[11px] text-white/50">{isModerator ? "You're the host" : "Novelia live class"}</p>
         </div>
         <button onClick={() => { try { apiRef.current?.executeCommand("hangup"); } catch {} router.push(backHref); }}
           className="rounded-lg bg-red-500 px-3 py-1.5 text-sm font-bold text-white hover:bg-red-600">

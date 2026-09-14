@@ -126,7 +126,7 @@ export default function InstallPrompt() {
           of the WhatsApp/assistant buttons. */}
       <button ref={btnRef}
         onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp}
-        aria-label="Get the D-Maths app — drag to move, tap to install"
+        aria-label="Get the Novelia app — drag to move, tap to install"
         style={pos ? { left: pos.x, top: pos.y, right: "auto", bottom: "auto", touchAction: "none" } : { touchAction: "none" }}
         className={`fixed z-[70] flex touch-none cursor-grab select-none items-center gap-2 rounded-full bg-board px-4 py-2.5 text-sm font-bold text-white shadow-xl ring-1 ring-white/10 transition active:scale-95 active:cursor-grabbing ${
           pos ? "" : "bottom-24 left-4 lg:bottom-5"
@@ -136,7 +136,7 @@ export default function InstallPrompt() {
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-[90] flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-label="Install the D-Maths app">
+        <div className="fixed inset-0 z-[90] flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-label="Install the Novelia app">
           <button aria-label="Close install instructions" tabIndex={-1} onClick={() => setOpen(false)}
             className="absolute inset-0 bg-board/50 backdrop-blur-sm" />
           <div ref={panelRef} className="relative z-10 w-full max-w-md rounded-t-3xl bg-white p-6 shadow-2xl sm:rounded-3xl">
@@ -145,7 +145,7 @@ export default function InstallPrompt() {
                 <Icon name="download" className="h-5 w-5" />
               </span>
               <div className="flex-1">
-                <h2 className="font-display text-lg font-bold">Install the D-Maths app</h2>
+                <h2 className="font-display text-lg font-bold">Install the Novelia app</h2>
                 <p className="text-sm text-ink/55">One-tap access, class reminders &amp; notifications — installs straight from your browser, no app store needed.</p>
               </div>
               <button onClick={() => setOpen(false)} aria-label="Close install instructions"
@@ -163,7 +163,7 @@ export default function InstallPrompt() {
                 <ol className="space-y-3 text-sm text-ink/70">
                   <li className="flex items-center gap-3"><Step n={1} /> <span>Tap the <Icon name="share" className="mx-0.5 inline h-4 w-4" /> <strong>Share</strong> button in Safari's toolbar.</span></li>
                   <li className="flex items-center gap-3"><Step n={2} /> <span>Choose <Icon name="plusSquare" className="mx-0.5 inline h-4 w-4" /> <strong>Add to Home Screen</strong>.</span></li>
-                  <li className="flex items-center gap-3"><Step n={3} /> <span>Tap <strong>Add</strong> — the D-Maths icon appears on your home screen.</span></li>
+                  <li className="flex items-center gap-3"><Step n={3} /> <span>Tap <strong>Add</strong> — the Novelia icon appears on your home screen.</span></li>
                 </ol>
               ) : platform === "android" ? (
                 <ol className="space-y-3 text-sm text-ink/70">
@@ -174,7 +174,7 @@ export default function InstallPrompt() {
               ) : (
                 <ol className="space-y-3 text-sm text-ink/70">
                   <li className="flex items-center gap-3"><Step n={1} /> <span>Look for the <strong>install icon</strong> in your browser's address bar.</span></li>
-                  <li className="flex items-center gap-3"><Step n={2} /> <span>Or open the <strong>⋮ menu</strong> → <strong>Install D-Maths…</strong></span></li>
+                  <li className="flex items-center gap-3"><Step n={2} /> <span>Or open the <strong>⋮ menu</strong> → <strong>Install Novelia…</strong></span></li>
                   <li className="flex items-center gap-3"><Step n={3} /> <span>Confirm to add it as an app.</span></li>
                 </ol>
               )}

@@ -109,7 +109,7 @@ body { @apply bg-chalk text-ink font-body antialiased; }
 
 /* ── Better focus rings everywhere ──────────────────────── */
 :focus-visible {
-  outline: 2px solid #EFAE56;
+  outline: 2px solid #F5951E;
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -133,7 +133,7 @@ body { @apply bg-chalk text-ink font-body antialiased; }
   transform: translateY(-150%);
   padding: 0.6rem 1rem;
   border-radius: 0.75rem;
-  background: #EFAE56;
+  background: #F5951E;
   color: #0F3A6B;
   font-size: 0.85rem;
   font-weight: 800;
@@ -277,7 +277,7 @@ html { scroll-behavior: smooth; }
 .accent-stroke::after {
   content: ""; position: absolute; left: 0; bottom: -6px;
   height: 4px; width: 56px; border-radius: 4px;
-  background: linear-gradient(90deg, #EFAE56, #F4C078);
+  background: linear-gradient(90deg, #F5951E, #F9B24E);
 }
 
 /* dotted grid texture for light sections */
@@ -362,7 +362,7 @@ html { scroll-behavior: smooth; }
   to { background-position: 200% center; }
 }
 .text-shimmer {
-  background: linear-gradient(90deg, #EFAE56 0%, #FFF1D6 50%, #EFAE56 100%);
+  background: linear-gradient(90deg, #F5951E 0%, #FFE7C8 50%, #F5951E 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
@@ -590,7 +590,7 @@ html { scroll-behavior: smooth; }
   content: "";
   position: absolute; inset-inline: 1.25rem; top: 0; height: 3px;
   border-radius: 999px;
-  background: linear-gradient(90deg, #EFAE56, #C8881F);
+  background: linear-gradient(90deg, #F5951E, #C56A12);
   opacity: 0; transition: opacity .3s ease;
 }
 .card-premium:hover { transform: translateY(-6px); box-shadow: 0 24px 60px rgba(26,96,171,.18); }
@@ -598,7 +598,7 @@ html { scroll-behavior: smooth; }
 
 /* Gradient text — gold sweep, no animation (crisper than shimmer for big headings). */
 .text-gradient-gold {
-  background: linear-gradient(120deg, #EFAE56 0%, #C8881F 60%, #EFAE56 100%);
+  background: linear-gradient(120deg, #F5951E 0%, #C56A12 60%, #F5951E 100%);
   -webkit-background-clip: text; background-clip: text;
   color: transparent;
 }
@@ -627,7 +627,7 @@ html { scroll-behavior: smooth; }
 /* Buttons — a warm, top-lit sheen and a lively micro-lift on hover. */
 .btn { transition: transform .18s ease, box-shadow .18s ease, filter .18s ease, background-color .18s ease; }
 .btn-gold {
-  background-image: linear-gradient(180deg, #F4C078 0%, #EFAE56 52%, #EAA544 100%);
+  background-image: linear-gradient(180deg, #F9B24E 0%, #F5951E 52%, #E7841A 100%);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 4px 16px rgba(239,174,86,.36);
 }
 .btn-gold:hover {

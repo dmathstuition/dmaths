@@ -14,7 +14,7 @@ const FEATURES: { icon: IconName; label: string }[] = [
 // "Play & learn" tiles and a league strip — so the landing previews the actual
 // premium portal rather than a phone mock.
 const TILES: { label: string; icon: IconName; from: string; to: string }[] = [
-  { label: "Practice",    icon: "target",   from: "#1A60AB", to: "#0A2A4F" },
+  { label: "Practice",    icon: "target",   from: "#1657C9", to: "#0A2A4F" },
   { label: "Math Sprint", icon: "zap",      from: "#7C3AED", to: "#4C1D95" },
   { label: "Mathle",      icon: "sigma",    from: "#0E9488", to: "#0B4A44" },
   { label: "Quiz Duel",   icon: "students", from: "#EA580C", to: "#7C2D12" },

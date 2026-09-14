@@ -1,12 +1,12 @@
 import LegalPage, { H2 } from "@/components/LegalPage";
 
-export const metadata = { title: "Payment & Refund Policy — D-Maths Tuition Centre", alternates: { canonical: "/refunds" } };
+export const metadata = { title: "Payment & Refund Policy — Novelia Academy", alternates: { canonical: "/refunds" } };
 
 export default function RefundsPage() {
   return (
     <LegalPage title="Payment & Refund Policy" updated="September 2026">
       <p>
-        This policy explains how payments and refunds work for D-Maths Tuition Centre. Please read
+        This policy explains how payments and refunds work for Novelia Academy. Please read
         it before enrolling.
       </p>
 

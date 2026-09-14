@@ -70,9 +70,9 @@ export default function EngagementReport({ report }: { report: Report }) {
       {/* Reward economy */}
       <Section icon="coins" title="Reward points">
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <Stat label="Total earned" value={r.reward.totalEarned} color="#C8881F" />
+          <Stat label="Total earned" value={r.reward.totalEarned} color="#C56A12" />
           <Stat label="Earned in activities" value={r.reward.activityEarned} sub="practice, mocks, streaks…" color="#059669" />
-          <Stat label="Awarded by teachers" value={r.reward.teacherAwarded} sub="for good conduct" color="#1A60AB" />
+          <Stat label="Awarded by teachers" value={r.reward.teacherAwarded} sub="for good conduct" color="#1657C9" />
           <Stat label="Spendable now" value={r.reward.spendable} sub="after redemptions" color="#0A2A4F" />
         </div>
         <div className="mt-4">
@@ -82,11 +82,11 @@ export default function EngagementReport({ report }: { report: Report }) {
           </div>
           <div className="flex h-3 overflow-hidden rounded-full bg-chalk" title={`${actPct}% activities / ${100 - actPct}% teacher`}>
             <div className="h-full bg-emerald-500" style={{ width: `${actPct}%` }} />
-            <div className="h-full bg-[#1A60AB]" style={{ width: `${100 - actPct}%` }} />
+            <div className="h-full bg-[#1657C9]" style={{ width: `${100 - actPct}%` }} />
           </div>
           <div className="mt-1.5 flex gap-4 text-[11px] font-semibold text-ink/55">
             <span className="inline-flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-emerald-500" /> Activities {r.reward.activityEarned}</span>
-            <span className="inline-flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-[#1A60AB]" /> Teacher {r.reward.teacherAwarded}</span>
+            <span className="inline-flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-[#1657C9]" /> Teacher {r.reward.teacherAwarded}</span>
           </div>
         </div>
       </Section>
@@ -96,7 +96,7 @@ export default function EngagementReport({ report }: { report: Report }) {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <Stat label="Mocks taken" value={r.mocks.count} />
           <Stat label="Average score" value={`${r.mocks.avgPercent}%`} color="#059669" />
-          <Stat label="Best" value={r.mocks.count ? `${r.mocks.bestPercent}%` : "—"} sub={r.mocks.count ? `Grade ${r.mocks.bestBand}` : undefined} color="#C8881F" />
+          <Stat label="Best" value={r.mocks.count ? `${r.mocks.bestPercent}%` : "—"} sub={r.mocks.count ? `Grade ${r.mocks.bestBand}` : undefined} color="#C56A12" />
           <Stat label="By paper" value={`${r.mocks.byExam.waec}·${r.mocks.byExam.jamb}·${r.mocks.byExam.quick}`} sub="WAEC · JAMB · Quick" />
         </div>
         {r.mocks.recent.length > 0 && (
@@ -128,7 +128,7 @@ export default function EngagementReport({ report }: { report: Report }) {
           <Stat label="Submitted" value={r.assignments.submitted} sub={`of ${r.assignments.total} set`} />
           <Stat label="Graded" value={r.assignments.graded} />
           <Stat label="Average grade" value={r.assignments.graded ? `${r.assignments.avgGrade}%` : "—"} color="#059669" />
-          <Stat label="CBT avg" value={r.assignments.cbt.graded ? `${r.assignments.cbt.avg}%` : "—"} sub={`${r.assignments.cbt.graded} CBT · ${r.assignments.written.graded} written`} color="#1A60AB" />
+          <Stat label="CBT avg" value={r.assignments.cbt.graded ? `${r.assignments.cbt.avg}%` : "—"} sub={`${r.assignments.cbt.graded} CBT · ${r.assignments.written.graded} written`} color="#1657C9" />
         </div>
       </Section>
 
@@ -145,8 +145,8 @@ export default function EngagementReport({ report }: { report: Report }) {
       {/* Consistency */}
       <Section icon="flame" title="Attendance & consistency">
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <Stat label="Attendance" value={`${r.attendance.rate}%`} sub={`${r.attendance.present}/${r.attendance.sessions} sessions`} color="#1A60AB" />
-          <Stat label="Current streak" value={`${r.extras.streak}d`} color="#C8881F" />
+          <Stat label="Attendance" value={`${r.attendance.rate}%`} sub={`${r.attendance.present}/${r.attendance.sessions} sessions`} color="#1657C9" />
+          <Stat label="Current streak" value={`${r.extras.streak}d`} color="#C56A12" />
           <Stat label="Boss wins" value={r.extras.bossWins} />
           <Stat label="Achievements" value={r.extras.achievements} />
         </div>
@@ -154,7 +154,7 @@ export default function EngagementReport({ report }: { report: Report }) {
 
       <div className="flex justify-between print:hidden">
         <Link href={back} className="text-sm font-bold text-ink/50 hover:text-ink">← Back</Link>
-        <p className="text-xs text-ink/35">D-Maths · engagement report</p>
+        <p className="text-xs text-ink/35">Novelia · engagement report</p>
       </div>
 
       <style>{`@media print { @page { size: A4 portrait; margin: 12mm; } .card { break-inside: avoid; } }`}</style>

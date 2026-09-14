@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     ? `Focus the whole paper on this topic: ${topic}.`
     : `Spread the questions across the core ${subject} topics in the syllabus (a mixed paper).`;
 
-  const system = `You are an experienced Nigerian examiner setting a mock ${std.key} paper for D-Maths. Write to genuine ${std.label} standard: syllabus-aligned, exam-realistic difficulty and phrasing, Nigerian context and spelling.
+  const system = `You are an experienced Nigerian examiner setting a mock ${std.key} paper for Novelia. Write to genuine ${std.label} standard: syllabus-aligned, exam-realistic difficulty and phrasing, Nigerian context and spelling.
 
 Set exactly ${count} multiple-choice questions in ${subject}${level ? ` for ${level} candidates` : ""}.
 ${scope}

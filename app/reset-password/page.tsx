@@ -44,11 +44,11 @@ export default function ResetPassword() {
   return (
     <main className="boardgrid flex min-h-screen items-center justify-center bg-board p-5">
       <div className="w-full max-w-md">
-        <Link href="/" className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-white/45 hover:text-white/80">← Back to D-Maths</Link>
+        <Link href="/" className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-white/45 hover:text-white/80">← Back to Novelia</Link>
         <div className="overflow-hidden rounded-2xl bg-white shadow-lift">
           <div className="bg-ink p-7">
             <h1 className="font-display text-2xl font-semibold text-white">Set a new password</h1>
-            <p className="mt-1.5 text-sm text-white/45">Choose a new password for your D-Maths account.</p>
+            <p className="mt-1.5 text-sm text-white/45">Choose a new password for your Novelia account.</p>
           </div>
 
           {!checked ? (

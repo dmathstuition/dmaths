@@ -41,7 +41,7 @@ export function nudgeFor(streakCount: number, streakLastDate: string | null, tod
     return {
       kind: "streak",
       title: STREAK_TITLE,
-      body: `You're on a ${streakCount}-day streak — open D-Maths today so it doesn't reset tonight.`,
+      body: `You're on a ${streakCount}-day streak — open Novelia today so it doesn't reset tonight.`,
     };
   }
   // "We've missed you": exactly 7 and 14 days idle (so at most two nudges).

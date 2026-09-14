@@ -16,7 +16,7 @@ export type Division = { name: string; min: number; emoji: string; accent: strin
 export const DIVISIONS: Division[] = [
   { name: "Bronze",   min: 0,    emoji: "🥉", accent: "#B87333" },
   { name: "Silver",   min: 100,  emoji: "🥈", accent: "#9CA3AF" },
-  { name: "Gold",     min: 300,  emoji: "🥇", accent: "#EFAE56" },
+  { name: "Gold",     min: 300,  emoji: "🥇", accent: "#F5951E" },
   { name: "Platinum", min: 600,  emoji: "💠", accent: "#5EA7C7" },
   { name: "Diamond",  min: 1000, emoji: "💎", accent: "#8B7BE8" },
 ];

@@ -17,7 +17,7 @@ export default function MarketingFooter() {
     <footer className="border-t border-line bg-white pt-12">
       <div className="mx-auto grid max-w-6xl gap-10 px-5 pb-10 sm:grid-cols-2 md:grid-cols-4">
         <div>
-          <p className="font-display text-lg font-bold text-ink">D-Maths</p>
+          <p className="font-display text-lg font-bold text-ink">Novelia</p>
           <p className="mt-3 max-w-xs text-[13px] leading-relaxed text-ink/55">
             A virtual learning community delivering world-class online tuition in maths, sciences
             and coding worldwide — with prep for WAEC, JAMB, IGCSE, SAT and A-Levels.
@@ -29,12 +29,12 @@ export default function MarketingFooter() {
       </div>
       <div className="mx-auto max-w-6xl px-5">
         <div className="flex flex-col items-center gap-3 border-t border-line py-6 sm:flex-row sm:justify-between">
-          <p className="text-sm font-semibold text-ink/55">Follow D-Maths</p>
+          <p className="text-sm font-semibold text-ink/55">Follow Novelia</p>
           <SocialLinks className="justify-center" />
         </div>
       </div>
       <div className="bg-board py-4 text-center text-xs font-semibold text-white/80">
-        © {new Date().getFullYear()} D-Maths Tuition Centre · support@dmaths.academy · Asaba, Delta State
+        © {new Date().getFullYear()} Novelia Academy · support@dmaths.academy · Asaba, Delta State
       </div>
     </footer>
   );

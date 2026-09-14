@@ -1,4 +1,4 @@
-// Single source of truth for date/time display. D-Maths serves Nigeria, so all
+// Single source of truth for date/time display. Novelia serves Nigeria, so all
 // dates are shown in West Africa Time (WAT = UTC+1, no daylight saving) rather
 // than the viewer's device timezone — otherwise a class set for 4 PM WAT shows
 // as a different hour for anyone whose phone is on another timezone.

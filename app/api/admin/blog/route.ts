@@ -33,7 +33,7 @@ async function announce(admin: ReturnType<typeof supabaseAdmin>, post: any): Pro
   let sent = 0, failed = 0;
   for (const s of batch) {
     const unsub = `${base}/api/blog/unsubscribe?id=${s.id}`;
-    const body = `We've just published a new post on the D-Maths blog:\n\n${post.title}\n\n${summary}\n\nRead the full post: ${postUrl}\n\n—\nYou're receiving this because you subscribed to the D-Maths blog. To stop these emails, unsubscribe: ${unsub}`;
+    const body = `We've just published a new post on the Novelia blog:\n\n${post.title}\n\n${summary}\n\nRead the full post: ${postUrl}\n\n—\nYou're receiving this because you subscribed to the Novelia blog. To stop these emails, unsubscribe: ${unsub}`;
     const okSent = await sendEmail("notice", s.email, {
       firstName: "there",
       title: `New on the blog: ${post.title}`,
@@ -99,7 +99,7 @@ export async function POST(req: Request) {
       tags,
       layout,
       accent,
-      author: String(b?.author ?? "").trim().slice(0, 80) || "D-Maths",
+      author: String(b?.author ?? "").trim().slice(0, 80) || "Novelia",
       updated_at: new Date().toISOString(),
     };
 

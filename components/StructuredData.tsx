@@ -3,7 +3,7 @@ import { siteBaseUrl } from "@/lib/siteUrl";
 // ── Social / profile links ───────────────────────────────────────────
 // ✏️  PASTE YOUR PUBLIC PROFILE URLS HERE (Facebook, Instagram, TikTok,
 //     LinkedIn, YouTube…). They tell Google these pages belong to the same
-//     D-Maths brand. Edit this list on GitHub anytime — one URL per line.
+//     Novelia brand. Edit this list on GitHub anytime — one URL per line.
 const SOCIAL_LINKS: string[] = [
   // "https://facebook.com/...",
   // "https://instagram.com/...",
@@ -19,11 +19,11 @@ export default function StructuredData() {
     {
       "@type": "EducationalOrganization",
       "@id": `${base}/#org`,
-      name: "D-Maths Tuition Centre",
-      alternateName: "D-Maths",
+      name: "Novelia Academy",
+      alternateName: "Novelia",
       url: base,
-      logo: `${base}/dmathslogo.png`,
-      image: `${base}/dmathslogo.png`,
+      logo: `${base}/novelia-logo.png`,
+      image: `${base}/novelia-logo.png`,
       description:
         "A virtual learning community for students worldwide — expert online tuition in maths, sciences and coding, with exam prep for WAEC, JAMB, IGCSE, SAT and A-Levels. Live classes, personalised feedback and a portal built for results.",
       email: "support@dmaths.academy",
@@ -52,7 +52,7 @@ export default function StructuredData() {
       "@type": "WebSite",
       "@id": `${base}/#website`,
       url: base,
-      name: "D-Maths Tuition Centre",
+      name: "Novelia Academy",
       publisher: { "@id": `${base}/#org` },
       inLanguage: "en-NG",
     },

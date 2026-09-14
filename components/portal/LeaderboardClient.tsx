@@ -29,12 +29,12 @@ function initials(s: Winner) {
   return `${s.first_name?.[0] ?? ""}${s.last_name?.[0] ?? ""}`.toUpperCase() || "S";
 }
 
-const MEDAL_TINT = ["text-[#EFAE56]", "text-[#AEB6C4]", "text-[#B87333]"]; // gold · silver · bronze
+const MEDAL_TINT = ["text-[#F5951E]", "text-[#AEB6C4]", "text-[#B87333]"]; // gold · silver · bronze
 const PLACE_LABEL = ["1ST", "2ND", "3RD"];
 // Podium theming by place — gold / silver / bronze arena furniture.
 // `top` is the lighter 3D "step surface"; `bar` is the front face of the block.
 const PLACE = [
-  { glow: "shadow-[0_0_54px_-6px_rgba(239,174,86,.95)]", ring: "ring-gold/60", top: "from-[#FBE0AE] to-[#F4C078]", bar: "from-[#EFAE56] to-[#B4791A]", h: 156 },
+  { glow: "shadow-[0_0_54px_-6px_rgba(245,149,30,.95)]", ring: "ring-gold/60", top: "from-[#FBE0AE] to-[#F9B24E]", bar: "from-[#F5951E] to-[#B4791A]", h: 156 },
   { glow: "shadow-[0_0_40px_-10px_rgba(174,182,196,.85)]", ring: "ring-slate-300/60", top: "from-[#EEF1F6] to-[#C6CDD9]", bar: "from-[#C6CDD9] to-[#6F7A8C]", h: 110 },
   { glow: "shadow-[0_0_36px_-10px_rgba(184,115,51,.85)]", ring: "ring-[#B87333]/60", top: "from-[#EAB988] to-[#C88A4E]", bar: "from-[#C88A4E] to-[#7C4D22]", h: 78 },
 ];
@@ -146,7 +146,7 @@ export default function LeaderboardClient({
       {/* ── Header HUD ───────────────────────────────────────────── */}
       <div className="boardgrid relative overflow-hidden rounded-2xl bg-board p-7 text-white">
         <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(239,174,86,.4), transparent 70%)" }} />
+          style={{ background: "radial-gradient(circle, rgba(245,149,30,.4), transparent 70%)" }} />
         <div aria-hidden className="pointer-events-none absolute right-6 top-6 text-gold/30 float"><Icon name="trophy" className="h-6 w-6" /></div>
         <div aria-hidden className="pointer-events-none absolute right-24 bottom-6 text-gold/25 float" style={{ animationDelay: "1.1s" }}><Icon name="sparkles" className="h-5 w-5" /></div>
         <div className="relative flex items-center gap-4">
@@ -226,9 +226,9 @@ export default function LeaderboardClient({
           title="Tap to celebrate 🎉">
           {/* stage spotlight + champion beam */}
           <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-56 opacity-80"
-            style={{ background: "radial-gradient(55% 100% at 50% 0%, rgba(239,174,86,.28), transparent 70%)" }} />
+            style={{ background: "radial-gradient(55% 100% at 50% 0%, rgba(245,149,30,.28), transparent 70%)" }} />
           <div aria-hidden className="pointer-events-none absolute left-1/2 top-0 h-56 w-40 -translate-x-1/2 opacity-60 badge-pulse"
-            style={{ background: "linear-gradient(to bottom, rgba(239,174,86,.30), transparent 80%)", clipPath: "polygon(38% 0, 62% 0, 100% 100%, 0 100%)" }} />
+            style={{ background: "linear-gradient(to bottom, rgba(245,149,30,.30), transparent 80%)", clipPath: "polygon(38% 0, 62% 0, 100% 100%, 0 100%)" }} />
           {/* floating sparkles */}
           <div aria-hidden className="pointer-events-none absolute left-6 top-10 text-gold/25 float"><Icon name="sparkles" className="h-4 w-4" /></div>
           <div aria-hidden className="pointer-events-none absolute right-8 top-16 text-gold/20 float" style={{ animationDelay: "1.4s" }}><Icon name="star" className="h-3.5 w-3.5" /></div>

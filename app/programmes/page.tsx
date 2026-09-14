@@ -3,7 +3,7 @@ import MarketingShell, { PageHeader } from "@/components/landing/MarketingShell"
 import Reveal from "@/components/landing/Reveal";
 
 export const metadata = {
-  title: "Programmes — D-Maths Tuition",
+  title: "Programmes — Novelia Academy",
   description: "Online tuition programmes in mathematics, English, sciences and coding, with focused preparation for WAEC, JAMB, IGCSE, SAT, A-Levels and KS2/KS3.",
   alternates: { canonical: "/programmes" },
 };

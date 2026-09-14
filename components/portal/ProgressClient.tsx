@@ -5,7 +5,7 @@ import ProgressRing from "@/components/ui/ProgressRing";
 import ActivityHeatmap from "@/components/portal/ActivityHeatmap";
 import { Icon } from "@/components/Icons";
 
-const COLORS = ["#1A60AB", "#EFAE56", "#059669", "#dc2626", "#8b5cf6", "#ec4899"];
+const COLORS = ["#1657C9", "#F5951E", "#059669", "#dc2626", "#8b5cf6", "#ec4899"];
 
 function encouragement(score: number) {
   if (score >= 80) return "Outstanding work — keep it up! 🌟";
@@ -131,7 +131,7 @@ export default function ProgressClient({
       <div className="relative overflow-hidden rounded-3xl p-7 text-white"
         style={{ background: "linear-gradient(135deg, #10406F 0%, #0A2A4F 55%, #071C36 100%)" }}>
         <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(239,174,86,.4), transparent 70%)" }} />
+          style={{ background: "radial-gradient(circle, rgba(245,149,30,.4), transparent 70%)" }} />
         <div aria-hidden className="pointer-events-none absolute right-6 top-6 text-gold/30 float"><Icon name="progress" className="h-6 w-6" /></div>
         <div aria-hidden className="pointer-events-none absolute right-24 bottom-6 text-gold/25 float" style={{ animationDelay: "1.1s" }}><Icon name="star" className="h-5 w-5" /></div>
         <div className="relative flex items-center gap-4">
@@ -178,7 +178,7 @@ export default function ProgressClient({
       {/* AI study coach */}
       <div className="relative overflow-hidden rounded-3xl p-6 text-white"
         style={{ background: "linear-gradient(135deg, #10406F 0%, #0A2A4F 55%, #071C36 100%)" }}>
-        <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full" style={{ background: "radial-gradient(circle, rgba(239,174,86,.4), transparent 70%)" }} />
+        <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full" style={{ background: "radial-gradient(circle, rgba(245,149,30,.4), transparent 70%)" }} />
         <div className="relative flex flex-wrap items-start gap-4">
           <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-gold/15 text-gold ring-1 ring-gold/25"><Icon name="compass" className="h-5 w-5" /></span>
           <div className="min-w-0 flex-1">
@@ -186,7 +186,7 @@ export default function ProgressClient({
             {coach ? (
               <p className="mt-1 whitespace-pre-line text-sm leading-relaxed text-white/80">{coach}</p>
             ) : (
-              <p className="mt-1 text-sm text-white/55">Let D-Maths A.I turn your results into a short focus plan for this week.</p>
+              <p className="mt-1 text-sm text-white/55">Let Novelia A.I turn your results into a short focus plan for this week.</p>
             )}
             {coachErr && <p className="mt-2 text-sm font-semibold text-red-300">{coachErr}</p>}
           </div>
@@ -202,7 +202,7 @@ export default function ProgressClient({
       {/* Overall progress hero + subject performance (app-style) */}
       <div className="grid gap-5 lg:grid-cols-2">
         <div className="card flex items-center gap-5 p-6">
-          <ProgressRing value={profile.avg_score} size={110} color="#1A60AB">
+          <ProgressRing value={profile.avg_score} size={110} color="#1657C9">
             <span className="font-display text-2xl font-extrabold text-ink">{profile.avg_score}%</span>
             <span className="text-[10px] font-bold uppercase tracking-wider text-ink/40">Overall</span>
           </ProgressRing>
@@ -262,10 +262,10 @@ export default function ProgressClient({
                 <XAxis dataKey="label" tick={{ fontSize: 10 }} angle={-20} textAnchor="end" height={50} />
                 <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} />
                 <Tooltip />
-                <Line type="monotone" dataKey="score" stroke="#EFAE56" strokeWidth={2} dot={{ r: 4 }} name="Score" />
-                <Line type="monotone" dataKey="avg" stroke="#1A60AB" strokeWidth={2} strokeDasharray="5 5" dot={false} name="Running avg" />
+                <Line type="monotone" dataKey="score" stroke="#F5951E" strokeWidth={2} dot={{ r: 4 }} name="Score" />
+                <Line type="monotone" dataKey="avg" stroke="#1657C9" strokeWidth={2} strokeDasharray="5 5" dot={false} name="Running avg" />
                 {gradeTarget !== null && (
-                  <ReferenceLine y={gradeTarget} stroke="#EFAE56" strokeDasharray="6 3" strokeWidth={1.5} label={{ value: `Target ${gradeTarget}%`, position: "insideTopRight", fontSize: 10, fill: "#EFAE56" }} />
+                  <ReferenceLine y={gradeTarget} stroke="#F5951E" strokeDasharray="6 3" strokeWidth={1.5} label={{ value: `Target ${gradeTarget}%`, position: "insideTopRight", fontSize: 10, fill: "#F5951E" }} />
                 )}
               </LineChart>
             </ResponsiveContainer>

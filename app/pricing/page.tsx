@@ -4,7 +4,7 @@ import Reveal from "@/components/landing/Reveal";
 import { PRICING_TIERS, PORTAL_BENEFITS, NGN_PER_USD, fmtNgn, fmtUsd, usdFromNgn } from "@/lib/pricing";
 
 export const metadata = {
-  title: "Pricing — D-Maths Tuition",
+  title: "Pricing — Novelia Academy",
   description: "Simple per-hour tuition — Maths, English & Science, KS2 exam prep, and coding. Billed monthly from attendance and paid securely in the portal.",
   alternates: { canonical: "/pricing" },
 };

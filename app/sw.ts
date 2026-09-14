@@ -1,5 +1,5 @@
 /// <reference lib="webworker" />
-// D-Maths service worker (Serwist). Compiled separately by @serwist/next, so
+// Novelia service worker (Serwist). Compiled separately by @serwist/next, so
 // it is excluded from the main tsconfig typecheck.
 //
 // Caching is deliberately CONSERVATIVE for a portal with auth + payments:
@@ -102,7 +102,7 @@ self.addEventListener("push", (event: PushEvent) => {
   } catch {
     data = { title: event.data?.text() };
   }
-  const title = data.title || "D-Maths";
+  const title = data.title || "Novelia";
   event.waitUntil(
     self.registration.showNotification(title, {
       body: data.body || "",

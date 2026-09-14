@@ -49,7 +49,7 @@ export default function FlyerPopup() {
   if (!open) return null;
 
   return (
-    <div role="dialog" aria-modal="true" aria-label="D-Maths Summer Camp"
+    <div role="dialog" aria-modal="true" aria-label="Novelia Summer Camp"
       className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       {/* Blurred, dark backdrop — clicking it dismisses. */}
       <button aria-label="Close this offer" tabIndex={-1} onClick={dismiss}
@@ -64,7 +64,7 @@ export default function FlyerPopup() {
 
         <Link href="/summer-camp" onClick={dismiss} className="block overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/20">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={FLYER_SRC} alt="D-Maths Summer Camp — registration is open" className="h-auto w-full" />
+          <img src={FLYER_SRC} alt="Novelia Summer Camp — registration is open" className="h-auto w-full" />
         </Link>
 
         <div className="mt-4 flex flex-col items-center gap-2">

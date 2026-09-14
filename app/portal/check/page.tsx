@@ -2,7 +2,7 @@ import SelfCheckClient from "@/components/portal/SelfCheckClient";
 import { Icon } from "@/components/Icons";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Check my work · D-Maths" };
+export const metadata = { title: "Check my work · Novelia" };
 
 // Learner self-marking helper. The A.I marks the typed working (it can't read a
 // photo) — the snap is just to read alongside while typing it up.

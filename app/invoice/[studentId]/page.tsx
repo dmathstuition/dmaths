@@ -7,7 +7,7 @@ import { owingSummary, fmtNaira, monthLabel, invoiceNumber } from "@/lib/payment
 import { fmtWATDate } from "@/lib/time";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Invoice — D-Maths", robots: { index: false } };
+export const metadata = { title: "Invoice — Novelia", robots: { index: false } };
 
 // A printable invoice for the learner's CURRENT-MONTH tuition fee. Where the
 // statement lists money already received, this is the forward-looking bill:
@@ -132,7 +132,7 @@ export default async function InvoicePage({ params }: { params: { studentId: str
 
         <div className="mt-8 flex flex-wrap items-end justify-between gap-4 border-t border-line pt-5">
           <div>
-            <p className="font-display text-base font-bold text-board">D-Maths Tuition</p>
+            <p className="font-display text-base font-bold text-board">Novelia Academy</p>
             <p className="text-[12px] text-ink/50">support@dmaths.academy</p>
           </div>
           <p className="text-[11px] text-ink/45">{invNo}</p>

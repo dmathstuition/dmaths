@@ -170,7 +170,7 @@ export default function Login() {
         </div>
         <Link href="/" className="relative w-fit"><Logo light size="lg" /></Link>
         <div className="relative mt-16 max-w-sm">
-          <h2 className="text-crisp font-display text-3xl font-bold leading-tight">Welcome back to your D-Maths portal <span className="align-middle">👋</span></h2>
+          <h2 className="text-crisp font-display text-3xl font-bold leading-tight">Welcome back to your Novelia portal <span className="align-middle">👋</span></h2>
           <p className="mt-3 text-sm leading-relaxed text-white/75">Live classes, grades, streaks and reminders — your whole learning journey in one beautiful app.</p>
           <ul className="mt-6 space-y-2.5 text-sm text-white/85">
             {["Grades, attendance & streaks, tracked live", "Join live classes from your phone", "Assignments & instant class reminders"].map((t) => (
@@ -212,7 +212,7 @@ export default function Login() {
             <div aria-hidden className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-gold-soft via-gold to-gold-deep" />
             <div className="mb-5">
               <h1 className="font-display text-2xl font-bold text-ink">{mfaRequired ? "Two-step verification" : "Welcome back"}</h1>
-              <p className="mt-1 text-sm text-ink/50">{mfaRequired ? "Enter the code from your authenticator app." : "Sign in to your D-Maths portal."}</p>
+              <p className="mt-1 text-sm text-ink/50">{mfaRequired ? "Enter the code from your authenticator app." : "Sign in to your Novelia portal."}</p>
             </div>
 
           {mfaRequired ? (
@@ -227,7 +227,7 @@ export default function Login() {
               </div>
               <button disabled={busy || mfaCode.length !== 6}
                 className="w-full rounded-2xl py-4 text-base font-bold text-white shadow-lg shadow-gold/30 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-gold/40 hover:brightness-[1.04] active:translate-y-0 active:scale-[.99] disabled:opacity-60"
-                style={{ background: "linear-gradient(135deg, #EFAE56 0%, #C8881F 100%)" }}>
+                style={{ background: "linear-gradient(135deg, #F5951E 0%, #C56A12 100%)" }}>
                 {busy ? "Verifying…" : "Verify & sign in"}
               </button>
               <button type="button" onClick={cancelMfa} className="block w-full text-center text-sm font-semibold text-ink/45 hover:text-ink">
@@ -276,7 +276,7 @@ export default function Login() {
 
             <button disabled={busy}
               className="w-full rounded-2xl py-4 text-base font-bold text-white shadow-lg shadow-gold/30 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-gold/40 hover:brightness-[1.04] active:translate-y-0 active:scale-[.99] disabled:opacity-60"
-              style={{ background: "linear-gradient(135deg, #EFAE56 0%, #C8881F 100%)" }}>
+              style={{ background: "linear-gradient(135deg, #F5951E 0%, #C56A12 100%)" }}>
               {busy ? "Signing in…" : "Sign In"}
             </button>
 
@@ -290,7 +290,7 @@ export default function Login() {
 
           <p className="mt-5 text-center text-xs text-ink/40">Students use their Student ID · Parents &amp; staff use their email</p>
           {!standalone && (
-            <Link href="/" className="mt-3 block text-center text-sm font-semibold text-ink/45 hover:text-ink/80">← Back to D-Maths</Link>
+            <Link href="/" className="mt-3 block text-center text-sm font-semibold text-ink/45 hover:text-ink/80">← Back to Novelia</Link>
           )}
         </div>
       </div>

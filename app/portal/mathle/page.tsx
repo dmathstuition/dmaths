@@ -2,7 +2,7 @@ import MathleClient from "@/components/portal/MathleClient";
 import { Icon } from "@/components/Icons";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Mathle · D-Maths" };
+export const metadata = { title: "Mathle · Novelia" };
 
 // A daily equation puzzle — everyone gets the same one each day. No backend: the
 // day's equation is derived from the date and progress lives in the browser.

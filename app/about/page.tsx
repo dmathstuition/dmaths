@@ -4,8 +4,8 @@ import MarketingShell, { PageHeader } from "@/components/landing/MarketingShell"
 import Reveal from "@/components/landing/Reveal";
 
 export const metadata = {
-  title: "About — D-Maths Tuition",
-  description: "D-Maths is a fully virtual tuition community preparing learners worldwide for WAEC, JAMB, IGCSE, SAT and A-Levels through personalised online teaching.",
+  title: "About — Novelia Academy",
+  description: "Novelia is a fully virtual tuition community preparing learners worldwide for WAEC, JAMB, IGCSE, SAT and A-Levels through personalised online teaching.",
   alternates: { canonical: "/about" },
 };
 
@@ -26,7 +26,7 @@ export default function AboutPage() {
           <div>
             <h2 className="font-display text-2xl font-bold text-ink md:text-3xl">Turning effort into achievement</h2>
             <p className="mt-4 text-[15px] leading-relaxed text-ink/60">
-              D-Maths delivers tailored maths, science and coding tuition for every learner. We prepare
+              Novelia delivers tailored maths, science and coding tuition for every learner. We prepare
               students for WAEC, JAMB, IGCSE, SAT, A-Levels and KS2/KS3 — meeting each child where they are
               and building a clear path forward.
             </p>
@@ -43,61 +43,82 @@ export default function AboutPage() {
             <Link href="/apply" className="btn-gold mt-7 inline-flex !rounded-full !px-6">Register now</Link>
           </div>
           <div className="overflow-hidden rounded-3xl border border-line bg-white shadow-sm">
-            <Image src="/camp-about.png" alt="A D-Maths learner" width={900} height={760} quality={90}
+            <Image src="/camp-about.png" alt="A Novelia learner" width={900} height={760} quality={90}
               sizes="(max-width: 768px) 100vw, 50vw" className="h-auto w-full object-contain" />
           </div>
         </Reveal>
       </section>
 
-      {/* Founder */}
+      {/* Co-founders */}
       <section className="border-t border-line bg-chalk/40">
         <div className="mx-auto max-w-6xl px-5 py-16">
-          <Reveal className="grid items-start gap-12 md:grid-cols-[320px_1fr]">
-            <div className="mx-auto w-full max-w-xs">
-              <div className="overflow-hidden rounded-3xl border border-line bg-white shadow-sm">
-                <Image src="/founder.jpg" alt="Bakare Oladapo E., founder of D-Maths"
-                  width={1086} height={1448} quality={90} sizes="(max-width: 768px) 90vw, 320px"
-                  className="h-auto w-full object-cover" />
+          <div className="text-center">
+            <p className="text-[12px] font-bold uppercase tracking-[0.18em] text-gold-deep">Our co-founders</p>
+            <h2 className="mt-2 font-display text-2xl font-bold text-ink md:text-3xl">The partnership behind Novelia Academy</h2>
+            <p className="mx-auto mt-3 max-w-2xl text-[15px] leading-relaxed text-ink/55">
+              Novelia Academy is founded and led by a partnership of educators and technologists who
+              share one goal: high-quality, personalised learning for every child.
+            </p>
+          </div>
+
+          <div className="mt-10 grid gap-6 md:grid-cols-2">
+            {/* Co-founder 1 — Bakare */}
+            <Reveal className="glass-card flex flex-col overflow-hidden !rounded-3xl">
+              <div className="aspect-[4/3] w-full overflow-hidden bg-white">
+                <Image src="/founder.jpg" alt="Bakare Oladapo E., co-founder of Novelia Academy"
+                  width={1086} height={1448} quality={90} sizes="(max-width: 768px) 100vw, 50vw"
+                  className="h-full w-full object-cover object-top" />
               </div>
-              <div className="mt-4 text-center">
-                <p className="font-display text-base font-bold text-ink">Bakare Oladapo E.</p>
-                <p className="text-[12px] font-semibold text-gold-deep">Founder &amp; Lead Educator</p>
+              <div className="flex flex-1 flex-col p-6">
+                <p className="font-display text-lg font-bold text-ink">Bakare Oladapo E.</p>
+                <p className="text-[12px] font-semibold text-gold-deep">Co-Founder &amp; Lead Educator</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {["Web Developer", "Data Analyst", "AI Engineer"].map(role => (
+                    <span key={role} className="rounded-full border border-line bg-white px-2.5 py-0.5 text-[11px] font-semibold text-ink/70">{role}</span>
+                  ))}
+                </div>
+                <div className="mt-4 space-y-3 text-[14px] leading-relaxed text-ink/60">
+                  <p>
+                    A passionate educator and technology professional dedicated to transforming education
+                    through innovation. As a Web Developer, Data Analyst and AI Engineer, he combines software
+                    development, data-driven decision-making and artificial intelligence to build learning that
+                    is practical, engaging and effective.
+                  </p>
+                  <p>
+                    Driven by the belief that every learner deserves access to high-quality education, he
+                    co-founded Novelia Academy to give students an interactive place to learn, practise, track
+                    their progress and develop future-ready skills in maths, coding, A.I and technology.
+                  </p>
+                </div>
               </div>
-            </div>
-            <div>
-              <p className="text-[12px] font-bold uppercase tracking-[0.18em] text-gold-deep">About the founder</p>
-              <h2 className="mt-2 font-display text-2xl font-bold text-ink md:text-3xl">Bakare Oladapo E.</h2>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {["Web Developer", "Data Analyst", "AI Engineer"].map(role => (
-                  <span key={role} className="rounded-full border border-line bg-white px-3 py-1 text-[12px] font-semibold text-ink/70">{role}</span>
-                ))}
+            </Reveal>
+
+            {/* Co-founder 2 — PLACEHOLDER: replace name, role, photo and bio */}
+            <Reveal delay={90} className="glass-card flex flex-col overflow-hidden !rounded-3xl">
+              <div className="flex aspect-[4/3] w-full items-center justify-center bg-gradient-to-br from-ink/10 to-gold/10">
+                <div className="flex flex-col items-center text-ink/40">
+                  <span className="flex h-20 w-20 items-center justify-center rounded-full bg-white/70 font-display text-2xl font-bold text-ink/50">N</span>
+                  <span className="mt-2 text-[12px] font-semibold">Photo coming soon</span>
+                </div>
               </div>
-              <div className="mt-5 space-y-4 text-[15px] leading-relaxed text-ink/60">
-                <p>
-                  Meet the visionary behind the D-Maths Learning Portal — a passionate educator and
-                  technology professional dedicated to transforming education through innovation.
-                </p>
-                <p>
-                  As a Web Developer, Data Analyst and AI Engineer, he combines expertise in software
-                  development, data-driven decision-making and artificial intelligence to create educational
-                  solutions that are practical, engaging and impactful. With a strong foundation in mathematics
-                  education and technology, he is committed to bridging the gap between traditional teaching
-                  methods and modern digital learning.
-                </p>
-                <p>
-                  Driven by the belief that every learner deserves access to high-quality education, he founded
-                  the D-Maths Learning Portal to provide an interactive platform where students learn, practise,
-                  monitor their progress and develop future-ready skills in mathematics, coding, artificial
-                  intelligence and technology.
-                </p>
-                <p>
-                  Beyond teaching, he is passionate about building innovative digital products that empower
-                  schools, educators and learners across Africa and beyond — inspiring the next generation of
-                  problem-solvers, innovators and technology leaders.
-                </p>
+              <div className="flex flex-1 flex-col p-6">
+                <p className="font-display text-lg font-bold text-ink">Co-founder&rsquo;s name</p>
+                <p className="text-[12px] font-semibold text-gold-deep">Co-Founder</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {["Role", "Role"].map((role, i) => (
+                    <span key={i} className="rounded-full border border-line bg-white px-2.5 py-0.5 text-[11px] font-semibold text-ink/50">{role}</span>
+                  ))}
+                </div>
+                <div className="mt-4 space-y-3 text-[14px] leading-relaxed text-ink/50">
+                  <p>
+                    A short bio for the second co-founder goes here — their background, expertise and what they
+                    bring to Novelia Academy. Replace this placeholder with their real details, and add their
+                    photo at <code className="rounded bg-chalk px-1 text-[12px]">/public/cofounder.jpg</code>.
+                  </p>
+                </div>
               </div>
-            </div>
-          </Reveal>
+            </Reveal>
+          </div>
         </div>
       </section>
     </MarketingShell>

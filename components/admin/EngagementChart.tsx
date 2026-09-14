@@ -6,12 +6,12 @@ import type { WeekBucket } from "@/lib/analytics";
 
 // Weekly learning-activity volume — practice rounds + mock exams per week,
 // stacked. Colours match the dashboard charts (blue = practice, gold = mock).
-const BLUE = "#1A60AB";
-const GOLD = "#C8881F";
+const BLUE = "#1657C9";
+const GOLD = "#C56A12";
 const TICK = { fill: "#8A93A6", fontSize: 11 } as const;
 const TOOLTIP_STYLE = {
   borderRadius: 12, border: "1px solid #E5E5E0", fontSize: 12,
-  boxShadow: "0 8px 24px rgba(26,96,171,.12)",
+  boxShadow: "0 8px 24px rgba(22,87,201,.12)",
 } as const;
 
 export default function EngagementChart({ data }: { data: WeekBucket[] }) {

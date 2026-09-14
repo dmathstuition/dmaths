@@ -1,7 +1,7 @@
 import Logo from "@/components/Logo";
 import OfflineAutoRetry from "@/components/OfflineAutoRetry";
 
-export const metadata = { title: "You're offline — D-Maths Tuition Centre" };
+export const metadata = { title: "You're offline — Novelia Academy" };
 
 // Shown by the service worker when a page is requested with no connection.
 // Mirrors the branded shell of not-found.tsx / error.tsx.
@@ -13,7 +13,7 @@ export default function Offline() {
       <h1 className="mt-2 font-display text-2xl font-semibold">No internet connection</h1>
       <p className="mt-2 max-w-sm text-sm text-white/55">
         You're not connected right now. Check your network and try again — your
-        D-Maths portal will be here when you're back online.
+        Novelia portal will be here when you're back online.
       </p>
       <a
         href="/"

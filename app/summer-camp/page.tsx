@@ -25,11 +25,11 @@ import {
 } from "@/lib/summerCamp";
 
 export const metadata: Metadata = {
-  title: "Summer Camp — D-Maths Online",
+  title: "Summer Camp — Novelia Online",
   alternates: { canonical: "/summer-camp" },
-  description: `D-Maths Online Summer Camp (${campDateRange()}): hands-on Maths & Coding. Foundation maths, coding, game development, AI, web development and Python — with a personalized portal to track every learner's growth.`,
+  description: `Novelia Online Summer Camp (${campDateRange()}): hands-on Maths & Coding. Foundation maths, coding, game development, AI, web development and Python — with a personalized portal to track every learner's growth.`,
   openGraph: {
-    title: "D-Maths Online Summer Camp",
+    title: "Novelia Online Summer Camp",
     description: `Hands-on Maths & Coding, ${campDateRange()}. Registration is open.`,
   },
 };
@@ -78,7 +78,7 @@ export default function SummerCamp() {
               </span>
             </div>
             <h1 className="mt-5 font-display text-4xl font-extrabold leading-[1.08] tracking-tight md:text-6xl">
-              D-Maths <span className="text-gradient-gold">Summer Camp</span>
+              Novelia <span className="text-gradient-gold">Summer Camp</span>
             </h1>
             <p className="mt-5 text-[15px] leading-relaxed text-white/70 md:text-base">
               Hands-on <strong className="text-white">Maths &amp; Coding</strong>, {campDateRange()}.
@@ -101,7 +101,7 @@ export default function SummerCamp() {
             <div className="relative overflow-hidden rounded-3xl shadow-2xl ring-1 ring-white/10">
               <Image
                 src="/summer-camp-banner.png"
-                alt="D-Maths students coding and building projects with the D-Maths robot"
+                alt="Novelia students coding and building projects with the Novelia robot"
                 width={1000}
                 height={812}
                 quality={90}
@@ -328,11 +328,11 @@ export default function SummerCamp() {
       {/* FOOTER */}
       <footer className="bg-white pt-8">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-3 px-5 pb-8">
-          <p className="text-sm font-semibold text-ink/50">Follow D-Maths</p>
+          <p className="text-sm font-semibold text-ink/50">Follow Novelia</p>
           <SocialLinks className="justify-center" />
         </div>
         <div className="bg-gold py-4 text-center text-xs font-semibold text-white">
-          © {new Date().getFullYear()} D-Maths Tuition Centre · support@dmaths.academy · Asaba, Delta State
+          © {new Date().getFullYear()} Novelia Academy · support@dmaths.academy · Asaba, Delta State
         </div>
       </footer>
 

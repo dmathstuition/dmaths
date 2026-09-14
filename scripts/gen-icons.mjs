@@ -1,7 +1,7 @@
 // Generate the PWA icon set from the square brand logo.
 // Run once (or after the logo changes):  node scripts/gen-icons.mjs
 //
-// The base logo (public/dmathslogo.png) is dark artwork on a transparent
+// The base logo (public/novelia-logo.png) is dark artwork on a transparent
 // background, so every icon is composited onto a WHITE square to stay visible
 // on any home-screen / launcher background. Maskable gets extra padding so
 // Android's circular/squircle mask never clips the mark.
@@ -9,7 +9,7 @@
 import sharp from "sharp";
 import { mkdir } from "node:fs/promises";
 
-const SRC = "public/dmathslogo.png";
+const SRC = "public/novelia-logo.png";
 const OUT = "public/icons";
 const WHITE = { r: 255, g: 255, b: 255, alpha: 1 };
 

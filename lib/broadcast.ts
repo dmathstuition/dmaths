@@ -37,7 +37,7 @@ export async function deliverBroadcast(
 
   const preview = body.length > 120 ? `${body.slice(0, 117)}…` : body;
   await Promise.allSettled(
-    recipients.map((sid) => notifyUser(admin, sid, { title: "New message from D-Maths", body: preview, link: "/portal/messages" })),
+    recipients.map((sid) => notifyUser(admin, sid, { title: "New message from Novelia", body: preview, link: "/portal/messages" })),
   );
   return { sent: recipients.length };
 }

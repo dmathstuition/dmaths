@@ -30,7 +30,7 @@ export default function GlobalError({ error }: { error: Error & { digest?: strin
           fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
         }}
       >
-        <p style={{ fontSize: "3rem", fontWeight: 800, color: "#EFAE56", margin: 0 }}>Oops</p>
+        <p style={{ fontSize: "3rem", fontWeight: 800, color: "#F5951E", margin: 0 }}>Oops</p>
         <h1 style={{ marginTop: "8px", fontSize: "1.5rem", fontWeight: 600 }}>Something went wrong</h1>
         <p style={{ marginTop: "8px", maxWidth: "24rem", fontSize: "0.9rem", color: "rgba(255,255,255,0.6)" }}>
           An unexpected error occurred. Please try again — if it keeps happening, contact us at
@@ -43,7 +43,7 @@ export default function GlobalError({ error }: { error: Error & { digest?: strin
             display: "inline-block",
             borderRadius: "9999px",
             padding: "12px 24px",
-            background: "#EFAE56",
+            background: "#F5951E",
             color: "#0A1F3D",
             fontWeight: 700,
             textDecoration: "none",

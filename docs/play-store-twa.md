@@ -1,6 +1,6 @@
-# Publishing D-Maths to Google Play (TWA)
+# Publishing Novelia to Google Play (TWA)
 
-The D-Maths PWA can be wrapped as a **Trusted Web Activity (TWA)** — a thin Android
+The Novelia PWA can be wrapped as a **Trusted Web Activity (TWA)** — a thin Android
 app that opens the live site full-screen (no browser bar) and installs from the Play
 Store. Users get real push notifications and a store presence, while you keep shipping
 by just deploying the website (the app always loads the live URL).
@@ -10,7 +10,7 @@ by just deploying the website (the app always loads the live URL).
 > in-app **Get the app** button already guides users through it).
 
 Everything in the app is already wired for this:
-- `twa-manifest.json` (repo root) — the Bubblewrap build config, pre-filled for D-Maths.
+- `twa-manifest.json` (repo root) — the Bubblewrap build config, pre-filled for Novelia.
 - `app/.well-known/assetlinks.json/route.ts` — serves Digital Asset Links from
   `ANDROID_PACKAGE_NAME` + `ANDROID_CERT_SHA256` env vars (this is what removes the URL bar).
 - `app/manifest.ts` — the web manifest (`/manifest.webmanifest`) the app is built from.
@@ -62,7 +62,7 @@ so the config is version-controlled.
    — it should list your package + fingerprints (empty `[]` means the env vars aren't set yet).
 
 ## Upload to Play Console
-1. **Create app** → name "D-Maths", category **Education**.
+1. **Create app** → name "Novelia", category **Education**.
 2. **Production → Create release** → upload the `.aab`.
 3. Fill the **store listing** (draft below), **content rating**, **data safety**, and
    **target audience** (this app is for minors — declare it and follow the Families policy).
@@ -72,10 +72,10 @@ so the config is version-controlled.
 
 ## Store listing draft (copy/paste, then edit)
 
-- **App name:** D-Maths
+- **App name:** Novelia
 - **Short description (≤80):** Live online maths, science & coding tuition — with a portal built for results.
 - **Full description:**
-  > D-Maths Tuition Centre is a virtual learning community for students across Nigeria.
+  > Novelia Academy is a virtual learning community for students across Nigeria.
   > Join live online classes in mathematics, sciences and coding, with focused prep for
   > WAEC, JAMB, IGCSE, SAT and A-Levels.
   >

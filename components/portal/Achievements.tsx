@@ -66,7 +66,7 @@ export default function Achievements() {
             className={`relative flex flex-col items-center gap-2 rounded-2xl border p-4 text-center transition ${
               a.unlocked ? "border-gold/40 bg-gold-pale/50 dark:bg-gold/10" : "border-line bg-chalk/50 dark:bg-white/[0.02]"}`}>
             <span className={`flex h-12 w-12 items-center justify-center rounded-2xl ${
-              a.unlocked ? "bg-gold text-board shadow-[0_6px_18px_-6px_rgba(239,174,86,.8)]" : "bg-ink/5 text-ink/25"}`}>
+              a.unlocked ? "bg-gold text-board shadow-[0_6px_18px_-6px_rgba(245,149,30,.8)]" : "bg-ink/5 text-ink/25"}`}>
               <Icon name={a.icon as IconName} className="h-6 w-6" />
             </span>
             <div>

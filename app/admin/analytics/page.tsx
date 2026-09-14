@@ -10,7 +10,7 @@ import { spentPoints } from "@/lib/rewards";
 import { activityBuckets, isOnStreak, weeklyActivity, pct } from "@/lib/analytics";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Engagement analytics · D-Maths" };
+export const metadata = { title: "Engagement analytics · Novelia" };
 
 // Admin Engagement analytics — how much learners actually USE the platform,
 // complementing the dashboard's outcome charts (enrolment/revenue/scores) and
@@ -97,8 +97,8 @@ export default async function AnalyticsPage() {
             <p className="mb-4 text-xs text-ink/45">When each learner last opened the portal</p>
             <div className="space-y-3">
               <FunnelBar label="Today" n={buckets.today} total={total} color="#059669" />
-              <FunnelBar label="This week" n={buckets.week} total={total} color="#1A60AB" />
-              <FunnelBar label="This month" n={buckets.month} total={total} color="#C8881F" />
+              <FunnelBar label="This week" n={buckets.week} total={total} color="#1657C9" />
+              <FunnelBar label="This month" n={buckets.month} total={total} color="#C56A12" />
               <FunnelBar label="Dormant (30d+ / never)" n={buckets.dormant} total={total} color="#EF4444" />
             </div>
           </div>

@@ -3,8 +3,8 @@ import MarketingShell, { PageHeader } from "@/components/landing/MarketingShell"
 import Reveal from "@/components/landing/Reveal";
 
 export const metadata = {
-  title: "Contact — D-Maths Tuition",
-  description: "Get in touch with D-Maths Tuition Centre by email or WhatsApp, or register your child online.",
+  title: "Contact — Novelia Academy",
+  description: "Get in touch with Novelia Academy by email or WhatsApp, or register your child online.",
   alternates: { canonical: "/contact" },
 };
 

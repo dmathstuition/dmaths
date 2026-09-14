@@ -1,4 +1,4 @@
-/* D-Maths Python notebook — kernel worker.
+/* Novelia Python notebook — kernel worker.
  *
  * A Jupyter/Colab-style kernel: one persistent Pyodide instance whose namespace
  * lives across cell runs (define a variable in one cell, use it in the next).

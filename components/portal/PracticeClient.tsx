@@ -193,7 +193,7 @@ export default function PracticeClient({ mySubjects, myLevel }: { mySubjects: st
       {/* hero */}
       <div className="relative flex items-center gap-4 overflow-hidden rounded-3xl p-7 text-white"
         style={{ background: "linear-gradient(135deg, #10406F 0%, #0A2A4F 55%, #071C36 100%)" }}>
-        <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full" style={{ background: "radial-gradient(circle, rgba(239,174,86,.4), transparent 70%)" }} />
+        <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full" style={{ background: "radial-gradient(circle, rgba(245,149,30,.4), transparent 70%)" }} />
         <div aria-hidden className="pointer-events-none absolute right-6 top-6 text-gold/30 float"><Icon name="target" className="h-6 w-6" /></div>
         <span className="relative flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gold/15 text-gold ring-1 ring-gold/25"><Icon name="assignments" className="h-6 w-6" /></span>
         <div className="relative min-w-0">
@@ -381,7 +381,7 @@ export default function PracticeClient({ mySubjects, myLevel }: { mySubjects: st
                   <div className="ml-7 mt-2">
                     {explains[q.id] ? (
                       <div className="rounded-xl bg-board/[0.04] p-3 text-[13px] leading-relaxed text-ink/75 ring-1 ring-line dark:bg-white/5">
-                        <span className="mb-0.5 inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wide text-gold-deep"><Icon name="compass" className="h-3 w-3" /> D-Maths A.I</span>
+                        <span className="mb-0.5 inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wide text-gold-deep"><Icon name="compass" className="h-3 w-3" /> Novelia A.I</span>
                         <p>{explains[q.id]}</p>
                       </div>
                     ) : (

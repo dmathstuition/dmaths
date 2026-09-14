@@ -12,7 +12,7 @@ const SLIDES: Slide[] = [
   {
     img: "/camp-hero.png",
     icon: "home",
-    title: "Welcome to D-Maths",
+    title: "Welcome to Novelia",
     body: "A virtual learning community for students worldwide.",
   },
   {

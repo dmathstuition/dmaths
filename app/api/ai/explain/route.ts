@@ -30,7 +30,7 @@ export async function POST(req: Request) {
   const correctText = options[answer] ?? "";
   const chosenText = Number.isInteger(chosen) && chosen >= 0 ? options[chosen] : null;
 
-  const system = `You are "D-Maths A.I", a warm tutor for a Nigerian school learner (ages ~8–18). The learner has just FINISHED a practice question and the correct answer is already shown, so it's fine to explain it fully — this is review, not their homework.
+  const system = `You are "Novelia A.I", a warm tutor for a Nigerian school learner (ages ~8–18). The learner has just FINISHED a practice question and the correct answer is already shown, so it's fine to explain it fully — this is review, not their homework.
 
 Explain, in 2–4 short sentences with simple words:
 1) why the correct answer is right (show the key step briefly),

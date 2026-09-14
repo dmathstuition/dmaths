@@ -7,7 +7,7 @@ import { FAQS as FAQ_SOURCE } from "@/lib/faq";
 type Msg = { role: "bot" | "user"; text: string };
 
 const WHATSAPP = "https://wa.me/2347025674894";
-const GREETING = "Hi! 👋 I'm the D-Maths assistant. Ask me anything about enrolling, subjects, pricing or how it all works — or pick a question below.";
+const GREETING = "Hi! 👋 I'm the Novelia assistant. Ask me anything about enrolling, subjects, pricing or how it all works — or pick a question below.";
 
 // The shared FAQ powers the quick-question buttons (instant answers, no AI
 // round-trip). The pricing answer gets the live per-hour rates appended.
@@ -68,7 +68,7 @@ export default function ChatWidget() {
           <div className="flex items-center gap-3 bg-board px-5 py-4 text-white">
             <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gold/20 font-display text-sm font-extrabold text-gold ring-1 ring-gold/30">DM</span>
             <div className="min-w-0 flex-1">
-              <p className="font-display text-base font-bold leading-tight">D-Maths</p>
+              <p className="font-display text-base font-bold leading-tight">Novelia</p>
               <p className="flex items-center gap-1.5 text-[11px] text-white/60">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Online now
               </p>
@@ -144,7 +144,7 @@ export default function ChatWidget() {
             </>
           )}
 
-          <p className="bg-white pb-2 text-center text-[10px] text-ink/30">Powered by D-Maths · replies are guidance, not a contract</p>
+          <p className="bg-white pb-2 text-center text-[10px] text-ink/30">Powered by Novelia · replies are guidance, not a contract</p>
         </div>
       )}
     </>

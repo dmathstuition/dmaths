@@ -1,4 +1,4 @@
-// ── D-MATHS SUMMER CAMP — single source of truth ─────────────────────
+// ── NOVELIA ACADEMY SUMMER CAMP — single source of truth ─────────────────────
 // Pricing and metadata shared between the /summer-camp landing page and the
 // /apply enrolment form. Change numbers HERE only — both places read from this.
 //
@@ -7,7 +7,7 @@
 
 export const SUMMER_CAMP = {
   season: "summer-2026",
-  title: "D-Maths Online Summer Camp",
+  title: "Novelia Online Summer Camp",
   // ┌──────────────────────────────────────────────────────────────────┐
   // │  ✏️  EDIT THE CAMP DATES HERE  (format: yyyy-mm-dd)               │
   // │  These two lines are the ONLY place the camp dates live — change  │

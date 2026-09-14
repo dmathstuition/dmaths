@@ -1,4 +1,4 @@
-// ── D-MATHS BLOG — shared helpers ────────────────────────────────────
+// ── NOVELIA ACADEMY BLOG — shared helpers ────────────────────────────────────
 // One source of truth for the blog's shape, the admin's presentation
 // choices ("designed in different form"), and small formatting utilities
 // used by both the public pages and the admin editor.

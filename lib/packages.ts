@@ -1,6 +1,6 @@
 import { ratePerHour } from "@/lib/pricing";
 
-// ── D-MATHS ENROLMENT PACKAGES — single source of truth ──────────────
+// ── NOVELIA ACADEMY ENROLMENT PACKAGES — single source of truth ──────────────
 // Learners enrol by choosing ONE package (not loose subjects). Each package
 // maps to an hourly billing tier in lib/pricing.ts, so the rate stays defined
 // in one place. Editing this list changes the sign-up form and the learner's

@@ -6,7 +6,7 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { lookupCredential } from "@/lib/verify";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Verification result — D-Maths", robots: { index: false } };
+export const metadata = { title: "Verification result — Novelia", robots: { index: false } };
 
 export default async function VerifyResult({ params }: { params: { serial: string } }) {
   const serial = decodeURIComponent(params.serial);
@@ -26,7 +26,7 @@ export default async function VerifyResult({ params }: { params: { serial: strin
           </span>
           <p className="mt-4 font-display text-2xl font-bold text-emerald-300">Genuine ✓</p>
           <p className="mt-1 text-sm text-white/55">
-            This is a valid D-Maths {credential.kind === "certificate" ? "certificate" : "report card"}.
+            This is a valid Novelia {credential.kind === "certificate" ? "certificate" : "report card"}.
           </p>
 
           <dl className="mt-6 space-y-3 text-left">
@@ -43,7 +43,7 @@ export default async function VerifyResult({ params }: { params: { serial: strin
           </span>
           <p className="mt-4 font-display text-2xl font-bold text-red-300">Not found</p>
           <p className="mt-2 text-sm text-white/55">
-            No D-Maths document matches the code <span className="font-mono text-white/80">{serial}</span>.
+            No Novelia document matches the code <span className="font-mono text-white/80">{serial}</span>.
             Check for typos (letters and numbers are easy to mix up), or try again below.
           </p>
           <div className="mt-6 flex justify-center">

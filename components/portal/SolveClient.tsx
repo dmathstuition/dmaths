@@ -43,7 +43,7 @@ export default function SolveClient() {
       {/* hero */}
       <div className="relative flex items-center gap-4 overflow-hidden rounded-3xl p-7 text-white"
         style={{ background: "linear-gradient(135deg, #10406F 0%, #0A2A4F 55%, #071C36 100%)" }}>
-        <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full" style={{ background: "radial-gradient(circle, rgba(239,174,86,.4), transparent 70%)" }} />
+        <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full" style={{ background: "radial-gradient(circle, rgba(245,149,30,.4), transparent 70%)" }} />
         <div aria-hidden className="pointer-events-none absolute right-6 top-6 text-gold/30 float"><Icon name="lightbulb" className="h-6 w-6" /></div>
         <span className="relative flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gold/15 text-gold ring-1 ring-gold/25"><Icon name="sigma" className="h-6 w-6" /></span>
         <div className="relative min-w-0">
@@ -114,7 +114,7 @@ export default function SolveClient() {
             <button onClick={reset} className="btn-gold !rounded-xl">
               <span className="inline-flex items-center gap-1.5">New question <Icon name="repeat" className="h-4 w-4" /></span>
             </button>
-            <a href="/portal/assistant" className="btn-ghost !rounded-xl">Ask D-Maths A.I</a>
+            <a href="/portal/assistant" className="btn-ghost !rounded-xl">Ask Novelia A.I</a>
             <a href="/portal/practice" className="btn-ghost !rounded-xl">Practice</a>
           </div>
           <p className="text-[11px] text-ink/40">A.I can slip up — check the working, and ask your tutor if a step doesn&apos;t look right.</p>

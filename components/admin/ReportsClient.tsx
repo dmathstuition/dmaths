@@ -2,7 +2,7 @@
 import { useState, useMemo } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, CartesianGrid, Legend } from "recharts";
 
-const COLORS = ["#1A60AB", "#EFAE56", "#7BA3CA", "#059669", "#dc2626", "#8b5cf6", "#ec4899", "#f59e0b", "#06b6d4", "#84cc16"];
+const COLORS = ["#1657C9", "#F5951E", "#7BA3CA", "#059669", "#dc2626", "#8b5cf6", "#ec4899", "#f59e0b", "#06b6d4", "#84cc16"];
 
 export default function ReportsClient({
   students, submissions, attendance,
@@ -139,7 +139,7 @@ export default function ReportsClient({
                   <XAxis dataKey="range" tick={{ fontSize: 12 }} />
                   <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
                   <Tooltip />
-                  <Bar dataKey="count" fill="#EFAE56" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="count" fill="#F5951E" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -166,7 +166,7 @@ export default function ReportsClient({
                   <XAxis type="number" tick={{ fontSize: 12 }} allowDecimals={false} />
                   <YAxis dataKey="level" type="category" tick={{ fontSize: 12 }} width={80} />
                   <Tooltip />
-                  <Bar dataKey="count" fill="#1A60AB" radius={[0, 6, 6, 0]} />
+                  <Bar dataKey="count" fill="#1657C9" radius={[0, 6, 6, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -179,7 +179,7 @@ export default function ReportsClient({
                   <XAxis dataKey="subject" tick={{ fontSize: 10 }} angle={-30} textAnchor="end" height={60} />
                   <YAxis tick={{ fontSize: 12 }} domain={[0, 100]} />
                   <Tooltip />
-                  <Bar dataKey="avg" fill="#1A60AB" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="avg" fill="#1657C9" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

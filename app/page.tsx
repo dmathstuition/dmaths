@@ -28,13 +28,13 @@ const STATS = [
 ];
 
 const TESTIMONIALS = [
-  { n: "Joseph Victor", r: "SSS 2 student", t: "D-Maths transformed my understanding of calculus. I went from failing to 91% in three months." },
+  { n: "Joseph Victor", r: "SSS 2 student", t: "Novelia transformed my understanding of calculus. I went from failing to 91% in three months." },
   { n: "Mrs Adetunji", r: "Parent", t: "My daughter's confidence in mathematics has improved remarkably. The feedback is incredible." },
-  { n: "Alli Abdulsamod", r: "Undergraduate", t: "D-Maths prepared me exceptionally well for my entrance exams — I credit them for my distinction." },
+  { n: "Alli Abdulsamod", r: "Undergraduate", t: "Novelia prepared me exceptionally well for my entrance exams — I credit them for my distinction." },
 ];
 
 export const metadata = {
-  title: "D-Maths Tuition — online maths, science & coding tuition",
+  title: "Novelia Academy — online maths, science & coding tuition",
   description: "A virtual learning community delivering world-class online tuition in maths, sciences and coding worldwide, with preparation for WAEC, JAMB, IGCSE, SAT and A-Levels.",
 };
 

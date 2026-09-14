@@ -197,7 +197,7 @@ export async function POST(req: Request) {
   // 6c. Welcome push + in-app notification for the new student (best-effort;
   //     they'll see it once they sign in and, if installed, on their device).
   await notifyUser(admin, created.user.id, {
-    title: "Welcome to D-Maths! 🎉",
+    title: "Welcome to Novelia! 🎉",
     body: "Your enrolment is approved — tap to sign in to your portal.",
     link: "/portal",
   });

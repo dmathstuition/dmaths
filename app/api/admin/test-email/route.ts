@@ -22,7 +22,7 @@ export async function POST(req: Request) {
   }
 
   const result = await sendEmailResult("notice", address, {
-    title: "D-Maths test email",
+    title: "Novelia test email",
     body: "If you can read this, your email relay is working correctly. ✅",
     loginUrl: loginUrl(),
   });

@@ -57,7 +57,7 @@ export default function BadgesClient({
       <div className="relative overflow-hidden rounded-3xl p-7 text-white sm:p-8"
         style={{ background: "linear-gradient(135deg, #10406F 0%, #0A2A4F 55%, #071C36 100%)" }}>
         <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(239,174,86,.4), transparent 70%)" }} />
+          style={{ background: "radial-gradient(circle, rgba(245,149,30,.4), transparent 70%)" }} />
         <div aria-hidden className="pointer-events-none absolute right-6 top-6 text-gold/30 float"><Icon name="award" className="h-6 w-6" /></div>
         <div aria-hidden className="pointer-events-none absolute right-24 bottom-8 text-gold/25 float" style={{ animationDelay: "1.1s" }}><Icon name="sparkles" className="h-5 w-5" /></div>
 

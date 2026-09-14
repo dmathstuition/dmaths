@@ -1,6 +1,6 @@
-# D-Maths Tuition Centre — Portal
+# Novelia Academy — Portal
 
-Online tuition portal for D-Maths Tuition Centre (Asaba, Nigeria): enrolment, payments,
+Online tuition portal for Novelia Academy (Asaba, Nigeria): enrolment, payments,
 student/parent/admin dashboards, a Summer Camp campaign, and an installable app with
 push notifications.
 

@@ -8,7 +8,7 @@ import WhatsAppShare from "@/components/WhatsAppShare";
 import { siteBaseUrl } from "@/lib/siteUrl";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Receipt — D-Maths", robots: { index: false } };
+export const metadata = { title: "Receipt — Novelia", robots: { index: false } };
 
 // A printable proof of payment. Readable by the learner it belongs to, a linked
 // parent, whoever's email actually paid, and staff — checked here explicitly
@@ -78,14 +78,14 @@ export default async function ReceiptPage({ params }: { params: { id: string } }
 
         <div className="mt-6 rounded-xl bg-chalk px-5 py-4 text-sm text-ink/60">
           <p>
-            This receipt confirms payment received by <strong>D-Maths Tuition</strong>
+            This receipt confirms payment received by <strong>Novelia Academy</strong>
             {name ? <> for <strong>{name}</strong></> : null}. Please keep it for your records.
           </p>
         </div>
 
         <div className="mt-8 flex flex-wrap items-end justify-between gap-4 border-t border-line pt-5">
           <div>
-            <p className="font-display text-base font-bold text-board">D-Maths Tuition</p>
+            <p className="font-display text-base font-bold text-board">Novelia Academy</p>
             <p className="text-[12px] text-ink/50">support@dmaths.academy</p>
           </div>
           <p className="text-[11px] text-ink/45">Issued {date(receipt.issued_at)}</p>
@@ -101,7 +101,7 @@ export default async function ReceiptPage({ params }: { params: { id: string } }
           <WhatsAppShare
             phone={student?.guardian_contact || student?.phone}
             label="Send receipt on WhatsApp"
-            text={`D-Maths payment receipt ${receipt.serial}\n\nAmount: ${fmtNgn(Number(receipt.amount ?? 0))}\nDate: ${date(receipt.paid_at)}\nReference: ${receipt.payment_reference}${name ? `\nFor: ${name}` : ""}\n\nView & print: ${siteBaseUrl()}/receipt/${receipt.id}\n\nThank you for your payment!`}
+            text={`Novelia payment receipt ${receipt.serial}\n\nAmount: ${fmtNgn(Number(receipt.amount ?? 0))}\nDate: ${date(receipt.paid_at)}\nReference: ${receipt.payment_reference}${name ? `\nFor: ${name}` : ""}\n\nView & print: ${siteBaseUrl()}/receipt/${receipt.id}\n\nThank you for your payment!`}
           />
         </div>
       )}

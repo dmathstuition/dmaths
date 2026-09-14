@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 
 // /apply is a client component, so its SEO metadata lives here in a layout.
 export const metadata: Metadata = {
-  title: "Register — D-Maths Tuition Centre",
+  title: "Register — Novelia Academy",
   description:
-    "Enrol in D-Maths online maths, science & coding tuition. Quick registration for learners worldwide — live classes, exam prep (WAEC, JAMB, IGCSE, SAT, A-Levels) and a progress portal.",
+    "Enrol in Novelia online maths, science & coding tuition. Quick registration for learners worldwide — live classes, exam prep (WAEC, JAMB, IGCSE, SAT, A-Levels) and a progress portal.",
   alternates: { canonical: "/apply" },
 };
 

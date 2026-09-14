@@ -41,7 +41,7 @@ export default function RateCard() {
     return (
       <div className="card flex items-center gap-3 p-5">
         <span className="text-gold"><Icon name="heart" className="h-6 w-6" /></span>
-        <p className="text-sm font-semibold text-ink/70">Thanks for your feedback — it helps us improve D-Maths.</p>
+        <p className="text-sm font-semibold text-ink/70">Thanks for your feedback — it helps us improve Novelia.</p>
       </div>
     );
   }
@@ -50,7 +50,7 @@ export default function RateCard() {
   return (
     <div className="card p-6">
       <h2 className="font-display text-lg font-semibold">How are we doing?</h2>
-      <p className="mt-1 text-sm text-ink/50">Your rating goes straight to the D-Maths team.</p>
+      <p className="mt-1 text-sm text-ink/50">Your rating goes straight to the Novelia team.</p>
 
       <div className="mt-4 flex gap-1" onMouseLeave={() => setHover(0)}>
         {[1, 2, 3, 4, 5].map((n) => (

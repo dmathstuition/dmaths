@@ -3,7 +3,7 @@ import MockPaperGenerator from "@/components/admin/MockPaperGenerator";
 import { Icon } from "@/components/Icons";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Mock exams · D-Maths" };
+export const metadata = { title: "Mock exams · Novelia" };
 
 // Where staff set up mock exams. Mock Exam mode pulls its questions from the
 // question bank (filtered by subject/level and weighted to the learner's exam

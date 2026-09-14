@@ -2,7 +2,7 @@ import BossBattleClient from "@/components/portal/BossBattleClient";
 import { Icon } from "@/components/Icons";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Boss Battle · D-Maths" };
+export const metadata = { title: "Boss Battle · Novelia" };
 
 // The weekly Boss Battle: one attempt at a curated question set, a reward for
 // defeating it. Everything server-owned via /api/boss — this page just frames it.

@@ -36,7 +36,7 @@ export default function SelfCheckClient() {
     finally { setBusy(false); }
   }
 
-  const markColor = (m: number) => m >= 8 ? "#059669" : m >= 5 ? "#C8881F" : "#EF4444";
+  const markColor = (m: number) => m >= 8 ? "#059669" : m >= 5 ? "#C56A12" : "#EF4444";
 
   return (
     <div className="mx-auto max-w-2xl space-y-5">

@@ -27,7 +27,7 @@ export default async function StudentNotices() {
       ))}
       {!mine.length && (
         <EmptyState icon="notices" title="No notices yet"
-          body="Announcements from D-Maths — schedule changes, reminders and news — will show up here." />
+          body="Announcements from Novelia — schedule changes, reminders and news — will show up here." />
       )}
     </div>
   );

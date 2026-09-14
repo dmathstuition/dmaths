@@ -9,8 +9,8 @@ import { accentOf, previewOf, readingTime, formatDate, type BlogPost } from "@/l
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Blog — D-Maths Tuition",
-  description: "Study tips, exam guidance and news from D-Maths — online tuition in maths, English, science and coding.",
+  title: "Blog — Novelia Academy",
+  description: "Study tips, exam guidance and news from Novelia — online tuition in maths, English, science and coding.",
   alternates: { canonical: "/blog" },
 };
 
@@ -62,7 +62,7 @@ export default async function BlogIndex() {
 
   return (
     <MarketingShell>
-      <PageHeader eyebrow="The D-Maths Blog" title="Learning, exams & ideas"
+      <PageHeader eyebrow="The Novelia Blog" title="Learning, exams & ideas"
         lead="Study tips, exam guidance and news from our tutors — written to help every learner go further." />
 
       <section className="mx-auto max-w-6xl px-5 py-14">
@@ -92,7 +92,7 @@ export default async function BlogIndex() {
         <div className="mx-auto max-w-3xl px-5 py-16 text-center">
           <p className="text-[12px] font-bold uppercase tracking-[0.18em] text-gold-deep">Stay in the loop</p>
           <h2 className="mt-2 font-display text-2xl font-bold text-ink md:text-3xl">Get new posts by email</h2>
-          <p className="mx-auto mt-2 max-w-lg text-sm text-ink/55">Join our newsletter for fresh study tips, exam guidance and D-Maths news — no spam, unsubscribe any time.</p>
+          <p className="mx-auto mt-2 max-w-lg text-sm text-ink/55">Join our newsletter for fresh study tips, exam guidance and Novelia news — no spam, unsubscribe any time.</p>
           <div className="mt-7"><NewsletterSignup /></div>
         </div>
       </section>

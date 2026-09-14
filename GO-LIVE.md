@@ -1,4 +1,4 @@
-# 🏁 D-Maths — Go-Live Runbook
+# 🏁 Novelia — Go-Live Runbook
 
 **One sitting, in order.** `LAUNCH-CHECKLIST.md` is the encyclopedia; this is the
 recipe. Do the steps top to bottom — each one has a **✅ Check** so you never move on
@@ -85,7 +85,7 @@ In Vercel → Settings → Environment Variables, confirm the required ones from
 `LAUNCH-CHECKLIST.md` §1 are set for **Production**. Add these if you want the optional
 features:
 
-- `DEEPSEEK_API_KEY` — turns on the **D-Maths A.I** helper.
+- `DEEPSEEK_API_KEY` — turns on the **Novelia A.I** helper.
 - `NEXT_PUBLIC_SENTRY_DSN` — turns on error monitoring (Step 6).
 
 **✅ Check:** no blanks in the Production column for the required rows.
